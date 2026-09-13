@@ -74,7 +74,7 @@ bun run category-governance:jd-evidence --limit=100 --skus-per-category=8 --conc
 bun run category-governance:jd-evidence --all --skus-per-category=8 --concurrency=4 --direct
 ```
 
-采样器默认从 `/Users/sanheng/Project/sanheng/ai-core/.env` 读取京东配置，并输出到 `context/<version>/jd-attribute-evidence.json`；可用 `--jd-project`、`--out` 覆盖。重复运行同一输出路径会按目标类目更新证据，不会把重复类目无限追加。
+采样器默认从 `/Users/sanheng/Project/sanheng/ai-core/.env` 读取京东配置，并更新稳定文件 `context/<version>/jd-attribute-evidence.json`；每次运行还会在 `output/<version>/jd-evidence/run-<时间戳>/` 保存完整快照和 `manifest.json`。可用 `--jd-project`、`--out` 覆盖稳定文件路径。重复运行同一输出路径会按目标类目更新证据，不会把重复类目无限追加。
 
 导入会写入独立库 `ai-building-category_governance` 的 `category_nodes_v1`；导入、运行、结果分别写入 `category_imports_v1`、`governance_runs_v1`、`attribute_templates_v1`。新的不可变版本可以使用 `--version=v2`，并通过新的迁移增加对应 `_v2` 表，不覆盖已完成的 `_v1` 记录。
 

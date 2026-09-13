@@ -92,6 +92,10 @@ function resolvePath(root: string, value: string | undefined, fallback: string):
   return isAbsolute(selected) ? selected : join(root, selected);
 }
 
+function runStamp(): string {
+  return new Date().toISOString().replace(/[-:]/gu, "").replace(".", "-");
+}
+
 async function loadGoodsApi(projectRoot: string): Promise<JdGoodsApi> {
   await loadEnvFile(join(projectRoot, ".env.local"));
   await loadEnvFile(join(projectRoot, ".env"));
@@ -145,7 +149,25 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   }
   const merged = mergeJdEvidenceDocuments(existing, result.document);
   await writeJsonFile(outputPath, merged);
+  const runDir = join(workspace, "output", version, "jd-evidence", `run-${runStamp()}`);
+  const runOutputPath = join(runDir, "jd-attribute-evidence.json");
+  await writeJsonFile(runOutputPath, merged);
+  await writeJsonFile(join(runDir, "manifest.json"), {
+    version,
+    generatedAt: result.document.generatedAt,
+    stableOutputPath: outputPath,
+    runOutputPath,
+    targetCount: result.stats.targetCount,
+    matchedTargetCount: result.stats.matchedTargetCount,
+    unmatchedTargetCount: result.stats.unmatchedTargetCount,
+    sampledSkuCount: result.stats.sampledSkuCount,
+    detailSuccessCount: result.stats.detailSuccessCount,
+    detailErrorCount: result.stats.detailErrorCount,
+    unmatchedTargetIds: result.unmatchedTargetIds,
+    errors: result.errors,
+  });
   console.log(`京东证据已写入：${outputPath}`);
+  console.log(`本次采样快照：${runOutputPath}`);
   console.log(`目标类目 ${result.stats.targetCount}，匹配 ${result.stats.matchedTargetCount}，未匹配 ${result.stats.unmatchedTargetCount}`);
   console.log(`采样 SKU ${result.stats.sampledSkuCount}，详情成功 ${result.stats.detailSuccessCount}，详情失败 ${result.stats.detailErrorCount}`);
   if (result.unmatchedTargetIds.length > 0) console.log(`未匹配类目 ID：${result.unmatchedTargetIds.slice(0, 20).join(",")}${result.unmatchedTargetIds.length > 20 ? "..." : ""}`);
