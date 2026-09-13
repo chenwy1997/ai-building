@@ -114,8 +114,19 @@ function parseProperty(value: unknown): AttributeProperty {
 }
 
 export function tupleToProperty(value: unknown): AttributeProperty {
-  if (!Array.isArray(value) || value.length !== 10) throw new Error("压缩属性必须包含 10 个字段");
-  const [key, name, code, required, unit, options, description, format, example, scope] = value;
+  if (!Array.isArray(value)) throw new Error("压缩属性必须是数组");
+  // 兼容模型偶尔在 unit 前多插入一个 null 的 11 元组：去掉多余占位后按标准十元组解析。
+  let tuple = value;
+  if (tuple.length === 11 && tuple[4] === null && typeof tuple[5] === "string" && Array.isArray(tuple[6])) {
+    tuple = [tuple[0], tuple[1], tuple[2], tuple[3], tuple[5], tuple[6], tuple[7], tuple[8], tuple[9], tuple[10]];
+  }
+  if (tuple.length !== 10) throw new Error("压缩属性必须包含 10 个字段");
+  let [key, name, code, required, unit, options, description, format, example, scope] = tuple;
+  // 兼容 number 属性把 unit 错放到 options 位置的 10 元组；只对数字类型修正，避免误伤枚举选项。
+  if (code === "n" && unit === null && typeof options === "string") {
+    unit = options;
+    options = [];
+  }
   const codeText = typeof code === "string" ? code : "";
   const type = TYPES[CODES.indexOf(codeText as typeof CODES[number])] ?? "text";
   return parseProperty({key, name, type, required, unit, options, description, format, example, scope});

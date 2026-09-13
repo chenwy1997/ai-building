@@ -70,6 +70,19 @@ describe("标准类目治理公共函数", () => {
     expect(() => parseGovernanceResponse(JSON.stringify(invalid), [document.nodes[2]!])).toThrow("必须填写 unit");
   });
 
+  test("兼容紧凑属性 unit 错位和多一个 null 的模型输出", () => {
+    const response = {
+      v: 1,
+      a: {
+        a0: ["screen_size", "屏幕尺寸", "n", "", null, "英寸", "屏幕对角线尺寸", null, null, "category"],
+        a1: ["battery_capacity", "电池容量", "n", "", null, "mAh", [], "电池容量", null, null, "category"],
+      },
+      c: { a4: [[], ["a0", "a1"], []] },
+    };
+    const restored = parseGovernanceResponse(JSON.stringify(response), [document.nodes[2]!]);
+    expect(restored[0]?.properties.map((item) => item.unit)).toEqual(["英寸", "mAh"]);
+  });
+
   test("治理提示词使用紧凑 a/c 结构，并把参考证据放在目标之后", () => {
     const target = document.nodes[2]!;
     const evidence = normalizeJdEvidence({ categories: [{ path: ["办公", "纸品", "A4复印纸"], attributes: [{ name: "纸张克重", unit: "g/m²", values: ["70", "80"] }] }] });

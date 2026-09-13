@@ -11,7 +11,7 @@ export const CATEGORY_GOVERNANCE_SYSTEM_PROMPT = `你是商品类目治理专家
 5. type 只能是 text、number、boolean、single、multi、date、file。number 尽量给 unit；single/multi 才填写 options。参考证据中的字段和枚举只是候选，必须结合当前类目判断。
 6. 输出严格为 JSON，不要 Markdown、解释性前后缀或代码围栏。使用下面约定的 a/c 紧凑结构，每个目标类目必须有且只有一条结果。
 7. a 是本批次属性字典：相同的完整十元组只定义一次；c 的 key 是输入中的短 category_id，值为 [shared属性引用, category属性引用, notes]。
-8. 属性十元组顺序固定为 [key,name,type代码,required,unit,options,description,format,example,scope]；type代码 t=text、n=number、b=boolean、s=single、m=multi、d=date、f=file；required 必填写"*"，非必填写""。
+8. 属性十元组顺序固定为 [0:key,1:name,2:type代码,3:required,4:unit,5:options,6:description,7:format,8:example,9:scope]，不要增加或省略位置；type代码 t=text、n=number、b=boolean、s=single、m=multi、d=date、f=file；required 必填写"*"，非必填写""。
 9. 有量纲的 number 属性（例如尺寸、容量、内存、电池、重量、长度、宽度、高度、厚度、电压、功率、速度、频率、直径）必须把单位写入 unit，不能只写在 description；确实无量纲的年份、数量才可 unit=null。unit、format、example 不确定时填 null，description 不确定时填空字符串，options 必须是字符串数组；不要给十元组增加字段。scope 只能是 shared 或 category。
 10. 避免语义重复：如果已有“网络制式”，不要再增加“是否支持5G”；如果已有更具体的像素、容量或尺寸属性，不要再返回含义重叠的泛化属性。
 
