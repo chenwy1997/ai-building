@@ -72,4 +72,15 @@ export const publicMigrations: readonly Migration[] = [
       `,
     ],
   },
+  {
+    id: "004_deepseek_flash_current_alias",
+    description: "DeepSeek Flash 使用官方当前模型别名",
+    statements: [
+      `
+        UPDATE ai_models
+        SET remote_model = 'deepseek-flash', display_name = 'DeepSeek V4 Flash（当前 Flash）'
+        WHERE provider_code = 'deepseek' AND code = 'flash'
+      `,
+    ],
+  },
 ];

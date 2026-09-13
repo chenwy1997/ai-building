@@ -9,6 +9,7 @@ credentials.json
 # Dependencies
 node_modules/
 .pnpm-store/
+.bun/
 .venv/
 venv/
 __pycache__/

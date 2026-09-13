@@ -1,8 +1,9 @@
 import { assertScenarioName } from "../platform/database/names.ts";
 import type { ScenarioModule } from "./types.ts";
+import { categoryGovernanceScenario } from "./category_governance/index.ts";
 
 // 新业务模块创建后，在这里导入并加入数组。
-const scenarios: readonly ScenarioModule[] = [];
+const scenarios: readonly ScenarioModule[] = [categoryGovernanceScenario];
 
 for (const scenario of scenarios) assertScenarioName(scenario.name);
 

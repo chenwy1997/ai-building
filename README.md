@@ -54,13 +54,19 @@ bun run cli ai:key:set deepseek
 
 已预置 DeepSeek 的 OpenAI 兼容地址 `https://api.deepseek.com`，以及模型别名：
 
-- `flash` → `deepseek-v4-flash`
+- `flash` → `deepseek-flash`（DeepSeek V4 Flash 的当前官方别名）
 - `pro` → `deepseek-v4-pro`
 
 测试：
 
 ```bash
 bun run cli ai:chat deepseek flash "用一句话介绍你自己"
+```
+
+类目治理完成导入后可直接启动全量治理；不传 `--category` 时会覆盖全部末级类目：
+
+```bash
+bun run category-governance --concurrency=128 --batch-size=12
 ```
 
 ## 公共设施层

@@ -1,0 +1,338 @@
+import { join } from "node:path";
+import { readdir } from "node:fs/promises";
+import type { SQL } from "bun";
+import type { AiService } from "../../ai/service.ts";
+import { readJsonFile, readTextFile, writeJsonFile } from "../../facilities/json/files.ts";
+import { buildGovernanceUserPrompt, CATEGORY_GOVERNANCE_SYSTEM_PROMPT } from "./prompt.ts";
+import { compactTemplates, parseGovernanceResponse } from "./template-codec.ts";
+import { mergeGovernanceResults } from "./merge.ts";
+import { categoryById } from "./category-tree.ts";
+import { outputPath, readContextDocument, writeContextBundle, workspaceRoot } from "./storage.ts";
+import { asInt, boolFlag, parseFlags, slugify } from "./util.ts";
+import { shortCategoryId } from "./util.ts";
+import type { CategoryNode, CategoryTreeDocument, GovernanceResult } from "./types.ts";
+
+interface Batch {
+  key: string;
+  nodes: CategoryNode[];
+  text: string;
+}
+
+function categoryMatches(node: CategoryNode, selector: string): boolean {
+  const needle = selector.trim().toLocaleLowerCase();
+  if (!needle) return true;
+  return node.pathIds.some((id) => id.toLocaleLowerCase() === needle || shortCategoryId(id).toLocaleLowerCase() === needle)
+    || node.pathNames.some((name) => name.toLocaleLowerCase() === needle)
+    || node.pathNames.join("/").toLocaleLowerCase() === needle
+    || node.pathNames.join(">").toLocaleLowerCase() === needle;
+}
+
+function groupBatches(
+  document: CategoryTreeDocument,
+  groupDepth: number,
+  batchSize: number,
+  categorySelector?: string,
+): Batch[] {
+  const groups = new Map<string, CategoryNode[]>();
+  const leaves = document.nodes.filter((candidate) => candidate.isLeaf);
+  const selectedLeaves = categorySelector
+    ? leaves.filter((leaf) => categoryMatches(leaf, categorySelector))
+    : leaves;
+  if (categorySelector && selectedLeaves.length === 0) {
+    throw new Error(`找不到类目：${categorySelector}（可传完整 ID、短 ID、类目名称或完整路径）`);
+  }
+  for (const node of selectedLeaves) {
+    const rootId = node.pathIds[Math.min(groupDepth, node.pathIds.length) - 1] ?? node.id;
+    const values = groups.get(rootId) ?? [];
+    values.push(node);
+    groups.set(rootId, values);
+  }
+  const byId = categoryById(document);
+  const batches: Batch[] = [];
+  for (const [rootId, leaves] of groups) {
+    for (let offset = 0; offset < leaves.length; offset += batchSize) {
+      const nodes = leaves.slice(offset, offset + batchSize);
+      const ids = new Set(nodes.flatMap((node) => node.pathIds));
+      const subset = document.nodes.filter((node) => ids.has(node.id));
+      const root = byId.get(rootId) ?? nodes[0]!;
+      const lines = subset.map((node) => `${"  ".repeat(node.level - 1)}${node.level}${node.isLeaf ? "*" : "+"} ${node.name}|i=${shortCategoryId(node.id)}`);
+      batches.push({
+        key: `${slugify(root.pathNames.join("-"))}-${offset / batchSize + 1}`,
+        nodes,
+        text: `#STD-CAT|v=${document.version}|target=${nodes.length}\n#PATH|${JSON.stringify(root.pathNames)}\n${lines.join("\n")}\n`,
+      });
+    }
+  }
+  return batches;
+}
+
+function parseContent(content: string | null | undefined): string {
+  if (!content) throw new Error("模型返回空 content");
+  return content;
+}
+
+export async function importAndBuildContext(options: {
+  database: SQL;
+  inputPath: string;
+  version: string;
+  workspace?: string;
+  groupDepth: number;
+}): Promise<{ document: CategoryTreeDocument; importId: number; contextDir: string }> {
+  const raw = await readJsonFile<unknown>(options.inputPath);
+  const { normalizeCategories } = await import("./category-tree.ts");
+  const document = normalizeCategories(raw, options.version);
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const meta = raw as Record<string, unknown>;
+    document.sourceUrl = typeof meta.sourceUrl === "string" ? meta.sourceUrl : undefined;
+    document.bucket = typeof meta.bucket === "string" ? meta.bucket : undefined;
+    document.fetchedAt = typeof meta.fetchedAt === "string" ? meta.fetchedAt : undefined;
+  }
+  const { insertCategoryDocument } = await import("./storage.ts");
+  const importId = await insertCategoryDocument(options.database, document, options.inputPath);
+  const { dir: contextDir } = await writeContextBundle(document, options.workspace ?? workspaceRoot(), options.groupDepth);
+  return { document, importId, contextDir };
+}
+
+export async function runGovernance(options: {
+  database: SQL;
+  ai: AiService;
+  workspace?: string;
+  version: string;
+  groupDepth: number;
+  batchSize: number;
+  concurrency: number;
+  attempts: number;
+  dryRun: boolean;
+  provider: string;
+  model: string;
+  categorySelector?: string;
+  onProgress?: (progress: {
+    completed: number;
+    total: number;
+    success: number;
+    errors: number;
+  }) => void;
+}): Promise<{ requestCount: number; successCount: number; errorCount: number; outputDir: string }> {
+  if (options.version !== "v1") {
+    throw new Error(`数据库目前只初始化了 *_v1 表；治理 ${options.version} 前请新增对应版本迁移`);
+  }
+  const rootDir = options.workspace ?? workspaceRoot();
+  const document = await readContextDocument(rootDir, options.version);
+  const batches = groupBatches(document, options.groupDepth, options.batchSize, options.categorySelector);
+  const outputDir = outputPath(rootDir, options.version, `level-${options.groupDepth}`);
+  const runRows = await options.database<{ id: number }[]>`
+    INSERT INTO governance_runs_v1 (version, provider, model, group_depth, status, request_count, output_dir)
+    VALUES (${options.version}, ${options.provider}, ${options.model}, ${options.groupDepth}, 'running', ${batches.length * options.attempts}, ${outputDir})
+    RETURNING id
+  `;
+  const runId = runRows[0]?.id;
+  if (!runId) throw new Error("创建治理运行记录失败");
+  const allResults: GovernanceResult[] = [];
+  const errors: Array<{ key: string; attempt: number; error: string }> = [];
+  const tasks = batches.flatMap((batch) => Array.from({ length: options.attempts }, (_, index) => ({ batch, attempt: index + 1 })));
+  let completedTasks = 0;
+  const markProgress = (): void => {
+    completedTasks += 1;
+    options.onProgress?.({
+      completed: completedTasks,
+      total: tasks.length,
+      success: allResults.length,
+      errors: errors.length,
+    });
+  };
+  let cursor = 0;
+  const worker = async (): Promise<void> => {
+    while (cursor < tasks.length) {
+      const task = tasks[cursor++];
+      if (!task) return;
+      const requestDir = join(outputDir, task.batch.key);
+      const requestPath = join(requestDir, `attempt-${String(task.attempt).padStart(3, "0")}.request.json`);
+      const prompt = buildGovernanceUserPrompt({ version: document.version, categoryText: task.batch.text, targetCategories: task.batch.nodes });
+      await writeJsonFile(requestPath, { system: CATEGORY_GOVERNANCE_SYSTEM_PROMPT, user: prompt, categoryIds: task.batch.nodes.map((node) => node.id) });
+      if (options.dryRun) {
+        markProgress();
+        continue;
+      }
+      try {
+        const response = await options.ai.chat(options.provider, options.model, {
+          messages: [
+            { role: "system", content: CATEGORY_GOVERNANCE_SYSTEM_PROMPT },
+            { role: "user", content: prompt },
+          ],
+          max_tokens: 32_000,
+          response_format: { type: "json_object" },
+          thinking: { type: "disabled" },
+        });
+        const rawText = parseContent(response.choices[0]?.message.content);
+        const results = parseGovernanceResponse(rawText, task.batch.nodes);
+        const compact = compactTemplates(results);
+        await writeJsonFile(join(requestDir, `attempt-${String(task.attempt).padStart(3, "0")}.json`), { ...compact, meta: { runId, batch: task.batch.key, attempt: task.attempt, rawBytes: rawText.length } });
+        for (const result of results) {
+          allResults.push(result);
+          await options.database`
+            INSERT INTO attribute_templates_v1 (run_id, version, category_id, category_path_json, attempt, template_json, raw_response, validation_status)
+            VALUES (${runId}, ${document.version}, ${result.category.id}, ${result.category.path}::jsonb, ${task.attempt}, ${result}::jsonb, ${rawText}, 'valid')
+          `;
+        }
+        markProgress();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        errors.push({ key: task.batch.key, attempt: task.attempt, error: message });
+        await writeJsonFile(join(requestDir, `attempt-${String(task.attempt).padStart(3, "0")}.error.json`), { error: message });
+        markProgress();
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, options.concurrency) }, () => worker()));
+  const status = options.dryRun ? "dry_run" : errors.length === 0 ? "completed" : allResults.length > 0 ? "partial" : "failed";
+  await options.database`
+    UPDATE governance_runs_v1 SET status=${status}, success_count=${allResults.length}, error_count=${errors.length}, finished_at=NOW() WHERE id=${runId}
+  `;
+  await writeJsonFile(join(outputDir, "manifest.json"), {
+    runId, version: document.version, provider: options.provider, model: options.model,
+    groupDepth: options.groupDepth, batchSize: options.batchSize, attempts: options.attempts,
+    categorySelector: options.categorySelector ?? null,
+    requestCount: tasks.length, successCount: allResults.length, errorCount: errors.length, errors,
+  });
+  return { requestCount: tasks.length, successCount: allResults.length, errorCount: errors.length, outputDir };
+}
+
+async function jsonFilesUnder(directory: string): Promise<string[]> {
+  const files: string[] = [];
+  let entries: Array<import("node:fs").Dirent>;
+  try {
+    entries = await readdir(directory, { withFileTypes: true });
+  } catch {
+    return files;
+  }
+  for (const entry of entries) {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...await jsonFilesUnder(path));
+    else if (entry.name.endsWith(".json") && !entry.name.includes("request") && !entry.name.includes("manifest")) files.push(path);
+  }
+  return files;
+}
+
+export async function mergeGovernanceOutput(options: {
+  workspace?: string;
+  version: string;
+  groupDepth: number;
+}): Promise<string> {
+  const rootDir = options.workspace ?? workspaceRoot();
+  const document = await readContextDocument(rootDir, options.version);
+  const byId = categoryById(document);
+  const files = await jsonFilesUnder(outputPath(rootDir, options.version, `level-${options.groupDepth}`));
+  const resultsByCategory = new Map<string, GovernanceResult[]>();
+  for (const file of files) {
+    const compact = await readJsonFile<Record<string, unknown>>(file);
+    if (!compact.a || !compact.c) continue;
+    const ids = Object.keys(compact.c as Record<string, unknown>);
+    const targets = ids.map((id) => byId.get(id)).filter((node): node is CategoryNode => Boolean(node));
+    if (targets.length !== ids.length) throw new Error(`结果包含未导入的类目：${file}`);
+    for (const result of parseGovernanceResponse(JSON.stringify(compact), targets)) {
+      const values = resultsByCategory.get(result.category.id) ?? [];
+      values.push(result);
+      resultsByCategory.set(result.category.id, values);
+    }
+  }
+  const merged = [...resultsByCategory.values()].map((results) => mergeGovernanceResults(results));
+  const path = outputPath(rootDir, options.version, `level-${options.groupDepth}`, "merged-v1.json");
+  await writeJsonFile(path, { ...compactTemplates(merged), meta: { categories: merged.length, sourceFiles: files.length } });
+  return path;
+}
+
+export async function runCommand(context: { args: string[]; database: SQL; ai: AiService }): Promise<void> {
+  const { positionals, flags } = parseFlags(context.args);
+  const command = positionals.shift() ?? "help";
+  const rootDir = flags.workspace ?? workspaceRoot();
+  // 内部深度从根节点 1 开始；深度 2 正好对应接口的一级子类，适合作为默认分片边界。
+  const groupDepth = asInt(flags["group-depth"], 2);
+  switch (command) {
+    case "count": {
+      const input = positionals[0];
+      if (!input) throw new Error("用法：count <raw.json>");
+      const raw = await readJsonFile<unknown>(input);
+      const { normalizeCategories } = await import("./category-tree.ts");
+      const document = normalizeCategories(raw, flags.version ?? "v1");
+      // 三横完整接口的 level 从根类目 0 开始；内部树为了兼容通用文本格式从 1 开始，
+      // 因此四级统计优先读取接口 level，回退时用路径长度减一。
+      const levelOf = (node: CategoryNode): number => {
+        const sourceLevel = (node.payload as Record<string, unknown>).level;
+        return typeof sourceLevel === "number" ? sourceLevel : Math.max(0, node.pathIds.length - 1);
+      };
+      const level4 = document.nodes.filter((node) => levelOf(node) === 4).length;
+      console.log(`类目总数：${document.nodes.length}，末级类目：${document.leafCount}，四级类目（接口 level=4）：${level4}`);
+      return;
+    }
+    case "pipeline": {
+      const input = positionals[0];
+      if (!input) throw new Error("用法：pipeline <raw.json> [--version=v1] [--group-depth=2] [--dry-run]");
+      const version = flags.version ?? "v1";
+      const imported = await importAndBuildContext({ database: context.database, inputPath: input, version, workspace: rootDir, groupDepth });
+      console.log(`已导入 ${imported.document.nodes.length} 个类目，开始治理`);
+      const result = await runGovernance({
+        database: context.database, ai: context.ai, workspace: rootDir, version,
+        groupDepth, batchSize: asInt(flags["batch-size"], 12), concurrency: asInt(flags.concurrency, 4),
+        attempts: asInt(flags.attempts, 1), dryRun: boolFlag(flags["dry-run"]),
+        provider: flags.provider ?? "deepseek", model: flags.model ?? "flash",
+        categorySelector: flags.category ?? flags["category-id"],
+      });
+      console.log(`治理完成：请求 ${result.requestCount}，成功类目 ${result.successCount}，失败请求 ${result.errorCount}`);
+      return;
+    }
+    case "import": {
+      const input = positionals[0];
+      if (!input) throw new Error("用法：import <raw.json> [--version=v1] [--group-depth=2]");
+      const version = flags.version ?? "v1";
+      const result = await importAndBuildContext({ database: context.database, inputPath: input, version, workspace: rootDir, groupDepth });
+      console.log(`已导入 ${result.document.nodes.length} 个类目（末级 ${result.document.leafCount}），import_id=${result.importId}`);
+      console.log(`上下文：${result.contextDir}`);
+      return;
+    }
+    case "context": {
+      const input = positionals[0];
+      if (!input) throw new Error("用法：context <category-tree.json> [--version=v1] [--group-depth=2]");
+      const document = await readJsonFile<CategoryTreeDocument>(input);
+      const version = flags.version ?? document.version ?? "v1";
+      document.version = version;
+      const result = await writeContextBundle(document, rootDir, groupDepth);
+      console.log(`已生成 ${result.chunks.length} 个压缩上下文：${result.dir}`);
+      return;
+    }
+    case "govern": {
+      const version = flags.version ?? "v1";
+      const result = await runGovernance({
+        database: context.database, ai: context.ai, workspace: rootDir, version,
+        groupDepth, batchSize: asInt(flags["batch-size"], 12), concurrency: asInt(flags.concurrency, 4),
+        attempts: asInt(flags.attempts, 1), dryRun: boolFlag(flags["dry-run"]),
+        provider: flags.provider ?? "deepseek", model: flags.model ?? "flash",
+        categorySelector: flags.category ?? flags["category-id"],
+      });
+      console.log(`治理完成：请求 ${result.requestCount}，成功类目 ${result.successCount}，失败请求 ${result.errorCount}`);
+      console.log(`输出：${result.outputDir}`);
+      return;
+    }
+    case "merge": {
+      const version = flags.version ?? "v1";
+      const path = await mergeGovernanceOutput({ workspace: rootDir, version, groupDepth });
+      console.log(`已合并治理结果：${path}`);
+      return;
+    }
+    case "to-std": {
+      const input = positionals[0];
+      const output = positionals[1];
+      if (!input || !output) throw new Error("用法：to-std <category-tree.json> <output.std.txt>");
+      const document = await readJsonFile<CategoryTreeDocument>(input);
+      const { toStdText } = await import("./std-text.ts");
+      const { writeTextFile } = await import("../../facilities/json/files.ts");
+      await writeTextFile(output, toStdText(document));
+      console.log(`已生成：${output}`);
+      return;
+    }
+    case "help":
+      console.log("count <raw.json>、pipeline <raw.json>、import <raw.json>、context <category-tree.json>、govern、merge、to-std");
+      return;
+    default:
+      throw new Error(`未知类目治理命令：${command}`);
+  }
+}

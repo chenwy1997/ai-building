@@ -14,6 +14,8 @@ export interface OpenAiChatRequest {
   temperature?: number;
   max_tokens?: number;
   response_format?: Record<string, unknown>;
+  thinking?: { type: "enabled" | "disabled" };
+  reasoning_effort?: "low" | "medium" | "high" | "xhigh" | "max";
   tools?: unknown[];
   tool_choice?: unknown;
   stream?: false;

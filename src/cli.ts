@@ -42,6 +42,12 @@ ai-building - 公司内部运营 AI 命令行项目
   bun run cli db:init public
   DEEPSEEK_API_KEY=... bun run cli ai:key:set deepseek
   bun run cli ai:chat deepseek flash "你好"
+
+类目治理：
+  bun run cli db:init category_governance
+  bun run cli scenario:run category_governance run import ./sanheng-standard-category.raw.json --version=v1 --group-depth=2
+  bun run cli scenario:run category_governance run govern --version=v1 --attempts=3 --concurrency=4
+  bun run category-governance --concurrency=128 --batch-size=12
 `.trim();
 
 function required(value: string | undefined, label: string): string {
