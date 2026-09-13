@@ -7,7 +7,7 @@ import { readJsonFile, writeJsonFile, writeTextFile } from "../../facilities/jso
 import { parseFlags, asInt, boolFlag, slugify, shortCategoryId } from "./util.ts";
 import { readContextDocument, workspaceRoot } from "./storage.ts";
 import { loadJdEvidence, buildJdEvidenceText, type JdEvidenceDocument } from "./jd-evidence.ts";
-import { applySemanticReviews, buildSemanticReviewPrompt, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT, type SemanticReviewResult } from "./semantic-review.ts";
+import { applySemanticReviews, buildSemanticReviewPrompt, mergeSemanticReviews, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT, type SemanticReviewDocument, type SemanticReviewResult } from "./semantic-review.ts";
 import type { AttributeConsensusDocument } from "./consensus.ts";
 import type { CategoryNode } from "./types.ts";
 
@@ -146,13 +146,16 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     return;
   }
   if (reviews.length === 0) throw new Error(`没有成功的语义审阅结果：${errors.map((item) => item.error).join("；")}`);
-  const reviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews, usage: { promptTokens, completionTokens, totalTokens, promptCacheHitTokens, promptCacheMissTokens }, errors };
+  let previous: SemanticReviewDocument | undefined;
+  try { previous = await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { /* 首次运行或旧文件损坏时从当前批次开始 */ }
+  const mergedReviews = mergeSemanticReviews(previous?.reviews ?? [], reviews);
+  const reviewDocument: SemanticReviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews: mergedReviews, usage: { promptTokens, completionTokens, totalTokens, promptCacheHitTokens, promptCacheMissTokens }, errors };
   await writeJsonFile(stableReviewPath, reviewDocument);
-  const templates = applySemanticReviews(consensus, reviews);
+  const templates = applySemanticReviews(consensus, mergedReviews);
   await writeJsonFile(stableTemplatePath, templates);
-  await writeJsonFile(join(runDir, "attribute-reviews-v1.json"), reviewDocument);
+  await writeJsonFile(join(runDir, "attribute-reviews-v1.json"), { ...reviewDocument, reviews });
   await writeJsonFile(join(runDir, "attribute-templates-v1.json"), templates);
-  await writeJsonFile(join(runDir, "manifest.json"), { runDir, categoryCount: categories.length, successCount: reviews.length, errorCount: errors.length, usage: reviewDocument.usage });
+  await writeJsonFile(join(runDir, "manifest.json"), { runDir, categoryCount: categories.length, successCount: reviews.length, errorCount: errors.length, mergedReviewCount: mergedReviews.length, previousReviewCount: previous?.reviews.length ?? 0, usage: reviewDocument.usage });
   console.log(`语义审阅完成：成功 ${reviews.length}，失败 ${errors.length}`);
   console.log(`模板：${stableTemplatePath}`);
   console.log(`缓存：命中 ${promptCacheHitTokens}，未命中 ${promptCacheMissTokens}`);

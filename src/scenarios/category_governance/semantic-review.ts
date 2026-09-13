@@ -16,6 +16,34 @@ export interface SemanticReviewResult {
   notes: string[];
 }
 
+export interface SemanticReviewDocument {
+  version: "semantic-review-v1";
+  generatedAt: string;
+  sourceConsensus: string;
+  reviews: SemanticReviewResult[];
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+    promptCacheHitTokens: number;
+    promptCacheMissTokens: number;
+  };
+  errors?: Array<{ categoryId: string; error: string }>;
+}
+
+/**
+ * 将本批次终审结果增量合并到稳定结果。相同类目使用最新一次成功结果，
+ * 未参与本批次的类目继续保留，适合按小批次反复治理。
+ */
+export function mergeSemanticReviews(
+  existing: SemanticReviewResult[],
+  incoming: SemanticReviewResult[],
+): SemanticReviewResult[] {
+  const byCategory = new Map(existing.map((review) => [review.categoryId, review]));
+  for (const review of incoming) byCategory.set(review.categoryId, review);
+  return [...byCategory.values()].sort((left, right) => left.categoryId.localeCompare(right.categoryId));
+}
+
 export interface SemanticTemplateDocument {
   version: "attribute-template-semantic-v1";
   generatedAt: string;

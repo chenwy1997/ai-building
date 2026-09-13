@@ -7,7 +7,7 @@ import { buildJdEvidenceText, normalizeJdEvidence } from "../src/scenarios/categ
 import { collectJdEvidence } from "../src/scenarios/category_governance/jd-collector.ts";
 import { buildJdCategoryMapping, autoJdCategoryReferences } from "../src/scenarios/category_governance/jd-mapping.ts";
 import { buildAttributeConsensus, buildConfirmedTemplateDocument } from "../src/scenarios/category_governance/consensus.ts";
-import { applySemanticReviews, buildSemanticReviewPrompt, parseSemanticReviewResponse } from "../src/scenarios/category_governance/semantic-review.ts";
+import { applySemanticReviews, buildSemanticReviewPrompt, mergeSemanticReviews, parseSemanticReviewResponse } from "../src/scenarios/category_governance/semantic-review.ts";
 import type { GovernanceResult } from "../src/scenarios/category_governance/types.ts";
 
 describe("标准类目治理公共函数", () => {
@@ -205,5 +205,17 @@ describe("标准类目治理公共函数", () => {
     ], notes: [] }), target);
     const templates = applySemanticReviews(category, [review]);
     expect(templates.categories[0]?.properties.map((property) => property.name)).toEqual(["纸张克重", "材质"]);
+  });
+
+  test("语义终审稳定结果按类目增量合并，重复类目使用最新结果", () => {
+    const merged = mergeSemanticReviews(
+      [
+        { categoryId: "a4", decisions: [], notes: ["旧"] },
+        { categoryId: "phone", decisions: [], notes: ["保留"] },
+      ],
+      [{ categoryId: "a4", decisions: [], notes: ["新"] }],
+    );
+    expect(merged.map((item) => item.categoryId)).toEqual(["a4", "phone"]);
+    expect(merged.find((item) => item.categoryId === "a4")?.notes).toEqual(["新"]);
   });
 });
