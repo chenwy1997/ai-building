@@ -89,7 +89,14 @@ describe("标准类目治理公共函数", () => {
 
   test("治理提示词使用紧凑 a/c 结构，并把参考证据放在目标之后", () => {
     const target = document.nodes[2]!;
-    const evidence = normalizeJdEvidence({ categories: [{ path: ["办公", "纸品", "A4复印纸"], attributes: [{ name: "纸张克重", unit: "g/m²", values: ["70", "80"] }] }] });
+    const evidence = normalizeJdEvidence({ categories: [
+      { path: ["办公", "纸品", "A4复印纸"], targetIds: [document.nodes[2]!.id], sampleSkuIds: ["1", "2", "3", "4"], attributes: [
+        { name: "纸张克重", unit: "g/m²", values: ["70", "80"], observed: 2 },
+        { name: "国补备案型号", values: ["型号-1"], observed: 2 },
+        { name: "偶然字段", values: ["只出现一次"], observed: 1 },
+      ] },
+      { path: ["办公", "纸品", "复印纸"], attributes: [{ name: "无关字段", values: ["不要带入"] }] },
+    ] });
     const reference = buildJdEvidenceText([target], evidence);
     const prompt = buildGovernanceUserPrompt({
       version: "v1", categoryText: "#STD-CAT\n1+ 办公", targetCategories: [target], referenceText: reference,
@@ -99,6 +106,11 @@ describe("标准类目治理公共函数", () => {
     expect(prompt).toContain("#JD-EVIDENCE");
     expect(prompt.indexOf("目标末级类目")).toBeLessThan(prompt.indexOf("#JD-EVIDENCE"));
     expect(prompt).toContain("纸张克重");
+    expect(prompt).toContain("seen=2/4");
+    expect(prompt).not.toContain("国补备案型号");
+    expect(prompt).not.toContain("偶然字段");
+    expect(prompt).not.toContain("无关字段");
+    expect(prompt).toContain("seen=x/y");
   });
 
   test("京东采样器聚合类目属性和规格参数，并保留目标映射", async () => {

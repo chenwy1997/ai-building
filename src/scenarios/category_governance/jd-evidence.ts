@@ -33,6 +33,18 @@ export interface JdEvidenceDocument {
 export interface JdEvidenceOptions {
   maxCategoriesPerTarget?: number;
   maxAttributesPerCategory?: number;
+  minObserved?: number;
+}
+
+const PLACEHOLDER_VALUES = new Set(["无", "未公布", "暂无", "不详", "未知"]);
+const LOW_VALUE_ATTRIBUTE_NAMES = [/^国补备案型号$/u, /国补备案/u, /^上市时间$/u, /^上市日期$/u];
+
+function meaningfulValues(values: string[] | undefined): string[] {
+  return [...new Set((values ?? []).filter((value) => !PLACEHOLDER_VALUES.has(value.trim())))].slice(0, 20);
+}
+
+function isLowValueAttribute(name: string): boolean {
+  return LOW_VALUE_ATTRIBUTE_NAMES.some((pattern) => pattern.test(name.trim()));
 }
 
 function text(value: unknown): string {
@@ -145,19 +157,38 @@ export function buildJdEvidenceText(
   const maxAttributes = options.maxAttributesPerCategory ?? 16;
   const lines: string[] = [];
   for (const target of targets) {
-    const matches = document.categories
+    const scored = document.categories
       .map((candidate) => ({ candidate, score: score(target, candidate) }))
-      .filter((item) => item.score >= 0.45)
+      .filter((item) => item.score >= 0.45);
+    // 有明确 targetIds 时只信任直接绑定的证据，避免同名或相邻路径的京东类目串入当前目标。
+    // 只有历史证据没有 targetIds 时，才使用精确叶子名或较高置信度的路径兜底。
+    const direct = scored.filter((item) => item.score >= 1.19);
+    const unbound = scored.filter((item) => !item.candidate.targetIds?.length);
+    const exact = unbound.filter((item) => item.score >= 1 && item.score < 1.19);
+    const fallback = unbound.filter((item) => item.score >= 0.68 && item.score < 1);
+    const matches = (direct.length > 0 ? direct : exact.length > 0 ? exact : fallback)
       .sort((a, b) => b.score - a.score || a.candidate.path.join("/").localeCompare(b.candidate.path.join("/")))
       .slice(0, maxCategories);
     for (const match of matches) {
-      lines.push(`#JD-EVIDENCE|target=${shortCategoryId(target.id)}|match=${match.candidate.path.join(">")}|confidence=${match.score.toFixed(2)}`);
-      for (const attribute of match.candidate.attributes.slice(0, maxAttributes)) {
+      const sampleCount = match.candidate.sampleSkuIds?.length;
+      lines.push(`#JD-EVIDENCE|target=${shortCategoryId(target.id)}|match=${match.candidate.path.join(">")}|confidence=${match.score.toFixed(2)}${sampleCount ? `|sample=${sampleCount}` : ""}`);
+      const inferredSampleCount = (sampleCount ?? Math.max(...match.candidate.attributes.map((attribute) => attribute.observed ?? 0), 0)) || undefined;
+      const minObserved = options.minObserved ?? (inferredSampleCount && inferredSampleCount >= 4 ? 2 : 1);
+      const attributes = match.candidate.attributes
+        .filter((attribute) => !isLowValueAttribute(attribute.name))
+        .filter((attribute) => attribute.observed === undefined || attribute.observed >= minObserved)
+        .map((attribute) => ({ attribute, values: meaningfulValues(attribute.values) }))
+        .filter(({ attribute, values }) => !attribute.values?.length || values.length > 0)
+        .slice(0, maxAttributes);
+      for (const { attribute, values } of attributes) {
         const parts = [`attr=${attribute.name}`];
         if (attribute.type) parts.push(`type=${attribute.type}`);
         if (attribute.unit) parts.push(`unit=${attribute.unit}`);
-        if (attribute.values?.length) parts.push(`values=${attribute.values.join(",")}`);
-        if (attribute.observed !== undefined) parts.push(`seen=${attribute.observed}`);
+        if (values.length) parts.push(`values=${values.join(",")}`);
+        if (attribute.observed !== undefined) {
+          parts.push(`seen=${attribute.observed}${inferredSampleCount ? `/${inferredSampleCount}` : ""}`);
+          if (attribute.observed <= 1) parts.push("weak=1");
+        }
         if (attribute.groups?.length) parts.push(`groups=${attribute.groups.join(",")}`);
         if (attribute.sources?.length) parts.push(`source=${attribute.sources.join(",")}`);
         lines.push(parts.join("|"));

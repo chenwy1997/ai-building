@@ -106,6 +106,8 @@ bun run category-governance:jd-evidence \
 
 映射文件是 `context/<version>/jd-category-mapping-v1.json`，采证运行的 `manifest.json` 会记录实际使用的 `jdMappingCount`。这样每条证据都能追溯到三横类目、京东类目 ID 和映射理由；后续人工确认 `review` 项时，只需把对应状态改为自动状态并保留新的映射版本。
 
+原始京东证据会完整保存；发送给治理模型前会过滤明显无价值的运营字段（例如国补备案型号、上市时间）、纯占位值，以及样本数达到 4 个时只出现 1 次的偶然字段。过滤只作用于提示词，不修改原始证据文件，便于后续审计和重新定义规则。
+
 详情接口成功但没有 `categoryAttrList`/`paramGroupAttrList` 的类目会记录到 `context/<version>/jd-attribute-evidence.empty.json`，这属于“空证据”而不是请求失败；`--resume` 会跳过它们，只有需要重试时才加 `--retry-empty`。
 
 `--indexed-only` 只采集能通过京东三级 ID 映射的三横末级类目，适合作为第一阶段高精度证据；未生成映射文件时，当前原生同名唯一映射约 1,492 个；生成映射文件后，自动映射会扩展到同名路径消歧和有父路径证据的包含关系。未匹配类目不是接口失败，而是两套类目体系没有可靠映射，后续应单独做同义词/人工映射，再开启关键词补召回，避免用低置信度证据污染模板。
