@@ -4,12 +4,15 @@ import { shortCategoryId } from "./util.ts";
 export const CATEGORY_GOVERNANCE_SYSTEM_PROMPT = `你是商品类目治理专家，负责为三横标准类目设计可落地的商品属性模板。
 
 规则：
-1. 只依据输入的类目层级和行业常识推断，不编造品牌、认证、型号或无法验证的固定枚举；不确定的枚举输出空数组，并在 notes 说明。
+1. 只依据类目层级、给出的参考证据和行业常识推断，不编造品牌、认证、型号或无法验证的固定枚举；不确定的枚举输出空数组，并在 notes 说明。
 2. 属性要服务于商品识别、检索、报价、采购和合规。区分类目共有属性和当前末级类目属性，避免把价格、库存、供应商等交易字段当成类目属性。
-3. 属性名称使用业务常用中文，key 使用稳定的 snake_case；同义属性只保留一个。必填只给通常能从商品资料获得且对识别有帮助的字段。
-4. type 只能是 text、number、boolean、single、multi、date、file。number 必须尽量给出 unit；single/multi 才能填写 options。
-5. 输出严格为 JSON，不要 Markdown、解释性前后缀或代码围栏。每个目标类目都必须有一条结果，category.id 必须逐字使用输入中的 category_id。
-6. description、unit、format、example 只能是字符串或 null；options 必须是字符串数组；scope 只能是 shared 或 category；不要输出数字、对象或其他枚举值作为这些字段。
+3. 属性名称使用业务常用中文，key 使用稳定的 snake_case；同义属性只保留一个。相同语义即使单位不同也尽量复用 key，只有业务含义确实不同才拆分。
+4. 必填只给通常能从商品资料获得、且对识别或合规关键的字段；品牌、型号默认可选，不能因为常见就自动标为必填。
+5. type 只能是 text、number、boolean、single、multi、date、file。number 尽量给 unit；single/multi 才填写 options。参考证据中的字段和枚举只是候选，必须结合当前类目判断。
+6. 输出严格为 JSON，不要 Markdown、解释性前后缀或代码围栏。使用下面约定的 a/c 紧凑结构，每个目标类目必须有且只有一条结果。
+7. a 是本批次属性字典：相同的完整十元组只定义一次；c 的 key 是输入中的短 category_id，值为 [shared属性引用, category属性引用, notes]。
+8. 属性十元组顺序固定为 [key,name,type代码,required,unit,options,description,format,example,scope]；type代码 t=text、n=number、b=boolean、s=single、m=multi、d=date、f=file；required 必填写"*"，非必填写""。
+9. unit、format、example 不确定时填 null，description 不确定时填空字符串，options 必须是字符串数组；不要给十元组增加字段。scope 只能是 shared 或 category。
 
 Excel 对照字段：属性名称、属性说明、属性值类型、属性值填写要求、属性值单位、属性值选项、属性值格式、属性值示例；其中 required=true 对应“必填”。`;
 
@@ -17,6 +20,7 @@ export function buildGovernanceUserPrompt(input: {
   version: string;
   categoryText: string;
   targetCategories: Array<Pick<CategoryNode, "id" | "pathNames" | "name" | "isLeaf">>;
+  referenceText?: string;
   repairError?: string;
 }): string {
   const targets = input.targetCategories.map((category) => ({
@@ -27,21 +31,21 @@ export function buildGovernanceUserPrompt(input: {
   const repair = input.repairError
     ? `\n上一次尝试未通过本地校验，原因是：${input.repairError}\n请重新完整输出全部目标类目，并严格修正该问题；不要只返回修改片段。\n`
     : "";
+  const reference = input.referenceText?.trim()
+    ? `\n京东参考证据（仅作候选，不是强制答案；证据可能不完整，不能照抄到所有类目）：\n${input.referenceText.trim()}\n`
+    : "";
   return `类目树版本：${input.version}
 压缩后的类目上下文（本类目组固定前缀）：
 ${input.categoryText}
 
-请输出如下 JSON 结构：
-{"items":[{"category":{"id":"目标 category_id","path":["一级","二级"],"name":"末级名称"},"shared":[${propertyExample()}],"properties":[${propertyExample()}],"notes":[]}]}
-shared 放该批次中可复用的共有属性，properties 放该类目专属或更准确的属性。每个属性都应包含 key,name,type,required；可选字段为 description,unit,options,format,example,scope。最终返回条数必须等于目标类目数。
+请只输出紧凑 JSON，结构固定为：
+{"v":1,"a":{"a0":["brand","品牌","t","",null,[],"商品品牌",null,null,"shared"]},"c":{"目标短category_id":[["a0"],["a1"],[]]}}
+a 是属性字典，c 的每个值依次是 shared 引用数组、类目专属属性引用数组、说明数组。不要输出 items、category 对象或任何字典之外的属性定义。最终 c 的 key 集合必须与目标类目的短 category_id 完全一致，不能遗漏、重复或新增。
 
 目标末级类目（必须全部返回）：
 ${JSON.stringify(targets)}
+${reference}
 ${repair}`;
-}
-
-function propertyExample(): string {
-  return `{"key":"brand","name":"品牌","type":"text","required":false,"unit":null,"options":[],"description":"","format":null,"example":null,"scope":"shared"}`;
 }
 
 export const ATTRIBUTE_PROPERTY_KEYS: ReadonlyArray<keyof AttributeProperty> = [

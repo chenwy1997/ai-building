@@ -43,7 +43,23 @@ bun run cli scenario:run category_governance run pipeline ./sanheng-standard-cat
 
 治理入口实际读取固定的 `context/v1/category-tree.json`，再根据目标类目生成本批次的精简文本，不会扫描目录中所有 `.std.txt`。`.std.txt` 是便于人工检查和复用的压缩导出；真正发送给模型的完整 system/user 输入保存在每个 `attempt-*.request.json`。启动日志会显示输入路径、导入记录 ID 和原始文件 SHA-256，运行 manifest 还记录归一化上下文的 SHA-256。`--attempts=3` 表示一个批次最多尝试三次，失败时会把校验原因反馈给下一次请求；只有最终成功的那一份写入结果表。
 
-为了利用 DeepSeek 的前缀缓存，批次请求会先放入同一类目组的固定压缩上下文，再放本批次变化的目标类目；运行开始时每个类目组先完成一个预热请求，缓存落盘后才并发发送剩余批次。运行结束会打印并在 manifest 的 `usage` 中保存 `promptCacheHitTokens` 和 `promptCacheMissTokens`，可以据此调整 `group-depth`、`batch-size` 和并发策略。DeepSeek 官方说明只有从输入起始位置完整匹配的前缀才会计入缓存命中，缓存本身是尽力而为。[上下文硬盘缓存说明](https://api-docs.deepseek.com/zh-cn/guides/kv_cache/)
+为了利用 DeepSeek 的前缀缓存，批次请求会先放入同一类目组的固定压缩上下文，再放本批次变化的目标类目；运行开始时每个类目组先完成一个预热请求，缓存落盘后才并发发送剩余批次。运行结束会打印并在 manifest 的 `usage` 中保存输入、输出、总 token 以及 `promptCacheHitTokens` 和 `promptCacheMissTokens`，可以据此调整 `group-depth`、`batch-size` 和并发策略。DeepSeek 官方说明只有从输入起始位置完整匹配的前缀才会计入缓存命中，缓存本身是尽力而为。[上下文硬盘缓存说明](https://api-docs.deepseek.com/zh-cn/guides/kv_cache/)
+
+## 京东参考证据
+
+京东库里的类目树和商品详情属性不是三横类目的替代品，只作为候选字段证据。治理入口会自动查找 `workspace/context/v1/jd-attribute-evidence.json`，也可以显式指定：
+
+```bash
+bun run category-governance --jd-evidence=/absolute/path/jd-attribute-evidence.json --concurrency=max --batch-size=12
+```
+
+文件可以是以下紧凑结构；每个京东类目只保留经过采样统计的属性，不要把九千多个类目全部拼进每次请求：
+
+```json
+{"version":"jd-v1","source":"jd-vop-sampled","categories":[{"id":"655","path":["手机","手机通讯","手机"],"attributes":[{"name":"屏幕尺寸","type":"text","unit":"英寸","values":["6.1","6.7"],"observed":128},{"name":"运行内存","type":"number","unit":"GB","observed":120}]}]}
+```
+
+程序会按三横目标末级类目匹配最多两个相近京东类目、每个类目最多十六个属性，并把证据放在目标类目列表之后。这样固定的类目树前缀仍可命中 DeepSeek KV 缓存，京东证据只增加当前批次需要的少量输入；`--no-jd-evidence` 可关闭。京东证据缺失时流程照常运行，不会因为参考库不可用而中断。
 
 导入会写入独立库 `ai-building-category_governance` 的 `category_nodes_v1`；导入、运行、结果分别写入 `category_imports_v1`、`governance_runs_v1`、`attribute_templates_v1`。新的不可变版本可以使用 `--version=v2`，并通过新的迁移增加对应 `_v2` 表，不覆盖已完成的 `_v1` 记录。
 
@@ -53,7 +69,7 @@ bun run cli scenario:run category_governance run pipeline ./sanheng-standard-cat
 
 ## 属性模板输出
 
-提示词以领导示例的字段为基准：属性名称、说明、类型、必填、单位、选项、格式、示例。模型可以返回易校验的普通 JSON；落盘时 `compactTemplates` 把完全相同的属性抽到 `a` 字典，类目只引用属性 ID，`*` 表示必填，便于多次治理和后续汇总。
+提示词以领导示例的字段为基准：属性名称、说明、类型、必填、单位、选项、格式、示例。模型直接返回紧凑的 `a/c` 字典：`a` 保存本批次唯一属性十元组，`c` 只保存每个类目对属性的引用，`*` 表示必填。解析器同时兼容旧的 `items` 普通 JSON，因此历史结果仍可合并；紧凑输出会降低输出 token 和截断导致的 JSON 不完整概率。
 
 完整目录优先使用项目已有的无筛选接口 `/manage/product/product-hub/api/searchStdCategory`，在登录页面会话中 POST `{ "name": null }`，返回 13,647 个节点，并直接提供接口层级 `level`（根为 0，四级类目为 4）。导出文件应保留接口原始字段和根节点 `51fae85e-d76e-45c1-bd10-d3d75e45545d`（标准类目）。重新导入同一版本会替换 `category_nodes_v1` 当前快照，避免不完整抓取的旧节点残留。
 

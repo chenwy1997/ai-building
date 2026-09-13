@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { normalizeCategories } from "../src/scenarios/category_governance/category-tree.ts";
 import { toStdText, makeContextChunks } from "../src/scenarios/category_governance/std-text.ts";
 import { compactTemplates, parseGovernanceResponse } from "../src/scenarios/category_governance/template-codec.ts";
+import { buildGovernanceUserPrompt } from "../src/scenarios/category_governance/prompt.ts";
+import { buildJdEvidenceText, normalizeJdEvidence } from "../src/scenarios/category_governance/jd-evidence.ts";
 import type { GovernanceResult } from "../src/scenarios/category_governance/types.ts";
 
 describe("标准类目治理公共函数", () => {
@@ -50,5 +52,19 @@ describe("标准类目治理公共函数", () => {
     expect(restored[0]?.properties[0]?.required).toBe(true);
     expect(restored[0]?.properties[0]?.options).toEqual(["A4", "16"]);
     expect(restored[0]?.notes).toEqual(["模型补充说明"]);
+  });
+
+  test("治理提示词使用紧凑 a/c 结构，并把参考证据放在目标之后", () => {
+    const target = document.nodes[2]!;
+    const evidence = normalizeJdEvidence({ categories: [{ path: ["办公", "纸品", "A4复印纸"], attributes: [{ name: "纸张克重", unit: "g/m²", values: ["70", "80"] }] }] });
+    const reference = buildJdEvidenceText([target], evidence);
+    const prompt = buildGovernanceUserPrompt({
+      version: "v1", categoryText: "#STD-CAT\n1+ 办公", targetCategories: [target], referenceText: reference,
+    });
+    expect(prompt).toContain('"a":{"a0"');
+    expect(prompt).toContain('"c":{"');
+    expect(prompt).toContain("#JD-EVIDENCE");
+    expect(prompt.indexOf("目标末级类目")).toBeLessThan(prompt.indexOf("#JD-EVIDENCE"));
+    expect(prompt).toContain("纸张克重");
   });
 });

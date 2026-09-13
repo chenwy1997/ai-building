@@ -43,6 +43,8 @@ const HELP = `
   --model=flash          AI 模型别名
   --direct               当前进程直连 AI API；等同于为 api.deepseek.com 设置 NO_PROXY
   --no-proxy             --direct 的别名
+  --jd-evidence=...      可选：京东属性证据 JSON；不传则自动读取 context/<version>/jd-attribute-evidence.json
+  --no-jd-evidence       禁用京东参考证据
   --dry-run              只生成请求文件，不调用模型
   --workspace=...        覆盖类目治理 workspace
 `.trim();
@@ -145,6 +147,8 @@ export async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       provider,
       model,
       categorySelector,
+      jdEvidencePath: flags["jd-evidence"],
+      jdEvidenceEnabled: !boolFlag(flags["no-jd-evidence"]),
       onProgress: (progress) => {
         if (progress.completed === progress.total || progress.completed % 10 === 0) {
           console.log(`进度 ${progress.completed}/${progress.total}，已生成 ${progress.success} 个类目结果，失败 ${progress.errors}`);
@@ -152,6 +156,7 @@ export async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       },
     });
     console.log(`治理完成：请求 ${result.requestCount}，成功类目 ${result.successCount}，失败请求 ${result.errorCount}`);
+    console.log(`Token：输入 ${result.promptTokens}，输出 ${result.completionTokens}，合计 ${result.totalTokens}`);
     console.log(`输入缓存：命中 ${result.promptCacheHitTokens} tokens，未命中 ${result.promptCacheMissTokens} tokens`);
     console.log(`输出目录：${result.outputDir}`);
   } finally {

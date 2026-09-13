@@ -12,6 +12,7 @@ import { outputPath, readContextDocument, writeContextBundle, workspaceRoot } fr
 import { makeContextChunks } from "./std-text.ts";
 import { asInt, boolFlag, parseFlags, slugify } from "./util.ts";
 import { shortCategoryId } from "./util.ts";
+import { buildJdEvidenceText, findJdEvidencePath, loadJdEvidence, type JdEvidenceDocument } from "./jd-evidence.ts";
 import type { CategoryNode, CategoryTreeDocument, GovernanceResult } from "./types.ts";
 
 interface Batch {
@@ -19,6 +20,7 @@ interface Batch {
   rootId: string;
   nodes: CategoryNode[];
   text: string;
+  referenceText: string;
 }
 
 function categoryMatches(node: CategoryNode, selector: string): boolean {
@@ -35,6 +37,7 @@ function groupBatches(
   groupDepth: number,
   batchSize: number,
   categorySelector?: string,
+  jdEvidence?: JdEvidenceDocument,
 ): Batch[] {
   const leafGroups = new Map<string, CategoryNode[]>();
   const leaves = document.nodes.filter((candidate) => candidate.isLeaf);
@@ -69,6 +72,8 @@ function groupBatches(
         text: !categorySelector || selectedLeaves.length > batchSize
           ? fullContextByRoot.get(rootId) ?? subsetText
           : subsetText,
+        // 动态证据放在目标类目之后，避免改变固定类目树前缀，尽量保留 KV 缓存命中。
+        referenceText: buildJdEvidenceText(nodes, jdEvidence),
       });
     }
   }
@@ -139,6 +144,8 @@ export async function runGovernance(options: {
   provider: string;
   model: string;
   categorySelector?: string;
+  jdEvidencePath?: string;
+  jdEvidenceEnabled?: boolean;
   onProgress?: (progress: {
     completed: number;
     total: number;
@@ -150,6 +157,9 @@ export async function runGovernance(options: {
   successCount: number;
   errorCount: number;
   outputDir: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
   promptCacheHitTokens: number;
   promptCacheMissTokens: number;
 }> {
@@ -167,7 +177,16 @@ export async function runGovernance(options: {
   };
   console.log(`输入上下文：${inputSource.contextPath}`);
   console.log(`输入来源：${inputSource.path ?? "未记录"}，import_id=${inputSource.importId ?? "未记录"}，SHA-256=${inputSource.sha256 ?? "未记录"}`);
-  const batches = groupBatches(document, options.groupDepth, options.batchSize, options.categorySelector);
+  const evidencePath = options.jdEvidenceEnabled === false
+    ? null
+    : await findJdEvidencePath(rootDir, options.version, options.jdEvidencePath);
+  const jdEvidence = evidencePath ? await loadJdEvidence(evidencePath) : undefined;
+  if (evidencePath) {
+    console.log(`京东参考证据：${evidencePath}，类目 ${jdEvidence?.categories.length ?? 0}`);
+  } else {
+    console.log("京东参考证据：未启用（可放置 context/<version>/jd-attribute-evidence.json 后自动加载）");
+  }
+  const batches = groupBatches(document, options.groupDepth, options.batchSize, options.categorySelector, jdEvidence);
   // 输出按运行批次归档；groupDepth 只属于输入分片配置，不再成为结果目录层级。
   const outputRootDir = outputPath(rootDir, options.version);
   const runRows = await options.database<{ id: number }[]>`
@@ -185,6 +204,9 @@ export async function runGovernance(options: {
   const errors: Array<{ key: string; attempt: number; error: string }> = [];
   const attemptErrors: Array<{ key: string; attempt: number; error: string }> = [];
   let requestCount = 0;
+  let promptTokens = 0;
+  let completionTokens = 0;
+  let totalTokens = 0;
   let promptCacheHitTokens = 0;
   let promptCacheMissTokens = 0;
   let completedBatches = 0;
@@ -209,6 +231,7 @@ export async function runGovernance(options: {
         version: document.version,
         categoryText: batch.text,
         targetCategories: batch.nodes,
+        referenceText: batch.referenceText,
         repairError: lastError || undefined,
       });
       await writeJsonFile(requestPath, {
@@ -216,6 +239,8 @@ export async function runGovernance(options: {
         user: prompt,
         categoryIds: batch.nodes.map((node) => node.id),
         source: inputSource,
+        jdEvidencePath: evidencePath,
+        jdEvidence: batch.referenceText || null,
         attempt,
       });
       if (options.dryRun) {
@@ -236,6 +261,9 @@ export async function runGovernance(options: {
           response_format: { type: "json_object" },
           thinking: { type: "disabled" },
         });
+        promptTokens += response.usage?.prompt_tokens ?? 0;
+        completionTokens += response.usage?.completion_tokens ?? 0;
+        totalTokens += response.usage?.total_tokens ?? 0;
         promptCacheHitTokens += response.usage?.prompt_cache_hit_tokens ?? 0;
         promptCacheMissTokens += response.usage?.prompt_cache_miss_tokens ?? 0;
         finishReason = response.choices[0]?.finish_reason ?? null;
@@ -322,15 +350,22 @@ export async function runGovernance(options: {
     runId, version: document.version, provider: options.provider, model: options.model,
     groupDepth: options.groupDepth, batchSize: options.batchSize, attempts: options.attempts,
     categorySelector: options.categorySelector ?? null,
+    jdEvidencePath: evidencePath,
     source: inputSource,
     requestCount, successCount: allResults.length, errorCount: errors.length, errors, attemptErrors,
-    usage: { promptCacheHitTokens, promptCacheMissTokens },
+    usage: {
+      promptTokens, completionTokens, totalTokens,
+      promptCacheHitTokens, promptCacheMissTokens,
+    },
   });
   return {
     requestCount,
     successCount: allResults.length,
     errorCount: errors.length,
     outputDir,
+    promptTokens,
+    completionTokens,
+    totalTokens,
     promptCacheHitTokens,
     promptCacheMissTokens,
   };
@@ -452,8 +487,11 @@ export async function runCommand(context: { args: string[]; database: SQL; ai: A
         attempts: asInt(flags.attempts, 1), dryRun: boolFlag(flags["dry-run"]),
         provider: flags.provider ?? "deepseek", model: flags.model ?? "flash",
         categorySelector: flags.category ?? flags["category-id"],
+        jdEvidencePath: flags["jd-evidence"],
+        jdEvidenceEnabled: !boolFlag(flags["no-jd-evidence"]),
       });
       console.log(`治理完成：请求 ${result.requestCount}，成功类目 ${result.successCount}，失败请求 ${result.errorCount}`);
+      console.log(`Token：输入 ${result.promptTokens}，输出 ${result.completionTokens}，合计 ${result.totalTokens}`);
       return;
     }
     case "import": {
@@ -483,8 +521,11 @@ export async function runCommand(context: { args: string[]; database: SQL; ai: A
         attempts: asInt(flags.attempts, 1), dryRun: boolFlag(flags["dry-run"]),
         provider: flags.provider ?? "deepseek", model: flags.model ?? "flash",
         categorySelector: flags.category ?? flags["category-id"],
+        jdEvidencePath: flags["jd-evidence"],
+        jdEvidenceEnabled: !boolFlag(flags["no-jd-evidence"]),
       });
       console.log(`治理完成：请求 ${result.requestCount}，成功类目 ${result.successCount}，失败请求 ${result.errorCount}`);
+      console.log(`Token：输入 ${result.promptTokens}，输出 ${result.completionTokens}，合计 ${result.totalTokens}`);
       console.log(`输出：${result.outputDir}`);
       return;
     }
