@@ -54,6 +54,22 @@ describe("标准类目治理公共函数", () => {
     expect(restored[0]?.notes).toEqual(["模型补充说明"]);
   });
 
+  test("公共属性 key 在多次治理中保持稳定，并拒绝缺少单位的量纲数字属性", () => {
+    const response = {
+      items: [{
+        category: { id: "a4" }, shared: [],
+        properties: [
+          { key: "os", name: "操作系统", type: "text", required: false },
+          { key: "ram_capacity", name: "运行内存", type: "number", required: false, unit: "GB" },
+        ], notes: [],
+      }],
+    };
+    const restored = parseGovernanceResponse(JSON.stringify(response), [document.nodes[2]!]);
+    expect(restored[0]?.properties.map((item) => item.key)).toEqual(["operating_system", "ram"]);
+    const invalid = { ...response, items: [{ ...response.items[0], properties: [{ key: "screen_size", name: "屏幕尺寸", type: "number", required: false }] }] };
+    expect(() => parseGovernanceResponse(JSON.stringify(invalid), [document.nodes[2]!])).toThrow("必须填写 unit");
+  });
+
   test("治理提示词使用紧凑 a/c 结构，并把参考证据放在目标之后", () => {
     const target = document.nodes[2]!;
     const evidence = normalizeJdEvidence({ categories: [{ path: ["办公", "纸品", "A4复印纸"], attributes: [{ name: "纸张克重", unit: "g/m²", values: ["70", "80"] }] }] });

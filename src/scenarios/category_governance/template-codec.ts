@@ -32,7 +32,34 @@ function stableFallbackKey(value: string): string {
   return `attr_${createHash("sha256").update(value).digest("hex").slice(0, 10)}`;
 }
 
+// 常见公共属性统一成跨批次稳定 key，避免模型在不同运行中返回 os/operating_system、ram/ram_capacity 等同义 key。
+const CANONICAL_NAME_KEYS: Record<string, string> = {
+  "品牌": "brand",
+  "型号": "model",
+  "颜色": "color",
+  "材质": "material",
+  "操作系统": "operating_system",
+  "运行内存": "ram",
+  "网络制式": "network_standard",
+  "屏幕尺寸": "screen_size",
+  "存储容量": "storage_capacity",
+  "电池容量": "battery_capacity",
+  "上市日期": "release_date",
+  "上市年份": "release_year",
+  "长度": "length",
+  "宽度": "width",
+  "高度": "height",
+  "厚度": "thickness",
+  "重量": "weight",
+  "功率": "power",
+  "电压": "voltage",
+  "防护等级": "protection_level",
+  "执行标准": "standard",
+};
+
 function normalizeKey(value: unknown, name: string): string {
+  const canonical = CANONICAL_NAME_KEYS[name.trim()];
+  if (canonical) return canonical;
   const raw = scalarText(value)?.trim() ?? "";
   const normalized = raw
     .replace(/([a-z])([A-Z])/gu, "$1_$2")
@@ -149,6 +176,10 @@ function validateProperties(properties: AttributeProperty[]): void {
   const names = new Set<string>();
   for (const p of properties) {
     if (keys.has(p.key) || names.has(p.name)) throw new Error(`重复属性：${p.key}/${p.name}`);
+    // 对有明确量纲的数字属性，要求把单位放入结构化 unit，不能只藏在 description 中。
+    if (p.type === "number" && !p.unit && /尺寸|容量|电池|内存|长度|宽度|高度|厚度|重量|电压|功率|速度|频率|直径|面积|体积|温度|压力|流量|距离|像素/u.test(p.name)) {
+      throw new Error(`数字属性 ${p.name} 必须填写 unit`);
+    }
     keys.add(p.key); names.add(p.name);
   }
 }
