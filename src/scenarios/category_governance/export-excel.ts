@@ -6,7 +6,6 @@ import type { AttributeProperty, CategoryNode, GovernanceResult } from "./types.
 
 const SCENARIO_DIR = resolve(import.meta.dir);
 const WORKSPACE_DIR = join(SCENARIO_DIR, "workspace");
-const DEFAULT_REFERENCE = "/Users/sanheng/Library/Containers/com.tencent.WeWorkMac/Data/Documents/Profiles/97D1B5EFDB06A5F5A0B1F34C4FBC7A22/Caches/Files/2026-08/ed603ecb2fed2363aad4f97e003d7224/AI比赛第2期-赛题类目属性.xlsx";
 const HEADERS = [
   "一级类目",
   "二级类目",
@@ -180,7 +179,7 @@ function applyMainSheetFormat(sheet: any, rowCount: number): void {
   sheet.showGridLines = false;
 }
 
-async function buildWorkbook(manifest: RunManifest, results: GovernanceResult[]): Promise<any> {
+async function buildWorkbook(results: GovernanceResult[]): Promise<any> {
   const { Workbook } = await loadArtifactTool();
   const workbook = Workbook.create();
   const sheet = workbook.worksheets.add("属性模板");
@@ -188,40 +187,12 @@ async function buildWorkbook(manifest: RunManifest, results: GovernanceResult[])
   sheet.getRange("A1:L1").values = [HEADERS as unknown as string[]];
   if (rows.length > 0) sheet.getRangeByIndexes(1, 0, rows.length, HEADERS.length).values = rows;
   applyMainSheetFormat(sheet, rows.length);
-
-  const info = workbook.worksheets.add("导出信息");
-  const hit = manifest.usage?.promptCacheHitTokens ?? 0;
-  const miss = manifest.usage?.promptCacheMissTokens ?? 0;
-  const infoRows = [
-    ["运行批次", manifest.runId],
-    ["类目版本", manifest.version],
-    ["请求数", manifest.requestCount],
-    ["成功类目数", manifest.successCount],
-    ["失败类目数", manifest.errorCount],
-    ["导出类目数", results.length],
-    ["属性行数", rows.length],
-    ["缓存命中 tokens", hit],
-    ["缓存未命中 tokens", miss],
-    ["缓存命中率", hit + miss > 0 ? hit / (hit + miss) : 0],
-    ["参考格式", DEFAULT_REFERENCE],
-  ];
-  info.getRangeByIndexes(0, 0, infoRows.length, 2).values = infoRows;
-  info.getRange("A1:B1").format = { fill: "#1F4E78", font: { bold: true, color: "#FFFFFF" } };
-  info.getRange(`A1:B${infoRows.length}`).format = {
-    font: { name: "Microsoft YaHei", size: 10 },
-    verticalAlignment: "center",
-    borders: { preset: "all", style: "thin", color: "#D9E2F3" },
-  };
-  info.getRange(`B10`).format.numberFormat = [["0.00%"]];
-  info.getRange("A:A").format.columnWidth = 22;
-  info.getRange("B:B").format.columnWidth = 70;
-  info.showGridLines = false;
   return workbook;
 }
 
 export async function exportRunToExcel(options: { version: string; runId: string; output?: string }): Promise<string> {
-  const { manifest, results } = await loadResults(options.version, options.runId);
-  const workbook = await buildWorkbook(manifest, results);
+  const { results } = await loadResults(options.version, options.runId);
+  const workbook = await buildWorkbook(results);
   workbook.recalculate();
   const outputPath = resolve(options.output ?? join(WORKSPACE_DIR, "output", options.version, "excel", `excel-${options.runId}.xlsx`));
   const { SpreadsheetFile } = await loadArtifactTool();
