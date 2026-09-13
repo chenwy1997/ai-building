@@ -6,6 +6,8 @@ import { buildGovernanceUserPrompt } from "../src/scenarios/category_governance/
 import { buildJdEvidenceText, normalizeJdEvidence } from "../src/scenarios/category_governance/jd-evidence.ts";
 import { collectJdEvidence } from "../src/scenarios/category_governance/jd-collector.ts";
 import { buildJdCategoryMapping, autoJdCategoryReferences } from "../src/scenarios/category_governance/jd-mapping.ts";
+import { buildAttributeConsensus, buildConfirmedTemplateDocument } from "../src/scenarios/category_governance/consensus.ts";
+import { applySemanticReviews, buildSemanticReviewPrompt, parseSemanticReviewResponse } from "../src/scenarios/category_governance/semantic-review.ts";
 import type { GovernanceResult } from "../src/scenarios/category_governance/types.ts";
 
 describe("标准类目治理公共函数", () => {
@@ -107,8 +109,10 @@ describe("标准类目治理公共函数", () => {
     expect(prompt.indexOf("目标末级类目")).toBeLessThan(prompt.indexOf("#JD-EVIDENCE"));
     expect(prompt).toContain("纸张克重");
     expect(prompt).toContain("seen=2/4");
-    expect(prompt).not.toContain("国补备案型号");
-    expect(prompt).not.toContain("偶然字段");
+    expect(prompt).toContain("国补备案型号");
+    expect(prompt).toContain("hint=platform_field");
+    expect(prompt).toContain("偶然字段");
+    expect(prompt).toContain("weak=1");
     expect(prompt).not.toContain("无关字段");
     expect(prompt).toContain("seen=x/y");
   });
@@ -161,5 +165,45 @@ describe("标准类目治理公共函数", () => {
     expect(drill?.status).toBe("auto_parent");
     expect(autoJdCategoryReferences(mapping).find((item) => item.targetIds?.includes(drill!.targetId))?.id).toBe("101");
     expect(phoneCase?.status).toBe("review");
+  });
+
+  test("多批次属性共识区分稳定属性、单批候选和低价值字段", () => {
+    const category = { id: "a4", path: ["办公", "纸品", "A4复印纸"], name: "A4复印纸" };
+    const observations: Array<{ runId: string; result: GovernanceResult }> = [1, 2].map((runId) => ({ runId: String(runId), result: {
+      category,
+      shared: [{ key: "brand", name: "品牌", type: "text" as const, required: false, unit: null, options: [], scope: "shared" as const }],
+      properties: [
+        { key: "weight", name: "纸张克重", type: "number" as const, required: true, unit: "g/m²", options: [], scope: "category" as const },
+        ...(runId === 1 ? [{ key: "color", name: "颜色", type: "single" as const, required: false, unit: null, options: ["白色"], scope: "category" as const }] : []),
+        { key: "release_date", name: "上市日期", type: "date" as const, required: false, unit: null, options: [], scope: "category" as const },
+      ],
+      notes: [],
+    } }));
+    const result = buildAttributeConsensus(observations);
+    const categoryResult = result.categories[0]!;
+    expect(result.stats.confirmedCount).toBe(3);
+    expect(categoryResult.properties.find((property) => property.name === "纸张克重")?.decision).toBe("confirmed");
+    expect(categoryResult.properties.find((property) => property.name === "纸张克重")?.required).toBe(true);
+    expect(categoryResult.properties.find((property) => property.name === "颜色")?.decision).toBe("candidate");
+    expect(categoryResult.properties.find((property) => property.name === "上市日期")?.decision).toBe("confirmed");
+    const templates = buildConfirmedTemplateDocument(result);
+    expect(templates.categories[0]?.properties.map((property) => property.name)).toEqual(["上市日期", "纸张克重"]);
+    expect(templates.categories[0]?.properties[0]).not.toHaveProperty("decision");
+  });
+
+  test("语义终审把固定上下文放在动态候选之前，并应用 keep/add 决策", () => {
+    const category = buildAttributeConsensus([{ runId: "1", result: {
+      category: { id: "a4", path: ["办公", "纸品", "A4复印纸"], name: "A4复印纸" },
+      shared: [], properties: [{ key: "weight", name: "纸张克重", type: "number", required: false, unit: "g/m²", options: [], scope: "category" }], notes: [],
+    } }]);
+    const target = category.categories[0]!;
+    const prompt = buildSemanticReviewPrompt({ category: target, evidenceText: "#JD-EVIDENCE\nattr=纸张克重|seen=1/1" });
+    expect(prompt.indexOf("#CATEGORY")).toBeLessThan(prompt.indexOf("#CANDIDATES"));
+    const review = parseSemanticReviewResponse(JSON.stringify({ category_id: "a4", decisions: [
+      { key: "weight", action: "keep", reason: "采购识别需要" },
+      { key: "material", action: "add", reason: "纸张行业通用字段", property: { key: "material", name: "材质", type: "text", required: false, unit: null, options: [], description: "纸张材质", format: null, example: null, scope: "category" } },
+    ], notes: [] }), target);
+    const templates = applySemanticReviews(category, [review]);
+    expect(templates.categories[0]?.properties.map((property) => property.name)).toEqual(["纸张克重", "材质"]);
   });
 });

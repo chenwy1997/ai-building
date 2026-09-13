@@ -1,0 +1,155 @@
+import { join } from "node:path";
+import { AiService } from "../../ai/service.ts";
+import { loadAppConfig } from "../../config/env.ts";
+import { PostgresAiCatalog } from "../../data/ai-catalog.ts";
+import { DatabaseHub } from "../../platform/database/index.ts";
+import { readJsonFile, writeJsonFile, writeTextFile } from "../../facilities/json/files.ts";
+import { parseFlags, asInt, boolFlag, slugify, shortCategoryId } from "./util.ts";
+import { readContextDocument, workspaceRoot } from "./storage.ts";
+import { loadJdEvidence, buildJdEvidenceText, type JdEvidenceDocument } from "./jd-evidence.ts";
+import { applySemanticReviews, buildSemanticReviewPrompt, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT, type SemanticReviewResult } from "./semantic-review.ts";
+import type { AttributeConsensusDocument } from "./consensus.ts";
+import type { CategoryNode } from "./types.ts";
+
+const HELP = `
+用大模型对多批次属性候选做语义终审
+
+用法：
+  bun run category-governance:semantic-review --category="手机" --limit=1 --direct
+  bun run category-governance:semantic-review --limit=30 --concurrency=4 --direct
+  bun run category-governance:semantic-review --all --concurrency=16 --direct
+
+参数：
+  --category=...       只审阅指定类目名称、完整路径、完整 ID 或短 ID
+  --limit=10           未指定类目时审阅前 N 个类目，默认 10
+  --all                明确允许审阅全部共识类目
+  --concurrency=4      语义审阅并发数，默认 4
+  --attempts=2         单类目失败重试次数
+  --consensus=...      共识文件路径，默认 output/<version>/consensus/attribute-candidates-v1.json
+  --jd-evidence=...    京东证据路径，默认 context/<version>/jd-attribute-evidence.json
+  --provider=deepseek  AI 服务商
+  --model=flash        AI 模型别名
+  --dry-run             只生成审阅请求，不调用模型
+  --direct              当前进程直连 AI API
+  --workspace=...       覆盖类目治理 workspace
+  --version=v1          类目上下文版本
+`.trim();
+
+function disableProxy(): void {
+  for (const key of ["HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"]) delete process.env[key];
+  process.env.NO_PROXY = "*";
+  process.env.no_proxy = "*";
+}
+
+function matches(node: CategoryNode, selector: string): boolean {
+  const value = selector.trim().toLocaleLowerCase();
+  return node.id.toLocaleLowerCase() === value || shortCategoryId(node.id).toLocaleLowerCase() === value
+    || node.pathNames.some((name) => name.toLocaleLowerCase() === value)
+    || node.pathNames.join("/").toLocaleLowerCase() === value
+    || node.pathNames.join(">").toLocaleLowerCase() === value;
+}
+
+function runStamp(): string {
+  return new Date().toISOString().replace(/[-:]/gu, "").replace(".", "-");
+}
+
+async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
+  const { positionals, flags } = parseFlags(argv);
+  if (flags.help === "true" || flags.h === "true" || positionals.length > 0) {
+    console.log(HELP);
+    if (positionals.length > 0) throw new Error(`不支持位置参数：${positionals.join(" ")}`);
+    return;
+  }
+  const version = flags.version ?? "v1";
+  const workspace = flags.workspace ?? workspaceRoot();
+  const consensusPath = flags.consensus ?? join(workspace, "output", version, "consensus", "attribute-candidates-v1.json");
+  const consensus = await readJsonFile<AttributeConsensusDocument>(consensusPath);
+  const context = await readContextDocument(workspace, version);
+  const byId = new Map(context.nodes.map((node) => [node.id, node]));
+  const selector = flags.category ?? flags["category-id"];
+  const candidateCategories = consensus.categories.filter((category) => {
+    const node = byId.get(category.category.id);
+    return node && (!selector || matches(node, selector));
+  });
+  if (candidateCategories.length === 0) throw new Error("没有找到可审阅的共识类目");
+  const categories = boolFlag(flags.all) || selector ? candidateCategories : candidateCategories.slice(0, asInt(flags.limit, 10));
+  if (categories.length === 0) throw new Error("没有需要审阅的类目；可使用 --all");
+  const evidencePath = flags["jd-evidence"] ?? join(workspace, "context", version, "jd-attribute-evidence.json");
+  let evidence: JdEvidenceDocument | undefined;
+  try { evidence = await loadJdEvidence(evidencePath); } catch { /* 京东证据可选 */ }
+  const runDir = join(workspace, "output", version, "semantic-review", `run-${runStamp()}`);
+  const stableReviewPath = join(workspace, "output", version, "semantic-review", "attribute-reviews-v1.json");
+  const stableTemplatePath = join(workspace, "output", version, "semantic-review", "attribute-templates-v1.json");
+  const provider = flags.provider ?? "deepseek";
+  const model = flags.model ?? "flash";
+  const attempts = asInt(flags.attempts, 2);
+  const concurrency = Math.min(32, asInt(flags.concurrency, 4));
+  const dryRun = boolFlag(flags["dry-run"]);
+  if (boolFlag(flags.direct) && provider === "deepseek") disableProxy();
+  const databases = dryRun ? undefined : new DatabaseHub(loadAppConfig().postgresUrl);
+  const ai = dryRun ? undefined : new AiService(new PostgresAiCatalog(databases!.publicDatabase()), loadAppConfig().masterKey);
+  const reviews: SemanticReviewResult[] = [];
+  const errors: Array<{ categoryId: string; error: string }> = [];
+  let promptTokens = 0; let completionTokens = 0; let totalTokens = 0; let promptCacheHitTokens = 0; let promptCacheMissTokens = 0;
+  try {
+    let cursor = 0;
+    const worker = async (): Promise<void> => {
+      while (true) {
+        const category = categories[cursor++];
+        if (!category) return;
+        const node = byId.get(category.category.id);
+        if (!node) continue;
+        const evidenceText = evidence ? buildJdEvidenceText([node], evidence) : "";
+        const prompt = buildSemanticReviewPrompt({ category, evidenceText });
+        const requestDir = join(runDir, slugify(category.category.path.join("-")));
+        await writeJsonFile(join(requestDir, "request.json"), { system: SEMANTIC_REVIEW_SYSTEM_PROMPT, user: prompt, categoryId: category.category.id, sourceConsensus: consensusPath, jdEvidencePath: evidence ? evidencePath : null });
+        if (dryRun) continue;
+        let lastError = "";
+        for (let attempt = 1; attempt <= attempts; attempt += 1) {
+          try {
+            const response = await ai!.chat(provider, model, {
+              messages: [{ role: "system", content: SEMANTIC_REVIEW_SYSTEM_PROMPT }, { role: "user", content: prompt + (lastError ? `\n上次输出校验失败：${lastError}` : "") }],
+              temperature: 0.1, max_tokens: 8_000, response_format: { type: "json_object" },
+            });
+            const content = response.choices[0]?.message.content;
+            if (!content) throw new Error("模型返回空 content");
+            const review = parseSemanticReviewResponse(content, category);
+            reviews.push(review);
+            await writeTextFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.raw.txt`), content);
+            await writeJsonFile(join(requestDir, "review.json"), review);
+            promptTokens += response.usage?.prompt_tokens ?? 0;
+            completionTokens += response.usage?.completion_tokens ?? 0;
+            totalTokens += response.usage?.total_tokens ?? 0;
+            promptCacheHitTokens += response.usage?.prompt_cache_hit_tokens ?? 0;
+            promptCacheMissTokens += response.usage?.prompt_cache_miss_tokens ?? 0;
+            lastError = "";
+            break;
+          } catch (error) {
+            lastError = error instanceof Error ? error.message : String(error);
+            if (attempt === attempts) errors.push({ categoryId: category.category.id, error: lastError });
+          }
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(concurrency, categories.length) }, () => worker()));
+  } finally {
+    await databases?.closeAll();
+  }
+  if (dryRun) {
+    console.log(`已生成 ${categories.length} 个语义审阅请求：${runDir}`);
+    return;
+  }
+  if (reviews.length === 0) throw new Error(`没有成功的语义审阅结果：${errors.map((item) => item.error).join("；")}`);
+  const reviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews, usage: { promptTokens, completionTokens, totalTokens, promptCacheHitTokens, promptCacheMissTokens }, errors };
+  await writeJsonFile(stableReviewPath, reviewDocument);
+  const templates = applySemanticReviews(consensus, reviews);
+  await writeJsonFile(stableTemplatePath, templates);
+  await writeJsonFile(join(runDir, "attribute-reviews-v1.json"), reviewDocument);
+  await writeJsonFile(join(runDir, "attribute-templates-v1.json"), templates);
+  await writeJsonFile(join(runDir, "manifest.json"), { runDir, categoryCount: categories.length, successCount: reviews.length, errorCount: errors.length, usage: reviewDocument.usage });
+  console.log(`语义审阅完成：成功 ${reviews.length}，失败 ${errors.length}`);
+  console.log(`模板：${stableTemplatePath}`);
+  console.log(`缓存：命中 ${promptCacheHitTokens}，未命中 ${promptCacheMissTokens}`);
+}
+
+if (import.meta.main) main().catch((error) => { console.error(error instanceof Error ? error.message : String(error)); process.exitCode = 1; });

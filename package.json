@@ -10,6 +10,8 @@
     "category-governance": "bun run src/scenarios/category_governance/entry.ts",
     "category-governance:jd-evidence": "bun run src/scenarios/category_governance/jd-evidence-entry.ts",
     "category-governance:jd-mapping": "bun run src/scenarios/category_governance/jd-mapping-entry.ts",
+    "category-governance:consensus": "bun run src/scenarios/category_governance/consensus-entry.ts",
+    "category-governance:semantic-review": "bun run src/scenarios/category_governance/semantic-review-entry.ts",
     "category-governance:excel": "bun run src/scenarios/category_governance/export-excel.ts",
     "typecheck": "bunx tsc --noEmit",
     "test": "bun test",

@@ -106,7 +106,42 @@ bun run category-governance:jd-evidence \
 
 映射文件是 `context/<version>/jd-category-mapping-v1.json`，采证运行的 `manifest.json` 会记录实际使用的 `jdMappingCount`。这样每条证据都能追溯到三横类目、京东类目 ID 和映射理由；后续人工确认 `review` 项时，只需把对应状态改为自动状态并保留新的映射版本。
 
-原始京东证据会完整保存；发送给治理模型前会过滤明显无价值的运营字段（例如国补备案型号、上市时间）、纯占位值，以及样本数达到 4 个时只出现 1 次的偶然字段。过滤只作用于提示词，不修改原始证据文件，便于后续审计和重新定义规则。
+原始京东证据会完整保存；发送给治理模型前只做轻量标注：`weak=1` 表示低频字段，`hint=platform_field` 表示可能是平台运营字段，`hint=placeholder_values` 表示值可能是占位符。代码不直接删除这些字段，由模型结合当前类目语义决定是否采用；需要时可在公共函数选项中显式设置最小观察次数。
+
+## 多批次属性共识
+
+模型每次返回的是候选结果，不直接覆盖正式模板。可以把多个治理运行汇总为属性候选和稳定决策：同一属性按规范化名称合并，统计出现批次、必填意见、公共属性意见和来源运行；默认至少两批且覆盖率达到 60% 才标记为 `confirmed`，覆盖率达到 30% 的保留为 `candidate`，其余进入 `review`。国补备案型号、上市时间等低价值字段会在决策层再次过滤。
+
+```bash
+# 汇总指定的多次运行；不传 --run-id 则读取 output/v1/run-* 全部运行
+bun run category-governance:consensus --run-id=20,22
+
+# 调整确认门槛
+bun run category-governance:consensus \
+  --run-id=20,21,22 \
+  --confirmed-coverage=0.6 \
+  --candidate-coverage=0.3 \
+  --min-confirmed-runs=2
+```
+
+汇总结果写入 `output/<version>/consensus/attribute-candidates-v1.json` 和 `attribute-decisions-v1.json`；`attribute-templates-v1.json` 只保留 `confirmed` 属性，可作为正式模板下游输入。每次汇总另有带时间戳的快照。历史运行中无法通过当前属性校验的结果会跳过并记录到快照 `manifest.json`，不会污染共识结果。
+
+统计共识之后，可让模型做语义终审。终审可以保留、删除、标记复核或新增属性，代码只校验结构并应用结果：
+
+```bash
+# 先生成一个类目的请求，不调用模型，检查输入和缓存前缀
+bun run category-governance:semantic-review --category="手机" --limit=1 --dry-run
+
+# 小范围实际终审
+bun run category-governance:semantic-review \
+  --category="手机" --concurrency=2 --attempts=2 --direct
+
+# 确认小范围结果后再扩大
+bun run category-governance:semantic-review \
+  --limit=50 --concurrency=8 --attempts=2 --direct
+```
+
+终审请求的系统提示词、类目、京东证据和输出协议位于前缀，候选统计放在末尾并稳定序列化，尽量复用 DeepSeek KV 缓存。结果写入 `output/<version>/semantic-review/attribute-templates-v1.json`，同时保存每个类目的原始请求、模型返回、缓存命中 token 和失败原因。
 
 详情接口成功但没有 `categoryAttrList`/`paramGroupAttrList` 的类目会记录到 `context/<version>/jd-attribute-evidence.empty.json`，这属于“空证据”而不是请求失败；`--resume` 会跳过它们，只有需要重试时才加 `--retry-empty`。
 

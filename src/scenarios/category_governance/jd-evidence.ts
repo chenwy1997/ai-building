@@ -37,14 +37,14 @@ export interface JdEvidenceOptions {
 }
 
 const PLACEHOLDER_VALUES = new Set(["无", "未公布", "暂无", "不详", "未知"]);
-const LOW_VALUE_ATTRIBUTE_NAMES = [/^国补备案型号$/u, /国补备案/u, /^上市时间$/u, /^上市日期$/u];
+const PLATFORM_ATTRIBUTE_NAMES = [/^国补备案型号$/u, /国补备案/u, /^上市时间$/u, /^上市日期$/u];
 
-function meaningfulValues(values: string[] | undefined): string[] {
-  return [...new Set((values ?? []).filter((value) => !PLACEHOLDER_VALUES.has(value.trim())))].slice(0, 20);
+function cleanValues(values: string[] | undefined): string[] {
+  return [...new Set(values ?? [])].slice(0, 20);
 }
 
-function isLowValueAttribute(name: string): boolean {
-  return LOW_VALUE_ATTRIBUTE_NAMES.some((pattern) => pattern.test(name.trim()));
+function isPlatformAttribute(name: string): boolean {
+  return PLATFORM_ATTRIBUTE_NAMES.some((pattern) => pattern.test(name.trim()));
 }
 
 function text(value: unknown): string {
@@ -173,12 +173,10 @@ export function buildJdEvidenceText(
       const sampleCount = match.candidate.sampleSkuIds?.length;
       lines.push(`#JD-EVIDENCE|target=${shortCategoryId(target.id)}|match=${match.candidate.path.join(">")}|confidence=${match.score.toFixed(2)}${sampleCount ? `|sample=${sampleCount}` : ""}`);
       const inferredSampleCount = (sampleCount ?? Math.max(...match.candidate.attributes.map((attribute) => attribute.observed ?? 0), 0)) || undefined;
-      const minObserved = options.minObserved ?? (inferredSampleCount && inferredSampleCount >= 4 ? 2 : 1);
+      const minObserved = options.minObserved;
       const attributes = match.candidate.attributes
-        .filter((attribute) => !isLowValueAttribute(attribute.name))
-        .filter((attribute) => attribute.observed === undefined || attribute.observed >= minObserved)
-        .map((attribute) => ({ attribute, values: meaningfulValues(attribute.values) }))
-        .filter(({ attribute, values }) => !attribute.values?.length || values.length > 0)
+        .filter((attribute) => minObserved === undefined || attribute.observed === undefined || attribute.observed >= minObserved)
+        .map((attribute) => ({ attribute, values: cleanValues(attribute.values) }))
         .slice(0, maxAttributes);
       for (const { attribute, values } of attributes) {
         const parts = [`attr=${attribute.name}`];
@@ -189,6 +187,8 @@ export function buildJdEvidenceText(
           parts.push(`seen=${attribute.observed}${inferredSampleCount ? `/${inferredSampleCount}` : ""}`);
           if (attribute.observed <= 1) parts.push("weak=1");
         }
+        if (isPlatformAttribute(attribute.name)) parts.push("hint=platform_field");
+        if (values.length > 0 && values.every((value) => PLACEHOLDER_VALUES.has(value.trim()))) parts.push("hint=placeholder_values");
         if (attribute.groups?.length) parts.push(`groups=${attribute.groups.join(",")}`);
         if (attribute.sources?.length) parts.push(`source=${attribute.sources.join(",")}`);
         lines.push(parts.join("|"));

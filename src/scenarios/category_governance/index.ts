@@ -18,3 +18,5 @@ export * from "./template-codec.ts";
 export * from "./prompt.ts";
 export * from "./types.ts";
 export * from "./storage.ts";
+export * from "./consensus.ts";
+export * from "./semantic-review.ts";
