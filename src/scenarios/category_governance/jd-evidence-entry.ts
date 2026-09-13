@@ -8,6 +8,7 @@ import { collectJdEvidence, mergeJdEvidenceDocuments, type JdCategoryReference, 
 import type { CategoryNode, CategoryTreeDocument } from "./types.ts";
 import { loadJdEvidence } from "./jd-evidence.ts";
 import { shortCategoryId } from "./util.ts";
+import { autoJdCategoryReferences, type JdCategoryMappingDocument } from "./jd-mapping.ts";
 
 const DEFAULT_JD_PROJECT = "/Users/sanheng/Project/sanheng/ai-core";
 const MAX_CONCURRENCY = 8;
@@ -37,6 +38,7 @@ const HELP = `
   --force                 不跳过已有证据，重新采样指定目标
   --retry-empty           重新采样已确认没有结构化京东属性的类目
   --indexed-only          只采样能唯一映射京东三级类目的目标，优先保证证据精度
+  --jd-mapping=...        三横到京东的映射文件，默认 context/<version>/jd-category-mapping-v1.json
   --jd-project=...        ai-core 项目目录，默认读取 /Users/sanheng/Project/sanheng/ai-core
   --out=...               输出证据文件，默认 context/<version>/jd-attribute-evidence.json
   --direct                当前进程绕过 V2rayN 代理直连京东
@@ -118,7 +120,7 @@ async function loadGoodsApi(projectRoot: string): Promise<JdGoodsApi> {
   return importGoodsApi(join(projectRoot, "src/lib/jd-vop/goods/index.ts"));
 }
 
-async function loadJdCategoryReferences(projectRoot: string): Promise<JdCategoryReference[]> {
+export async function loadJdCategoryReferences(projectRoot: string): Promise<JdCategoryReference[]> {
   await loadEnvFile(join(projectRoot, ".env.local"));
   await loadEnvFile(join(projectRoot, ".env"));
   const url = process.env.DATABASE_URL ?? process.env.JD_DATABASE_URL;
@@ -207,7 +209,16 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const chunkSize = Math.min(500, asInt(flags["chunk-size"], 100));
   const goodsApi = await loadGoodsApi(jdProject);
   const jdCategories = await loadJdCategoryReferences(jdProject);
-  console.log(`京东类目索引：${jdCategories.length} 个可用三级类目`);
+  const mappingPath = resolvePath(workspace, flags["jd-mapping"], join("context", version, "jd-category-mapping-v1.json"));
+  let mappedCategories: JdCategoryReference[] = [];
+  try {
+    const mapping = await readJsonFile<JdCategoryMappingDocument>(mappingPath);
+    mappedCategories = autoJdCategoryReferences(mapping);
+  } catch {
+    // 映射文件是可选增强；没有生成时继续使用京东原生名称索引。
+  }
+  const searchCategories = [...jdCategories, ...mappedCategories];
+  console.log(`京东类目索引：${jdCategories.length} 个可用三级类目，映射增强：${mappedCategories.length} 个`);
   let merged = existing;
   const skippedCount = allTargets.length - targets.length;
   let processedCount = 0;
@@ -252,6 +263,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       targetCount: allTargets.length, processedCount: skippedCount + processedCount,
       remainingCount: allTargets.length - skippedCount - processedCount,
       jdCategoryReferenceCount: jdCategories.length,
+      jdMappingCount: mappedCategories.length,
       indexedOnly: boolFlag(flags["indexed-only"]),
       matchedTargetCount, unmatchedTargetCount: unmatchedTargetIds.length,
       emptyEvidenceCount: emptyEvidenceTargetIds.size,
@@ -267,7 +279,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       searchPageSize: Math.min(50, asInt(flags["search-page-size"], 20)),
       concurrency: Math.min(MAX_CONCURRENCY, asInt(flags.concurrency, 4)),
       attempts: Math.min(5, asInt(flags.attempts, 2)),
-      jdCategories,
+      jdCategories: searchCategories,
       onlyUseJdCategories: boolFlag(flags["indexed-only"]),
       onProgress: (progress) => {
         if (progress.completed === progress.total || progress.completed % 5 === 0) {

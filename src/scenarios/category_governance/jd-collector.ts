@@ -32,6 +32,7 @@ export interface JdCategoryReference {
   id: string;
   name: string;
   path: string[];
+  targetIds?: string[];
 }
 
 export interface JdCollectorOptions {
@@ -123,6 +124,8 @@ function categoryPath(item: JdSearchItem): string[] {
 
 function resolveJdCategory(target: CategoryNode, references: JdCategoryReference[]): JdCategoryReference | undefined {
   const targetName = normalize(target.name);
+  const direct = references.filter((reference) => reference.targetIds?.includes(target.id) || reference.targetIds?.includes(shortCategoryId(target.id)));
+  if (direct.length === 1) return direct[0];
   const matches = references.filter((reference) => normalize(reference.name) === targetName);
   if (matches.length === 0) return undefined;
   if (matches.length === 1) return matches[0];

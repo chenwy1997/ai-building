@@ -81,9 +81,34 @@ bun run category-governance:jd-evidence --all --indexed-only --skus-per-category
 
 全量采样按 `--chunk-size` 分块，每完成一块就原子写入稳定文件和快照；进程中断后重新执行同样的命令并保留 `--resume`，已有属性证据的类目会跳过。`--force` 可强制重采样。当前采集器对京东叶子类目采用保守匹配：要求叶子相同或与三横类目有明确包含关系并且 SKU 标题命中，明显的配件、保护壳、支架等不会仅因标题包含目标词而混入。
 
+在扩大采证范围前，先生成三横到京东三级类目的离线映射。映射不会调用商品接口，结果会同时保存稳定文件和带时间戳的快照，保留每个类目的候选、分数和原因：
+
+```bash
+bun run category-governance:jd-mapping
+```
+
+映射状态分为 `auto_exact`、`auto_exact_path`、`auto_parent`、`review` 和 `unmatched`。只有前三种自动状态会进入采证；`review` 和 `unmatched` 不会被关键词强行召回。生成映射后，可以先跑一小批验证自动映射质量：
+
+```bash
+bun run category-governance:jd-evidence \
+  --sample-per-group=2 --skus-per-category=8 --search-page-size=20 \
+  --concurrency=4 --attempts=2 --chunk-size=50 --indexed-only \
+  --resume --direct
+```
+
+确认日志中的“映射增强”类目和证据质量后，再继续全量断点采证：
+
+```bash
+bun run category-governance:jd-evidence \
+  --all --indexed-only --skus-per-category=8 --search-page-size=20 \
+  --concurrency=4 --attempts=2 --chunk-size=100 --resume --direct
+```
+
+映射文件是 `context/<version>/jd-category-mapping-v1.json`，采证运行的 `manifest.json` 会记录实际使用的 `jdMappingCount`。这样每条证据都能追溯到三横类目、京东类目 ID 和映射理由；后续人工确认 `review` 项时，只需把对应状态改为自动状态并保留新的映射版本。
+
 详情接口成功但没有 `categoryAttrList`/`paramGroupAttrList` 的类目会记录到 `context/<version>/jd-attribute-evidence.empty.json`，这属于“空证据”而不是请求失败；`--resume` 会跳过它们，只有需要重试时才加 `--retry-empty`。
 
-`--indexed-only` 只采集能唯一映射到京东启用三级类目的三横末级类目，适合作为第一阶段高精度证据；本地当前 11,796 个三横末级类目中，约 1,492 个有唯一同名京东叶子。未匹配类目不是接口失败，而是两套类目体系没有直接同名映射，后续应单独做同义词/人工映射，再开启关键词补召回，避免用低置信度证据污染模板。
+`--indexed-only` 只采集能通过京东三级 ID 映射的三横末级类目，适合作为第一阶段高精度证据；未生成映射文件时，当前原生同名唯一映射约 1,492 个；生成映射文件后，自动映射会扩展到同名路径消歧和有父路径证据的包含关系。未匹配类目不是接口失败，而是两套类目体系没有可靠映射，后续应单独做同义词/人工映射，再开启关键词补召回，避免用低置信度证据污染模板。
 
 导入会写入独立库 `ai-building-category_governance` 的 `category_nodes_v1`；导入、运行、结果分别写入 `category_imports_v1`、`governance_runs_v1`、`attribute_templates_v1`。新的不可变版本可以使用 `--version=v2`，并通过新的迁移增加对应 `_v2` 表，不覆盖已完成的 `_v1` 记录。
 

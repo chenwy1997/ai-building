@@ -5,6 +5,7 @@ import { compactTemplates, parseGovernanceResponse } from "../src/scenarios/cate
 import { buildGovernanceUserPrompt } from "../src/scenarios/category_governance/prompt.ts";
 import { buildJdEvidenceText, normalizeJdEvidence } from "../src/scenarios/category_governance/jd-evidence.ts";
 import { collectJdEvidence } from "../src/scenarios/category_governance/jd-collector.ts";
+import { buildJdCategoryMapping, autoJdCategoryReferences } from "../src/scenarios/category_governance/jd-mapping.ts";
 import type { GovernanceResult } from "../src/scenarios/category_governance/types.ts";
 
 describe("标准类目治理公共函数", () => {
@@ -130,5 +131,23 @@ describe("标准类目治理公共函数", () => {
     expect(result.document.categories[0]?.targetIds).toContain(target.id);
     expect(result.document.categories[0]?.attributes.map((item) => item.name)).toEqual(["克重", "纸张类型"]);
     expect(result.document.categories[0]?.attributes[0]?.observed).toBe(2);
+  });
+
+  test("京东类目映射只自动接受有父路径证据的包含关系", () => {
+    const targets = normalizeCategories({ items: [
+      { id: "root", name: "标准类目", fatherId: null },
+      { id: "tools", name: "五金工具", fatherId: "root" },
+      { id: "drill", name: "手电钻", fatherId: "tools" },
+      { id: "phone", name: "手机壳", fatherId: "root" },
+    ] }, "v1").nodes.filter((node) => node.isLeaf);
+    const mapping = buildJdCategoryMapping(targets, [
+      { id: "101", name: "电钻", path: ["家装建材", "五金工具", "电钻"] },
+      { id: "102", name: "手机", path: ["手机通讯", "手机"] },
+    ]);
+    const drill = mapping.mappings.find((item) => item.targetName === "手电钻");
+    const phoneCase = mapping.mappings.find((item) => item.targetName === "手机壳");
+    expect(drill?.status).toBe("auto_parent");
+    expect(autoJdCategoryReferences(mapping).find((item) => item.targetIds?.includes(drill!.targetId))?.id).toBe("101");
+    expect(phoneCase?.status).toBe("review");
   });
 });
