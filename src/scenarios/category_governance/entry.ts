@@ -41,6 +41,8 @@ const HELP = `
   --version=v1           当前数据库版本
   --provider=deepseek    AI 服务商
   --model=flash          AI 模型别名
+  --direct               当前进程直连 AI API；等同于为 api.deepseek.com 设置 NO_PROXY
+  --no-proxy             --direct 的别名
   --dry-run              只生成请求文件，不调用模型
   --workspace=...        覆盖类目治理 workspace
 `.trim();
@@ -53,6 +55,15 @@ function concurrencyValue(value: string | undefined): number {
     throw new Error(`并发数不合法：${value}`);
   }
   return Math.min(MAX_CONCURRENCY, Math.floor(parsed));
+}
+
+function addNoProxy(hostname: string): void {
+  for (const key of ["NO_PROXY", "no_proxy"]) {
+    const current = process.env[key] ?? "";
+    const values = current.split(",").map((value) => value.trim()).filter(Boolean);
+    if (!values.some((value) => value === hostname || value === `.${hostname}`)) values.push(hostname);
+    process.env[key] = values.join(",");
+  }
 }
 
 async function ensureDatabases(config: ReturnType<typeof loadAppConfig>): Promise<void> {
@@ -92,8 +103,14 @@ export async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const provider = flags.provider ?? "deepseek";
   const model = flags.model ?? "flash";
   const dryRun = boolFlag(flags["dry-run"]);
+  const direct = boolFlag(flags.direct) || boolFlag(flags["no-proxy"]);
   const workspace = flags.workspace ?? workspaceRoot();
   const categorySelector = flags.category ?? flags["category-id"];
+
+  if (direct && provider === "deepseek") {
+    addNoProxy("api.deepseek.com");
+    console.log("已启用 AI 直连：api.deepseek.com（仅当前命令绕过代理）");
+  }
 
   const databases = new DatabaseHub(config.postgresUrl);
   try {
