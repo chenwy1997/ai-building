@@ -32,4 +32,23 @@ describe("标准类目治理公共函数", () => {
     expect(restored[0]?.properties[0]?.required).toBe(true);
     expect(restored[0]?.properties[0]?.options).toEqual(["A4"]);
   });
+
+  test("兼容模型把属性值返回成数字或非标准 scope 的情况", () => {
+    const response = {
+      items: [{
+        category: { id: "a4", path: ["办公", "纸品", "A4复印纸"], name: "A4复印纸" },
+        shared: [{ key: "成型技术", name: "成型技术", type: "text", required: false, scope: "common", example: 80 }],
+        properties: [{ key: "size", name: "纸张尺寸", type: "string", required: "true", options: ["A4", 16] }],
+        notes: "模型补充说明",
+      }],
+    };
+    const restored = parseGovernanceResponse(JSON.stringify(response), [document.nodes[2]!]);
+    expect(restored[0]?.shared[0]?.key).toMatch(/^attr_[a-f0-9]{10}$/);
+    expect(restored[0]?.shared[0]?.example).toBe("80");
+    expect(restored[0]?.shared[0]?.scope).toBe("shared");
+    expect(restored[0]?.properties[0]?.type).toBe("text");
+    expect(restored[0]?.properties[0]?.required).toBe(true);
+    expect(restored[0]?.properties[0]?.options).toEqual(["A4", "16"]);
+    expect(restored[0]?.notes).toEqual(["模型补充说明"]);
+  });
 });

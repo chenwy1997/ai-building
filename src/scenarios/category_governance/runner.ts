@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { readdir } from "node:fs/promises";
 import type { SQL } from "bun";
 import type { AiService } from "../../ai/service.ts";
-import { readJsonFile, readTextFile, writeJsonFile } from "../../facilities/json/files.ts";
+import { readJsonFile, readTextFile, writeJsonFile, writeTextFile } from "../../facilities/json/files.ts";
 import { buildGovernanceUserPrompt, CATEGORY_GOVERNANCE_SYSTEM_PROMPT } from "./prompt.ts";
 import { compactTemplates, parseGovernanceResponse } from "./template-codec.ts";
 import { mergeGovernanceResults } from "./merge.ts";
@@ -137,10 +137,11 @@ export async function runGovernance(options: {
   console.log(`输入上下文：${inputSource.contextPath}`);
   console.log(`输入来源：${inputSource.path ?? "未记录"}，import_id=${inputSource.importId ?? "未记录"}，SHA-256=${inputSource.sha256 ?? "未记录"}`);
   const batches = groupBatches(document, options.groupDepth, options.batchSize, options.categorySelector);
-  const outputRootDir = outputPath(rootDir, options.version, `level-${options.groupDepth}`);
+  // 输出按运行批次归档；groupDepth 只属于输入分片配置，不再成为结果目录层级。
+  const outputRootDir = outputPath(rootDir, options.version);
   const runRows = await options.database<{ id: number }[]>`
     INSERT INTO governance_runs_v1 (version, provider, model, group_depth, status, request_count, output_dir)
-    VALUES (${options.version}, ${options.provider}, ${options.model}, ${options.groupDepth}, 'running', ${batches.length * options.attempts}, ${outputRootDir})
+    VALUES (${options.version}, ${options.provider}, ${options.model}, ${options.groupDepth}, 'running', ${batches.length}, ${outputRootDir})
     RETURNING id
   `;
   const runId = runRows[0]?.id;
@@ -151,87 +152,123 @@ export async function runGovernance(options: {
   `;
   const allResults: GovernanceResult[] = [];
   const errors: Array<{ key: string; attempt: number; error: string }> = [];
-  const tasks = batches.flatMap((batch) => Array.from({ length: options.attempts }, (_, index) => ({ batch, attempt: index + 1 })));
-  let completedTasks = 0;
+  const attemptErrors: Array<{ key: string; attempt: number; error: string }> = [];
+  let requestCount = 0;
+  let completedBatches = 0;
   const markProgress = (): void => {
-    completedTasks += 1;
+    completedBatches += 1;
     options.onProgress?.({
-      completed: completedTasks,
-      total: tasks.length,
+      completed: completedBatches,
+      total: batches.length,
       success: allResults.length,
       errors: errors.length,
     });
   };
   let cursor = 0;
   const worker = async (): Promise<void> => {
-    while (cursor < tasks.length) {
-      const task = tasks[cursor++];
-      if (!task) return;
-      const requestDir = join(outputDir, task.batch.key);
-      const requestPath = join(requestDir, `attempt-${String(task.attempt).padStart(3, "0")}.request.json`);
-      const prompt = buildGovernanceUserPrompt({ version: document.version, categoryText: task.batch.text, targetCategories: task.batch.nodes });
-      await writeJsonFile(requestPath, {
-        system: CATEGORY_GOVERNANCE_SYSTEM_PROMPT,
-        user: prompt,
-        categoryIds: task.batch.nodes.map((node) => node.id),
-        source: inputSource,
-      });
-      if (options.dryRun) {
-        markProgress();
-        continue;
-      }
-      try {
-        const response = await options.ai.chat(options.provider, options.model, {
-          messages: [
-            { role: "system", content: CATEGORY_GOVERNANCE_SYSTEM_PROMPT },
-            { role: "user", content: prompt },
-          ],
-          max_tokens: 32_000,
-          response_format: { type: "json_object" },
-          thinking: { type: "disabled" },
+    while (cursor < batches.length) {
+      const batch = batches[cursor++];
+      if (!batch) return;
+      const requestDir = join(outputDir, batch.key);
+      let lastError = "";
+      let succeeded = false;
+      for (let attempt = 1; attempt <= Math.max(1, options.attempts); attempt += 1) {
+        let rawText = "";
+        const requestPath = join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.request.json`);
+        const prompt = buildGovernanceUserPrompt({
+          version: document.version,
+          categoryText: batch.text,
+          targetCategories: batch.nodes,
+          repairError: lastError || undefined,
         });
-        const rawText = parseContent(response.choices[0]?.message.content);
-        const results = parseGovernanceResponse(rawText, task.batch.nodes);
-        const compact = compactTemplates(results);
-        await writeJsonFile(join(requestDir, `attempt-${String(task.attempt).padStart(3, "0")}.json`), {
-          ...compact,
-          meta: {
-            runId,
-            batch: task.batch.key,
-            attempt: task.attempt,
-            rawBytes: rawText.length,
-            source: inputSource,
-          },
+        await writeJsonFile(requestPath, {
+          system: CATEGORY_GOVERNANCE_SYSTEM_PROMPT,
+          user: prompt,
+          categoryIds: batch.nodes.map((node) => node.id),
+          source: inputSource,
+          attempt,
         });
-        for (const result of results) {
-          allResults.push(result);
-          await options.database`
-            INSERT INTO attribute_templates_v1 (run_id, version, category_id, category_path_json, attempt, template_json, raw_response, validation_status)
-            VALUES (${runId}, ${document.version}, ${result.category.id}, ${result.category.path}::jsonb, ${task.attempt}, ${result}::jsonb, ${rawText}, 'valid')
-          `;
+        if (options.dryRun) {
+          requestCount += 1;
+          succeeded = true;
+          markProgress();
+          break;
         }
-        markProgress();
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        errors.push({ key: task.batch.key, attempt: task.attempt, error: message });
-        await writeJsonFile(join(requestDir, `attempt-${String(task.attempt).padStart(3, "0")}.error.json`), { error: message });
+        try {
+          requestCount += 1;
+          const response = await options.ai.chat(options.provider, options.model, {
+            messages: [
+              { role: "system", content: CATEGORY_GOVERNANCE_SYSTEM_PROMPT },
+              { role: "user", content: prompt },
+            ],
+            temperature: 0.2,
+            max_tokens: 32_000,
+            response_format: { type: "json_object" },
+            thinking: { type: "disabled" },
+          });
+          rawText = parseContent(response.choices[0]?.message.content);
+          const results = parseGovernanceResponse(rawText, batch.nodes);
+          const compact = compactTemplates(results);
+          await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.json`), {
+            ...compact,
+            meta: {
+              runId,
+              batch: batch.key,
+              attempt,
+              rawBytes: rawText.length,
+              source: inputSource,
+            },
+          });
+          for (const result of results) {
+            allResults.push(result);
+            await options.database`
+              INSERT INTO attribute_templates_v1 (run_id, version, category_id, category_path_json, attempt, template_json, raw_response, validation_status)
+              VALUES (${runId}, ${document.version}, ${result.category.id}, ${result.category.path}::jsonb, ${attempt}, ${result}::jsonb, ${rawText}, 'valid')
+            `;
+          }
+          succeeded = true;
+          markProgress();
+          break;
+        } catch (error) {
+          lastError = error instanceof Error ? error.message : String(error);
+          attemptErrors.push({ key: batch.key, attempt, error: lastError });
+          await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.error.json`), {
+            error: lastError,
+            runId,
+            batch: batch.key,
+            attempt,
+            source: inputSource,
+          });
+          if (error instanceof Error && error.message.startsWith("模型请求失败")) {
+            continue;
+          }
+          // 将模型原文保存下来，便于分析 JSON 或字段校验失败的真实原因。
+          try {
+            if (rawText) await writeTextFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.raw.txt`), rawText);
+          } catch {
+            // 诊断文件写入失败不影响重试流程。
+          }
+        }
+      }
+      if (!succeeded) {
+        errors.push({ key: batch.key, attempt: Math.max(1, options.attempts), error: lastError || "未知错误" });
         markProgress();
       }
     }
   };
-  await Promise.all(Array.from({ length: Math.max(1, options.concurrency) }, () => worker()));
+  await Promise.all(Array.from({ length: Math.min(Math.max(1, options.concurrency), Math.max(1, batches.length)) }, () => worker()));
   const status = options.dryRun ? "dry_run" : errors.length === 0 ? "completed" : allResults.length > 0 ? "partial" : "failed";
   await options.database`
-    UPDATE governance_runs_v1 SET status=${status}, success_count=${allResults.length}, error_count=${errors.length}, finished_at=NOW() WHERE id=${runId}
+    UPDATE governance_runs_v1 SET status=${status}, request_count=${requestCount}, success_count=${allResults.length}, error_count=${errors.length}, finished_at=NOW() WHERE id=${runId}
   `;
   await writeJsonFile(join(outputDir, "manifest.json"), {
     runId, version: document.version, provider: options.provider, model: options.model,
     groupDepth: options.groupDepth, batchSize: options.batchSize, attempts: options.attempts,
     categorySelector: options.categorySelector ?? null,
     source: inputSource,
-    requestCount: tasks.length, successCount: allResults.length, errorCount: errors.length, errors,
+    requestCount, successCount: allResults.length, errorCount: errors.length, errors, attemptErrors,
   });
-  return { requestCount: tasks.length, successCount: allResults.length, errorCount: errors.length, outputDir };
+  return { requestCount, successCount: allResults.length, errorCount: errors.length, outputDir };
 }
 
 async function jsonFilesUnder(directory: string): Promise<string[]> {
@@ -259,18 +296,40 @@ export async function mergeGovernanceOutput(options: {
   const rootDir = options.workspace ?? workspaceRoot();
   const document = await readContextDocument(rootDir, options.version);
   const byId = categoryById(document);
-  const outputRootDir = outputPath(rootDir, options.version, `level-${options.groupDepth}`);
-  let outputDir = options.runId ? join(outputRootDir, `run-${options.runId}`) : outputRootDir;
+  const outputRootDir = outputPath(rootDir, options.version);
+  const directRun = (runId: string): string => join(outputRootDir, `run-${runId}`);
+  const legacyRun = (runId: string): string => join(outputRootDir, `level-${options.groupDepth}`, `run-${runId}`);
+  const exists = async (path: string): Promise<boolean> => {
+    try {
+      await readdir(path);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  let outputDir = options.runId ? directRun(options.runId) : outputRootDir;
+  if (options.runId && !(await exists(outputDir))) outputDir = legacyRun(options.runId);
   if (!options.runId) {
     try {
-      const entries = await readdir(outputRootDir, { withFileTypes: true });
-      const runDirs = entries
+      const directEntries = await readdir(outputRootDir, { withFileTypes: true });
+      const directRuns = directEntries
         .filter((entry) => entry.isDirectory() && /^run-\d+$/u.test(entry.name))
         .map((entry) => entry.name)
         .sort((a, b) => Number(b.slice(4)) - Number(a.slice(4)));
-      if (runDirs[0]) outputDir = join(outputRootDir, runDirs[0]);
+      if (directRuns[0]) outputDir = join(outputRootDir, directRuns[0]);
+      else {
+        const legacyRuns: Array<{ name: string; path: string }> = [];
+        for (const entry of directEntries.filter((item) => item.isDirectory() && /^level-\d+$/u.test(item.name))) {
+          const levelEntries = await readdir(join(outputRootDir, entry.name), { withFileTypes: true });
+          legacyRuns.push(...levelEntries
+            .filter((item) => item.isDirectory() && /^run-\d+$/u.test(item.name))
+            .map((item) => ({ name: item.name, path: join(outputRootDir, entry.name, item.name) })));
+        }
+        const latestLegacy = legacyRuns.sort((a, b) => Number(b.name.slice(4)) - Number(a.name.slice(4)))[0];
+        if (latestLegacy) outputDir = latestLegacy.path;
+      }
     } catch {
-      // 没有按 run-id 分目录时兼容旧输出目录。
+      // 没有可用运行目录时保持版本根目录，兼容最早的旧输出。
     }
   }
   const files = await jsonFilesUnder(outputDir);

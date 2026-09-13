@@ -33,7 +33,7 @@ const HELP = `
 参数：
   --concurrency=64       并发请求数；传 max 使用 256，传 auto 使用 64，最高允许 256
   --batch-size=12        每次请求包含的末级类目数
-  --attempts=1           每个批次重复治理次数
+  --attempts=1           每个批次最多尝试次数；失败会带着校验原因重试
   --category=...         可选：类目 ID、短 ID、名称或完整路径；不传则全量
   --category-id=...      --category 的别名
   --input=...            可选：先导入新类目文件，再开始治理
