@@ -123,7 +123,7 @@ async function runScenario(args: string[]): Promise<void> {
 async function setAiKey(providerCode: string, envName?: string): Promise<void> {
   const config = loadAppConfig();
   if (!config.masterKey) {
-    throw new Error("请先在 .env 中设置 AI_BUILDING_MASTER_KEY");
+    throw new Error("缺少 AI_BUILDING_MASTER_KEY，请先在 .env 中设置 32 字节 Base64 主密钥（可用 openssl rand -base64 32 生成）");
   }
 
   const keyEnvName = envName ?? `${providerCode.toUpperCase()}_API_KEY`;
