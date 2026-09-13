@@ -143,6 +143,8 @@ bun run category-governance:semantic-review \
 
 终审请求的系统提示词、类目、京东证据和输出协议位于前缀，候选统计放在末尾并稳定序列化，尽量复用 DeepSeek KV 缓存。第一版类目树只读，终审只能改变属性。结果写入 `output/<version>/semantic-review/attribute-templates-v1.json`，同时保存每个类目的原始请求、模型返回、缓存命中 token 和失败原因。
 
+语义终审支持增量运行：稳定的 `attribute-reviews-v1.json` 会按类目合并，重复类目使用最新一次成功结果，未参与本批次的类目继续保留；每次运行目录仍保存本批次独立快照。因此可以先跑小样本、修正提示词，再逐批扩大范围，不会因为单批覆盖而丢失历史终审结果。
+
 详情接口成功但没有 `categoryAttrList`/`paramGroupAttrList` 的类目会记录到 `context/<version>/jd-attribute-evidence.empty.json`，这属于“空证据”而不是请求失败；`--resume` 会跳过它们，只有需要重试时才加 `--retry-empty`。
 
 `--indexed-only` 只采集能通过京东三级 ID 映射的三横末级类目，适合作为第一阶段高精度证据；未生成映射文件时，当前原生同名唯一映射约 1,492 个；生成映射文件后，自动映射会扩展到同名路径消歧和有父路径证据的包含关系。未匹配类目不是接口失败，而是两套类目体系没有可靠映射，后续应单独做同义词/人工映射，再开启关键词补召回，避免用低置信度证据污染模板。
