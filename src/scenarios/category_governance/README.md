@@ -141,7 +141,7 @@ bun run category-governance:semantic-review \
   --limit=50 --concurrency=8 --attempts=2 --direct
 ```
 
-终审请求的系统提示词、类目、京东证据和输出协议位于前缀，候选统计放在末尾并稳定序列化，尽量复用 DeepSeek KV 缓存。结果写入 `output/<version>/semantic-review/attribute-templates-v1.json`，同时保存每个类目的原始请求、模型返回、缓存命中 token 和失败原因。
+终审请求的系统提示词、类目、京东证据和输出协议位于前缀，候选统计放在末尾并稳定序列化，尽量复用 DeepSeek KV 缓存。第一版类目树只读，终审只能改变属性。结果写入 `output/<version>/semantic-review/attribute-templates-v1.json`，同时保存每个类目的原始请求、模型返回、缓存命中 token 和失败原因。
 
 详情接口成功但没有 `categoryAttrList`/`paramGroupAttrList` 的类目会记录到 `context/<version>/jd-attribute-evidence.empty.json`，这属于“空证据”而不是请求失败；`--resume` 会跳过它们，只有需要重试时才加 `--retry-empty`。
 

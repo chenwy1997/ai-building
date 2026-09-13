@@ -109,10 +109,16 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
           try {
             const response = await ai!.chat(provider, model, {
               messages: [{ role: "system", content: SEMANTIC_REVIEW_SYSTEM_PROMPT }, { role: "user", content: prompt + (lastError ? `\n上次输出校验失败：${lastError}` : "") }],
-              temperature: 0.1, max_tokens: 8_000, response_format: { type: "json_object" },
+              // DeepSeek 主治理入口已验证不带 response_format；保持同一请求形态，避免 V4flash 兼容差异。
+              temperature: 0.1, max_tokens: 8_000,
             });
-            const content = response.choices[0]?.message.content;
-            if (!content) throw new Error("模型返回空 content");
+            await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.response.json`), response);
+            const message = response.choices[0]?.message;
+            const content = typeof message?.content === "string" ? message.content.trim() : "";
+            if (!content) {
+              const fields = message && typeof message === "object" ? Object.keys(message).join(",") : "none";
+              throw new Error(`模型返回空 content（choices=${response.choices.length}，message字段=${fields || "none"}）`);
+            }
             const review = parseSemanticReviewResponse(content, category);
             reviews.push(review);
             await writeTextFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.raw.txt`), content);

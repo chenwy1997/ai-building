@@ -31,6 +31,7 @@ export interface SemanticTemplateDocument {
 export const SEMANTIC_REVIEW_SYSTEM_PROMPT = `你是类目属性治理的最终语义审阅专家。输入是多个批次模型生成的属性候选、候选出现频次和京东商品证据摘要。你要结合三横类目完整路径、行业常识和证据语义，决定哪些属性进入模板。
 
 原则：
+0. 第一版只治理属性。类目名称、类目 ID、类目层级和类目树是只读输入，禁止新增、删除、合并、改名或调整类目。
 1. 统计频次只是参考，不是决定条件。可以保留低频但对当前类目有明确识别、采购或合规价值的属性，也可以删除高频但属于平台运营、促销或偶然字段的属性。
 2. 识别父类公共属性与末级类目属性，消除同义重复，统一 key、类型、单位和枚举。必要时可新增候选属性，但不能编造固定枚举。
 3. required 只有在商品资料通常稳定具备且对识别、采购或合规确实关键时才设为 true；品牌、型号、颜色默认可选。
@@ -65,7 +66,7 @@ ${input.evidenceText?.trim() ?? "（暂无京东证据）"}
 #CANDIDATES
 ${JSON.stringify({ runCount: input.category.runCount, candidates })}
 
-返回一个 JSON 对象，category_id 必须使用类目完整 ID；decisions 必须覆盖上面每个候选 key。你可以增加在当前类目治理中确有必要但候选缺失的属性。`;
+返回一个 JSON 对象，category_id 必须使用输入类目的完整 ID；不要返回或修改任何类目字段。decisions 必须覆盖上面每个候选 key。你可以增加当前类目确有必要但候选缺失的属性。`;
 }
 
 function cleanProperty(value: unknown): AttributeProperty {
