@@ -102,10 +102,13 @@ describe("标准类目治理公共函数", () => {
 
   test("京东采样器聚合类目属性和规格参数，并保留目标映射", async () => {
     const target = document.nodes[2]!;
+    let searchRequest: Record<string, unknown> | undefined;
     const result = await collectJdEvidence({
       targetCategories: [target], skusPerCategory: 2, searchPageSize: 2, concurrency: 1, attempts: 1,
+      jdCategories: [{ id: "123", name: target.name, path: ["办公", "纸品", target.name] }],
       goodsApi: {
-        async searchSku() {
+        async searchSku(request) {
+          searchRequest = request;
           return { skuHitResultPaging: { items: [
             { skuId: 1001, skuName: "A4复印纸 70g", categoryId3: 999, categoryName1: "办公", categoryName2: "纸品", categoryName3: "复印纸" },
             { skuId: 1002, skuName: "A4复印纸 80g", categoryId3: 999, categoryName1: "办公", categoryName2: "纸品", categoryName3: "复印纸" },
@@ -121,6 +124,8 @@ describe("标准类目治理公共函数", () => {
         },
       },
     });
+    expect(searchRequest?.categoryId3).toBe(123);
+    expect(searchRequest?.keyword).toBe("");
     expect(result.stats.sampledSkuCount).toBe(2);
     expect(result.document.categories[0]?.targetIds).toContain(target.id);
     expect(result.document.categories[0]?.attributes.map((item) => item.name)).toEqual(["克重", "纸张类型"]);

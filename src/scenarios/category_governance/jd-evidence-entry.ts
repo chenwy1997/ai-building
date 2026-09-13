@@ -1,9 +1,10 @@
 import { isAbsolute, join } from "node:path";
-import { readFile } from "node:fs/promises";
+import { readFile, rename } from "node:fs/promises";
+import { SQL } from "bun";
 import { readJsonFile, writeJsonFile } from "../../facilities/json/files.ts";
 import { parseFlags, asInt, boolFlag } from "./util.ts";
 import { readContextDocument, workspaceRoot } from "./storage.ts";
-import { collectJdEvidence, mergeJdEvidenceDocuments, type JdGoodsApi } from "./jd-collector.ts";
+import { collectJdEvidence, mergeJdEvidenceDocuments, type JdCategoryReference, type JdGoodsApi } from "./jd-collector.ts";
 import type { CategoryNode, CategoryTreeDocument } from "./types.ts";
 import { loadJdEvidence } from "./jd-evidence.ts";
 import { shortCategoryId } from "./util.ts";
@@ -25,11 +26,16 @@ const HELP = `
 参数：
   --category=...          类目 ID、短 ID、名称或完整路径；可重复采样单个类目
   --limit=10              未指定 --category/--all 时采样前 N 个末级类目
+  --sample-per-group=2    按三横一级类目分层抽样，每组取 N 个末级类目
   --all                   明确允许采样全部末级类目（请求量较大）
   --skus-per-category=8   每个三横类目最多采样的 SKU 数
   --search-page-size=20   每个类目的京东搜索候选数
   --concurrency=4         京东采样并发；建议 2～4，最高 8
   --attempts=2            单个京东请求失败重试次数
+  --chunk-size=100        每完成多少个类目就落盘一次，便于中断后续跑
+  --resume                跳过稳定证据中已经有属性的类目
+  --force                 不跳过已有证据，重新采样指定目标
+  --indexed-only          只采样能唯一映射京东三级类目的目标，优先保证证据精度
   --jd-project=...        ai-core 项目目录，默认读取 /Users/sanheng/Project/sanheng/ai-core
   --out=...               输出证据文件，默认 context/<version>/jd-attribute-evidence.json
   --direct                当前进程绕过 V2rayN 代理直连京东
@@ -83,6 +89,15 @@ function selectTargets(document: CategoryTreeDocument, flags: Record<string, str
     return selected;
   }
   if (boolFlag(flags.all)) return leaves;
+  const samplePerGroup = asInt(flags["sample-per-group"], 0, 0);
+  if (samplePerGroup > 0) {
+    const groups = new Map<string, CategoryNode[]>();
+    for (const leaf of leaves) {
+      const group = leaf.pathNames[1] ?? leaf.pathNames[0] ?? "";
+      (groups.get(group) ?? groups.set(group, []).get(group)!).push(leaf);
+    }
+    return [...groups.keys()].sort().flatMap((group) => groups.get(group)!.slice(0, samplePerGroup));
+  }
   const limit = asInt(flags.limit, 10);
   return leaves.slice(0, limit);
 }
@@ -102,6 +117,27 @@ async function loadGoodsApi(projectRoot: string): Promise<JdGoodsApi> {
   return importGoodsApi(join(projectRoot, "src/lib/jd-vop/goods/index.ts"));
 }
 
+async function loadJdCategoryReferences(projectRoot: string): Promise<JdCategoryReference[]> {
+  await loadEnvFile(join(projectRoot, ".env.local"));
+  await loadEnvFile(join(projectRoot, ".env"));
+  const url = process.env.DATABASE_URL ?? process.env.JD_DATABASE_URL;
+  if (!url) return [];
+  const database = new SQL(url, { max: 1, connectionTimeout: 10 });
+  try {
+    const rows = await database<Array<{ categoryId: string; name: string; fullPath: string }>>`
+      SELECT "categoryId", "name", "fullPath"
+      FROM "jdvop_categories"
+      WHERE "enabled" = true AND "level" = 2
+    `;
+    return rows.map((row) => ({ id: String(row.categoryId), name: String(row.name), path: String(row.fullPath).split("/").map((part) => part.trim()).filter(Boolean) }));
+  } catch (error) {
+    console.warn(`京东类目索引不可用，将回退关键词搜索：${error instanceof Error ? error.message : String(error)}`);
+    return [];
+  } finally {
+    await database.close();
+  }
+}
+
 async function importGoodsApi(path: string): Promise<JdGoodsApi> {
   const module = await import(path) as {
     searchSku: JdGoodsApi["searchSku"];
@@ -111,6 +147,12 @@ async function importGoodsApi(path: string): Promise<JdGoodsApi> {
     searchSku: module.searchSku,
     getSkuDetailInfo: module.getSkuDetailInfo,
   };
+}
+
+async function writeJsonAtomically(path: string, value: unknown): Promise<void> {
+  const tempPath = `${path}.tmp-${process.pid}`;
+  await writeJsonFile(tempPath, value);
+  await rename(tempPath, path);
 }
 
 async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
@@ -123,55 +165,103 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const version = flags.version ?? "v1";
   const workspace = flags.workspace ?? workspaceRoot();
   const document = await readContextDocument(workspace, version);
-  const targets = selectTargets(document, flags);
+  const allTargets = selectTargets(document, flags);
   const jdProject = flags["jd-project"] ?? Bun.env.CATEGORY_GOVERNANCE_JD_PROJECT ?? DEFAULT_JD_PROJECT;
   if (boolFlag(flags.direct)) disableProxy();
-  const goodsApi = await loadGoodsApi(jdProject);
   const outputPath = resolvePath(workspace, flags.out, join("context", version, "jd-attribute-evidence.json"));
-  const result = await collectJdEvidence({
-    targetCategories: targets,
-    goodsApi,
-    skusPerCategory: Math.min(30, asInt(flags["skus-per-category"], 8)),
-    searchPageSize: Math.min(50, asInt(flags["search-page-size"], 20)),
-    concurrency: Math.min(MAX_CONCURRENCY, asInt(flags.concurrency, 4)),
-    attempts: Math.min(5, asInt(flags.attempts, 2)),
-    onProgress: (progress) => {
-      if (progress.completed === progress.total || progress.completed % 5 === 0) {
-        console.log(`进度 ${progress.completed}/${progress.total}，匹配 ${progress.matched}，失败 ${progress.failed}`);
-      }
-    },
-  });
   let existing;
   try {
     existing = await loadJdEvidence(outputPath);
   } catch {
     existing = undefined;
   }
-  const merged = mergeJdEvidenceDocuments(existing, result.document);
-  await writeJsonFile(outputPath, merged);
+  const resume = boolFlag(flags.resume) && !boolFlag(flags.force);
+  const coveredIds = new Set((existing?.categories ?? []).flatMap((category) => category.targetIds ?? []));
+  const targets = resume ? allTargets.filter((target) => !coveredIds.has(target.id) && !coveredIds.has(shortCategoryId(target.id))) : allTargets;
+  if (resume && targets.length !== allTargets.length) {
+    console.log(`断点续跑：跳过已有证据 ${allTargets.length - targets.length} 个，剩余 ${targets.length} 个类目`);
+  }
+  if (targets.length === 0) {
+    console.log("没有需要采样的类目；如需重采样，请去掉 --resume 或使用 --force");
+    return;
+  }
+
   const runDir = join(workspace, "output", version, "jd-evidence", `run-${runStamp()}`);
   const runOutputPath = join(runDir, "jd-attribute-evidence.json");
-  await writeJsonFile(runOutputPath, merged);
-  await writeJsonFile(join(runDir, "manifest.json"), {
-    version,
-    generatedAt: result.document.generatedAt,
-    stableOutputPath: outputPath,
-    runOutputPath,
-    targetCount: result.stats.targetCount,
-    matchedTargetCount: result.stats.matchedTargetCount,
-    unmatchedTargetCount: result.stats.unmatchedTargetCount,
-    sampledSkuCount: result.stats.sampledSkuCount,
-    detailSuccessCount: result.stats.detailSuccessCount,
-    detailErrorCount: result.stats.detailErrorCount,
-    unmatchedTargetIds: result.unmatchedTargetIds,
-    errors: result.errors,
-  });
+  const chunkSize = Math.min(500, asInt(flags["chunk-size"], 100));
+  const goodsApi = await loadGoodsApi(jdProject);
+  const jdCategories = await loadJdCategoryReferences(jdProject);
+  console.log(`京东类目索引：${jdCategories.length} 个可用三级类目`);
+  let merged = existing;
+  const skippedCount = allTargets.length - targets.length;
+  let processedCount = 0;
+  let matchedTargetCount = skippedCount;
+  let sampledSkuCount = 0;
+  let detailSuccessCount = 0;
+  let detailErrorCount = 0;
+  const unmatchedTargetIds: string[] = [];
+  const errors: Array<{ categoryId: string; error: string }> = [];
+  const writeCheckpoint = async (generatedAt: string, status: "running" | "completed"): Promise<void> => {
+    if (!merged) return;
+    const checkpoint = {
+      ...merged,
+      sampling: {
+        ...(merged.sampling ?? {}),
+        targetCount: allTargets.length,
+        processedCount: skippedCount + processedCount,
+        skusPerCategory: Math.min(30, asInt(flags["skus-per-category"], 8)),
+        searchPageSize: Math.min(50, asInt(flags["search-page-size"], 20)),
+        matcherVersion: "strict-v2",
+      },
+      generatedAt,
+    };
+    await writeJsonAtomically(outputPath, checkpoint);
+    await writeJsonAtomically(runOutputPath, checkpoint);
+    await writeJsonAtomically(join(runDir, "manifest.json"), {
+      version, status, generatedAt, stableOutputPath: outputPath, runOutputPath,
+      targetCount: allTargets.length, processedCount: skippedCount + processedCount,
+      remainingCount: allTargets.length - skippedCount - processedCount,
+      jdCategoryReferenceCount: jdCategories.length,
+      indexedOnly: boolFlag(flags["indexed-only"]),
+      matchedTargetCount, unmatchedTargetCount: unmatchedTargetIds.length,
+      sampledSkuCount, detailSuccessCount, detailErrorCount, unmatchedTargetIds, errors,
+    });
+  };
+  for (let offset = 0; offset < targets.length; offset += chunkSize) {
+    const chunk = targets.slice(offset, offset + chunkSize);
+    const result = await collectJdEvidence({
+      targetCategories: chunk,
+      goodsApi,
+      skusPerCategory: Math.min(30, asInt(flags["skus-per-category"], 8)),
+      searchPageSize: Math.min(50, asInt(flags["search-page-size"], 20)),
+      concurrency: Math.min(MAX_CONCURRENCY, asInt(flags.concurrency, 4)),
+      attempts: Math.min(5, asInt(flags.attempts, 2)),
+      jdCategories,
+      onlyUseJdCategories: boolFlag(flags["indexed-only"]),
+      onProgress: (progress) => {
+        if (progress.completed === progress.total || progress.completed % 5 === 0) {
+          console.log(`进度 ${skippedCount + processedCount + progress.completed}/${allTargets.length}，匹配 ${matchedTargetCount + progress.matched}，失败 ${errors.length + progress.failed}`);
+        }
+      },
+    });
+    const replacedTargetIds = new Set(result.document.categories.flatMap((category) => category.targetIds ?? []));
+    merged = mergeJdEvidenceDocuments(merged, result.document, { replaceTargetIds: replacedTargetIds });
+    processedCount += chunk.length;
+    matchedTargetCount += result.stats.matchedTargetCount;
+    sampledSkuCount += result.stats.sampledSkuCount;
+    detailSuccessCount += result.stats.detailSuccessCount;
+    detailErrorCount += result.stats.detailErrorCount;
+    unmatchedTargetIds.push(...result.unmatchedTargetIds);
+    errors.push(...result.errors);
+    await writeCheckpoint(result.document.generatedAt ?? new Date().toISOString(), offset + chunk.length >= targets.length ? "completed" : "running");
+    console.log(`已落盘 ${skippedCount + processedCount}/${allTargets.length} 个类目，证据 ${merged?.categories.length ?? 0} 个，详情成功 ${detailSuccessCount}，详情失败 ${detailErrorCount}`);
+  }
   console.log(`京东证据已写入：${outputPath}`);
   console.log(`本次采样快照：${runOutputPath}`);
-  console.log(`目标类目 ${result.stats.targetCount}，匹配 ${result.stats.matchedTargetCount}，未匹配 ${result.stats.unmatchedTargetCount}`);
-  console.log(`采样 SKU ${result.stats.sampledSkuCount}，详情成功 ${result.stats.detailSuccessCount}，详情失败 ${result.stats.detailErrorCount}`);
-  if (result.unmatchedTargetIds.length > 0) console.log(`未匹配类目 ID：${result.unmatchedTargetIds.slice(0, 20).join(",")}${result.unmatchedTargetIds.length > 20 ? "..." : ""}`);
-  if (result.errors.length > 0) console.log(`错误示例：${result.errors.slice(0, 5).map((item) => `${item.categoryId} ${item.error}`).join("；")}`);
+  console.log(`目标类目 ${allTargets.length}，本次处理 ${processedCount}，匹配 ${matchedTargetCount}，未匹配 ${unmatchedTargetIds.length}`);
+  console.log(`采样 SKU ${sampledSkuCount}，详情成功 ${detailSuccessCount}，详情失败 ${detailErrorCount}`);
+  if (unmatchedTargetIds.length > 0) console.log(`未匹配类目 ID：${unmatchedTargetIds.slice(0, 20).join(",")}${unmatchedTargetIds.length > 20 ? "..." : ""}`);
+  if (errors.length > 0) console.log(`错误示例：${errors.slice(0, 5).map((item) => `${item.categoryId} ${item.error}`).join("；")}`);
 }
 
 if (import.meta.main) {

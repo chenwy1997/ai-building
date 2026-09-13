@@ -28,6 +28,12 @@ export interface JdGoodsApi {
   getSkuDetailInfo(request: Record<string, unknown>): Promise<JdDetailResult | JdDetailResult[]>;
 }
 
+export interface JdCategoryReference {
+  id: string;
+  name: string;
+  path: string[];
+}
+
 export interface JdCollectorOptions {
   targetCategories: CategoryNode[];
   goodsApi: JdGoodsApi;
@@ -35,6 +41,8 @@ export interface JdCollectorOptions {
   searchPageSize: number;
   concurrency: number;
   attempts: number;
+  jdCategories?: JdCategoryReference[];
+  onlyUseJdCategories?: boolean;
   onProgress?: (progress: { completed: number; total: number; matched: number; failed: number }) => void;
 }
 
@@ -112,21 +120,35 @@ function categoryPath(item: JdSearchItem): string[] {
   return [item.categoryName1, item.categoryName2, item.categoryName3].map(text).filter(Boolean);
 }
 
+function resolveJdCategory(target: CategoryNode, references: JdCategoryReference[]): JdCategoryReference | undefined {
+  const targetName = normalize(target.name);
+  const matches = references.filter((reference) => normalize(reference.name) === targetName);
+  if (matches.length === 0) return undefined;
+  if (matches.length === 1) return matches[0];
+  const targetPath = new Set(target.pathNames.map(normalize));
+  const scored = matches.map((reference) => ({
+    reference,
+    overlap: reference.path.map(normalize).filter((part) => targetPath.has(part)).length,
+  })).sort((a, b) => b.overlap - a.overlap);
+  return scored.length > 0 && scored[0]!.overlap > (scored[1]?.overlap ?? -1) ? scored[0]!.reference : undefined;
+}
+
 function candidateScore(target: CategoryNode, item: JdSearchItem): number {
   const targetName = normalize(target.name);
   if (!targetName) return 0;
   const title = normalize(text(item.skuName));
   const path = categoryPath(item).map(normalize);
-  let value = 0;
-  if (title.includes(targetName)) value += 0.7;
-  else if (targetName.length >= 2 && [...targetName].filter((char) => title.includes(char)).length / targetName.length >= 0.7) value += 0.45;
-  if (path.some((part) => part === targetName)) value += 0.3;
-  else if (path.some((part) => part.includes(targetName) || targetName.includes(part))) value += 0.2;
-  const pathOverlap = target.pathNames
-    .map(normalize)
-    .filter((part) => part && path.includes(part)).length;
-  value += Math.min(pathOverlap * 0.05, 0.1);
-  return Math.min(value, 1);
+  const leaf = path.at(-1) ?? "";
+  if (!leaf) return 0;
+  // “手机”不能因为标题包含手机就命中“手机壳/手机配件”。对明显的配件类叶子保守拒绝，
+  // 只有目标本身就是该叶子时才允许通过。
+  if (/(?:配件|配套|附件|保护套|保护壳|支架|底座|收纳包|包装)/u.test(leaf) && leaf !== targetName) return 0;
+  if (leaf === targetName) return 1;
+  // 允许京东叶子比三横类目更短（如“三横 A4 复印纸”对应京东“复印纸”），但必须同时在 SKU 标题中出现三横类目。
+  if (targetName.length >= 2 && targetName.includes(leaf) && title.includes(targetName)) return 0.9;
+  // 允许京东叶子是三横类目的带前后缀名称，但仍要求商品标题包含目标类目，避免只按单字重合。
+  if (targetName.length >= 2 && leaf.includes(targetName) && title.includes(targetName)) return 0.85;
+  return 0;
 }
 
 function attrName(record: Record<string, unknown>, prefix: "cate" | "param"): string {
@@ -253,8 +275,11 @@ export async function collectJdEvidence(options: JdCollectorOptions): Promise<Jd
 
   await mapLimit(options.targetCategories, options.concurrency, async (target) => {
     try {
+      const jdCategory = resolveJdCategory(target, options.jdCategories ?? []);
+      if (options.onlyUseJdCategories && !jdCategory) return;
       const search = await withRetry(() => options.goodsApi.searchSku({
-        keyword: target.name,
+        keyword: jdCategory ? "" : target.name,
+        ...(jdCategory && Number.isFinite(Number(jdCategory.id)) ? { categoryId3: Number(jdCategory.id) } : {}),
         needMergeSku: 0,
         extAttrCollect: 1,
         priceCollect: 0,
@@ -268,15 +293,24 @@ export async function collectJdEvidence(options: JdCollectorOptions): Promise<Jd
         .map((item) => ({ item, score: candidateScore(target, item), path: categoryPath(item) }))
         .filter((candidate) => candidate.score >= 0.65)
         .sort((a, b) => b.score - a.score || String(a.item.skuId).localeCompare(String(b.item.skuId)));
-      const selected = [...new Map(candidates.map((candidate) => [String(candidate.item.skuId), candidate])).values()]
+      // 一个关键词可能召回“乒乓球、乒乓球拍、乒乓球桌”等多个京东叶子；
+      // 只取最高置信度的一个京东叶子组，避免把相邻类目的属性混成一个证据模板。
+      const categoryGroups = new Map<string, Candidate[]>();
+      for (const candidate of candidates) {
+        const groupKey = `${text(candidate.item.categoryId3)}|${candidate.path.join(">")}`;
+        (categoryGroups.get(groupKey) ?? categoryGroups.set(groupKey, []).get(groupKey)!).push(candidate);
+      }
+      const selectedGroup = [...categoryGroups.values()].sort((left, right) => {
+        const scoreDiff = (right[0]?.score ?? 0) - (left[0]?.score ?? 0);
+        return scoreDiff || right.length - left.length || (right[0]?.path.join(">") ?? "").localeCompare(left[0]?.path.join(">") ?? "");
+      })[0] ?? [];
+      const selected = [...new Map(selectedGroup.map((candidate) => [String(candidate.item.skuId), candidate])).values()]
         .slice(0, options.skusPerCategory);
       if (selected.length === 0) {
-        completed += 1;
-        options.onProgress?.({ completed, total: options.targetCategories.length, matched: matchedTargetIds.size, failed: errors.length });
         return;
       }
-      matchedTargetIds.add(target.id);
       const targetIdList = [target.id, shortCategoryId(target.id)];
+      let targetHasEvidence = false;
       for (const candidate of selected) {
         const skuId = String(candidate.item.skuId);
         sampledSkuIds.add(skuId);
@@ -303,12 +337,15 @@ export async function collectJdEvidence(options: JdCollectorOptions): Promise<Jd
           if (!detail) throw new Error("详情接口返回空数据");
           extractCategoryAttributes(accumulator, detail, skuId);
           extractParamAttributes(accumulator, detail, skuId);
+          if (accumulator.attributes.size > 0) targetHasEvidence = true;
           detailSuccessCount += 1;
         } catch (error) {
           detailErrorCount += 1;
           errors.push({ categoryId: target.id, error: `SKU ${skuId}：${error instanceof Error ? error.message : String(error)}` });
         }
       }
+      if (targetHasEvidence) matchedTargetIds.add(target.id);
+      else errors.push({ categoryId: target.id, error: "详情请求成功但没有可用类目属性" });
     } catch (error) {
       errors.push({ categoryId: target.id, error: error instanceof Error ? error.message : String(error) });
     } finally {
@@ -359,6 +396,7 @@ export async function collectJdEvidence(options: JdCollectorOptions): Promise<Jd
 export function mergeJdEvidenceDocuments(
   existing: JdEvidenceDocument | undefined,
   incoming: JdEvidenceDocument,
+  options: { replaceTargetIds?: ReadonlySet<string> } = {},
 ): JdEvidenceDocument {
   const mergeCategory = (left: JdCategoryEvidence, right: JdCategoryEvidence): JdCategoryEvidence => {
     const attributes = new Map<string, JdAttributeEvidence>();
@@ -390,6 +428,7 @@ export function mergeJdEvidenceDocuments(
   };
   const categories = new Map<string, JdCategoryEvidence>();
   for (const category of existing?.categories ?? []) {
+    if (options.replaceTargetIds && category.targetIds?.some((id) => options.replaceTargetIds!.has(id))) continue;
     const key = `${category.targetIds?.join(",") ?? ""}|${category.id ?? category.path.join(">")}`;
     categories.set(key, category);
   }

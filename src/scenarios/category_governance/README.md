@@ -67,14 +67,21 @@ bun run category-governance --jd-evidence=/absolute/path/jd-attribute-evidence.j
 # 先采样一个类目，确认代理和字段质量
 bun run category-governance:jd-evidence --category="手机" --skus-per-category=8 --concurrency=2 --direct
 
+# 按三横一级类目分层抽样，每个一级类目取 2 个末级类目
+bun run category-governance:jd-evidence --sample-per-group=2 --skus-per-category=5 --chunk-size=46 --concurrency=4 --attempts=2 --direct
+
 # 采样前 100 个末级类目
 bun run category-governance:jd-evidence --limit=100 --skus-per-category=8 --concurrency=4 --direct
 
 # 明确允许全量采样（京东 VOP 请求量较大）
-bun run category-governance:jd-evidence --all --skus-per-category=8 --concurrency=4 --direct
+bun run category-governance:jd-evidence --all --indexed-only --skus-per-category=8 --chunk-size=100 --concurrency=4 --attempts=2 --resume --direct
 ```
 
 采样器默认从 `/Users/sanheng/Project/sanheng/ai-core/.env` 读取京东配置，并更新稳定文件 `context/<version>/jd-attribute-evidence.json`；每次运行还会在 `output/<version>/jd-evidence/run-<时间戳>/` 保存完整快照和 `manifest.json`。可用 `--jd-project`、`--out` 覆盖稳定文件路径。重复运行同一输出路径会按目标类目更新证据，不会把重复类目无限追加。
+
+全量采样按 `--chunk-size` 分块，每完成一块就原子写入稳定文件和快照；进程中断后重新执行同样的命令并保留 `--resume`，已有属性证据的类目会跳过。`--force` 可强制重采样。当前采集器对京东叶子类目采用保守匹配：要求叶子相同或与三横类目有明确包含关系并且 SKU 标题命中，明显的配件、保护壳、支架等不会仅因标题包含目标词而混入。
+
+`--indexed-only` 只采集能唯一映射到京东启用三级类目的三横末级类目，适合作为第一阶段高精度证据；本地当前 11,796 个三横末级类目中，约 1,492 个有唯一同名京东叶子。未匹配类目不是接口失败，而是两套类目体系没有直接同名映射，后续应单独做同义词/人工映射，再开启关键词补召回，避免用低置信度证据污染模板。
 
 导入会写入独立库 `ai-building-category_governance` 的 `category_nodes_v1`；导入、运行、结果分别写入 `category_imports_v1`、`governance_runs_v1`、`attribute_templates_v1`。新的不可变版本可以使用 `--version=v2`，并通过新的迁移增加对应 `_v2` 表，不覆盖已完成的 `_v1` 记录。
 
