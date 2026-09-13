@@ -98,6 +98,11 @@ function normalizeOptions(value: unknown): string[] {
   return [...new Set(values.map(scalarText).filter((item): item is string => item !== null && item.length > 0))];
 }
 
+function looksLikeUnit(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  return /^(?:英寸|吋|万像素|像素|Hz|k?Hz|W|kW|mW|mAh|Ah|V|mV|A|mA|mm|cm|m|km|kg|g|mg|GB|TB|MB|KB|GiB|TiB|℃|°C|Pa|kPa|Mbps|Gbps|dB|L|mL|平方米|平方厘米|立方米|个|台|级|%|元)$/iu.test(value.trim());
+}
+
 function parseProperty(value: unknown): AttributeProperty {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("属性必须是对象");
   const p = value as Record<string, unknown>;
@@ -120,12 +125,22 @@ export function tupleToProperty(value: unknown): AttributeProperty {
   if (tuple.length === 11 && tuple[4] === null && typeof tuple[5] === "string" && Array.isArray(tuple[6])) {
     tuple = [tuple[0], tuple[1], tuple[2], tuple[3], tuple[5], tuple[6], tuple[7], tuple[8], tuple[9], tuple[10]];
   }
+  // 兼容模型把 unit 放到 options，同时把 description/format 向后错一位并追加 scope 的 11 元组。
+  if (tuple.length === 11 && tuple[4] === null && typeof tuple[5] === "string" && tuple[6] === null &&
+      typeof tuple[7] === "string" && tuple[9] === null && typeof tuple[10] === "string") {
+    tuple = [tuple[0], tuple[1], tuple[2], tuple[3], tuple[5], [], tuple[7], null, tuple[8], tuple[10]];
+  }
   if (tuple.length !== 10) throw new Error("压缩属性必须包含 10 个字段");
   let [key, name, code, required, unit, options, description, format, example, scope] = tuple;
   // 兼容 number 属性把 unit 错放到 options 位置的 10 元组；只对数字类型修正，避免误伤枚举选项。
   if (code === "n" && unit === null && typeof options === "string") {
     unit = options;
     options = [];
+  }
+  // 兼容 number 属性把 unit 错放到 format 位置的 10 元组；仅识别常见单位，避免吞掉真正的格式说明。
+  if (code === "n" && unit === null && options === null && looksLikeUnit(format)) {
+    unit = format;
+    format = null;
   }
   const codeText = typeof code === "string" ? code : "";
   const type = TYPES[CODES.indexOf(codeText as typeof CODES[number])] ?? "text";

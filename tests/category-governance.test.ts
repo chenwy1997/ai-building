@@ -77,11 +77,13 @@ describe("标准类目治理公共函数", () => {
       a: {
         a0: ["screen_size", "屏幕尺寸", "n", "", null, "英寸", "屏幕对角线尺寸", null, null, "category"],
         a1: ["battery_capacity", "电池容量", "n", "", null, "mAh", [], "电池容量", null, null, "category"],
+        a2: ["screen_refresh_rate", "屏幕刷新率", "n", "", null, null, "屏幕刷新率", "Hz", null, "category"],
+        a3: ["screen_resolution", "屏幕分辨率", "t", "", null, "", null, "分辨率规格", null, null, "category"],
       },
-      c: { a4: [[], ["a0", "a1"], []] },
+      c: { a4: [[], ["a0", "a1", "a2", "a3"], []] },
     };
     const restored = parseGovernanceResponse(JSON.stringify(response), [document.nodes[2]!]);
-    expect(restored[0]?.properties.map((item) => item.unit)).toEqual(["英寸", "mAh"]);
+    expect(restored[0]?.properties.map((item) => item.unit)).toEqual(["英寸", "mAh", "Hz", ""]);
   });
 
   test("治理提示词使用紧凑 a/c 结构，并把参考证据放在目标之后", () => {
