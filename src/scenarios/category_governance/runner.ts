@@ -9,12 +9,14 @@ import { compactTemplates, parseGovernanceResponse } from "./template-codec.ts";
 import { mergeGovernanceResults } from "./merge.ts";
 import { categoryById } from "./category-tree.ts";
 import { outputPath, readContextDocument, writeContextBundle, workspaceRoot } from "./storage.ts";
+import { makeContextChunks } from "./std-text.ts";
 import { asInt, boolFlag, parseFlags, slugify } from "./util.ts";
 import { shortCategoryId } from "./util.ts";
 import type { CategoryNode, CategoryTreeDocument, GovernanceResult } from "./types.ts";
 
 interface Batch {
   key: string;
+  rootId: string;
   nodes: CategoryNode[];
   text: string;
 }
@@ -34,7 +36,7 @@ function groupBatches(
   batchSize: number,
   categorySelector?: string,
 ): Batch[] {
-  const groups = new Map<string, CategoryNode[]>();
+  const leafGroups = new Map<string, CategoryNode[]>();
   const leaves = document.nodes.filter((candidate) => candidate.isLeaf);
   const selectedLeaves = categorySelector
     ? leaves.filter((leaf) => categoryMatches(leaf, categorySelector))
@@ -44,27 +46,49 @@ function groupBatches(
   }
   for (const node of selectedLeaves) {
     const rootId = node.pathIds[Math.min(groupDepth, node.pathIds.length) - 1] ?? node.id;
-    const values = groups.get(rootId) ?? [];
+    const values = leafGroups.get(rootId) ?? [];
     values.push(node);
-    groups.set(rootId, values);
+    leafGroups.set(rootId, values);
   }
   const byId = categoryById(document);
+  const fullContextByRoot = new Map(makeContextChunks(document, groupDepth).map((chunk) => [chunk.rootId, chunk.text]));
   const batches: Batch[] = [];
-  for (const [rootId, leaves] of groups) {
+  for (const [rootId, leaves] of leafGroups) {
     for (let offset = 0; offset < leaves.length; offset += batchSize) {
       const nodes = leaves.slice(offset, offset + batchSize);
       const ids = new Set(nodes.flatMap((node) => node.pathIds));
       const subset = document.nodes.filter((node) => ids.has(node.id));
       const root = byId.get(rootId) ?? nodes[0]!;
       const lines = subset.map((node) => `${"  ".repeat(node.level - 1)}${node.level}${node.isLeaf ? "*" : "+"} ${node.name}|i=${shortCategoryId(node.id)}`);
+      const subsetText = `#STD-CAT|v=${document.version}|target=${nodes.length}\n#PATH|${JSON.stringify(root.pathNames)}\n${lines.join("\n")}\n`;
       batches.push({
         key: `${slugify(root.pathNames.join("-"))}-${offset / batchSize + 1}`,
+        rootId,
         nodes,
-        text: `#STD-CAT|v=${document.version}|target=${nodes.length}\n#PATH|${JSON.stringify(root.pathNames)}\n${lines.join("\n")}\n`,
+        // 全量运行时使用整个类目组作为固定前缀；单类目调试仍使用精简上下文，避免无谓扩大输入。
+        text: !categorySelector || selectedLeaves.length > batchSize
+          ? fullContextByRoot.get(rootId) ?? subsetText
+          : subsetText,
       });
     }
   }
-  return batches;
+  // 交错不同类目组的首批请求，让每个固定前缀先有机会落盘，再并发发送同组后续批次。
+  const byRoot = new Map<string, Batch[]>();
+  for (const batch of batches) (byRoot.get(batch.rootId) ?? byRoot.set(batch.rootId, []).get(batch.rootId)!).push(batch);
+  const ordered: Batch[] = [];
+  const batchGroups = [...byRoot.values()];
+  for (let index = 0; ; index += 1) {
+    let added = false;
+    for (const group of batchGroups) {
+      const batch = group[index];
+      if (batch) {
+        ordered.push(batch);
+        added = true;
+      }
+    }
+    if (!added) break;
+  }
+  return ordered;
 }
 
 function parseContent(content: string | null | undefined): string {
@@ -121,7 +145,14 @@ export async function runGovernance(options: {
     success: number;
     errors: number;
   }) => void;
-}): Promise<{ requestCount: number; successCount: number; errorCount: number; outputDir: string }> {
+}): Promise<{
+  requestCount: number;
+  successCount: number;
+  errorCount: number;
+  outputDir: string;
+  promptCacheHitTokens: number;
+  promptCacheMissTokens: number;
+}> {
   if (options.version !== "v1") {
     throw new Error(`数据库目前只初始化了 *_v1 表；治理 ${options.version} 前请新增对应版本迁移`);
   }
@@ -154,6 +185,8 @@ export async function runGovernance(options: {
   const errors: Array<{ key: string; attempt: number; error: string }> = [];
   const attemptErrors: Array<{ key: string; attempt: number; error: string }> = [];
   let requestCount = 0;
+  let promptCacheHitTokens = 0;
+  let promptCacheMissTokens = 0;
   let completedBatches = 0;
   const markProgress = (): void => {
     completedBatches += 1;
@@ -164,103 +197,123 @@ export async function runGovernance(options: {
       errors: errors.length,
     });
   };
-  let cursor = 0;
-  const worker = async (): Promise<void> => {
-    while (cursor < batches.length) {
-      const batch = batches[cursor++];
-      if (!batch) return;
-      const requestDir = join(outputDir, batch.key);
-      let lastError = "";
-      let succeeded = false;
-      for (let attempt = 1; attempt <= Math.max(1, options.attempts); attempt += 1) {
-        let rawText = "";
-        let finishReason: string | null = null;
-        const requestPath = join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.request.json`);
-        const prompt = buildGovernanceUserPrompt({
-          version: document.version,
-          categoryText: batch.text,
-          targetCategories: batch.nodes,
-          repairError: lastError || undefined,
+  const processBatch = async (batch: Batch): Promise<void> => {
+    const requestDir = join(outputDir, batch.key);
+    let lastError = "";
+    let succeeded = false;
+    for (let attempt = 1; attempt <= Math.max(1, options.attempts); attempt += 1) {
+      let rawText = "";
+      let finishReason: string | null = null;
+      const requestPath = join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.request.json`);
+      const prompt = buildGovernanceUserPrompt({
+        version: document.version,
+        categoryText: batch.text,
+        targetCategories: batch.nodes,
+        repairError: lastError || undefined,
+      });
+      await writeJsonFile(requestPath, {
+        system: CATEGORY_GOVERNANCE_SYSTEM_PROMPT,
+        user: prompt,
+        categoryIds: batch.nodes.map((node) => node.id),
+        source: inputSource,
+        attempt,
+      });
+      if (options.dryRun) {
+        requestCount += 1;
+        succeeded = true;
+        markProgress();
+        break;
+      }
+      try {
+        requestCount += 1;
+        const response = await options.ai.chat(options.provider, options.model, {
+          messages: [
+            { role: "system", content: CATEGORY_GOVERNANCE_SYSTEM_PROMPT },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.2,
+          max_tokens: 32_000,
+          response_format: { type: "json_object" },
+          thinking: { type: "disabled" },
         });
-        await writeJsonFile(requestPath, {
-          system: CATEGORY_GOVERNANCE_SYSTEM_PROMPT,
-          user: prompt,
-          categoryIds: batch.nodes.map((node) => node.id),
-          source: inputSource,
-          attempt,
-        });
-        if (options.dryRun) {
-          requestCount += 1;
-          succeeded = true;
-          markProgress();
-          break;
-        }
-        try {
-          requestCount += 1;
-          const response = await options.ai.chat(options.provider, options.model, {
-            messages: [
-              { role: "system", content: CATEGORY_GOVERNANCE_SYSTEM_PROMPT },
-              { role: "user", content: prompt },
-            ],
-            temperature: 0.2,
-            max_tokens: 32_000,
-            response_format: { type: "json_object" },
-            thinking: { type: "disabled" },
-          });
-          finishReason = response.choices[0]?.finish_reason ?? null;
-          rawText = parseContent(response.choices[0]?.message.content);
-          const results = parseGovernanceResponse(rawText, batch.nodes);
-          const compact = compactTemplates(results);
-          await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.json`), {
-            ...compact,
-            meta: {
-              runId,
-              batch: batch.key,
-              attempt,
-              rawBytes: rawText.length,
-              source: inputSource,
-            },
-          });
-          for (const result of results) {
-            allResults.push(result);
-            await options.database`
-              INSERT INTO attribute_templates_v1 (run_id, version, category_id, category_path_json, attempt, template_json, raw_response, validation_status)
-              VALUES (${runId}, ${document.version}, ${result.category.id}, ${result.category.path}::jsonb, ${attempt}, ${result}::jsonb, ${rawText}, 'valid')
-            `;
-          }
-          succeeded = true;
-          markProgress();
-          break;
-        } catch (error) {
-          lastError = error instanceof Error ? error.message : String(error);
-          attemptErrors.push({ key: batch.key, attempt, error: lastError });
-          await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.error.json`), {
-            error: lastError,
+        promptCacheHitTokens += response.usage?.prompt_cache_hit_tokens ?? 0;
+        promptCacheMissTokens += response.usage?.prompt_cache_miss_tokens ?? 0;
+        finishReason = response.choices[0]?.finish_reason ?? null;
+        rawText = parseContent(response.choices[0]?.message.content);
+        const results = parseGovernanceResponse(rawText, batch.nodes);
+        const compact = compactTemplates(results);
+        await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.json`), {
+          ...compact,
+          meta: {
             runId,
             batch: batch.key,
             attempt,
-            finishReason,
             rawBytes: rawText.length,
             source: inputSource,
-          });
-          if (error instanceof Error && error.message.startsWith("模型请求失败")) {
-            continue;
-          }
-          // 将模型原文保存下来，便于分析 JSON 或字段校验失败的真实原因。
-          try {
-            if (rawText) await writeTextFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.raw.txt`), rawText);
-          } catch {
-            // 诊断文件写入失败不影响重试流程。
-          }
+          },
+        });
+        for (const result of results) {
+          allResults.push(result);
+          await options.database`
+            INSERT INTO attribute_templates_v1 (run_id, version, category_id, category_path_json, attempt, template_json, raw_response, validation_status)
+            VALUES (${runId}, ${document.version}, ${result.category.id}, ${result.category.path}::jsonb, ${attempt}, ${result}::jsonb, ${rawText}, 'valid')
+          `;
+        }
+        succeeded = true;
+        markProgress();
+        break;
+      } catch (error) {
+        lastError = error instanceof Error ? error.message : String(error);
+        attemptErrors.push({ key: batch.key, attempt, error: lastError });
+        await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.error.json`), {
+          error: lastError,
+          runId,
+          batch: batch.key,
+          attempt,
+          finishReason,
+          rawBytes: rawText.length,
+          source: inputSource,
+        });
+        // 将模型原文保存下来，便于分析 JSON 或字段校验失败的真实原因。
+        try {
+          if (rawText) await writeTextFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.raw.txt`), rawText);
+        } catch {
+          // 诊断文件写入失败不影响重试流程。
         }
       }
-      if (!succeeded) {
-        errors.push({ key: batch.key, attempt: Math.max(1, options.attempts), error: lastError || "未知错误" });
-        markProgress();
-      }
+    }
+    if (!succeeded) {
+      errors.push({ key: batch.key, attempt: Math.max(1, options.attempts), error: lastError || "未知错误" });
+      markProgress();
     }
   };
-  await Promise.all(Array.from({ length: Math.min(Math.max(1, options.concurrency), Math.max(1, batches.length)) }, () => worker()));
+
+  const runPhase = async (phase: Batch[], concurrency: number): Promise<void> => {
+    let cursor = 0;
+    const worker = async (): Promise<void> => {
+      while (cursor < phase.length) {
+        const batch = phase[cursor++];
+        if (!batch) return;
+        await processBatch(batch);
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(Math.max(1, concurrency), Math.max(1, phase.length)) }, () => worker()));
+  };
+
+  const firstByRoot = new Set<string>();
+  const warmupBatches: Batch[] = [];
+  const remainingBatches: Batch[] = [];
+  for (const batch of batches) {
+    if (!firstByRoot.has(batch.rootId)) {
+      firstByRoot.add(batch.rootId);
+      warmupBatches.push(batch);
+    } else {
+      remainingBatches.push(batch);
+    }
+  }
+  // 先为每个固定前缀发一个请求，等待缓存落盘后再开启高并发批量治理。
+  await runPhase(warmupBatches, Math.min(options.concurrency, 32));
+  await runPhase(remainingBatches, options.concurrency);
   const status = options.dryRun ? "dry_run" : errors.length === 0 ? "completed" : allResults.length > 0 ? "partial" : "failed";
   await options.database`
     UPDATE governance_runs_v1 SET status=${status}, request_count=${requestCount}, success_count=${allResults.length}, error_count=${errors.length}, finished_at=NOW() WHERE id=${runId}
@@ -271,8 +324,16 @@ export async function runGovernance(options: {
     categorySelector: options.categorySelector ?? null,
     source: inputSource,
     requestCount, successCount: allResults.length, errorCount: errors.length, errors, attemptErrors,
+    usage: { promptCacheHitTokens, promptCacheMissTokens },
   });
-  return { requestCount, successCount: allResults.length, errorCount: errors.length, outputDir };
+  return {
+    requestCount,
+    successCount: allResults.length,
+    errorCount: errors.length,
+    outputDir,
+    promptCacheHitTokens,
+    promptCacheMissTokens,
+  };
 }
 
 async function jsonFilesUnder(directory: string): Promise<string[]> {

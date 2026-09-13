@@ -152,6 +152,7 @@ export async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       },
     });
     console.log(`治理完成：请求 ${result.requestCount}，成功类目 ${result.successCount}，失败请求 ${result.errorCount}`);
+    console.log(`输入缓存：命中 ${result.promptCacheHitTokens} tokens，未命中 ${result.promptCacheMissTokens} tokens`);
     console.log(`输出目录：${result.outputDir}`);
   } finally {
     await databases.closeAll();

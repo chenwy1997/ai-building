@@ -28,11 +28,11 @@ export function buildGovernanceUserPrompt(input: {
     ? `\n上一次尝试未通过本地校验，原因是：${input.repairError}\n请重新完整输出全部目标类目，并严格修正该问题；不要只返回修改片段。\n`
     : "";
   return `类目树版本：${input.version}
+压缩后的类目上下文（本类目组固定前缀）：
+${input.categoryText}
+
 目标末级类目（必须全部返回）：
 ${JSON.stringify(targets, null, 2)}
-
-压缩后的类目上下文：
-${input.categoryText}
 
 ${repair}
 
