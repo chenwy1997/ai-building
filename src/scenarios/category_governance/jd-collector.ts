@@ -59,6 +59,7 @@ export interface JdCollectorResult {
   document: JdEvidenceDocument;
   stats: JdCollectorStats;
   unmatchedTargetIds: string[];
+  emptyEvidenceTargetIds: string[];
   errors: Array<{ categoryId: string; error: string }>;
 }
 
@@ -267,6 +268,7 @@ function asDetail(value: JdDetailResult | JdDetailResult[]): JdDetailResult | un
 export async function collectJdEvidence(options: JdCollectorOptions): Promise<JdCollectorResult> {
   const categoryAccumulators = new Map<string, CategoryAccumulator>();
   const errors: Array<{ categoryId: string; error: string }> = [];
+  const emptyEvidenceTargetIds: string[] = [];
   const matchedTargetIds = new Set<string>();
   const sampledSkuIds = new Set<string>();
   let detailSuccessCount = 0;
@@ -345,7 +347,7 @@ export async function collectJdEvidence(options: JdCollectorOptions): Promise<Jd
         }
       }
       if (targetHasEvidence) matchedTargetIds.add(target.id);
-      else errors.push({ categoryId: target.id, error: "详情请求成功但没有可用类目属性" });
+      else emptyEvidenceTargetIds.push(target.id);
     } catch (error) {
       errors.push({ categoryId: target.id, error: error instanceof Error ? error.message : String(error) });
     } finally {
@@ -389,6 +391,7 @@ export async function collectJdEvidence(options: JdCollectorOptions): Promise<Jd
       detailErrorCount,
     },
     unmatchedTargetIds,
+    emptyEvidenceTargetIds,
     errors,
   };
 }

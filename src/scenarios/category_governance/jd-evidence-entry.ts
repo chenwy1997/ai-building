@@ -35,6 +35,7 @@ const HELP = `
   --chunk-size=100        每完成多少个类目就落盘一次，便于中断后续跑
   --resume                跳过稳定证据中已经有属性的类目
   --force                 不跳过已有证据，重新采样指定目标
+  --retry-empty           重新采样已确认没有结构化京东属性的类目
   --indexed-only          只采样能唯一映射京东三级类目的目标，优先保证证据精度
   --jd-project=...        ai-core 项目目录，默认读取 /Users/sanheng/Project/sanheng/ai-core
   --out=...               输出证据文件，默认 context/<version>/jd-attribute-evidence.json
@@ -169,15 +170,30 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const jdProject = flags["jd-project"] ?? Bun.env.CATEGORY_GOVERNANCE_JD_PROJECT ?? DEFAULT_JD_PROJECT;
   if (boolFlag(flags.direct)) disableProxy();
   const outputPath = resolvePath(workspace, flags.out, join("context", version, "jd-attribute-evidence.json"));
+  const emptyEvidencePath = resolvePath(workspace, undefined, join("context", version, "jd-attribute-evidence.empty.json"));
   let existing;
   try {
     existing = await loadJdEvidence(outputPath);
   } catch {
     existing = undefined;
   }
+  let existingEmptyIds = new Set<string>();
+  try {
+    const empty = await readJsonFile<{ targetIds?: unknown[] }>(emptyEvidencePath);
+    existingEmptyIds = new Set((empty.targetIds ?? []).filter((id): id is string => typeof id === "string"));
+  } catch {
+    // 首次运行没有空证据清单。
+  }
   const resume = boolFlag(flags.resume) && !boolFlag(flags.force);
+  const retryEmpty = boolFlag(flags["retry-empty"]);
   const coveredIds = new Set((existing?.categories ?? []).flatMap((category) => category.targetIds ?? []));
-  const targets = resume ? allTargets.filter((target) => !coveredIds.has(target.id) && !coveredIds.has(shortCategoryId(target.id))) : allTargets;
+  const targets = resume
+    ? allTargets.filter((target) => {
+      const idCovered = coveredIds.has(target.id) || coveredIds.has(shortCategoryId(target.id));
+      const empty = existingEmptyIds.has(target.id) || existingEmptyIds.has(shortCategoryId(target.id));
+      return !idCovered && (retryEmpty || !empty);
+    })
+    : allTargets;
   if (resume && targets.length !== allTargets.length) {
     console.log(`断点续跑：跳过已有证据 ${allTargets.length - targets.length} 个，剩余 ${targets.length} 个类目`);
   }
@@ -195,10 +211,18 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   let merged = existing;
   const skippedCount = allTargets.length - targets.length;
   let processedCount = 0;
-  let matchedTargetCount = skippedCount;
+  const coveredCount = allTargets.filter((target) => coveredIds.has(target.id) || coveredIds.has(shortCategoryId(target.id))).length;
+  let matchedTargetCount = coveredCount;
   let sampledSkuCount = 0;
   let detailSuccessCount = 0;
   let detailErrorCount = 0;
+  const emptyEvidenceTargetIds = new Set(existingEmptyIds);
+  if (!resume || retryEmpty) {
+    for (const target of targets) {
+      emptyEvidenceTargetIds.delete(target.id);
+      emptyEvidenceTargetIds.delete(shortCategoryId(target.id));
+    }
+  }
   const unmatchedTargetIds: string[] = [];
   const errors: Array<{ categoryId: string; error: string }> = [];
   const writeCheckpoint = async (generatedAt: string, status: "running" | "completed"): Promise<void> => {
@@ -217,6 +241,12 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     };
     await writeJsonAtomically(outputPath, checkpoint);
     await writeJsonAtomically(runOutputPath, checkpoint);
+    await writeJsonAtomically(emptyEvidencePath, {
+      version,
+      generatedAt,
+      targetIds: [...emptyEvidenceTargetIds],
+      count: emptyEvidenceTargetIds.size,
+    });
     await writeJsonAtomically(join(runDir, "manifest.json"), {
       version, status, generatedAt, stableOutputPath: outputPath, runOutputPath,
       targetCount: allTargets.length, processedCount: skippedCount + processedCount,
@@ -224,6 +254,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       jdCategoryReferenceCount: jdCategories.length,
       indexedOnly: boolFlag(flags["indexed-only"]),
       matchedTargetCount, unmatchedTargetCount: unmatchedTargetIds.length,
+      emptyEvidenceCount: emptyEvidenceTargetIds.size,
       sampledSkuCount, detailSuccessCount, detailErrorCount, unmatchedTargetIds, errors,
     });
   };
@@ -252,6 +283,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     detailSuccessCount += result.stats.detailSuccessCount;
     detailErrorCount += result.stats.detailErrorCount;
     unmatchedTargetIds.push(...result.unmatchedTargetIds);
+    for (const id of result.emptyEvidenceTargetIds) emptyEvidenceTargetIds.add(id);
     errors.push(...result.errors);
     await writeCheckpoint(result.document.generatedAt ?? new Date().toISOString(), offset + chunk.length >= targets.length ? "completed" : "running");
     console.log(`已落盘 ${skippedCount + processedCount}/${allTargets.length} 个类目，证据 ${merged?.categories.length ?? 0} 个，详情成功 ${detailSuccessCount}，详情失败 ${detailErrorCount}`);
@@ -259,7 +291,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   console.log(`京东证据已写入：${outputPath}`);
   console.log(`本次采样快照：${runOutputPath}`);
   console.log(`目标类目 ${allTargets.length}，本次处理 ${processedCount}，匹配 ${matchedTargetCount}，未匹配 ${unmatchedTargetIds.length}`);
-  console.log(`采样 SKU ${sampledSkuCount}，详情成功 ${detailSuccessCount}，详情失败 ${detailErrorCount}`);
+  console.log(`采样 SKU ${sampledSkuCount}，详情成功 ${detailSuccessCount}，详情失败 ${detailErrorCount}，空证据 ${emptyEvidenceTargetIds.size}`);
   if (unmatchedTargetIds.length > 0) console.log(`未匹配类目 ID：${unmatchedTargetIds.slice(0, 20).join(",")}${unmatchedTargetIds.length > 20 ? "..." : ""}`);
   if (errors.length > 0) console.log(`错误示例：${errors.slice(0, 5).map((item) => `${item.categoryId} ${item.error}`).join("；")}`);
 }
