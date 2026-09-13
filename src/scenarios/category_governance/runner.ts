@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { readdir } from "node:fs/promises";
 import type { SQL } from "bun";
@@ -79,8 +80,11 @@ export async function importAndBuildContext(options: {
   groupDepth: number;
 }): Promise<{ document: CategoryTreeDocument; importId: number; contextDir: string }> {
   const raw = await readJsonFile<unknown>(options.inputPath);
+  const rawText = await readTextFile(options.inputPath);
   const { normalizeCategories } = await import("./category-tree.ts");
   const document = normalizeCategories(raw, options.version);
+  document.sourcePath = options.inputPath;
+  document.sourceSha256 = createHash("sha256").update(rawText).digest("hex");
   if (raw && typeof raw === "object" && !Array.isArray(raw)) {
     const meta = raw as Record<string, unknown>;
     document.sourceUrl = typeof meta.sourceUrl === "string" ? meta.sourceUrl : undefined;
@@ -89,7 +93,12 @@ export async function importAndBuildContext(options: {
   }
   const { insertCategoryDocument } = await import("./storage.ts");
   const importId = await insertCategoryDocument(options.database, document, options.inputPath);
-  const { dir: contextDir } = await writeContextBundle(document, options.workspace ?? workspaceRoot(), options.groupDepth);
+  const { dir: contextDir } = await writeContextBundle(
+    document,
+    options.workspace ?? workspaceRoot(),
+    options.groupDepth,
+    { importId },
+  );
   return { document, importId, contextDir };
 }
 
@@ -118,15 +127,28 @@ export async function runGovernance(options: {
   }
   const rootDir = options.workspace ?? workspaceRoot();
   const document = await readContextDocument(rootDir, options.version);
+  const inputSource = {
+    path: document.sourcePath ?? null,
+    sha256: document.sourceSha256 ?? null,
+    importId: document.importId ?? null,
+    contextPath: join(rootDir, "context", options.version, "category-tree.json"),
+    contextSha256: createHash("sha256").update(JSON.stringify(document)).digest("hex"),
+  };
+  console.log(`输入上下文：${inputSource.contextPath}`);
+  console.log(`输入来源：${inputSource.path ?? "未记录"}，import_id=${inputSource.importId ?? "未记录"}，SHA-256=${inputSource.sha256 ?? "未记录"}`);
   const batches = groupBatches(document, options.groupDepth, options.batchSize, options.categorySelector);
-  const outputDir = outputPath(rootDir, options.version, `level-${options.groupDepth}`);
+  const outputRootDir = outputPath(rootDir, options.version, `level-${options.groupDepth}`);
   const runRows = await options.database<{ id: number }[]>`
     INSERT INTO governance_runs_v1 (version, provider, model, group_depth, status, request_count, output_dir)
-    VALUES (${options.version}, ${options.provider}, ${options.model}, ${options.groupDepth}, 'running', ${batches.length * options.attempts}, ${outputDir})
+    VALUES (${options.version}, ${options.provider}, ${options.model}, ${options.groupDepth}, 'running', ${batches.length * options.attempts}, ${outputRootDir})
     RETURNING id
   `;
   const runId = runRows[0]?.id;
   if (!runId) throw new Error("创建治理运行记录失败");
+  const outputDir = join(outputRootDir, `run-${runId}`);
+  await options.database`
+    UPDATE governance_runs_v1 SET output_dir=${outputDir} WHERE id=${runId}
+  `;
   const allResults: GovernanceResult[] = [];
   const errors: Array<{ key: string; attempt: number; error: string }> = [];
   const tasks = batches.flatMap((batch) => Array.from({ length: options.attempts }, (_, index) => ({ batch, attempt: index + 1 })));
@@ -148,7 +170,12 @@ export async function runGovernance(options: {
       const requestDir = join(outputDir, task.batch.key);
       const requestPath = join(requestDir, `attempt-${String(task.attempt).padStart(3, "0")}.request.json`);
       const prompt = buildGovernanceUserPrompt({ version: document.version, categoryText: task.batch.text, targetCategories: task.batch.nodes });
-      await writeJsonFile(requestPath, { system: CATEGORY_GOVERNANCE_SYSTEM_PROMPT, user: prompt, categoryIds: task.batch.nodes.map((node) => node.id) });
+      await writeJsonFile(requestPath, {
+        system: CATEGORY_GOVERNANCE_SYSTEM_PROMPT,
+        user: prompt,
+        categoryIds: task.batch.nodes.map((node) => node.id),
+        source: inputSource,
+      });
       if (options.dryRun) {
         markProgress();
         continue;
@@ -166,7 +193,16 @@ export async function runGovernance(options: {
         const rawText = parseContent(response.choices[0]?.message.content);
         const results = parseGovernanceResponse(rawText, task.batch.nodes);
         const compact = compactTemplates(results);
-        await writeJsonFile(join(requestDir, `attempt-${String(task.attempt).padStart(3, "0")}.json`), { ...compact, meta: { runId, batch: task.batch.key, attempt: task.attempt, rawBytes: rawText.length } });
+        await writeJsonFile(join(requestDir, `attempt-${String(task.attempt).padStart(3, "0")}.json`), {
+          ...compact,
+          meta: {
+            runId,
+            batch: task.batch.key,
+            attempt: task.attempt,
+            rawBytes: rawText.length,
+            source: inputSource,
+          },
+        });
         for (const result of results) {
           allResults.push(result);
           await options.database`
@@ -192,6 +228,7 @@ export async function runGovernance(options: {
     runId, version: document.version, provider: options.provider, model: options.model,
     groupDepth: options.groupDepth, batchSize: options.batchSize, attempts: options.attempts,
     categorySelector: options.categorySelector ?? null,
+    source: inputSource,
     requestCount: tasks.length, successCount: allResults.length, errorCount: errors.length, errors,
   });
   return { requestCount: tasks.length, successCount: allResults.length, errorCount: errors.length, outputDir };
@@ -217,11 +254,26 @@ export async function mergeGovernanceOutput(options: {
   workspace?: string;
   version: string;
   groupDepth: number;
+  runId?: string;
 }): Promise<string> {
   const rootDir = options.workspace ?? workspaceRoot();
   const document = await readContextDocument(rootDir, options.version);
   const byId = categoryById(document);
-  const files = await jsonFilesUnder(outputPath(rootDir, options.version, `level-${options.groupDepth}`));
+  const outputRootDir = outputPath(rootDir, options.version, `level-${options.groupDepth}`);
+  let outputDir = options.runId ? join(outputRootDir, `run-${options.runId}`) : outputRootDir;
+  if (!options.runId) {
+    try {
+      const entries = await readdir(outputRootDir, { withFileTypes: true });
+      const runDirs = entries
+        .filter((entry) => entry.isDirectory() && /^run-\d+$/u.test(entry.name))
+        .map((entry) => entry.name)
+        .sort((a, b) => Number(b.slice(4)) - Number(a.slice(4)));
+      if (runDirs[0]) outputDir = join(outputRootDir, runDirs[0]);
+    } catch {
+      // 没有按 run-id 分目录时兼容旧输出目录。
+    }
+  }
+  const files = await jsonFilesUnder(outputDir);
   const resultsByCategory = new Map<string, GovernanceResult[]>();
   for (const file of files) {
     const compact = await readJsonFile<Record<string, unknown>>(file);
@@ -236,7 +288,7 @@ export async function mergeGovernanceOutput(options: {
     }
   }
   const merged = [...resultsByCategory.values()].map((results) => mergeGovernanceResults(results));
-  const path = outputPath(rootDir, options.version, `level-${options.groupDepth}`, "merged-v1.json");
+  const path = join(outputDir, "merged-v1.json");
   await writeJsonFile(path, { ...compactTemplates(merged), meta: { categories: merged.length, sourceFiles: files.length } });
   return path;
 }
@@ -314,7 +366,7 @@ export async function runCommand(context: { args: string[]; database: SQL; ai: A
     }
     case "merge": {
       const version = flags.version ?? "v1";
-      const path = await mergeGovernanceOutput({ workspace: rootDir, version, groupDepth });
+      const path = await mergeGovernanceOutput({ workspace: rootDir, version, groupDepth, runId: flags["run-id"] });
       console.log(`已合并治理结果：${path}`);
       return;
     }

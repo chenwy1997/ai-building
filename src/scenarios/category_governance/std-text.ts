@@ -51,7 +51,7 @@ export function makeContextChunks(
       leafCount: nodes.filter((node) => node.isLeaf).length,
     };
     return {
-      key: `d${depth}-${slugify(root.pathNames.join("-"))}-${shortCategoryId(rootId)}`,
+      key: `d${depth}-${slugify(root.pathNames.join("-"))}-id-${shortCategoryId(rootId)}`,
       groupDepth: depth,
       rootId,
       rootPath: root.pathNames,

@@ -24,6 +24,9 @@ export interface CategoryTreeDocument {
   sourceUrl?: string;
   bucket?: string;
   fetchedAt?: string;
+  sourcePath?: string;
+  sourceSha256?: string;
+  importId?: number;
   version: string;
   nodes: CategoryNode[];
   roots: string[];

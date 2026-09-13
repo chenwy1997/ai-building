@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto";
-import { mkdir, readdir } from "node:fs/promises";
+import { mkdir, readdir, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { SQL } from "bun";
 import { readJsonFile, readTextFile, writeJsonFile, writeTextFile } from "../../facilities/json/files.ts";
 import { makeContextChunks } from "./std-text.ts";
-import { slugify } from "./util.ts";
+import { shortCategoryId, slugify } from "./util.ts";
 import type { CategoryTreeDocument, ContextChunk } from "./types.ts";
 
 export const SCENARIO_NAME = "category_governance";
@@ -18,14 +18,31 @@ export async function writeContextBundle(
   document: CategoryTreeDocument,
   rootDir: string,
   groupDepth: number,
+  options: { importId?: number } = {},
 ): Promise<{ dir: string; chunks: ContextChunk[] }> {
   const dir = join(rootDir, "context", document.version);
   const chunks = makeContextChunks(document, groupDepth);
   await mkdir(dir, { recursive: true });
-  await writeJsonFile(join(dir, "category-tree.json"), document);
+  // 一个版本只保留当前分片方案，避免上一次不完整抓取的 level-* 文件混入目录。
+  let entries: Array<import("node:fs").Dirent> = [];
+  try {
+    entries = await readdir(dir, { withFileTypes: true });
+  } catch {
+    entries = [];
+  }
+  await Promise.all(
+    entries
+      .filter((entry) => entry.isDirectory() && /^level-\d+$/u.test(entry.name))
+      .map((entry) => rm(join(dir, entry.name), { recursive: true, force: true })),
+  );
+  const bundleDocument = options.importId === undefined
+    ? document
+    : { ...document, importId: options.importId };
+  await writeJsonFile(join(dir, "category-tree.json"), bundleDocument);
   const manifestChunks: Array<Omit<ContextChunk, "text"> & { file: string; sha256: string }> = [];
   for (const chunk of chunks) {
-    const file = join(`level-${groupDepth}`, `${slugify(chunk.key)}.std.txt`);
+    const readable = slugify(`d${groupDepth}-${chunk.rootPath.join("-")}`).slice(0, 60);
+    const file = join(`level-${groupDepth}`, `${readable}-id-${shortCategoryId(chunk.rootId)}.std.txt`);
     const absolute = join(dir, file);
     await writeTextFile(absolute, chunk.text);
     manifestChunks.push({
@@ -36,14 +53,22 @@ export async function writeContextBundle(
     });
   }
   await writeJsonFile(join(dir, "manifest.json"), {
-    version: document.version,
+    version: bundleDocument.version,
     groupDepth,
-    nodeCount: document.nodes.length,
-    leafCount: document.leafCount,
+    nodeCount: bundleDocument.nodes.length,
+    leafCount: bundleDocument.leafCount,
+    importId: bundleDocument.importId ?? null,
+    source: {
+      path: bundleDocument.sourcePath ?? null,
+      sha256: bundleDocument.sourceSha256 ?? null,
+      url: bundleDocument.sourceUrl ?? null,
+      fetchedAt: bundleDocument.fetchedAt ?? null,
+    },
+    generatedAt: new Date().toISOString(),
     chunks: manifestChunks,
   });
   await writeJsonFile(join(dir, "id-index.json"), Object.fromEntries(
-    document.nodes.map((node) => [node.id, { path: node.pathNames, level: node.level, leaf: node.isLeaf }]),
+    bundleDocument.nodes.map((node) => [node.id, { path: node.pathNames, level: node.level, leaf: node.isLeaf }]),
   ));
   return { dir, chunks };
 }
