@@ -10,17 +10,23 @@ export interface JdAttributeEvidence {
   values?: string[];
   observed?: number;
   groups?: string[];
+  sources?: string[];
 }
 
 export interface JdCategoryEvidence {
   id?: string;
   path: string[];
   attributes: JdAttributeEvidence[];
+  targetIds?: string[];
+  sampleSkuIds?: string[];
+  confidence?: number;
 }
 
 export interface JdEvidenceDocument {
   version?: string;
   source?: string;
+  generatedAt?: string;
+  sampling?: Record<string, unknown>;
   categories: JdCategoryEvidence[];
 }
 
@@ -38,6 +44,7 @@ function normalize(value: string): string {
 }
 
 function score(target: CategoryNode, candidate: JdCategoryEvidence): number {
+  if (candidate.targetIds?.includes(target.id) || candidate.targetIds?.includes(shortCategoryId(target.id))) return 1.2;
   const targetLeaf = normalize(target.name);
   const candidateLeaf = normalize(candidate.path.at(-1) ?? "");
   if (!targetLeaf || !candidateLeaf) return 0;
@@ -59,6 +66,7 @@ function cleanAttribute(value: unknown): JdAttributeEvidence | null {
   const values = [...new Set(rawValues.map(text).filter(Boolean))].slice(0, 20);
   const observed = typeof item.observed === "number" && Number.isFinite(item.observed) ? item.observed : undefined;
   const groups = Array.isArray(item.groups) ? item.groups.map(text).filter(Boolean).slice(0, 4) : undefined;
+  const sources = Array.isArray(item.sources) ? item.sources.map(text).filter(Boolean).slice(0, 4) : undefined;
   return {
     name,
     type: text(item.type ?? item.valueType) || null,
@@ -66,6 +74,7 @@ function cleanAttribute(value: unknown): JdAttributeEvidence | null {
     values,
     observed,
     groups,
+    sources,
   };
 }
 
@@ -81,7 +90,10 @@ function cleanCategory(value: unknown): JdCategoryEvidence | null {
     ? rawAttributes.map(cleanAttribute).filter((item): item is JdAttributeEvidence => Boolean(item))
     : [];
   if (attributes.length === 0) return null;
-  return { id: text(item.id) || undefined, path, attributes };
+  const targetIds = Array.isArray(item.targetIds) ? item.targetIds.map(text).filter(Boolean) : undefined;
+  const sampleSkuIds = Array.isArray(item.sampleSkuIds) ? item.sampleSkuIds.map(text).filter(Boolean).slice(0, 50) : undefined;
+  const confidence = typeof item.confidence === "number" && Number.isFinite(item.confidence) ? item.confidence : undefined;
+  return { id: text(item.id) || undefined, path, attributes, targetIds, sampleSkuIds, confidence };
 }
 
 export function normalizeJdEvidence(raw: unknown): JdEvidenceDocument {
@@ -93,6 +105,10 @@ export function normalizeJdEvidence(raw: unknown): JdEvidenceDocument {
   return {
     version: text(root.version) || undefined,
     source: text(root.source) || undefined,
+    generatedAt: text(root.generatedAt) || undefined,
+    sampling: root.sampling && typeof root.sampling === "object" && !Array.isArray(root.sampling)
+      ? root.sampling as Record<string, unknown>
+      : undefined,
     categories,
   };
 }
@@ -143,6 +159,7 @@ export function buildJdEvidenceText(
         if (attribute.values?.length) parts.push(`values=${attribute.values.join(",")}`);
         if (attribute.observed !== undefined) parts.push(`seen=${attribute.observed}`);
         if (attribute.groups?.length) parts.push(`groups=${attribute.groups.join(",")}`);
+        if (attribute.sources?.length) parts.push(`source=${attribute.sources.join(",")}`);
         lines.push(parts.join("|"));
       }
     }

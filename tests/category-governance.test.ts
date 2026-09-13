@@ -4,6 +4,7 @@ import { toStdText, makeContextChunks } from "../src/scenarios/category_governan
 import { compactTemplates, parseGovernanceResponse } from "../src/scenarios/category_governance/template-codec.ts";
 import { buildGovernanceUserPrompt } from "../src/scenarios/category_governance/prompt.ts";
 import { buildJdEvidenceText, normalizeJdEvidence } from "../src/scenarios/category_governance/jd-evidence.ts";
+import { collectJdEvidence } from "../src/scenarios/category_governance/jd-collector.ts";
 import type { GovernanceResult } from "../src/scenarios/category_governance/types.ts";
 
 describe("标准类目治理公共函数", () => {
@@ -95,5 +96,32 @@ describe("标准类目治理公共函数", () => {
     expect(prompt).toContain("#JD-EVIDENCE");
     expect(prompt.indexOf("目标末级类目")).toBeLessThan(prompt.indexOf("#JD-EVIDENCE"));
     expect(prompt).toContain("纸张克重");
+  });
+
+  test("京东采样器聚合类目属性和规格参数，并保留目标映射", async () => {
+    const target = document.nodes[2]!;
+    const result = await collectJdEvidence({
+      targetCategories: [target], skusPerCategory: 2, searchPageSize: 2, concurrency: 1, attempts: 1,
+      goodsApi: {
+        async searchSku() {
+          return { skuHitResultPaging: { items: [
+            { skuId: 1001, skuName: "A4复印纸 70g", categoryId3: 999, categoryName1: "办公", categoryName2: "纸品", categoryName3: "复印纸" },
+            { skuId: 1002, skuName: "A4复印纸 80g", categoryId3: 999, categoryName1: "办公", categoryName2: "纸品", categoryName3: "复印纸" },
+          ] } };
+        },
+        async getSkuDetailInfo(request) {
+          const skuId = String(request.skuId);
+          return {
+            skuId,
+            categoryAttrList: [{ cateAttrName: "纸张类型", cateAttrValList: ["复印纸"] }],
+            paramGroupAttrList: [{ paramGroupName: "规格", paramAttributeList: [{ paramAttrName: "克重", paramAttrValList: [String(skuId) === "1001" ? "70g" : "80g"] }] }],
+          };
+        },
+      },
+    });
+    expect(result.stats.sampledSkuCount).toBe(2);
+    expect(result.document.categories[0]?.targetIds).toContain(target.id);
+    expect(result.document.categories[0]?.attributes.map((item) => item.name)).toEqual(["克重", "纸张类型"]);
+    expect(result.document.categories[0]?.attributes[0]?.observed).toBe(2);
   });
 });

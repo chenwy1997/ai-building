@@ -61,6 +61,21 @@ bun run category-governance --jd-evidence=/absolute/path/jd-attribute-evidence.j
 
 程序会按三横目标末级类目匹配最多两个相近京东类目、每个类目最多十六个属性，并把证据放在目标类目列表之后。这样固定的类目树前缀仍可命中 DeepSeek KV 缓存，京东证据只增加当前批次需要的少量输入；`--no-jd-evidence` 可关闭。京东证据缺失时流程照常运行，不会因为参考库不可用而中断。
 
+可以用项目内置采样器从京东 VOP 生成证据文件。它先调用 `searchSku` 找候选 SKU，再调用 `getSkuDetailInfo` 聚合 `categoryAttrList` 和 `paramGroupAttrList`；默认只采样 10 个三横末级类目，避免误触发全量请求：
+
+```bash
+# 先采样一个类目，确认代理和字段质量
+bun run category-governance:jd-evidence --category="手机" --skus-per-category=8 --concurrency=2 --direct
+
+# 采样前 100 个末级类目
+bun run category-governance:jd-evidence --limit=100 --skus-per-category=8 --concurrency=4 --direct
+
+# 明确允许全量采样（京东 VOP 请求量较大）
+bun run category-governance:jd-evidence --all --skus-per-category=8 --concurrency=4 --direct
+```
+
+采样器默认从 `/Users/sanheng/Project/sanheng/ai-core/.env` 读取京东配置，并输出到 `context/<version>/jd-attribute-evidence.json`；可用 `--jd-project`、`--out` 覆盖。重复运行同一输出路径会按目标类目更新证据，不会把重复类目无限追加。
+
 导入会写入独立库 `ai-building-category_governance` 的 `category_nodes_v1`；导入、运行、结果分别写入 `category_imports_v1`、`governance_runs_v1`、`attribute_templates_v1`。新的不可变版本可以使用 `--version=v2`，并通过新的迁移增加对应 `_v2` 表，不覆盖已完成的 `_v1` 记录。
 
 ## 上下文格式
