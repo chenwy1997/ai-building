@@ -31,14 +31,13 @@ export function buildGovernanceUserPrompt(input: {
 压缩后的类目上下文（本类目组固定前缀）：
 ${input.categoryText}
 
-目标末级类目（必须全部返回）：
-${JSON.stringify(targets, null, 2)}
-
-${repair}
-
 请输出如下 JSON 结构：
 {"items":[{"category":{"id":"目标 category_id","path":["一级","二级"],"name":"末级名称"},"shared":[${propertyExample()}],"properties":[${propertyExample()}],"notes":[]}]}
-shared 放该批次中可复用的共有属性，properties 放该类目专属或更准确的属性。每个属性都应包含 key,name,type,required；可选字段为 description,unit,options,format,example,scope。最终返回条数必须等于目标类目数。`;
+shared 放该批次中可复用的共有属性，properties 放该类目专属或更准确的属性。每个属性都应包含 key,name,type,required；可选字段为 description,unit,options,format,example,scope。最终返回条数必须等于目标类目数。
+
+目标末级类目（必须全部返回）：
+${JSON.stringify(targets)}
+${repair}`;
 }
 
 function propertyExample(): string {

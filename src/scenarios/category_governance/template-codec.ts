@@ -127,6 +127,22 @@ function dedupeProperties(properties: AttributeProperty[]): AttributeProperty[] 
   });
 }
 
+function dedupePropertyParts(shared: AttributeProperty[], properties: AttributeProperty[]): {
+  shared: AttributeProperty[];
+  properties: AttributeProperty[];
+} {
+  const cleanShared = dedupeProperties(shared);
+  const sharedKeys = new Set(cleanShared.map((property) => property.key));
+  const sharedNames = new Set(cleanShared.map((property) => property.name));
+  const cleanProperties = dedupeProperties(properties).filter((property) => {
+    if (sharedKeys.has(property.key) || sharedNames.has(property.name)) return false;
+    sharedKeys.add(property.key);
+    sharedNames.add(property.name);
+    return true;
+  });
+  return { shared: cleanShared, properties: cleanProperties };
+}
+
 function validateProperties(properties: AttributeProperty[]): void {
   if (properties.length === 0) throw new Error("类目属性不能为空");
   const keys = new Set<string>();
@@ -155,7 +171,8 @@ export function parseGovernanceResponse(text: string, targets: CategoryNode[]): 
           return tupleToProperty(dictionary[key]);
         });
       };
-      normalized.push({ category: {id: node.id, name: node.name, path: node.pathNames}, shared: dedupeProperties(expand(refs[0])), properties: dedupeProperties(expand(refs[1])), notes: parseNotes(refs[2]) });
+      const parts = dedupePropertyParts(expand(refs[0]), expand(refs[1]));
+      normalized.push({ category: {id: node.id, name: node.name, path: node.pathNames}, ...parts, notes: parseNotes(refs[2]) });
     }
   } else {
     const items = data.items;
@@ -164,7 +181,8 @@ export function parseGovernanceResponse(text: string, targets: CategoryNode[]): 
       const node = aliases.get(item?.category?.id);
       if (!node) throw new Error(`输出包含非目标类目：${item?.category?.id}`);
       if (!Array.isArray(item.properties)) throw new Error("properties 必须为数组");
-      normalized.push({ category: {id: node.id, name: node.name, path: node.pathNames}, shared: dedupeProperties((item.shared ?? []).map(parseProperty)), properties: dedupeProperties(item.properties.map(parseProperty)), notes: parseNotes(item.notes ?? []) });
+      const parts = dedupePropertyParts((item.shared ?? []).map(parseProperty), item.properties.map(parseProperty));
+      normalized.push({ category: {id: node.id, name: node.name, path: node.pathNames}, ...parts, notes: parseNotes(item.notes ?? []) });
     }
   }
   const actual = new Set(normalized.map((result) => result.category.id));
