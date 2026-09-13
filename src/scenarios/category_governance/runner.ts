@@ -174,6 +174,7 @@ export async function runGovernance(options: {
       let succeeded = false;
       for (let attempt = 1; attempt <= Math.max(1, options.attempts); attempt += 1) {
         let rawText = "";
+        let finishReason: string | null = null;
         const requestPath = join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.request.json`);
         const prompt = buildGovernanceUserPrompt({
           version: document.version,
@@ -206,6 +207,7 @@ export async function runGovernance(options: {
             response_format: { type: "json_object" },
             thinking: { type: "disabled" },
           });
+          finishReason = response.choices[0]?.finish_reason ?? null;
           rawText = parseContent(response.choices[0]?.message.content);
           const results = parseGovernanceResponse(rawText, batch.nodes);
           const compact = compactTemplates(results);
@@ -237,6 +239,8 @@ export async function runGovernance(options: {
             runId,
             batch: batch.key,
             attempt,
+            finishReason,
+            rawBytes: rawText.length,
             source: inputSource,
           });
           if (error instanceof Error && error.message.startsWith("模型请求失败")) {
