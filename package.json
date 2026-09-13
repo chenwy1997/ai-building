@@ -8,6 +8,7 @@
     "dev": "bun --watch index.ts",
     "cli": "bun run src/cli.ts",
     "category-governance": "bun run src/scenarios/category_governance/entry.ts",
+    "category-governance:excel": "bun run src/scenarios/category_governance/export-excel.ts",
     "typecheck": "bunx tsc --noEmit",
     "test": "bun test",
     "check": "bun run typecheck && bun test"
