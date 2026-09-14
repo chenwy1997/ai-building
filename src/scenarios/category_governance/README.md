@@ -150,6 +150,14 @@ bun run category-governance:semantic-review \
 `--failed-only` 可以和 `--category` 组合，用于只重试某一个失败类目；成功结果会替换旧失败记录，仍失败的才会继续留在错误列表中。
 新增类目进入共识库后，使用 `--unreviewed-only` 只运行尚未有语义终审记录的类目，避免把已完成的 11,000 多个类目再次计费。
 
+v1 验收后可冻结一份带 SHA-256 校验的只读基线：
+
+```bash
+bun run category-governance:freeze --version=v1
+```
+
+基线写入 `output/v1/baseline/`。后续重复治理仍使用新的 `run-*` 快照，并用 `--unreviewed-only` 或 `--failed-only` 增量处理；不要使用 `--all` 重新发送已经完成的类目。
+
 如果某次运行已经保存了模型响应，但因为协议校验失败，优先用本地恢复避免重复计费：
 
 ```bash
