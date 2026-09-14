@@ -88,6 +88,25 @@ export interface SemanticTemplateDocument {
   }>;
 }
 
+function comparableCandidate(candidate: AttributeCandidate): Record<string, unknown> {
+  // 排除 runCount/coverage/sourceRuns 等运行统计；只有实际属性定义或候选状态变化才触发增量复审。
+  return {
+    key: candidate.key, name: candidate.name, type: candidate.type, required: candidate.required,
+    unit: candidate.unit, options: candidate.options ?? [], description: candidate.description ?? "",
+    format: candidate.format ?? null, example: candidate.example ?? null, scope: candidate.scope,
+    decision: candidate.decision,
+  };
+}
+
+export function semanticCategoryFingerprint(category: CategoryConsensus): string {
+  const sort = (items: AttributeCandidate[]) => items.map(comparableCandidate).sort((left, right) => `${left.key}`.localeCompare(`${right.key}`));
+  return JSON.stringify({ category: category.category, shared: sort(category.shared), properties: sort(category.properties) });
+}
+
+export function semanticCategoryChanged(current: CategoryConsensus, baseline: CategoryConsensus | undefined): boolean {
+  return !baseline || semanticCategoryFingerprint(current) !== semanticCategoryFingerprint(baseline);
+}
+
 export const SEMANTIC_REVIEW_SYSTEM_PROMPT = `你是类目属性治理的最终语义审阅专家。输入是多个批次模型生成的属性候选、候选出现频次和京东商品证据摘要。你要结合三横类目完整路径、行业常识和证据语义，决定哪些属性进入模板。
 
 原则：

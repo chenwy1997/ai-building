@@ -8,7 +8,7 @@ import { readJsonFile, writeJsonFile, writeTextFile } from "../../facilities/jso
 import { parseFlags, asInt, boolFlag, slugify, shortCategoryId, parseGovernanceConcurrency } from "./util.ts";
 import { readContextDocument, workspaceRoot } from "./storage.ts";
 import { loadJdEvidence, buildJdEvidenceText, type JdEvidenceDocument } from "./jd-evidence.ts";
-import { addSemanticReviewUsage, applySemanticReviews, buildSemanticReviewPrompt, emptySemanticReviewUsage, mergeSemanticReviewErrors, mergeSemanticReviews, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT, type SemanticReviewDocument, type SemanticReviewError, type SemanticReviewResult, type SemanticReviewUsage } from "./semantic-review.ts";
+import { addSemanticReviewUsage, applySemanticReviews, buildSemanticReviewPrompt, emptySemanticReviewUsage, mergeSemanticReviewErrors, mergeSemanticReviews, parseSemanticReviewResponse, semanticCategoryChanged, SEMANTIC_REVIEW_SYSTEM_PROMPT, type SemanticReviewDocument, type SemanticReviewError, type SemanticReviewResult, type SemanticReviewUsage } from "./semantic-review.ts";
 import type { AttributeConsensusDocument, CategoryConsensus } from "./consensus.ts";
 import type { CategoryNode } from "./types.ts";
 
@@ -27,6 +27,7 @@ const HELP = `
   --all                明确允许审阅全部共识类目
   --failed-only        只重试稳定审阅文件中上次失败的类目
   --unreviewed-only    只审阅稳定文件中尚未有终审结果的新类目
+  --changed-only       只审阅相对已冻结候选基线发生属性变化的类目
   --replay-run=...     只解析已保存的某次运行响应，不调用模型、不产生 API 费用
   --concurrency=64     并发请求数；auto 为 64，max 为 2500，可显式指定 1–2500
   --attempts=2         单类目失败重试次数
@@ -121,6 +122,15 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const selector = flags.category ?? flags["category-id"];
   const failedOnly = boolFlag(flags["failed-only"]);
   const unreviewedOnly = boolFlag(flags["unreviewed-only"]);
+  const changedOnly = boolFlag(flags["changed-only"]);
+  let baselineById: Map<string, CategoryConsensus> | undefined;
+  if (changedOnly) {
+    const baselinePath = join(workspace, "output", version, "baseline", "attribute-candidates-v1.json");
+    try {
+      const baseline = await readJsonFile<AttributeConsensusDocument>(baselinePath);
+      baselineById = new Map(baseline.categories.map((item) => [item.category.id, item]));
+    } catch { throw new Error(`--changed-only 找不到已冻结候选基线：${baselinePath}`); }
+  }
   let stableReviewForSelection: SemanticReviewDocument | undefined;
   try { stableReviewForSelection = await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { /* 首次运行 */ }
   let failedIds: Set<string> | undefined;
@@ -132,11 +142,11 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const reviewedIds = unreviewedOnly ? new Set((stableReviewForSelection?.reviews ?? []).map((item) => item.categoryId)) : undefined;
   const candidateCategories = consensus.categories.filter((category) => {
     const node = byId.get(category.category.id);
-    return node && (!selector || matches(node, selector)) && (!failedIds || failedIds.has(category.category.id)) && (!reviewedIds || !reviewedIds.has(category.category.id));
+    return node && (!selector || matches(node, selector)) && (!failedIds || failedIds.has(category.category.id)) && (!reviewedIds || !reviewedIds.has(category.category.id)) && (!baselineById || semanticCategoryChanged(category, baselineById.get(category.category.id)));
   });
   if (candidateCategories.length === 0) throw new Error("没有找到可审阅的共识类目");
   if (boolFlag(flags.all) && flags.limit !== undefined) throw new Error("--all 和 --limit 不能同时指定");
-  const requestedLimit = flags.limit !== undefined ? asInt(flags.limit, 10) : boolFlag(flags.all) || selector || failedOnly || unreviewedOnly ? undefined : 10;
+  const requestedLimit = flags.limit !== undefined ? asInt(flags.limit, 10) : boolFlag(flags.all) || selector || failedOnly || unreviewedOnly || changedOnly ? undefined : 10;
   const categories = requestedLimit === undefined ? candidateCategories : candidateCategories.slice(0, requestedLimit);
   if (categories.length === 0) throw new Error("没有需要审阅的类目；可使用 --all");
   const concurrency = parseGovernanceConcurrency(flags.concurrency ?? Bun.env.CATEGORY_GOVERNANCE_CONCURRENCY);
@@ -151,6 +161,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     workerCount,
     failedOnly,
     unreviewedOnly,
+    changedOnly,
     categoryIds: categories.map((item) => item.category.id),
   };
   console.log(`候选库：${consensusPath}（来源 ${consensus.sourceRuns.map((id) => `run-${id}`).join(", ")}）`);

@@ -7,7 +7,7 @@ import { buildJdEvidenceText, normalizeJdEvidence } from "../src/scenarios/categ
 import { collectJdEvidence } from "../src/scenarios/category_governance/jd-collector.ts";
 import { buildJdCategoryMapping, autoJdCategoryReferences } from "../src/scenarios/category_governance/jd-mapping.ts";
 import { buildAttributeConsensus, buildConfirmedTemplateDocument } from "../src/scenarios/category_governance/consensus.ts";
-import { addSemanticReviewUsage, applySemanticReviews, buildSemanticReviewPrompt, emptySemanticReviewUsage, mergeSemanticReviewErrors, mergeSemanticReviews, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT } from "../src/scenarios/category_governance/semantic-review.ts";
+import { addSemanticReviewUsage, applySemanticReviews, buildSemanticReviewPrompt, emptySemanticReviewUsage, mergeSemanticReviewErrors, mergeSemanticReviews, parseSemanticReviewResponse, semanticCategoryChanged, semanticCategoryFingerprint, SEMANTIC_REVIEW_SYSTEM_PROMPT } from "../src/scenarios/category_governance/semantic-review.ts";
 import type { OpenAiUsage } from "../src/ai/types.ts";
 import type { GovernanceResult } from "../src/scenarios/category_governance/types.ts";
 import { parseGovernanceConcurrency } from "../src/scenarios/category_governance/util.ts";
@@ -265,5 +265,17 @@ describe("标准类目治理公共函数", () => {
     );
     expect(merged.map((item) => item.categoryId)).toEqual(["a4", "phone"]);
     expect(merged.find((item) => item.categoryId === "a4")?.notes).toEqual(["新"]);
+  });
+
+  test("changed-only 忽略运行统计变化，只在属性定义或候选状态变化时触发", () => {
+    const base = buildAttributeConsensus([{ runId: "1", result: {
+      category: { id: "a4", path: ["办公", "纸品", "A4复印纸"], name: "A4复印纸" }, shared: [],
+      properties: [{ key: "weight", name: "克重", type: "number", required: false, unit: "g/m²", options: [], scope: "category" }], notes: [],
+    } }]).categories[0]!;
+    const sameDefinition = { ...base, runCount: 9, properties: base.properties.map((item) => ({ ...item, coverage: 0.9, sourceRuns: ["1", "2"] })) };
+    expect(semanticCategoryFingerprint(base)).toBe(semanticCategoryFingerprint(sameDefinition));
+    expect(semanticCategoryChanged(sameDefinition, base)).toBe(false);
+    const changed = { ...sameDefinition, properties: sameDefinition.properties.map((item) => ({ ...item, unit: "kg" })) };
+    expect(semanticCategoryChanged(changed, base)).toBe(true);
   });
 });
