@@ -151,7 +151,13 @@ bun run category-governance:semantic-review \
 # 确认小范围结果后再扩大
 bun run category-governance:semantic-review \
   --limit=50 --concurrency=8 --attempts=2 --direct
+
+# 后续全量运行使用高并发；max 等于 DeepSeek V4 Flash 官方并发上限 2500
+bun run category-governance:semantic-review \
+  --all --concurrency=max --attempts=2 --direct
 ```
+
+生成与终审入口共用并发参数解析：默认或 `auto` 为 64，`max` 为 2500，也可指定 1–2500 的整数。DeepSeek V4 Flash 的官方账号级并发上限为 2500，超过会返回 HTTP 429；多个 API Key 仍共用账号额度。未传参数时读取 `CATEGORY_GOVERNANCE_CONCURRENCY` 环境变量。非法或超范围值会报错，终审不再把大于 32 的值静默压低。启动日志和 manifest 会记录配置并发以及按目标数量计算的实际工作数。并发在启动时确定，修改源码不会提高已运行进程的并发。
 
 终审请求的系统提示词、类目、京东证据和输出协议位于前缀，候选统计放在末尾并稳定序列化，尽量复用 DeepSeek KV 缓存。第一版类目树只读，终审只能改变属性。终审请求关闭 V4flash 思考模式，避免把 reasoning token 计入每个属性的治理成本；为控制输出成本，`keep/drop/review` 只返回 key、动作和短理由，完整 property 只允许出现在 `add` 中。结果写入 `output/<version>/semantic-review/attribute-templates-v1.json`，同时保存每个类目的原始请求、模型返回、缓存命中 token、reasoning token 和失败原因。
 

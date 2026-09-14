@@ -9,6 +9,7 @@ import { buildJdCategoryMapping, autoJdCategoryReferences } from "../src/scenari
 import { buildAttributeConsensus, buildConfirmedTemplateDocument } from "../src/scenarios/category_governance/consensus.ts";
 import { applySemanticReviews, buildSemanticReviewPrompt, mergeSemanticReviews, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT } from "../src/scenarios/category_governance/semantic-review.ts";
 import type { GovernanceResult } from "../src/scenarios/category_governance/types.ts";
+import { parseGovernanceConcurrency } from "../src/scenarios/category_governance/util.ts";
 
 describe("标准类目治理公共函数", () => {
   const document = normalizeCategories({ items: [
@@ -16,6 +17,19 @@ describe("标准类目治理公共函数", () => {
     { id: "paper", name: "纸品", fatherId: "root" },
     { id: "a4", name: "A4复印纸", fatherId: "paper" },
   ] }, "v1");
+
+  test("高并发参数不再被截到 32 或把 max 回退到低并发", () => {
+    expect(parseGovernanceConcurrency("128")).toBe(128);
+    expect(parseGovernanceConcurrency("256")).toBe(256);
+    expect(parseGovernanceConcurrency("2500")).toBe(2500);
+    expect(parseGovernanceConcurrency("max")).toBe(2500);
+    expect(parseGovernanceConcurrency("16")).toBe(16);
+    expect(parseGovernanceConcurrency("auto")).toBe(64);
+    expect(parseGovernanceConcurrency(undefined)).toBe(64);
+    for (const value of ["0", "-1", "2501", "1.5", "invalid"]) {
+      expect(() => parseGovernanceConcurrency(value)).toThrow("并发数不合法");
+    }
+  });
 
   test("保留层级并用缩进表达共同父路径", () => {
     const text = toStdText(document);

@@ -8,16 +8,13 @@ import {
   publicMigrations,
   scenarioDatabaseName,
 } from "../../platform/database/index.ts";
-import { parseFlags, asInt, boolFlag } from "./util.ts";
+import { parseFlags, asInt, boolFlag, parseGovernanceConcurrency } from "./util.ts";
 import { categoryGovernanceScenario } from "./index.ts";
 import {
   importAndBuildContext,
   runGovernance,
 } from "./runner.ts";
 import { workspaceRoot } from "./storage.ts";
-
-const DEFAULT_CONCURRENCY = 64;
-const MAX_CONCURRENCY = 256;
 
 const HELP = `
 标准类目治理快捷入口
@@ -31,7 +28,7 @@ const HELP = `
   bun run category-governance --input=/path/to/category.raw.json
 
 参数：
-  --concurrency=64       并发请求数；传 max 使用 256，传 auto 使用 64，最高允许 256
+  --concurrency=64       并发请求数；传 max 使用 2500，传 auto 使用 64，最高允许 2500
   --batch-size=12        每次请求包含的末级类目数
   --attempts=1           每个批次最多尝试次数；失败会带着校验原因重试
   --category=...         可选：类目 ID、短 ID、名称或完整路径；不传则全量
@@ -48,16 +45,6 @@ const HELP = `
   --dry-run              只生成请求文件，不调用模型
   --workspace=...        覆盖类目治理 workspace
 `.trim();
-
-function concurrencyValue(value: string | undefined): number {
-  if (!value || value === "auto") return DEFAULT_CONCURRENCY;
-  if (value === "max") return MAX_CONCURRENCY;
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed < 1) {
-    throw new Error(`并发数不合法：${value}`);
-  }
-  return Math.min(MAX_CONCURRENCY, Math.floor(parsed));
-}
 
 function addNoProxy(hostname: string): void {
   for (const key of ["NO_PROXY", "no_proxy"]) {
@@ -101,7 +88,7 @@ export async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const groupDepth = asInt(flags["group-depth"], 2);
   const batchSize = asInt(flags["batch-size"], 12);
   const attempts = asInt(flags.attempts, 1);
-  const concurrency = concurrencyValue(flags.concurrency ?? Bun.env.CATEGORY_GOVERNANCE_CONCURRENCY);
+  const concurrency = parseGovernanceConcurrency(flags.concurrency ?? Bun.env.CATEGORY_GOVERNANCE_CONCURRENCY);
   const provider = flags.provider ?? "deepseek";
   const model = flags.model ?? "flash";
   const dryRun = boolFlag(flags["dry-run"]);

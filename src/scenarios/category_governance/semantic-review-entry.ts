@@ -4,7 +4,7 @@ import { loadAppConfig } from "../../config/env.ts";
 import { PostgresAiCatalog } from "../../data/ai-catalog.ts";
 import { DatabaseHub } from "../../platform/database/index.ts";
 import { readJsonFile, writeJsonFile, writeTextFile } from "../../facilities/json/files.ts";
-import { parseFlags, asInt, boolFlag, slugify, shortCategoryId } from "./util.ts";
+import { parseFlags, asInt, boolFlag, slugify, shortCategoryId, parseGovernanceConcurrency } from "./util.ts";
 import { readContextDocument, workspaceRoot } from "./storage.ts";
 import { loadJdEvidence, buildJdEvidenceText, type JdEvidenceDocument } from "./jd-evidence.ts";
 import { applySemanticReviews, buildSemanticReviewPrompt, mergeSemanticReviews, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT, type SemanticReviewDocument, type SemanticReviewResult } from "./semantic-review.ts";
@@ -17,13 +17,14 @@ const HELP = `
 用法：
   bun run category-governance:semantic-review --category="手机" --limit=1 --direct
   bun run category-governance:semantic-review --limit=30 --concurrency=4 --direct
-  bun run category-governance:semantic-review --all --concurrency=16 --direct
+  bun run category-governance:semantic-review --all --concurrency=128 --direct
+  bun run category-governance:semantic-review --all --concurrency=max --direct
 
 参数：
   --category=...       只审阅指定类目名称、完整路径、完整 ID 或短 ID
   --limit=10           从候选库中最多审阅 N 个类目，不会自动生成候选；未指定范围时默认 10
   --all                明确允许审阅全部共识类目
-  --concurrency=4      语义审阅并发数，默认 4
+  --concurrency=64     并发请求数；auto 为 64，max 为 2500，可显式指定 1–2500
   --attempts=2         单类目失败重试次数
   --consensus=...      共识文件路径，默认 output/<version>/consensus/attribute-candidates-v1.json
   --jd-evidence=...    京东证据路径，默认 context/<version>/jd-attribute-evidence.json
@@ -76,16 +77,21 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const requestedLimit = flags.limit !== undefined ? asInt(flags.limit, 10) : boolFlag(flags.all) || selector ? undefined : 10;
   const categories = requestedLimit === undefined ? candidateCategories : candidateCategories.slice(0, requestedLimit);
   if (categories.length === 0) throw new Error("没有需要审阅的类目；可使用 --all");
+  const concurrency = parseGovernanceConcurrency(flags.concurrency ?? Bun.env.CATEGORY_GOVERNANCE_CONCURRENCY);
+  const workerCount = Math.min(concurrency, categories.length);
   const inputSummary = {
     sourceConsensus: consensusPath,
     sourceRuns: consensus.sourceRuns,
     consensusCategoryCount: consensus.categories.length,
     matchedCategoryCount: candidateCategories.length,
     requestedLimit: requestedLimit ?? null,
+    concurrency,
+    workerCount,
     categoryIds: categories.map((item) => item.category.id),
   };
   console.log(`候选库：${consensusPath}（来源 ${consensus.sourceRuns.map((id) => `run-${id}`).join(", ")}）`);
   console.log(`候选类目 ${consensus.categories.length}，匹配 ${candidateCategories.length}，本次审阅 ${categories.length}${requestedLimit === undefined ? "" : `（上限 ${requestedLimit}）`}`);
+  console.log(`并发：配置 ${concurrency}，本次并发上限 ${workerCount}；思考模式已关闭`);
   if (requestedLimit !== undefined && candidateCategories.length < requestedLimit) {
     console.warn(`候选不足：当前范围只有 ${candidateCategories.length} 个类目。--limit 只限制数量；扩大范围前请用 category-governance:consensus 汇总包含更多类目的已有批次。`);
   }
@@ -98,7 +104,6 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const provider = flags.provider ?? "deepseek";
   const model = flags.model ?? "flash";
   const attempts = asInt(flags.attempts, 2);
-  const concurrency = Math.min(32, asInt(flags.concurrency, 4));
   const dryRun = boolFlag(flags["dry-run"]);
   if (boolFlag(flags.direct) && provider === "deepseek") disableProxy();
   const databases = dryRun ? undefined : new DatabaseHub(loadAppConfig().postgresUrl);
@@ -161,7 +166,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
         markProgress(lastError.length === 0);
       }
     };
-    await Promise.all(Array.from({ length: Math.min(concurrency, categories.length) }, () => worker()));
+    await Promise.all(Array.from({ length: workerCount }, () => worker()));
   } finally {
     await databases?.closeAll();
   }

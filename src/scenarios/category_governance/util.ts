@@ -36,6 +36,17 @@ export function asInt(value: string | undefined, fallback: number, min = 1): num
   return Number.isFinite(parsed) ? Math.max(min, Math.floor(parsed)) : fallback;
 }
 
+export function parseGovernanceConcurrency(value: string | undefined): number {
+  const normalized = value?.trim().toLowerCase();
+  if (!normalized || normalized === "auto") return 64;
+  if (normalized === "max") return 2_500;
+  const parsed = Number(normalized);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 2_500) {
+    throw new Error(`并发数不合法：${value}；请使用 1–2500 的整数、auto（64）或 max（2500）`);
+  }
+  return parsed;
+}
+
 export function boolFlag(value: string | undefined): boolean {
   return value === "true" || value === "1" || value === "yes";
 }
