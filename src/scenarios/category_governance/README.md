@@ -169,6 +169,25 @@ bun run category-governance:semantic-review \
   --changed-only --concurrency=128 --attempts=1 --direct
 ```
 
+多轮汇总后，建议先完成候选整理和分层抽样。仍然使用已有两个入口：
+
+```bash
+# 本地汇总及整理，不调用模型；27～31 的补跑沿用第 27 轮，不增加独立票数
+bun run category-governance:consensus --run-id=19,24,25,26,27,28,29,30,31
+
+# 免费查看将要抽查的范围，仅写一份计划
+bun run category-governance:semantic-review --changed-only --sample=30 --plan
+
+# 实际审阅 30 个分层样本，默认关闭思考
+bun run category-governance:semantic-review --changed-only --sample=30 --concurrency=8 --attempts=2 --direct
+```
+
+汇总保留每个候选的完整原始定义及来源，不把不同版本的类型、单位、枚举拼接成一份属性。`attribute-review-candidates-v1.json` 按已有 key 的联系整理候选组，`review-plan.json` 列出多定义、大输入和抽样情况；原定义不会因低频或数量超限被删除。复审入口同样自动执行整理，因此显式传旧候选文件也能得到唯一的候选组 key。
+
+复审输入用 `d` 存完整属性十元组，`g` 引用这些定义及观察轮数。多个定义的 `keep` 必须由 AI 指定 `variant` 或完整修正后的 `property`，程序不会默认覆盖其中一份。AI 若已判断其余候选不适用，可以明确返回 `drop_remaining=true` 和 `drop_reason`，本地展开为逐项删除审计；缺少这个明确决定时，遗漏候选仍然校验失败。这能减少异常大类目逐条输出删除说明的费用。
+
+新复审结果保存输入指纹。`--changed-only` 会跳过候选、证据和协议都没变且已成功审阅的类目；没有输入指纹的旧记录才回退对照冻结基线。`--sample` 每次从当前待审池分层选择，因此重复执行会抽到后续尚未完成的样本。小批次只更新本次成功类目的模板，未审或本次失败的类目保留原模板；只改变候选库不会悄悄套用旧的 `keep` 决定。`--all`、`--limit`、`--sample` 互斥。
+
 v1 验收后可冻结一份带 SHA-256 校验的只读基线：
 
 ```bash

@@ -8,7 +8,8 @@ import { readJsonFile, writeJsonFile, writeTextFile } from "../../facilities/jso
 import { parseFlags, asInt, boolFlag, slugify, shortCategoryId, parseGovernanceConcurrency } from "./util.ts";
 import { readContextDocument, workspaceRoot } from "./storage.ts";
 import { loadJdEvidence, buildJdEvidenceText, type JdEvidenceDocument } from "./jd-evidence.ts";
-import { addSemanticReviewUsage, applySemanticReviews, buildSemanticReviewPrompt, emptySemanticReviewUsage, mergeSemanticReviewErrors, mergeSemanticReviews, parseSemanticReviewResponse, semanticCategoryChanged, SEMANTIC_REVIEW_SYSTEM_PROMPT, type SemanticReviewDocument, type SemanticReviewError, type SemanticReviewResult, type SemanticReviewUsage } from "./semantic-review.ts";
+import { addSemanticReviewUsage, applySuccessfulSemanticReviews, buildSemanticReviewPrompt, emptySemanticReviewUsage, mergeSemanticReviewErrors, mergeSemanticReviews, parseSemanticReviewResponse, semanticCategoryChanged, semanticReviewInputFingerprint, SEMANTIC_REVIEW_SYSTEM_PROMPT, type SemanticReviewDocument, type SemanticReviewError, type SemanticReviewResult, type SemanticReviewUsage, type SemanticTemplateDocument } from "./semantic-review.ts";
+import { prepareReviewConsensus, prepareReviewCategory, reviewCategoryStats, sampleReviewCategories } from "./review-preparation.ts";
 import type { AttributeConsensusDocument, CategoryConsensus } from "./consensus.ts";
 import type { CategoryNode } from "./types.ts";
 
@@ -24,10 +25,12 @@ const HELP = `
 参数：
   --category=...       只审阅指定类目名称、完整路径、完整 ID 或短 ID
   --limit=10           从候选库中最多审阅 N 个类目，不会自动生成候选；未指定范围时默认 10
+  --sample=30          分层抽样，覆盖不同业务类目、普通/多定义/大输入
   --all                明确允许审阅全部共识类目
   --failed-only        只重试稳定审阅文件中上次失败的类目
   --unreviewed-only    只审阅稳定文件中尚未有终审结果的新类目
-  --changed-only       只审阅相对已冻结候选基线发生属性变化的类目
+  --changed-only       相同输入已经成功审阅的跳过；旧记录则对照冻结候选基线
+  --plan               只输出范围和统计，不生成逐类目请求、不调用模型
   --replay-run=...     只解析已保存的某次运行响应，不调用模型、不产生 API 费用
   --concurrency=64     并发请求数；auto 为 64，max 为 2500，可显式指定 1–2500
   --attempts=2         单类目失败重试次数
@@ -55,7 +58,7 @@ interface ReplayResult {
 }
 
 /** 从本地原始响应中恢复结果。每个类目选最后一个能通过当前协议的尝试。 */
-async function replaySavedResponses(runDir: string, categories: CategoryConsensus[]): Promise<ReplayResult> {
+async function replaySavedResponses(runDir: string, categories: CategoryConsensus[], expectedInputs: Map<string, string>): Promise<ReplayResult> {
   const wanted = new Set(categories.map((item) => item.category.id));
   const reviews: SemanticReviewResult[] = [];
   const errors: SemanticReviewError[] = [];
@@ -65,8 +68,10 @@ async function replaySavedResponses(runDir: string, categories: CategoryConsensu
   for (const entry of entries.filter((item) => item.isDirectory())) {
     const requestPath = join(runDir, entry.name, "request.json");
     try {
-      const request = await readJsonFile<{ categoryId: string }>(requestPath);
+      const request = await readJsonFile<{ categoryId: string; system: string; user: string; inputFingerprint?: string }>(requestPath);
       if (!wanted.has(request.categoryId)) continue;
+      const inputFingerprint = request.inputFingerprint ?? semanticReviewInputFingerprint(request.user, request.system);
+      if (inputFingerprint !== expectedInputs.get(request.categoryId)) throw new Error("已保存响应的输入与当前候选/证据/协议不同，不能套用旧决定");
       const category = categories.find((item) => item.category.id === request.categoryId)!;
       const responses = (await readdir(join(runDir, entry.name)))
         .filter((name) => /^attempt-\d+\.response\.json$/u.test(name)).sort();
@@ -80,7 +85,7 @@ async function replaySavedResponses(runDir: string, categories: CategoryConsensu
         const content = typeof response.choices?.[0]?.message?.content === "string" ? response.choices[0].message.content.trim() : "";
         if (!content) { lastError = "模型返回空 content"; continue; }
         try {
-          recovered = { ...parseSemanticReviewResponse(content, category), provenance: { requestPath, responsePath } };
+          recovered = { ...parseSemanticReviewResponse(content, category), inputFingerprint, provenance: { requestPath, responsePath } };
           lastError = "";
         } catch (error) { lastError = error instanceof Error ? error.message : String(error); }
       }
@@ -115,7 +120,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const version = flags.version ?? "v1";
   const workspace = flags.workspace ?? workspaceRoot();
   const consensusPath = flags.consensus ?? join(workspace, "output", version, "consensus", "attribute-candidates-v1.json");
-  const consensus = await readJsonFile<AttributeConsensusDocument>(consensusPath);
+  const consensus = prepareReviewConsensus(await readJsonFile<AttributeConsensusDocument>(consensusPath));
   const context = await readContextDocument(workspace, version);
   const stableReviewPath = join(workspace, "output", version, "semantic-review", "attribute-reviews-v1.json");
   const byId = new Map(context.nodes.map((node) => [node.id, node]));
@@ -133,6 +138,14 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   }
   let stableReviewForSelection: SemanticReviewDocument | undefined;
   try { stableReviewForSelection = await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { /* 首次运行 */ }
+  const previousReviewsById = new Map((stableReviewForSelection?.reviews ?? []).map((review) => [review.categoryId, review]));
+  const evidencePath = flags["jd-evidence"] ?? join(workspace, "context", version, "jd-attribute-evidence.json");
+  let evidence: JdEvidenceDocument | undefined;
+  try { evidence = await loadJdEvidence(evidencePath); } catch { /* 京东证据可选 */ }
+  const promptFor = (category: CategoryConsensus): string => {
+    const node = byId.get(category.category.id);
+    return buildSemanticReviewPrompt({ category, evidenceText: evidence && node ? buildJdEvidenceText([node], evidence) : "" });
+  };
   let failedIds: Set<string> | undefined;
   if (failedOnly) {
     if (!stableReviewForSelection) throw new Error("--failed-only 找不到稳定语义审阅文件");
@@ -142,12 +155,19 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const reviewedIds = unreviewedOnly ? new Set((stableReviewForSelection?.reviews ?? []).map((item) => item.categoryId)) : undefined;
   const candidateCategories = consensus.categories.filter((category) => {
     const node = byId.get(category.category.id);
-    return node && (!selector || matches(node, selector)) && (!failedIds || failedIds.has(category.category.id)) && (!reviewedIds || !reviewedIds.has(category.category.id)) && (!baselineById || semanticCategoryChanged(category, baselineById.get(category.category.id)));
+    if (!node || (selector && !matches(node, selector)) || (failedIds && !failedIds.has(category.category.id)) || reviewedIds?.has(category.category.id)) return false;
+    if (!changedOnly) return true;
+    const previous = previousReviewsById.get(category.category.id);
+    if (previous?.inputFingerprint) return previous.inputFingerprint !== semanticReviewInputFingerprint(promptFor(category));
+    const baseline = baselineById?.get(category.category.id);
+    return semanticCategoryChanged(category, baseline ? prepareReviewCategory(baseline) : undefined);
   });
+  if (candidateCategories.length === 0 && (changedOnly || unreviewedOnly)) { console.log("当前输入没有需要新增复审的类目，模型请求 0"); return; }
   if (candidateCategories.length === 0) throw new Error("没有找到可审阅的共识类目");
-  if (boolFlag(flags.all) && flags.limit !== undefined) throw new Error("--all 和 --limit 不能同时指定");
-  const requestedLimit = flags.limit !== undefined ? asInt(flags.limit, 10) : boolFlag(flags.all) || selector || failedOnly || unreviewedOnly || changedOnly ? undefined : 10;
-  const categories = requestedLimit === undefined ? candidateCategories : candidateCategories.slice(0, requestedLimit);
+  if ([boolFlag(flags.all), flags.limit !== undefined, flags.sample !== undefined].filter(Boolean).length > 1) throw new Error("--all、--limit、--sample 不能同时指定");
+  const sampleSize = flags.sample === undefined ? undefined : asInt(flags.sample, 30);
+  const requestedLimit = flags.limit !== undefined ? asInt(flags.limit, 10) : sampleSize !== undefined || boolFlag(flags.all) || selector || failedOnly || unreviewedOnly || changedOnly ? undefined : 10;
+  const categories = sampleSize !== undefined ? sampleReviewCategories(candidateCategories, sampleSize) : requestedLimit === undefined ? candidateCategories : candidateCategories.slice(0, requestedLimit);
   if (categories.length === 0) throw new Error("没有需要审阅的类目；可使用 --all");
   const concurrency = parseGovernanceConcurrency(flags.concurrency ?? Bun.env.CATEGORY_GOVERNANCE_CONCURRENCY);
   const workerCount = Math.min(concurrency, categories.length);
@@ -157,6 +177,8 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     consensusCategoryCount: consensus.categories.length,
     matchedCategoryCount: candidateCategories.length,
     requestedLimit: requestedLimit ?? null,
+    sampleSize: sampleSize ?? null,
+    selectedStats: categories.map((category) => ({ categoryId: category.category.id, ...reviewCategoryStats(category) })),
     concurrency,
     workerCount,
     failedOnly,
@@ -165,16 +187,24 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     categoryIds: categories.map((item) => item.category.id),
   };
   console.log(`候选库：${consensusPath}（来源 ${consensus.sourceRuns.map((id) => `run-${id}`).join(", ")}）`);
-  console.log(`候选类目 ${consensus.categories.length}，匹配 ${candidateCategories.length}，本次审阅 ${categories.length}${requestedLimit === undefined ? "" : `（上限 ${requestedLimit}）`}`);
+  console.log(`候选类目 ${consensus.categories.length}，匹配 ${candidateCategories.length}，本次审阅 ${categories.length}${sampleSize !== undefined ? `（分层抽样 ${sampleSize}）` : requestedLimit === undefined ? "" : `（上限 ${requestedLimit}）`}`);
   console.log(`并发：配置 ${concurrency}，本次并发上限 ${workerCount}；思考模式已关闭`);
   if (requestedLimit !== undefined && candidateCategories.length < requestedLimit) {
     console.warn(`候选不足：当前范围只有 ${candidateCategories.length} 个类目。--limit 只限制数量；扩大范围前请用 category-governance:consensus 汇总包含更多类目的已有批次。`);
   }
-  const evidencePath = flags["jd-evidence"] ?? join(workspace, "context", version, "jd-attribute-evidence.json");
-  let evidence: JdEvidenceDocument | undefined;
-  try { evidence = await loadJdEvidence(evidencePath); } catch { /* 京东证据可选 */ }
   const runDir = join(workspace, "output", version, "semantic-review", `run-${runStamp()}`);
+  if (boolFlag(flags.plan)) {
+    const planPath = join(runDir, "plan.json");
+    await writeJsonFile(planPath, { ...inputSummary, apiRequests: 0 });
+    console.log(`仅生成计划：${planPath}；模型请求 0`);
+    return;
+  }
   const stableTemplatePath = join(workspace, "output", version, "semantic-review", "attribute-templates-v1.json");
+  let previousTemplates: SemanticTemplateDocument | undefined;
+  try { previousTemplates = await readJsonFile<SemanticTemplateDocument>(stableTemplatePath); } catch { /* 首次导出模板 */ }
+  const updateTemplates = (incoming: SemanticReviewResult[]): SemanticTemplateDocument => {
+    return applySuccessfulSemanticReviews(consensus, incoming, previousTemplates);
+  };
   const provider = flags.provider ?? "deepseek";
   const model = flags.model ?? "flash";
   const attempts = asInt(flags.attempts, 2);
@@ -182,12 +212,12 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const replayFlag = flags["replay-run"];
   const replayRunDir = replayFlag ? (replayFlag.includes("/") ? resolve(replayFlag) : join(workspace, "output", version, "semantic-review", replayFlag)) : undefined;
   if (replayRunDir) {
-    const replay = await replaySavedResponses(replayRunDir, categories);
+    const replay = await replaySavedResponses(replayRunDir, categories, new Map(categories.map((category) => [category.category.id, semanticReviewInputFingerprint(promptFor(category))])));
     const stablePrevious = await (async () => { try { return await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { return undefined; } })();
     const mergedReviews = mergeSemanticReviews(stablePrevious?.reviews ?? [], replay.reviews);
     const mergedErrors = mergeSemanticReviewErrors(stablePrevious?.errors ?? [], replay.errors, replay.reviews);
     const reviewDocument: SemanticReviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews: mergedReviews, usage: emptySemanticReviewUsage(), errors: mergedErrors };
-    const templates = applySemanticReviews(consensus, mergedReviews);
+    const templates = updateTemplates(replay.reviews);
     await writeJsonFile(stableReviewPath, reviewDocument);
     await writeJsonFile(stableTemplatePath, templates);
     const runDir = join(workspace, "output", version, "semantic-review", `run-${runStamp()}-replay`);
@@ -219,11 +249,11 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
         if (!category) return;
         const node = byId.get(category.category.id);
         if (!node) continue;
-        const evidenceText = evidence ? buildJdEvidenceText([node], evidence) : "";
-        const prompt = buildSemanticReviewPrompt({ category, evidenceText });
+        const prompt = promptFor(category);
+        const inputFingerprint = semanticReviewInputFingerprint(prompt);
         // 路径名只是给人看的；短 ID 保证同名/截断路径不会覆盖别的类目。
         const requestDir = join(runDir, `${slugify(category.category.path.join("-"))}--${shortCategoryId(category.category.id)}`);
-        await writeJsonFile(join(requestDir, "request.json"), { system: SEMANTIC_REVIEW_SYSTEM_PROMPT, user: prompt, categoryId: category.category.id, sourceConsensus: consensusPath, jdEvidencePath: evidence ? evidencePath : null });
+        await writeJsonFile(join(requestDir, "request.json"), { system: SEMANTIC_REVIEW_SYSTEM_PROMPT, user: prompt, inputFingerprint, categoryId: category.category.id, sourceConsensus: consensusPath, jdEvidencePath: evidence ? evidencePath : null });
         if (dryRun) continue;
         let lastError = "";
         for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -241,7 +271,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
               const fields = message && typeof message === "object" ? Object.keys(message).join(",") : "none";
               throw new Error(`模型返回空 content（choices=${response.choices.length}，message字段=${fields || "none"}）`);
             }
-            const review = parseSemanticReviewResponse(content, category);
+            const review = { ...parseSemanticReviewResponse(content, category), inputFingerprint, provenance: { requestPath: join(requestDir, "request.json"), responsePath: join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.response.json`) } };
             reviews.push(review);
             await writeTextFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.raw.txt`), content);
             await writeJsonFile(join(requestDir, "review.json"), review);
@@ -269,7 +299,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const mergedErrors = mergeSemanticReviewErrors(previous?.errors ?? [], errors, reviews);
   const reviewDocument: SemanticReviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews: mergedReviews, usage, errors: mergedErrors };
   await writeJsonFile(stableReviewPath, reviewDocument);
-  const templates = applySemanticReviews(consensus, mergedReviews);
+  const templates = updateTemplates(reviews);
   await writeJsonFile(stableTemplatePath, templates);
   await writeJsonFile(join(runDir, "attribute-reviews-v1.json"), { ...reviewDocument, reviews, errors });
   await writeJsonFile(join(runDir, "attribute-templates-v1.json"), templates);

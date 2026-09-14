@@ -219,7 +219,7 @@ function dedupePropertyParts(shared: AttributeProperty[], properties: AttributeP
   return { shared: cleanShared, properties: cleanProperties };
 }
 
-function validateProperties(properties: AttributeProperty[], options: { allowMissingUnits?: boolean } = {}): void {
+export function validateAttributeProperties(properties: AttributeProperty[], options: { allowMissingUnits?: boolean } = {}): void {
   if (properties.length === 0) throw new Error("类目属性不能为空");
   const keys = new Set<string>();
   const names = new Set<string>();
@@ -335,7 +335,7 @@ export function parseGovernanceResponsePartial(text: string, targets: CategoryNo
         parts = dedupePropertyParts(((item.shared ?? []) as unknown[]).map(parseProperty), item.properties.map(parseProperty));
         notes = parseNotes(item.notes);
       }
-      validateProperties([...parts.shared, ...parts.properties], options);
+      validateAttributeProperties([...parts.shared, ...parts.properties], options);
       results.push({ category: { id: node.id, name: node.name, path: node.pathNames }, ...parts, notes });
     } catch (error) {
       errors.push({ categoryId: node.id, error: error instanceof Error ? error.message : String(error) });

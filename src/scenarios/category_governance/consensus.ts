@@ -1,10 +1,21 @@
 import type { AttributeProperty, GovernanceResult } from "./types.ts";
+import { createHash } from "node:crypto";
+import { propertyToTuple } from "./template-codec.ts";
 
 export type AttributeDecisionStatus = "confirmed" | "candidate" | "review";
 
 export interface GovernanceObservation {
   runId: string;
+  /** 补跑沿用原全量运行的轮次，避免同一轮重复计票。 */
+  roundId?: string;
   result: GovernanceResult;
+}
+
+export interface AttributeVariant {
+  id: string;
+  property: AttributeProperty;
+  sourceRuns: string[];
+  roundIds: string[];
 }
 
 export interface AttributeCandidate extends AttributeProperty {
@@ -16,6 +27,7 @@ export interface AttributeCandidate extends AttributeProperty {
   sharedRate: number;
   sourceRuns: string[];
   reasons: string[];
+  variants?: AttributeVariant[];
 }
 
 export interface CategoryConsensus {
@@ -58,8 +70,9 @@ export interface ConfirmedTemplateDocument {
 }
 
 interface PropertyGroup {
-  values: AttributeProperty[];
+  variants: Map<string, { property: AttributeProperty; sourceRuns: Set<string>; roundIds: Set<string> }>;
   runIds: Set<string>;
+  sourceRuns: Set<string>;
   requiredRuns: Set<string>;
   sharedRuns: Set<string>;
 }
@@ -93,31 +106,18 @@ function groupKey(property: AttributeProperty): string {
   return CANONICAL_NAMES[property.name.trim()] ?? normalizeName(property.name);
 }
 
-function frequency<T>(values: T[], fallback: T): T {
-  const counts = new Map<T, number>();
-  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
-  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? fallback;
+export function propertyVariantId(property: AttributeProperty): string {
+  return `v${createHash("sha256").update(JSON.stringify(propertyToTuple(property))).digest("hex").slice(0, 16)}`;
 }
 
 function representative(group: PropertyGroup): AttributeProperty {
-  const first = group.values[0]!;
-  const type = frequency(group.values.map((value) => value.type), first.type);
-  const unit = frequency(group.values.map((value) => value.unit ?? ""), first.unit ?? "") || null;
-  const description = frequency(group.values.map((value) => value.description ?? "").filter(Boolean), first.description ?? "");
-  const format = frequency(group.values.map((value) => value.format ?? "").filter(Boolean), first.format ?? "") || null;
-  const example = frequency(group.values.map((value) => value.example ?? "").filter(Boolean), first.example ?? "") || null;
-  const options = [...new Set(group.values.flatMap((value) => value.options ?? []))].slice(0, 30);
-  return {
-    ...first,
-    key: frequency(group.values.map((value) => value.key), first.key),
-    name: frequency(group.values.map((value) => value.name), first.name),
-    type, unit, options, description, format, example,
-  };
+  // 仅选一份完整定义作为显示值，不能将多个版本的 type/unit/options 拼成不存在的定义。
+  return [...group.variants.entries()].sort((a, b) => b[1].roundIds.size - a[1].roundIds.size || a[0].localeCompare(b[0]))[0]![1].property;
 }
 
 function toCandidate(group: PropertyGroup, runCount: number, thresholds: AttributeConsensusDocument["thresholds"]): AttributeCandidate {
   const property = representative(group);
-  const observationCount = group.values.length;
+  const observationCount = group.runIds.size;
   const coverage = observationCount / Math.max(1, runCount);
   const requiredRate = group.requiredRuns.size / Math.max(1, runCount);
   const sharedRate = group.sharedRuns.size / Math.max(1, runCount);
@@ -140,8 +140,11 @@ function toCandidate(group: PropertyGroup, runCount: number, thresholds: Attribu
     coverage: Number(coverage.toFixed(3)),
     requiredRate: Number(requiredRate.toFixed(3)),
     sharedRate: Number(sharedRate.toFixed(3)),
-    sourceRuns: [...new Set(group.values.flatMap(() => [...group.runIds]))].sort(),
+    sourceRuns: [...group.sourceRuns].sort(),
     reasons,
+    variants: [...group.variants.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([id, value]) => ({
+      id, property: value.property, sourceRuns: [...value.sourceRuns].sort(), roundIds: [...value.roundIds].sort(),
+    })),
   };
 }
 
@@ -160,20 +163,23 @@ export function buildAttributeConsensus(
     const current = byCategory.get(observation.result.category.id) ?? {
       category: observation.result.category, runs: new Set<string>(), groups: new Map<string, PropertyGroup>(), notes: new Set<string>(),
     };
-    current.runs.add(observation.runId);
+    const roundId = observation.roundId ?? observation.runId;
+    current.runs.add(roundId);
     observation.result.notes.forEach((note) => current.notes.add(note));
     // 一个运行中同一属性只计一次，避免重试或重复文件人为抬高覆盖率。
     const properties = [...observation.result.shared, ...observation.result.properties];
-    const seen = new Set<string>();
     for (const property of properties) {
       const key = groupKey(property);
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const group = current.groups.get(key) ?? { values: [], runIds: new Set<string>(), requiredRuns: new Set<string>(), sharedRuns: new Set<string>() } satisfies PropertyGroup;
-      group.values.push(property);
-      group.runIds.add(observation.runId);
-      if (property.required) group.requiredRuns.add(observation.runId);
-      if (observation.result.shared.some((item) => groupKey(item) === key)) group.sharedRuns.add(observation.runId);
+      const group = current.groups.get(key) ?? { variants: new Map(), runIds: new Set<string>(), sourceRuns: new Set<string>(), requiredRuns: new Set<string>(), sharedRuns: new Set<string>() } satisfies PropertyGroup;
+      const id = propertyVariantId(property);
+      const variant = group.variants.get(id) ?? { property, sourceRuns: new Set<string>(), roundIds: new Set<string>() };
+      variant.sourceRuns.add(observation.runId);
+      variant.roundIds.add(roundId);
+      group.variants.set(id, variant);
+      group.runIds.add(roundId);
+      group.sourceRuns.add(observation.runId);
+      if (property.required) group.requiredRuns.add(roundId);
+      if (observation.result.shared.includes(property)) group.sharedRuns.add(roundId);
       current.groups.set(key, group);
     }
     byCategory.set(observation.result.category.id, current);
@@ -212,8 +218,8 @@ export function buildConfirmedTemplateDocument(consensus: AttributeConsensusDocu
     sourceRuns: consensus.sourceRuns,
     categories: consensus.categories.map((category) => ({
       category: category.category,
-      shared: category.shared.filter((property) => property.decision === "confirmed").map(({ decision: _decision, runCount: _runCount, observationCount: _observationCount, coverage: _coverage, requiredRate: _requiredRate, sharedRate: _sharedRate, sourceRuns: _sourceRuns, reasons: _reasons, ...property }) => property),
-      properties: category.properties.filter((property) => property.decision === "confirmed").map(({ decision: _decision, runCount: _runCount, observationCount: _observationCount, coverage: _coverage, requiredRate: _requiredRate, sharedRate: _sharedRate, sourceRuns: _sourceRuns, reasons: _reasons, ...property }) => property),
+      shared: category.shared.filter((property) => property.decision === "confirmed" && (property.variants?.length ?? 1) === 1).map(({ decision: _decision, runCount: _runCount, observationCount: _observationCount, coverage: _coverage, requiredRate: _requiredRate, sharedRate: _sharedRate, sourceRuns: _sourceRuns, reasons: _reasons, variants: _variants, ...property }) => property),
+      properties: category.properties.filter((property) => property.decision === "confirmed" && (property.variants?.length ?? 1) === 1).map(({ decision: _decision, runCount: _runCount, observationCount: _observationCount, coverage: _coverage, requiredRate: _requiredRate, sharedRate: _sharedRate, sourceRuns: _sourceRuns, reasons: _reasons, variants: _variants, ...property }) => property),
       notes: category.notes,
     })),
   };

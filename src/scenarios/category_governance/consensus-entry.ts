@@ -7,6 +7,7 @@ import { buildAttributeConsensus, buildConfirmedTemplateDocument, type Governanc
 import { parseFlags, asInt, shortCategoryId } from "./util.ts";
 import { readContextDocument, workspaceRoot } from "./storage.ts";
 import type { CategoryNode } from "./types.ts";
+import { prepareReviewConsensus, reviewCategoryStats, sampleReviewCategories } from "./review-preparation.ts";
 
 const HELP = `
 把多次类目治理结果汇总为属性候选和稳定决策
@@ -32,7 +33,8 @@ async function jsonFilesUnder(directory: string): Promise<string[]> {
   for (const entry of entries) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) files.push(...await jsonFilesUnder(path));
-    else if (entry.name.endsWith(".json") && !entry.name.includes("request") && !entry.name.includes("manifest") && !entry.name.startsWith("merged-")) files.push(path);
+    else if (entry.name.endsWith(".json") && !entry.name.includes("request") && !entry.name.includes("manifest") && !entry.name.startsWith("merged-") &&
+      !(entry.name.startsWith("attempt-") && entries.some((item) => item.name === "results.json"))) files.push(path);
   }
   return files;
 }
@@ -101,9 +103,22 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const byId = categoryById(document);
   for (const node of document.nodes) byId.set(shortCategoryId(node.id), node);
   const skipped: Array<{ runId: string; file: string; error: string }> = [];
+  const roundIds = new Map<string, string>();
+  const resolveRound = async (id: string, visited = new Set<string>()): Promise<string> => {
+    if (roundIds.has(id)) return roundIds.get(id)!;
+    if (visited.has(id)) throw new Error("补跑来源存在循环");
+    visited.add(id);
+    const manifest = await readJsonFile<{ retryRunId?: string | null }>(join(outputRoot, `run-${id}`, "manifest.json"));
+    const parent = manifest.retryRunId?.replace(/^run-/u, "");
+    if (parent && !/^\d+$/u.test(parent)) throw new Error(`无效补跑来源：${parent}`);
+    const roundId = parent ? await resolveRound(parent, visited) : id;
+    roundIds.set(id, roundId);
+    return roundId;
+  };
   for (const run of runs) {
     const loaded = await loadRunObservations(run, byId);
-    observations.push(...loaded.observations);
+    const roundId = await resolveRound(run.id);
+    observations.push(...loaded.observations.map((observation) => ({ ...observation, roundId })));
     skipped.push(...loaded.skipped);
   }
   if (observations.length === 0) throw new Error(`运行目录中没有成功的治理结果：${runs.map((run) => run.id).join(",")}`);
@@ -118,18 +133,37 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const decisionsPath = join(stableDir, "attribute-decisions-v1.json");
   const templatesPath = join(stableDir, "attribute-templates-v1.json");
   const templates = buildConfirmedTemplateDocument(consensus);
-  await writeJsonFile(candidatesPath, consensus);
-  await writeJsonFile(decisionsPath, consensus);
-  await writeJsonFile(templatesPath, templates);
-  await writeJsonFile(join(runDir, "attribute-candidates-v1.json"), consensus);
-  await writeJsonFile(join(runDir, "attribute-decisions-v1.json"), consensus);
-  await writeJsonFile(join(runDir, "attribute-templates-v1.json"), templates);
+  const prepared = prepareReviewConsensus(consensus);
+  const preparedPath = join(stableDir, "attribute-review-candidates-v1.json");
+  const categoryStats = prepared.categories.map((category) => ({ category: category.category, ...reviewCategoryStats(category) }));
+  const plan = { sourceRuns: consensus.sourceRuns, sourceRounds: Object.fromEntries(roundIds), localOnly: true,
+    categoryCount: prepared.categories.length, sourceCandidateCount: consensus.stats.candidateCount,
+    candidateGroupCount: prepared.stats.candidateCount,
+    definitionCount: categoryStats.reduce((sum, item) => sum + item.definitionCount, 0),
+    conflictCategoryCount: categoryStats.filter((item) => item.conflictGroups > 0).length,
+    largeCategoryCount: categoryStats.filter((item) => item.risk === "large").length,
+    maximumCandidateGroups: Math.max(...categoryStats.map((item) => item.candidateGroups)),
+    sample: sampleReviewCategories(prepared.categories, 30).map((category) => ({ category: category.category, ...reviewCategoryStats(category) })),
+  };
+  const compactJson = { pretty: false, trailingNewline: true };
+  await writeJsonFile(candidatesPath, consensus, compactJson);
+  await writeJsonFile(decisionsPath, consensus, compactJson);
+  await writeJsonFile(templatesPath, templates, compactJson);
+  await writeJsonFile(join(runDir, "attribute-candidates-v1.json"), consensus, compactJson);
+  await writeJsonFile(join(runDir, "attribute-decisions-v1.json"), consensus, compactJson);
+  await writeJsonFile(join(runDir, "attribute-templates-v1.json"), templates, compactJson);
+  await writeJsonFile(preparedPath, prepared, { pretty: false, trailingNewline: true });
+  await writeJsonFile(join(runDir, "attribute-review-candidates-v1.json"), prepared, { pretty: false, trailingNewline: true });
+  await writeJsonFile(join(stableDir, "review-plan.json"), plan);
+  await writeJsonFile(join(runDir, "review-plan.json"), plan);
   await writeJsonFile(join(runDir, "manifest.json"), { ...consensus.stats, sourceRuns: consensus.sourceRuns, observationCount: observations.length, skippedCount: skipped.length, skipped, generatedAt: consensus.generatedAt, thresholds: consensus.thresholds });
   console.log(`已汇总运行：${consensus.sourceRuns.join(", ")}`);
   console.log(`类目 ${consensus.stats.categoryCount}，属性候选 ${consensus.stats.candidateCount}，确认 ${consensus.stats.confirmedCount}，候选 ${consensus.stats.candidateStatusCount}，待复核 ${consensus.stats.reviewCount}`);
   console.log(`候选：${candidatesPath}`);
   console.log(`决策：${decisionsPath}`);
   console.log(`正式模板（仅 confirmed）：${templatesPath}`);
+  console.log(`复审输入：${preparedPath}（${plan.candidateGroupCount} 个候选组，${plan.definitionCount} 份完整定义；不丢弃冲突和低频候选）`);
+  console.log(`抽样计划：多定义类目 ${plan.conflictCategoryCount}，大输入类目 ${plan.largeCategoryCount}，详见 ${join(stableDir, "review-plan.json")}`);
   if (skipped.length > 0) console.log(`跳过无法通过当前校验的历史结果 ${skipped.length} 个；详见快照 manifest.json`);
 }
 
