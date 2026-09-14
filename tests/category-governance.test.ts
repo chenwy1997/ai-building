@@ -7,7 +7,7 @@ import { buildJdEvidenceText, normalizeJdEvidence } from "../src/scenarios/categ
 import { collectJdEvidence } from "../src/scenarios/category_governance/jd-collector.ts";
 import { buildJdCategoryMapping, autoJdCategoryReferences } from "../src/scenarios/category_governance/jd-mapping.ts";
 import { buildAttributeConsensus, buildConfirmedTemplateDocument } from "../src/scenarios/category_governance/consensus.ts";
-import { applySemanticReviews, buildSemanticReviewPrompt, mergeSemanticReviews, parseSemanticReviewResponse } from "../src/scenarios/category_governance/semantic-review.ts";
+import { applySemanticReviews, buildSemanticReviewPrompt, mergeSemanticReviews, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT } from "../src/scenarios/category_governance/semantic-review.ts";
 import type { GovernanceResult } from "../src/scenarios/category_governance/types.ts";
 
 describe("标准类目治理公共函数", () => {
@@ -205,6 +205,11 @@ describe("标准类目治理公共函数", () => {
     ], notes: [] }), target);
     const templates = applySemanticReviews(category, [review]);
     expect(templates.categories[0]?.properties.map((property) => property.name)).toEqual(["纸张克重", "材质"]);
+  });
+
+  test("语义终审协议要求非 add 决策省略属性对象", () => {
+    expect(SEMANTIC_REVIEW_SYSTEM_PROMPT).toContain("keep、drop、review 决策禁止输出 property 字段");
+    expect(SEMANTIC_REVIEW_SYSTEM_PROMPT).toContain("property 在 keep/review/drop 时必须省略");
   });
 
   test("语义终审稳定结果按类目增量合并，重复类目使用最新结果", () => {

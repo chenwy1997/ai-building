@@ -125,7 +125,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
             const response = await ai!.chat(provider, model, {
               messages: [{ role: "system", content: SEMANTIC_REVIEW_SYSTEM_PROMPT }, { role: "user", content: prompt + (lastError ? `\n上次输出校验失败：${lastError}` : "") }],
               // DeepSeek 主治理入口已验证不带 response_format；保持同一请求形态，避免 V4flash 兼容差异。
-              temperature: 0.1, max_tokens: 8_000,
+              temperature: 0.1, max_tokens: 6_000,
             });
             await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.response.json`), response);
             const message = response.choices[0]?.message;

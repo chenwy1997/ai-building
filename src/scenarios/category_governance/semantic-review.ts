@@ -65,10 +65,11 @@ export const SEMANTIC_REVIEW_SYSTEM_PROMPT = `你是类目属性治理的最终�
 3. required 只有在商品资料通常稳定具备且对识别、采购或合规确实关键时才设为 true；品牌、型号、颜色默认可选。
 4. 对京东证据中的 weak=1、hint=platform_field、hint=placeholder_values 做语义判断，不要机械保留或机械删除。
 5. 只输出严格 JSON，不要 Markdown。必须覆盖输入的每个候选 key；新增属性使用 action=add，删除使用 action=drop，无法确定使用 action=review。
+6. 为节省输出 token，keep、drop、review 决策禁止输出 property 字段；只有 add 决策必须输出 property。每条 reason 尽量不超过 30 个汉字，notes 最多 3 条。
 
 输出结构：
 {"category_id":"...","decisions":[{"key":"...","action":"keep|drop|review|add","reason":"简短原因","property":{"key":"...","name":"...","type":"text|number|boolean|single|multi|date|file","required":false,"unit":null,"options":[],"description":"","format":null,"example":null,"scope":"shared|category"}}],"notes":[]}
-keep/review/drop 必须使用输入候选 key；add 才使用新 key。property 在 keep/review/drop 时可省略，add 时必填。`;
+keep/review/drop 必须使用输入候选 key；add 才使用新 key。property 在 keep/review/drop 时必须省略，add 时必填。`;
 
 function compactCandidate(candidate: AttributeCandidate): Record<string, unknown> {
   return {
@@ -137,7 +138,7 @@ export function parseSemanticReviewResponse(text: string, category: CategoryCons
     decisions.push({ key, action: action as SemanticAction, reason: typeof item.reason === "string" ? item.reason : "", property: action === "add" ? cleanProperty(item.property) : undefined });
   }
   for (const key of keys) if (!seen.has(key)) throw new Error(`语义审阅遗漏候选：${key}`);
-  const notes = Array.isArray(data.notes) ? data.notes.filter((value): value is string => typeof value === "string").slice(0, 10) : [];
+  const notes = Array.isArray(data.notes) ? data.notes.filter((value): value is string => typeof value === "string").slice(0, 3).map((value) => value.slice(0, 120)) : [];
   return { categoryId: category.category.id, decisions, notes };
 }
 
