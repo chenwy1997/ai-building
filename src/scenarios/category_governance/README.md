@@ -149,6 +149,15 @@ bun run category-governance:semantic-review \
 
 `--failed-only` 可以和 `--category` 组合，用于只重试某一个失败类目；成功结果会替换旧失败记录，仍失败的才会继续留在错误列表中。
 
+如果某次运行已经保存了模型响应，但因为协议校验失败，优先用本地恢复避免重复计费：
+
+```bash
+bun run category-governance:semantic-review \
+  --failed-only --replay-run=run-20260914T020855-720Z
+```
+
+`--replay-run` 只解析该运行目录里的 `*.response.json`，API 请求数为 0。审阅用量会在运行 manifest 中完整统计每个已保存响应，包括校验失败和重试响应；稳定文件的 `errors` 只保留当前仍未恢复的类目。京东证据中模型判断为“不采用”的非候选字段会进入 `evidenceDecisions` 审计记录，不会偷偷进入属性模板；未知字段若被模型判断为 `keep` 仍会失败，避免把证据误当成候选属性。
+
 ```bash
 # 先生成一个类目的请求，不调用模型，检查输入和缓存前缀
 bun run category-governance:semantic-review --category="手机" --limit=1 --dry-run

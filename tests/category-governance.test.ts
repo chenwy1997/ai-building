@@ -7,7 +7,8 @@ import { buildJdEvidenceText, normalizeJdEvidence } from "../src/scenarios/categ
 import { collectJdEvidence } from "../src/scenarios/category_governance/jd-collector.ts";
 import { buildJdCategoryMapping, autoJdCategoryReferences } from "../src/scenarios/category_governance/jd-mapping.ts";
 import { buildAttributeConsensus, buildConfirmedTemplateDocument } from "../src/scenarios/category_governance/consensus.ts";
-import { applySemanticReviews, buildSemanticReviewPrompt, mergeSemanticReviews, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT } from "../src/scenarios/category_governance/semantic-review.ts";
+import { addSemanticReviewUsage, applySemanticReviews, buildSemanticReviewPrompt, emptySemanticReviewUsage, mergeSemanticReviewErrors, mergeSemanticReviews, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT } from "../src/scenarios/category_governance/semantic-review.ts";
+import type { OpenAiUsage } from "../src/ai/types.ts";
 import type { GovernanceResult } from "../src/scenarios/category_governance/types.ts";
 import { parseGovernanceConcurrency } from "../src/scenarios/category_governance/util.ts";
 
@@ -224,6 +225,32 @@ describe("标准类目治理公共函数", () => {
   test("语义终审协议要求非 add 决策省略属性对象", () => {
     expect(SEMANTIC_REVIEW_SYSTEM_PROMPT).toContain("keep、drop、review 决策禁止输出 property 字段");
     expect(SEMANTIC_REVIEW_SYSTEM_PROMPT).toContain("property 在 keep/review/drop 时必须省略");
+  });
+
+  test("证据中的非候选 drop 只留审计，未知 keep 仍拒绝", () => {
+    const category = buildAttributeConsensus([{ runId: "1", result: {
+      category: { id: "a4", path: ["办公", "纸品", "A4复印纸"], name: "A4复印纸" }, shared: [],
+      properties: [{ key: "weight", name: "纸张克重", type: "number", required: false, unit: "g/m²", options: [], scope: "category" }], notes: [],
+    } }]).categories[0]!;
+    const review = parseSemanticReviewResponse(JSON.stringify({ category_id: "a4", decisions: [
+      { key: "weight", action: "keep", reason: "核心规格" },
+      { key: "listing_time", action: "drop", reason: "平台字段" },
+    ], notes: [] }), category);
+    expect(review.decisions).toHaveLength(1);
+    expect(review.evidenceDecisions?.[0]?.key).toBe("listing_time");
+    expect(() => parseSemanticReviewResponse(JSON.stringify({ category_id: "a4", decisions: [
+      { key: "weight", action: "keep", reason: "核心规格" }, { key: "brand_new", action: "keep", reason: "证据字段" },
+    ], notes: [] }), category)).toThrow("未知候选");
+  });
+
+  test("语义用量在协议校验前累计，错误重试不会覆盖其他错误", () => {
+    const usage = emptySemanticReviewUsage();
+    const responseUsage: OpenAiUsage = { prompt_tokens: 10, completion_tokens: 3, total_tokens: 13, prompt_cache_hit_tokens: 8, prompt_cache_miss_tokens: 2 };
+    addSemanticReviewUsage(usage, responseUsage);
+    addSemanticReviewUsage(usage, responseUsage);
+    expect(usage).toMatchObject({ promptTokens: 20, completionTokens: 6, totalTokens: 26, promptCacheHitTokens: 16, promptCacheMissTokens: 4 });
+    const merged = mergeSemanticReviewErrors([{ categoryId: "old", error: "仍失败" }, { categoryId: "done", error: "旧失败" }], [{ categoryId: "new", error: "本批失败" }], [{ categoryId: "done", decisions: [], notes: [] }]);
+    expect(merged.map((item) => item.categoryId)).toEqual(["new", "old"]);
   });
 
   test("语义终审稳定结果按类目增量合并，重复类目使用最新结果", () => {

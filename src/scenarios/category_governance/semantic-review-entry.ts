@@ -1,4 +1,5 @@
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { readdir } from "node:fs/promises";
 import { AiService } from "../../ai/service.ts";
 import { loadAppConfig } from "../../config/env.ts";
 import { PostgresAiCatalog } from "../../data/ai-catalog.ts";
@@ -7,8 +8,8 @@ import { readJsonFile, writeJsonFile, writeTextFile } from "../../facilities/jso
 import { parseFlags, asInt, boolFlag, slugify, shortCategoryId, parseGovernanceConcurrency } from "./util.ts";
 import { readContextDocument, workspaceRoot } from "./storage.ts";
 import { loadJdEvidence, buildJdEvidenceText, type JdEvidenceDocument } from "./jd-evidence.ts";
-import { applySemanticReviews, buildSemanticReviewPrompt, mergeSemanticReviews, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT, type SemanticReviewDocument, type SemanticReviewResult } from "./semantic-review.ts";
-import type { AttributeConsensusDocument } from "./consensus.ts";
+import { addSemanticReviewUsage, applySemanticReviews, buildSemanticReviewPrompt, emptySemanticReviewUsage, mergeSemanticReviewErrors, mergeSemanticReviews, parseSemanticReviewResponse, SEMANTIC_REVIEW_SYSTEM_PROMPT, type SemanticReviewDocument, type SemanticReviewError, type SemanticReviewResult, type SemanticReviewUsage } from "./semantic-review.ts";
+import type { AttributeConsensusDocument, CategoryConsensus } from "./consensus.ts";
 import type { CategoryNode } from "./types.ts";
 
 const HELP = `
@@ -25,6 +26,7 @@ const HELP = `
   --limit=10           从候选库中最多审阅 N 个类目，不会自动生成候选；未指定范围时默认 10
   --all                明确允许审阅全部共识类目
   --failed-only        只重试稳定审阅文件中上次失败的类目
+  --replay-run=...     只解析已保存的某次运行响应，不调用模型、不产生 API 费用
   --concurrency=64     并发请求数；auto 为 64，max 为 2500，可显式指定 1–2500
   --attempts=2         单类目失败重试次数
   --consensus=...      共识文件路径，默认 output/<version>/consensus/attribute-candidates-v1.json
@@ -41,6 +43,52 @@ function disableProxy(): void {
   for (const key of ["HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"]) delete process.env[key];
   process.env.NO_PROXY = "*";
   process.env.no_proxy = "*";
+}
+
+interface ReplayResult {
+  reviews: SemanticReviewResult[];
+  errors: SemanticReviewError[];
+  usage: SemanticReviewUsage;
+  responseCount: number;
+}
+
+/** 从本地原始响应中恢复结果。每个类目选最后一个能通过当前协议的尝试。 */
+async function replaySavedResponses(runDir: string, categories: CategoryConsensus[]): Promise<ReplayResult> {
+  const wanted = new Set(categories.map((item) => item.category.id));
+  const reviews: SemanticReviewResult[] = [];
+  const errors: SemanticReviewError[] = [];
+  const usage = emptySemanticReviewUsage();
+  let responseCount = 0;
+  const entries = await readdir(runDir, { withFileTypes: true });
+  for (const entry of entries.filter((item) => item.isDirectory())) {
+    const requestPath = join(runDir, entry.name, "request.json");
+    try {
+      const request = await readJsonFile<{ categoryId: string }>(requestPath);
+      if (!wanted.has(request.categoryId)) continue;
+      const category = categories.find((item) => item.category.id === request.categoryId)!;
+      const responses = (await readdir(join(runDir, entry.name)))
+        .filter((name) => /^attempt-\d+\.response\.json$/u.test(name)).sort();
+      let lastError = "没有可解析的已保存响应";
+      let recovered: SemanticReviewResult | undefined;
+      for (const name of responses) {
+        const responsePath = join(runDir, entry.name, name);
+        const response = await readJsonFile<any>(responsePath);
+        responseCount += 1;
+        addSemanticReviewUsage(usage, response.usage);
+        const content = typeof response.choices?.[0]?.message?.content === "string" ? response.choices[0].message.content.trim() : "";
+        if (!content) { lastError = "模型返回空 content"; continue; }
+        try {
+          recovered = { ...parseSemanticReviewResponse(content, category), provenance: { requestPath, responsePath } };
+          lastError = "";
+        } catch (error) { lastError = error instanceof Error ? error.message : String(error); }
+      }
+      if (recovered) reviews.push(recovered);
+      else errors.push({ categoryId: request.categoryId, error: lastError });
+    } catch (error) {
+      errors.push({ categoryId: entry.name, error: error instanceof Error ? error.message : String(error) });
+    }
+  }
+  return { reviews, errors, usage, responseCount };
 }
 
 function matches(node: CategoryNode, selector: string): boolean {
@@ -115,12 +163,31 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const model = flags.model ?? "flash";
   const attempts = asInt(flags.attempts, 2);
   const dryRun = boolFlag(flags["dry-run"]);
+  const replayFlag = flags["replay-run"];
+  const replayRunDir = replayFlag ? (replayFlag.includes("/") ? resolve(replayFlag) : join(workspace, "output", version, "semantic-review", replayFlag)) : undefined;
+  if (replayRunDir) {
+    const replay = await replaySavedResponses(replayRunDir, categories);
+    const stablePrevious = await (async () => { try { return await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { return undefined; } })();
+    const mergedReviews = mergeSemanticReviews(stablePrevious?.reviews ?? [], replay.reviews);
+    const mergedErrors = mergeSemanticReviewErrors(stablePrevious?.errors ?? [], replay.errors, replay.reviews);
+    const reviewDocument: SemanticReviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews: mergedReviews, usage: emptySemanticReviewUsage(), errors: mergedErrors };
+    const templates = applySemanticReviews(consensus, mergedReviews);
+    await writeJsonFile(stableReviewPath, reviewDocument);
+    await writeJsonFile(stableTemplatePath, templates);
+    const runDir = join(workspace, "output", version, "semantic-review", `run-${runStamp()}-replay`);
+    await writeJsonFile(join(runDir, "manifest.json"), { runDir, replayRunDir, ...inputSummary, categoryCount: categories.length, successCount: replay.reviews.length, errorCount: replay.errors.length, mergedReviewCount: mergedReviews.length, previousReviewCount: stablePrevious?.reviews.length ?? 0, responseCount: replay.responseCount, sourceResponseUsage: replay.usage, usage: emptySemanticReviewUsage(), apiRequests: 0 });
+    await writeJsonFile(join(runDir, "attribute-reviews-v1.json"), { ...reviewDocument, reviews: replay.reviews, errors: replay.errors });
+    await writeJsonFile(join(runDir, "attribute-templates-v1.json"), templates);
+    console.log(`本地恢复完成：成功 ${replay.reviews.length}，失败 ${replay.errors.length}，解析已保存响应 ${replay.responseCount}`);
+    console.log(`本次 API 请求 0；源响应用量：输入 ${replay.usage.promptTokens}，输出 ${replay.usage.completionTokens}，缓存命中 ${replay.usage.promptCacheHitTokens}，未命中 ${replay.usage.promptCacheMissTokens}`);
+    return;
+  }
   if (boolFlag(flags.direct) && provider === "deepseek") disableProxy();
   const databases = dryRun ? undefined : new DatabaseHub(loadAppConfig().postgresUrl);
   const ai = dryRun ? undefined : new AiService(new PostgresAiCatalog(databases!.publicDatabase()), loadAppConfig().masterKey);
   const reviews: SemanticReviewResult[] = [];
   const errors: Array<{ categoryId: string; error: string }> = [];
-  let promptTokens = 0; let completionTokens = 0; let totalTokens = 0; let promptCacheHitTokens = 0; let promptCacheMissTokens = 0; let reasoningTokens = 0;
+  const usage = emptySemanticReviewUsage();
   let completed = 0;
   const markProgress = (success: boolean): void => {
     completed += 1;
@@ -138,7 +205,8 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
         if (!node) continue;
         const evidenceText = evidence ? buildJdEvidenceText([node], evidence) : "";
         const prompt = buildSemanticReviewPrompt({ category, evidenceText });
-        const requestDir = join(runDir, slugify(category.category.path.join("-")));
+        // 路径名只是给人看的；短 ID 保证同名/截断路径不会覆盖别的类目。
+        const requestDir = join(runDir, `${slugify(category.category.path.join("-"))}--${shortCategoryId(category.category.id)}`);
         await writeJsonFile(join(requestDir, "request.json"), { system: SEMANTIC_REVIEW_SYSTEM_PROMPT, user: prompt, categoryId: category.category.id, sourceConsensus: consensusPath, jdEvidencePath: evidence ? evidencePath : null });
         if (dryRun) continue;
         let lastError = "";
@@ -150,6 +218,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
               temperature: 0.1, max_tokens: 6_000, thinking: { type: "disabled" },
             });
             await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.response.json`), response);
+            addSemanticReviewUsage(usage, response.usage);
             const message = response.choices[0]?.message;
             const content = typeof message?.content === "string" ? message.content.trim() : "";
             if (!content) {
@@ -160,12 +229,6 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
             reviews.push(review);
             await writeTextFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.raw.txt`), content);
             await writeJsonFile(join(requestDir, "review.json"), review);
-            promptTokens += response.usage?.prompt_tokens ?? 0;
-            completionTokens += response.usage?.completion_tokens ?? 0;
-            totalTokens += response.usage?.total_tokens ?? 0;
-            promptCacheHitTokens += response.usage?.prompt_cache_hit_tokens ?? 0;
-            promptCacheMissTokens += response.usage?.prompt_cache_miss_tokens ?? 0;
-            reasoningTokens += response.usage?.completion_tokens_details?.reasoning_tokens ?? 0;
             lastError = "";
             break;
           } catch (error) {
@@ -185,21 +248,22 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     console.log(`已生成 ${categories.length} 个语义审阅请求：${runDir}`);
     return;
   }
-  if (reviews.length === 0) throw new Error(`没有成功的语义审阅结果：${errors.map((item) => item.error).join("；")}`);
   let previous: SemanticReviewDocument | undefined;
   try { previous = await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { /* 首次运行或旧文件损坏时从当前批次开始 */ }
   const mergedReviews = mergeSemanticReviews(previous?.reviews ?? [], reviews);
-  const reviewDocument: SemanticReviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews: mergedReviews, usage: { promptTokens, completionTokens, totalTokens, promptCacheHitTokens, promptCacheMissTokens, reasoningTokens }, errors };
+  const mergedErrors = mergeSemanticReviewErrors(previous?.errors ?? [], errors, reviews);
+  const reviewDocument: SemanticReviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews: mergedReviews, usage, errors: mergedErrors };
   await writeJsonFile(stableReviewPath, reviewDocument);
   const templates = applySemanticReviews(consensus, mergedReviews);
   await writeJsonFile(stableTemplatePath, templates);
-  await writeJsonFile(join(runDir, "attribute-reviews-v1.json"), { ...reviewDocument, reviews });
+  await writeJsonFile(join(runDir, "attribute-reviews-v1.json"), { ...reviewDocument, reviews, errors });
   await writeJsonFile(join(runDir, "attribute-templates-v1.json"), templates);
-  await writeJsonFile(join(runDir, "manifest.json"), { runDir, ...inputSummary, categoryCount: categories.length, successCount: reviews.length, errorCount: errors.length, mergedReviewCount: mergedReviews.length, previousReviewCount: previous?.reviews.length ?? 0, usage: reviewDocument.usage });
+  await writeJsonFile(join(runDir, "manifest.json"), { runDir, ...inputSummary, categoryCount: categories.length, successCount: reviews.length, errorCount: errors.length, mergedReviewCount: mergedReviews.length, previousReviewCount: previous?.reviews.length ?? 0, usage, usageIncludesAllResponses: true });
+  if (reviews.length === 0) throw new Error(`没有成功的语义审阅结果：${errors.map((item) => item.error).join("；")}`);
   console.log(`语义审阅完成：成功 ${reviews.length}，失败 ${errors.length}`);
   console.log(`模板：${stableTemplatePath}`);
-  console.log(`缓存：命中 ${promptCacheHitTokens}，未命中 ${promptCacheMissTokens}`);
-  console.log(`Token：输入 ${promptTokens}，输出 ${completionTokens}，思考 ${reasoningTokens}，合计 ${totalTokens}`);
+  console.log(`缓存：命中 ${usage.promptCacheHitTokens}，未命中 ${usage.promptCacheMissTokens}`);
+  console.log(`Token：输入 ${usage.promptTokens}，输出 ${usage.completionTokens}，思考 ${usage.reasoningTokens ?? 0}，合计 ${usage.totalTokens}`);
 }
 
 if (import.meta.main) main().catch((error) => { console.error(error instanceof Error ? error.message : String(error)); process.exitCode = 1; });
