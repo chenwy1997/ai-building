@@ -84,7 +84,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   });
   if (candidateCategories.length === 0) throw new Error("没有找到可审阅的共识类目");
   if (boolFlag(flags.all) && flags.limit !== undefined) throw new Error("--all 和 --limit 不能同时指定");
-  const requestedLimit = flags.limit !== undefined ? asInt(flags.limit, 10) : boolFlag(flags.all) || selector ? undefined : 10;
+  const requestedLimit = flags.limit !== undefined ? asInt(flags.limit, 10) : boolFlag(flags.all) || selector || failedOnly ? undefined : 10;
   const categories = requestedLimit === undefined ? candidateCategories : candidateCategories.slice(0, requestedLimit);
   if (categories.length === 0) throw new Error("没有需要审阅的类目；可使用 --all");
   const concurrency = parseGovernanceConcurrency(flags.concurrency ?? Bun.env.CATEGORY_GOVERNANCE_CONCURRENCY);
