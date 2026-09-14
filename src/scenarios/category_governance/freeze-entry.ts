@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { readJsonFile, writeJsonFile } from "../../facilities/json/files.ts";
 import { parseFlags } from "./util.ts";
 import { workspaceRoot } from "./storage.ts";
+import type { RevisionState } from "./revision-storage.ts";
 
 const HELP = `
 冻结类目治理版本基线（只读快照，不调用模型）
@@ -25,6 +26,7 @@ const FILES: Array<{ source: string; target: string; required: boolean }> = [
   { source: "output/{version}/consensus/attribute-candidates-v1.json", target: "attribute-candidates-v1.json", required: true },
   { source: "output/{version}/consensus/attribute-decisions-v1.json", target: "attribute-decisions-v1.json", required: false },
   { source: "output/{version}/semantic-review/attribute-reviews-v1.json", target: "attribute-reviews-v1.json", required: true },
+  { source: "output/{version}/semantic-review/attribute-governance-state-v1.json", target: "attribute-governance-state-v1.json", required: false },
   { source: "output/{version}/semantic-review/attribute-templates-v1.json", target: "attribute-templates-v1.json", required: true },
 ];
 
@@ -33,7 +35,7 @@ async function sha256(path: string): Promise<{ bytes: number; sha256: string }> 
   return { bytes: data.byteLength, sha256: createHash("sha256").update(new Uint8Array(data)).digest("hex") };
 }
 
-async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
+export async function freezeMain(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const { positionals, flags } = parseFlags(argv);
   if (flags.help === "true" || flags.h === "true" || positionals.length > 0) {
     console.log(HELP);
@@ -49,22 +51,29 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     if (error instanceof Error && !error.message.startsWith("ENOENT")) throw error;
   }
   const selected: Array<{ source: string; target: string; bytes: number; sha256: string }> = [];
+  const statePath = join(workspace, "output", version, "semantic-review", "attribute-governance-state-v1.json");
+  const state = await Bun.file(statePath).exists() ? await readJsonFile<RevisionState>(statePath) : undefined;
   for (const item of FILES) {
     const source = join(workspace, item.source.replace("{version}", version));
-    try { await stat(source); } catch {
-      if (item.required) throw new Error(`冻结所需文件不存在：${source}`);
+    const fromState = state && item.target === "attribute-templates-v1.json";
+    try { if (!fromState) await stat(source); } catch {
+      if (item.required && !(state && item.target === "attribute-reviews-v1.json")) throw new Error(`冻结所需文件不存在：${source}`);
       continue;
     }
     const target = join(baselineDir, item.target);
     await mkdir(baselineDir, { recursive: true });
-    await copyFile(source, target);
+    if (fromState) await writeJsonFile(target, state.templates, { pretty: false, trailingNewline: true });
+    else await copyFile(source, target);
     const digest = await sha256(target);
-    selected.push({ source, target: item.target, ...digest });
+    selected.push({ source: fromState ? statePath : source, target: item.target, ...digest });
   }
   const categoryTree = await readJsonFile<{ leafCount?: number; nodes?: unknown[] }>(join(baselineDir, "category-tree.json"));
   const candidates = await readJsonFile<{ categories?: unknown[]; stats?: unknown }>(join(baselineDir, "attribute-candidates-v1.json"));
-  const reviews = await readJsonFile<{ reviews?: unknown[]; errors?: unknown[] }>(join(baselineDir, "attribute-reviews-v1.json"));
+  const reviewPath = join(baselineDir, "attribute-reviews-v1.json");
+  const reviews = await Bun.file(reviewPath).exists() ? await readJsonFile<{ reviews?: unknown[]; errors?: unknown[] }>(reviewPath) : {};
   const templates = await readJsonFile<{ categories?: unknown[] }>(join(baselineDir, "attribute-templates-v1.json"));
+  const reviewedCount = state ? state.templates.categories.length : reviews.reviews?.length ?? null;
+  const reviewErrors = state ? Object.values(state.records).filter(r => r.status !== "accepted").length : reviews.errors?.length ?? null;
   await writeJsonFile(join(baselineDir, "manifest.json"), {
     baseline: "category-governance-baseline-v1",
     version,
@@ -74,14 +83,14 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       categoryNodes: categoryTree.nodes?.length ?? null,
       standardLeafCount: categoryTree.leafCount ?? null,
       candidateCategories: candidates.categories?.length ?? null,
-      reviewedCategories: reviews.reviews?.length ?? null,
-      reviewErrors: reviews.errors?.length ?? null,
+      reviewedCategories: reviewedCount,
+      reviewErrors,
       templateCategories: templates.categories?.length ?? null,
     },
     files: selected,
   });
   console.log(`v${version.replace(/^v/u, "")} 基线已冻结：${baselineDir}`);
-  console.log(`文件 ${selected.length} 个；类目 ${categoryTree.leafCount ?? "?"}；终审 ${reviews.reviews?.length ?? "?"}；失败 ${reviews.errors?.length ?? "?"}`);
+  console.log(`文件 ${selected.length} 个；类目 ${categoryTree.leafCount ?? "?"}；终审 ${reviewedCount ?? "?"}；待处理 ${reviewErrors ?? "?"}`);
 }
 
-if (import.meta.main) main().catch((error) => { console.error(error instanceof Error ? error.message : String(error)); process.exitCode = 1; });
+if (import.meta.main) freezeMain().catch((error) => { console.error(error instanceof Error ? error.message : String(error)); process.exitCode = 1; });

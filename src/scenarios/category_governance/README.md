@@ -124,109 +124,58 @@ bun run category-governance:consensus \
   --min-confirmed-runs=2
 ```
 
-汇总结果写入 `output/<version>/consensus/attribute-candidates-v1.json` 和 `attribute-decisions-v1.json`；`attribute-templates-v1.json` 只保留 `confirmed` 属性，可作为正式模板下游输入。每次汇总另有带时间戳的快照。历史运行中无法通过当前属性校验的结果会跳过并记录到快照 `manifest.json`，不会污染共识结果。
+汇总结果写入 `output/<version>/consensus/attribute-candidates-v1.json` 和 `attribute-decisions-v1.json`；`attribute-templates-v1.json` 只保留 `confirmed` 属性，是统计候选视图，不能代替语义验收后的正式模板。每次汇总另有带时间戳的快照。历史运行中无法通过当前属性校验的结果会跳过并记录到快照 `manifest.json`，不会污染共识结果。
 
-统计共识之后，可让模型做语义终审。终审可以保留、删除、标记复核或新增属性，代码只校验结构并应用结果：
-
-语义终审只读取候选库，`--limit=10` 表示最多审阅其中 10 个类目；`--all` 也只覆盖当前候选库。如果上次只汇总了手机样本，即使提高 limit 也仍只有一个类目。扩大范围前，先把包含全量类目的已有运行加入汇总，这一步在本地执行，不调用模型。例如：
+统计共识之后，使用同一个 Bun 入口执行属性增量治理。流程为：**已采用模板 → AI 修改提案 → 独立语义验收 → 通过后采用**。类目树保持只读。
 
 ```bash
-# run-19 为已有全量结果，run-24/25/26 为后续手机样本
-bun run category-governance:consensus --run-id=19,24,25,26
-
-# 先核对候选范围和实际选中数量，不调用模型
-bun run category-governance:semantic-review --limit=10 --dry-run
-```
-
-启动日志会列出候选文件、来源批次、可用类目数和实际选中数量；候选不足时给出提示，运行 manifest 保存相同信息及本次类目 ID。显式 `--limit` 对 `--category` 范围同样生效，`--all` 与 `--limit` 不能同时使用。
-
-全量完成后如果仍有失败，不要重新跑全部类目，直接只重试稳定文件中的失败类目：
-
-```bash
-bun run category-governance:semantic-review \
-  --failed-only --concurrency=128 --attempts=2 --direct
-```
-
-`--failed-only` 可以和 `--category` 组合，用于只重试某一个失败类目；成功结果会替换旧失败记录，仍失败的才会继续留在错误列表中。
-
-主治理批次如果有失败请求，使用 `--retry-run=<run编号>` 自动恢复并补跑，例如：
-
-```bash
-bun run category-governance \
-  --retry-run=28 --retry-batch-size=4 --concurrency=128 --attempts=2 --direct
-```
-
-命令先读取该 run 及其来源 run 的本地失败响应，按类目独立校验并恢复合格结果（不调用模型）。只修复末尾闭合符错配等明确的格式问题，不补造被截断的正文、类目 ID、属性或单位。仍缺失或校验不合格的类目按 `--retry-batch-size` 拆分，默认每次最多 4 个；可设为 1 做最后的定点补跑。目标来自历史请求里的准确 ID，因此不依赖原来的批次名称、`batch-size` 或随机串。
-
-每次响应也会先保存成功类目，下一次尝试仅发送剩余失败类目。日志和 manifest 分别记录本地恢复数、本次模型成功数、失败请求数、待补跑类目数；所有模型返回的 token 都计入用量，包括格式校验失败的响应。补跑读取本地京东证据，不访问京东 VOP。
-
-新结果保存在 `output/v1/run-<新编号>/<批次>/results.json`，一个批次只保留一份合格结果，文件中记录历史响应的来源。Excel 导出、合并和共识命令兼容这个文件及旧版 `attempt-xxx.json`。重试产生新的 run 编号，汇总时把原全量 run 和重试 run 一起传给 `consensus`；原文件与冻结基线保持不变。`--dry-run` 可预览剩余请求，不调用模型。
-新增类目进入共识库后，使用 `--unreviewed-only` 只运行尚未有语义终审记录的类目，避免把已完成的 11,000 多个类目再次计费。
-冻结 v1 后又产生新批次时，使用 `--changed-only` 对比冻结候选基线，只审阅属性定义或候选状态确实变化的类目：
-
-```bash
-bun run category-governance:semantic-review \
-  --changed-only --concurrency=128 --attempts=1 --direct
-```
-
-多轮汇总后，建议先完成候选整理和分层抽样。仍然使用已有两个入口：
-
-```bash
-# 本地汇总及整理，不调用模型；27～31 的补跑沿用第 27 轮，不增加独立票数
+# 本地汇总原始候选；补跑 27～31 按一个逻辑轮次统计，不重复加票
 bun run category-governance:consensus --run-id=19,24,25,26,27,28,29,30,31
 
-# 免费查看将要抽查的范围，仅写一份计划
+# 查看待处理范围，不调用模型
 bun run category-governance:semantic-review --changed-only --sample=30 --plan
 
-# 实际审阅 30 个分层样本，默认关闭思考
+# 抽样验证新的输入/协议
 bun run category-governance:semantic-review --changed-only --sample=30 --concurrency=8 --attempts=2 --direct
+
+# 精确复测指定历史清单，不让已经成功的样本被另一批替代
+bun run category-governance:semantic-review \
+  --from-run=run-20260914T063111-388Z \
+  --concurrency=8 --attempts=2 --direct
+
+# 后续只处理尚未通过验收的类目，带入上一轮问题，避免从头猜测
+bun run category-governance:semantic-review --failed-only --concurrency=8 --attempts=2 --direct
 ```
 
-汇总保留每个候选的完整原始定义及来源，不把不同版本的类型、单位、枚举拼接成一份属性。`attribute-review-candidates-v1.json` 按已有 key 的联系整理候选组，`review-plan.json` 列出多定义、大输入和抽样情况；原定义不会因低频或数量超限被删除。复审入口同样自动执行整理，因此显式传旧候选文件也能得到唯一的候选组 key。
+`--from-run` 从 manifest 读取准确类目 ID；可加 `--category` 选择清单中的某类目。它与 `--limit`、`--sample`、`--all`、`--changed-only` 互斥。不传范围时默认最多 10 个；大范围用 `--all` 或 `--changed-only`。`--limit`、`--sample`、`--all` 互斥。并发可用整数、auto（64）或 max（2500），实际工作数取选中类目数和配置的较小值。两阶段在同一工作任务内顺序执行，所以不会把并发乘二。
 
-复审输入用 `d` 存完整属性十元组，`g` 引用这些定义及观察轮数。多个定义的 `keep` 必须由 AI 指定 `variant` 或完整修正后的 `property`，程序不会默认覆盖其中一份。AI 若已判断其余候选不适用，可以明确返回 `drop_remaining=true` 和 `drop_reason`，本地展开为逐项删除审计；缺少这个明确决定时，遗漏候选仍然校验失败。这能减少异常大类目逐条输出删除说明的费用。
+初次使用新流程时，从冻结的 `baseline/attribute-templates-v1.json` 初始化已采用模板。旧版仅通过 JSON 校验的工作文件会备份到本次运行的 `legacy-templates-before-migration.json`，不自动当成通过了新验收。没有冻结基线的新版本从空模板建立；禁止把候选统计票数直接当成定稿。
 
-新复审结果保存输入指纹。`--changed-only` 会跳过候选、证据和协议都没变且已成功审阅的类目；没有输入指纹的旧记录才回退对照冻结基线。`--sample` 每次从当前待审池分层选择，因此重复执行会抽到后续尚未完成的样本。小批次只更新本次成功类目的模板，未审或本次失败的类目保留原模板；只改变候选库不会悄悄套用旧的 `keep` 决定。`--all`、`--limit`、`--sample` 互斥。
+提案中不变的旧属性默认保留，删除旧属性必须明确给出 key 和理由。AI 只输出 `upsert/remove` 和一句不确定性说明；修改旧属性时只返回改变的字段对象，新属性才返回完整定义。输入用十元组压缩，输出使用普通对象，避免深层数组和多套引用表示互相矛盾。未采纳的新候选留在候选库，无需逐条生成 drop；历史补充属性也不会因候选缺失而消失。无效引用、重复修改、空枚举和基本计量问题会被本地校验挡住；业务适用性、同义合并、核心属性是否缺失由 AI 判断，没有添加行业关键词黑名单或属性数量上限。
 
-v1 验收后可冻结一份带 SHA-256 校验的只读基线：
+验收是另一次独立 AI 请求，只看完整类目、证据、旧模板和拟采用模板，不看候选堆或提案者的自评理由。它可以纠正旧模板本身的问题。发现跨类目属性、同义项、无依据枚举、关键属性丢失时返回具体问题；这些问题回到下一轮提案。`--attempts=2` 最多两轮，每轮最多一次提案和一次验收，验收格式失败时仅重试验收。仍未通过则保存为 `needs_review`，正式模板保留原值。独立验收仍由模型执行，不等于人工或行业标准认证；应继续用固定样本检查语义质量。
+
+稳定文件为 `output/<version>/semantic-review/attribute-governance-state-v1.json`，包含已采用模板和每类目的当前状态，是原子写入的正式状态。`attribute-templates-v1.json` 是兼容下游的模板视图。冻结基线不可覆盖。每次运行主要保存：
+
+- `manifest.json`：准确范围、来源、通过/待改进/格式失败、所有响应 token；
+- `trace.jsonl`：每次实际请求、原始响应与调用异常；
+- `results.jsonl`：提案、独立验收结论、输入指纹及用量；每个类目完成即落盘；
+- `attribute-templates-v1.json`：本次完成后的正式模板快照；
+- `report.md`：属性数量变化、未通过原因与用量。
+
+成功的新模板必须有与其内容指纹一致的验收结论才能写入。运行中断后，可用 `--resume-run=<新协议运行目录>` 从已落盘结果恢复已完成类目，再调用剩余部分。`--replay-run=<新协议运行目录>` 只使用输入完全匹配的已保存响应，API 请求为 0。旧协议没有独立验收，不能通过本地重新解析直接晋级；用 `--from-run` 对它的固定清单执行新流程。
+
+候选、证据、协议及已采用模板都没变且已经验收通过时，默认直接跳过，**API 请求为 0**。仅重复生成相同属性定义、增加来源批次/频次，不算新知识。`--force` 才会重新请求已验收的相同输入，适合明确做模型比较；常规循环无需使用。待改进类目的具体反馈保留到下一次执行。新版本流程首次运行会重新验收选中的样本；历史旧记录不能冒充已通过新协议。
+
+请求保持关闭思考。固定协议、类目、京东证据、已采用模板放在共同前缀；候选、拟采用模板和本轮反馈在后面。两个阶段尽可能共享前缀，但不会为了命中率向验收输入无用候选。[DeepSeek 官方缓存说明](https://api-docs.deepseek.com/zh-cn/guides/kv_cache/)明确缓存基于重复前缀、尽力命中，不能保证 100%。输入缓存只节省输入费用；减少重复请求、压缩修改输出同样必要。
+
+原始生成批次的格式失败仍使用原入口补跑：
 
 ```bash
-bun run category-governance:freeze --version=v1
+bun run category-governance --retry-run=28 --retry-batch-size=4 --concurrency=128 --attempts=2 --direct
 ```
 
-基线写入 `output/v1/baseline/`。后续重复治理仍使用新的 `run-*` 快照，并用 `--unreviewed-only` 或 `--failed-only` 增量处理；不要使用 `--all` 重新发送已经完成的类目。
-
-如果某次运行已经保存了模型响应，但因为协议校验失败，优先用本地恢复避免重复计费：
-
-```bash
-bun run category-governance:semantic-review \
-  --failed-only --replay-run=run-20260914T020855-720Z
-```
-
-`--replay-run` 只解析该运行目录里的 `*.response.json`，API 请求数为 0。审阅用量会在运行 manifest 中完整统计每个已保存响应，包括校验失败和重试响应；稳定文件的 `errors` 只保留当前仍未恢复的类目。京东证据中模型判断为“不采用”的非候选字段会进入 `evidenceDecisions` 审计记录，不会偷偷进入属性模板；未知字段若被模型判断为 `keep` 仍会失败，避免把证据误当成候选属性。
-
-```bash
-# 先生成一个类目的请求，不调用模型，检查输入和缓存前缀
-bun run category-governance:semantic-review --category="手机" --limit=1 --dry-run
-
-# 小范围实际终审
-bun run category-governance:semantic-review \
-  --category="手机" --concurrency=2 --attempts=2 --direct
-
-# 确认小范围结果后再扩大
-bun run category-governance:semantic-review \
-  --limit=50 --concurrency=8 --attempts=2 --direct
-
-# 后续全量运行使用高并发；max 等于 DeepSeek V4 Flash 官方并发上限 2500
-bun run category-governance:semantic-review \
-  --all --concurrency=max --attempts=2 --direct
-```
-
-生成与终审入口共用并发参数解析：默认或 `auto` 为 64，`max` 为 2500，也可指定 1–2500 的整数。DeepSeek V4 Flash 的官方账号级并发上限为 2500，超过会返回 HTTP 429；多个 API Key 仍共用账号额度。未传参数时读取 `CATEGORY_GOVERNANCE_CONCURRENCY` 环境变量。非法或超范围值会报错，终审不再把大于 32 的值静默压低。启动日志和 manifest 会记录配置并发以及按目标数量计算的实际工作数。并发在启动时确定，修改源码不会提高已运行进程的并发。
-
-终审请求的系统提示词、类目、京东证据和输出协议位于前缀，候选统计放在末尾并稳定序列化，尽量复用 DeepSeek KV 缓存。第一版类目树只读，终审只能改变属性。终审请求关闭 V4flash 思考模式，避免把 reasoning token 计入每个属性的治理成本；为控制输出成本，正常的 `keep/drop/review` 只返回 key、动作和短理由，完整 `property` 只在 `add` 或需要修正已有候选的 `keep` 中出现。结果写入 `output/<version>/semantic-review/attribute-templates-v1.json`，同时保存每个类目的原始请求、模型返回、缓存命中 token、reasoning token 和失败原因。
-
-语义终审支持增量运行：稳定的 `attribute-reviews-v1.json` 会按类目合并，重复类目使用最新一次成功结果，未参与本批次的类目继续保留；每次运行目录仍保存本批次独立快照。因此可以先跑小样本、修正提示词，再逐批扩大范围，不会因为单批覆盖而丢失历史终审结果。
+该入口先读取本地历史响应，恢复已完整通过校验的类目，再调用剩余部分；补跑读取本地京东证据，不访问京东 VOP。生成批次只产出候选，需要汇总后进入上述增量治理流程。不要把原始生成批次的成功数等同于正式模板验收数。
 
 详情接口成功但没有 `categoryAttrList`/`paramGroupAttrList` 的类目会记录到 `context/<version>/jd-attribute-evidence.empty.json`，这属于“空证据”而不是请求失败；`--resume` 会跳过它们，只有需要重试时才加 `--retry-empty`。
 
