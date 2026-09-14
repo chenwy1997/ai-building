@@ -59,7 +59,25 @@ async function loadRunObservations(run: { id: string; path: string }, byId: Map<
     try {
       for (const result of parseGovernanceResponse(JSON.stringify(compact), targets)) observations.push({ runId: run.id, result });
     } catch (error) {
-      skipped.push({ runId: run.id, file, error: error instanceof Error ? error.message : String(error) });
+      // 紧凑文件按批次保存，单个类目的坏属性不应丢弃同批其他类目。
+      // 逐类目隔离解析后，只有真正失败的类目会进入 skipped，便于后续定点补跑。
+      for (const id of ids) {
+        const node = byId.get(id);
+        if (!node) continue;
+        try {
+          const one = { ...compact, c: { [id]: (compact.c as Record<string, unknown>)[id] } };
+          try {
+            observations.push({ runId: run.id, result: parseGovernanceResponse(JSON.stringify(one), [node])[0]! });
+          } catch (strictError) {
+            const message = strictError instanceof Error ? strictError.message : String(strictError);
+            if (!message.includes("必须填写 unit")) throw strictError;
+            // 单位缺失交给语义终审结合类目和证据补正；这里不凭规则猜单位。
+            observations.push({ runId: run.id, result: parseGovernanceResponse(JSON.stringify(one), [node], { allowMissingUnits: true })[0]! });
+          }
+        } catch (itemError) {
+          skipped.push({ runId: run.id, file: `${file}#${id}`, error: itemError instanceof Error ? itemError.message : String(itemError) });
+        }
+      }
     }
   }
   return { observations, skipped };

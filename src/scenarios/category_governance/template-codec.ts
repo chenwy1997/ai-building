@@ -196,21 +196,23 @@ function dedupePropertyParts(shared: AttributeProperty[], properties: AttributeP
   return { shared: cleanShared, properties: cleanProperties };
 }
 
-function validateProperties(properties: AttributeProperty[]): void {
+function validateProperties(properties: AttributeProperty[], options: { allowMissingUnits?: boolean } = {}): void {
   if (properties.length === 0) throw new Error("类目属性不能为空");
   const keys = new Set<string>();
   const names = new Set<string>();
   for (const p of properties) {
     if (keys.has(p.key) || names.has(p.name)) throw new Error(`重复属性：${p.key}/${p.name}`);
     // 对有明确量纲的数字属性，要求把单位放入结构化 unit，不能只藏在 description 中。
-    if (p.type === "number" && !p.unit && /尺寸|容量|电池|内存|长度|宽度|高度|厚度|重量|电压|功率|速度|频率|直径|面积|体积|温度|压力|流量|距离|像素/u.test(p.name)) {
+    // 比值、系数和等级是无量纲数字；名称里可能包含“压力/流量”，不能误判为缺少单位。
+    const dimensionless = /比例|比值|压力比|系数|等级|级别/u.test(p.name);
+    if (!options.allowMissingUnits && p.type === "number" && !p.unit && !dimensionless && /尺寸|容量|电池|内存|长度|宽度|高度|厚度|重量|电压|功率|速度|频率|直径|面积|体积|温度|压力|流量|距离|像素/u.test(p.name)) {
       throw new Error(`数字属性 ${p.name} 必须填写 unit`);
     }
     keys.add(p.key); names.add(p.name);
   }
 }
 
-export function parseGovernanceResponse(text: string, targets: CategoryNode[]): GovernanceResult[] {
+export function parseGovernanceResponse(text: string, targets: CategoryNode[], options: { allowMissingUnits?: boolean } = {}): GovernanceResult[] {
   const clean = text.trim().replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "");
   const data = JSON.parse(clean) as Record<string, unknown>;
   const aliases = new Map(targets.flatMap((node) => [[node.id, node], [shortCategoryId(node.id), node]] as const));
@@ -244,7 +246,7 @@ export function parseGovernanceResponse(text: string, targets: CategoryNode[]): 
   }
   const actual = new Set(normalized.map((result) => result.category.id));
   if (actual.size !== targets.length || targets.some((node) => !actual.has(node.id))) throw new Error("类目覆盖不完整或包含重复类目");
-  for (const result of normalized) validateProperties([...result.shared, ...result.properties]);
+  for (const result of normalized) validateProperties([...result.shared, ...result.properties], options);
   return normalized;
 }
 

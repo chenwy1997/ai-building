@@ -26,6 +26,7 @@ const HELP = `
   --limit=10           从候选库中最多审阅 N 个类目，不会自动生成候选；未指定范围时默认 10
   --all                明确允许审阅全部共识类目
   --failed-only        只重试稳定审阅文件中上次失败的类目
+  --unreviewed-only    只审阅稳定文件中尚未有终审结果的新类目
   --replay-run=...     只解析已保存的某次运行响应，不调用模型、不产生 API 费用
   --concurrency=64     并发请求数；auto 为 64，max 为 2500，可显式指定 1–2500
   --attempts=2         单类目失败重试次数
@@ -119,20 +120,23 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const byId = new Map(context.nodes.map((node) => [node.id, node]));
   const selector = flags.category ?? flags["category-id"];
   const failedOnly = boolFlag(flags["failed-only"]);
+  const unreviewedOnly = boolFlag(flags["unreviewed-only"]);
+  let stableReviewForSelection: SemanticReviewDocument | undefined;
+  try { stableReviewForSelection = await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { /* 首次运行 */ }
   let failedIds: Set<string> | undefined;
   if (failedOnly) {
-    let previous: SemanticReviewDocument;
-    try { previous = await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { throw new Error("--failed-only 找不到稳定语义审阅文件"); }
-    failedIds = new Set((previous.errors ?? []).map((item) => item.categoryId));
+    if (!stableReviewForSelection) throw new Error("--failed-only 找不到稳定语义审阅文件");
+    failedIds = new Set((stableReviewForSelection.errors ?? []).map((item) => item.categoryId));
     if (failedIds.size === 0) throw new Error("当前没有失败的语义审阅类目");
   }
+  const reviewedIds = unreviewedOnly ? new Set((stableReviewForSelection?.reviews ?? []).map((item) => item.categoryId)) : undefined;
   const candidateCategories = consensus.categories.filter((category) => {
     const node = byId.get(category.category.id);
-    return node && (!selector || matches(node, selector)) && (!failedIds || failedIds.has(category.category.id));
+    return node && (!selector || matches(node, selector)) && (!failedIds || failedIds.has(category.category.id)) && (!reviewedIds || !reviewedIds.has(category.category.id));
   });
   if (candidateCategories.length === 0) throw new Error("没有找到可审阅的共识类目");
   if (boolFlag(flags.all) && flags.limit !== undefined) throw new Error("--all 和 --limit 不能同时指定");
-  const requestedLimit = flags.limit !== undefined ? asInt(flags.limit, 10) : boolFlag(flags.all) || selector || failedOnly ? undefined : 10;
+  const requestedLimit = flags.limit !== undefined ? asInt(flags.limit, 10) : boolFlag(flags.all) || selector || failedOnly || unreviewedOnly ? undefined : 10;
   const categories = requestedLimit === undefined ? candidateCategories : candidateCategories.slice(0, requestedLimit);
   if (categories.length === 0) throw new Error("没有需要审阅的类目；可使用 --all");
   const concurrency = parseGovernanceConcurrency(flags.concurrency ?? Bun.env.CATEGORY_GOVERNANCE_CONCURRENCY);
@@ -146,6 +150,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     concurrency,
     workerCount,
     failedOnly,
+    unreviewedOnly,
     categoryIds: categories.map((item) => item.category.id),
   };
   console.log(`候选库：${consensusPath}（来源 ${consensus.sourceRuns.map((id) => `run-${id}`).join(", ")}）`);
@@ -248,8 +253,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     console.log(`已生成 ${categories.length} 个语义审阅请求：${runDir}`);
     return;
   }
-  let previous: SemanticReviewDocument | undefined;
-  try { previous = await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { /* 首次运行或旧文件损坏时从当前批次开始 */ }
+  const previous = stableReviewForSelection;
   const mergedReviews = mergeSemanticReviews(previous?.reviews ?? [], reviews);
   const mergedErrors = mergeSemanticReviewErrors(previous?.errors ?? [], errors, reviews);
   const reviewDocument: SemanticReviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews: mergedReviews, usage, errors: mergedErrors };

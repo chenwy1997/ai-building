@@ -97,12 +97,12 @@ export const SEMANTIC_REVIEW_SYSTEM_PROMPT = `你是类目属性治理的最终�
 3. required 只有在商品资料通常稳定具备且对识别、采购或合规确实关键时才设为 true；品牌、型号、颜色默认可选。
 4. 对京东证据中的 weak=1、hint=platform_field、hint=placeholder_values 做语义判断，不要机械保留或机械删除。
 5. 只输出严格 JSON，不要 Markdown。必须覆盖输入的每个候选 key；新增属性使用 action=add，删除使用 action=drop，无法确定使用 action=review。
-6. 为节省输出 token，keep、drop、review 决策禁止输出 property 字段；只有 add 决策必须输出 property。每条 reason 尽量不超过 30 个汉字，notes 最多 3 条。
+6. 为节省输出 token，正常的 keep、drop、review 决策禁止输出 property 字段；只有 add 决策必须输出 property。若 keep 需要纠正候选已有的类型、单位或枚举，可附上完整且使用同一 key 的 property；不需要纠正时省略。review 不进入正式模板。每条 reason 尽量不超过 30 个汉字，notes 最多 3 条。
 7. #CANDIDATES 是待决策清单；#EVIDENCE 只是参考，里面的字段不自动成为候选。不要逐项为未采用的证据输出 drop/review；必要说明写在 notes。采用候选以外的证据字段时必须使用 add 并给出完整 property，不能使用 keep。不得自行翻译或改写已有候选 key。
 
 输出结构：
 {"category_id":"...","decisions":[{"key":"...","action":"keep|drop|review|add","reason":"简短原因","property":{"key":"...","name":"...","type":"text|number|boolean|single|multi|date|file","required":false,"unit":null,"options":[],"description":"","format":null,"example":null,"scope":"shared|category"}}],"notes":[]}
-keep/review/drop 必须使用输入候选 key；add 才使用新 key。property 在 keep/review/drop 时必须省略，add 时必填。`;
+keep/review/drop 必须使用输入候选 key；add 才使用新 key。property 仅在 add 必填，或 keep 纠正已有候选时提供；drop/review 通常省略。`;
 
 function compactCandidate(candidate: AttributeCandidate): Record<string, unknown> {
   return {
@@ -174,8 +174,8 @@ export function parseSemanticReviewResponse(text: string, category: CategoryCons
     if (seen.has(key)) throw new Error(`语义审阅重复候选：${key}`);
     if (action === "add" && keys.has(key)) throw new Error(`语义审阅新增属性与候选 key 重复：${key}`);
     seen.add(key);
-    const property = action === "add" ? cleanProperty(item.property) : undefined;
-    if (property && property.key !== key) throw new Error(`语义审阅新增属性 key 不一致：${key}/${property.key}`);
+    const property = action === "add" || action === "keep" && item.property !== undefined ? cleanProperty(item.property) : undefined;
+    if (property && property.key !== key) throw new Error(`语义审阅 property key 不一致：${key}/${property.key}`);
     decisions.push({ key, action: action as SemanticAction, reason: typeof item.reason === "string" ? item.reason : "", property });
   }
   for (const key of keys) if (!seen.has(key)) throw new Error(`语义审阅遗漏候选：${key}`);
@@ -201,7 +201,8 @@ export function applySemanticReviews(
           if (decision.action === "keep") {
             const candidate = candidates.get(decision.key);
             if (candidate) {
-              const { decision: _decision, runCount: _runCount, observationCount: _observationCount, coverage: _coverage, requiredRate: _requiredRate, sharedRate: _sharedRate, sourceRuns: _sourceRuns, reasons: _reasons, ...property } = candidate;
+              const { decision: _decision, runCount: _runCount, observationCount: _observationCount, coverage: _coverage, requiredRate: _requiredRate, sharedRate: _sharedRate, sourceRuns: _sourceRuns, reasons: _reasons, ...candidateProperty } = candidate;
+              const property = decision.property ?? candidateProperty;
               selected.push(property);
             }
           } else if (decision.action === "add" && decision.property) selected.push(decision.property);

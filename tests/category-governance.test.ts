@@ -87,6 +87,8 @@ describe("标准类目治理公共函数", () => {
     expect(restored[0]?.properties.map((item) => item.key)).toEqual(["operating_system", "ram"]);
     const invalid = { ...response, items: [{ ...response.items[0], properties: [{ key: "screen_size", name: "屏幕尺寸", type: "number", required: false }] }] };
     expect(() => parseGovernanceResponse(JSON.stringify(invalid), [document.nodes[2]!])).toThrow("必须填写 unit");
+    const ratio = { ...response, items: [{ ...response.items[0], properties: [{ key: "pressure_ratio", name: "压力比", type: "number", required: false }] }] };
+    expect(parseGovernanceResponse(JSON.stringify(ratio), [document.nodes[2]!])[0]?.properties[0]?.unit).toBe(null);
   });
 
   test("兼容紧凑属性 unit 错位和多一个 null 的模型输出", () => {
@@ -223,8 +225,8 @@ describe("标准类目治理公共函数", () => {
   });
 
   test("语义终审协议要求非 add 决策省略属性对象", () => {
-    expect(SEMANTIC_REVIEW_SYSTEM_PROMPT).toContain("keep、drop、review 决策禁止输出 property 字段");
-    expect(SEMANTIC_REVIEW_SYSTEM_PROMPT).toContain("property 在 keep/review/drop 时必须省略");
+    expect(SEMANTIC_REVIEW_SYSTEM_PROMPT).toContain("正常的 keep、drop、review 决策禁止输出 property 字段");
+    expect(SEMANTIC_REVIEW_SYSTEM_PROMPT).toContain("drop/review 通常省略");
   });
 
   test("证据中的非候选 drop 只留审计，未知 keep 仍拒绝", () => {
