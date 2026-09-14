@@ -148,6 +148,15 @@ bun run category-governance:semantic-review \
 ```
 
 `--failed-only` 可以和 `--category` 组合，用于只重试某一个失败类目；成功结果会替换旧失败记录，仍失败的才会继续留在错误列表中。
+
+主治理批次如果有失败请求，使用 `--retry-run=<run编号>` 只重试该 run 的失败批次，例如：
+
+```bash
+bun run category-governance \
+  --retry-run=27 --concurrency=128 --batch-size=12 --attempts=2 --direct
+```
+
+它不会重新发送 run-27 已成功的批次；重试产生新的 run 编号，汇总时把原全量 run 和重试 run 一起传给 `consensus`。
 新增类目进入共识库后，使用 `--unreviewed-only` 只运行尚未有语义终审记录的类目，避免把已完成的 11,000 多个类目再次计费。
 冻结 v1 后又产生新批次时，使用 `--changed-only` 对比冻结候选基线，只审阅属性定义或候选状态确实变化的类目：
 

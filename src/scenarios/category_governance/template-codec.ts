@@ -120,8 +120,23 @@ function parseProperty(value: unknown): AttributeProperty {
 
 export function tupleToProperty(value: unknown): AttributeProperty {
   if (!Array.isArray(value)) throw new Error("压缩属性必须是数组");
+  let tuple: unknown[] = value;
+  // 兼容模型省略 required 的 9 元组；数字属性的第 3 位若是字符串则视为 unit。
+  if (tuple.length === 9 && typeof tuple[8] === "string" && Array.isArray(tuple[4]) && typeof tuple[5] === "string") {
+    tuple = [tuple[0], tuple[1], tuple[2], "", tuple[2] === "n" && typeof tuple[3] === "string" ? tuple[3] : null,
+      tuple[4], tuple[5], tuple[6], tuple[7], tuple[8]];
+  }
+  // 兼容模型在 options 后多插入一个空数组的 12 元组。
+  if (tuple.length === 12 && typeof tuple[11] === "string" && Array.isArray(tuple[6]) && Array.isArray(tuple[7]) &&
+      (tuple[5] === null || typeof tuple[5] === "string") && typeof tuple[8] === "string") {
+    tuple = [tuple[0], tuple[1], tuple[2], tuple[3], tuple[5], tuple[6], tuple[8], tuple[9], tuple[10], tuple[11]];
+  }
+  // 11 元组的同一变体：多余数组位于 description 之前。
+  if (tuple.length === 11 && tuple[4] === null && (tuple[5] === null || typeof tuple[5] === "string") &&
+      Array.isArray(tuple[6]) && Array.isArray(tuple[7]) && typeof tuple[8] === "string" && typeof tuple[10] === "string") {
+    tuple = [tuple[0], tuple[1], tuple[2], tuple[3], tuple[5], tuple[6], tuple[8], tuple[9], null, tuple[10]];
+  }
   // 兼容模型偶尔在 unit 前多插入一个 null 的 11 元组：去掉多余占位后按标准十元组解析。
-  let tuple = value;
   if (tuple.length === 11 && tuple[4] === null && typeof tuple[5] === "string" && Array.isArray(tuple[6])) {
     tuple = [tuple[0], tuple[1], tuple[2], tuple[3], tuple[5], tuple[6], tuple[7], tuple[8], tuple[9], tuple[10]];
   }
@@ -222,7 +237,9 @@ export function parseGovernanceResponse(text: string, targets: CategoryNode[], o
     for (const [id, refs] of Object.entries(data.c as Record<string, unknown>)) {
       if (!Array.isArray(refs) || refs.length !== 3) throw new Error(`类目 ${id} 的引用格式无效`);
       const node = aliases.get(id);
-      if (!node) throw new Error(`输出包含非目标类目：${id}`);
+      // 模型偶尔在 c 中附带 __unused__、*_dup 等辅助键；只要目标类目完整，
+      // 忽略这些非目标项，避免一条无关键拖垮同批 12 个有效类目。
+      if (!node) continue;
       const expand = (values: unknown): AttributeProperty[] => {
         if (!Array.isArray(values)) throw new Error("属性引用必须为数组");
         return values.map((key) => {

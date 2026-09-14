@@ -146,6 +146,7 @@ export async function runGovernance(options: {
   categorySelector?: string;
   jdEvidencePath?: string;
   jdEvidenceEnabled?: boolean;
+  retryRunId?: string;
   onProgress?: (progress: {
     completed: number;
     total: number;
@@ -186,9 +187,17 @@ export async function runGovernance(options: {
   } else {
     console.log("京东参考证据：未启用（可放置 context/<version>/jd-attribute-evidence.json 后自动加载）");
   }
-  const batches = groupBatches(document, options.groupDepth, options.batchSize, options.categorySelector, jdEvidence);
-  // 输出按运行批次归档；groupDepth 只属于输入分片配置，不再成为结果目录层级。
   const outputRootDir = outputPath(rootDir, options.version);
+  let batches = groupBatches(document, options.groupDepth, options.batchSize, options.categorySelector, jdEvidence);
+  if (options.retryRunId) {
+    const retryManifestPath = join(outputRootDir, `run-${options.retryRunId}`, "manifest.json");
+    const retryManifest = await readJsonFile<{ errors?: Array<{ key?: string }> }>(retryManifestPath);
+    const failedKeys = new Set((retryManifest.errors ?? []).map((error) => error.key).filter((key): key is string => Boolean(key)));
+    batches = batches.filter((batch) => failedKeys.has(batch.key));
+    if (batches.length === 0) throw new Error(`run-${options.retryRunId} 没有可重试的失败批次：${retryManifestPath}`);
+    console.log(`仅重试 run-${options.retryRunId} 的失败批次：${batches.length} 个；成功批次不会重复请求`);
+  }
+  // 输出按运行批次归档；groupDepth 只属于输入分片配置，不再成为结果目录层级。
   const runRows = await options.database<{ id: number }[]>`
     INSERT INTO governance_runs_v1 (version, provider, model, group_depth, status, request_count, output_dir)
     VALUES (${options.version}, ${options.provider}, ${options.model}, ${options.groupDepth}, 'running', ${batches.length}, ${outputRootDir})
@@ -350,6 +359,7 @@ export async function runGovernance(options: {
     runId, version: document.version, provider: options.provider, model: options.model,
     groupDepth: options.groupDepth, batchSize: options.batchSize, attempts: options.attempts,
     categorySelector: options.categorySelector ?? null,
+    retryRunId: options.retryRunId ?? null,
     jdEvidencePath: evidencePath,
     source: inputSource,
     requestCount, successCount: allResults.length, errorCount: errors.length, errors, attemptErrors,

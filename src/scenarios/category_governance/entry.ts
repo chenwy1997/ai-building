@@ -31,6 +31,7 @@ const HELP = `
   --concurrency=64       并发请求数；传 max 使用 2500，传 auto 使用 64，最高允许 2500
   --batch-size=12        每次请求包含的末级类目数
   --attempts=1           每个批次最多尝试次数；失败会带着校验原因重试
+  --retry-run=27         只重试指定治理运行中最终失败的批次，不重发成功批次
   --category=...         可选：类目 ID、短 ID、名称或完整路径；不传则全量
   --category-id=...      --category 的别名
   --input=...            可选：先导入新类目文件，再开始治理
@@ -136,6 +137,7 @@ export async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       categorySelector,
       jdEvidencePath: flags["jd-evidence"],
       jdEvidenceEnabled: !boolFlag(flags["no-jd-evidence"]),
+      retryRunId: flags["retry-run"],
       onProgress: (progress) => {
         if (progress.completed === progress.total || progress.completed % 10 === 0) {
           console.log(`进度 ${progress.completed}/${progress.total}，已生成 ${progress.success} 个类目结果，失败 ${progress.errors}`);

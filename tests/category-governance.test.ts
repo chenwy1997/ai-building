@@ -106,6 +106,20 @@ describe("标准类目治理公共函数", () => {
     expect(restored[0]?.properties.map((item) => item.unit)).toEqual(["英寸", "mAh", "Hz", ""]);
   });
 
+  test("兼容紧凑属性省略 required 或插入空占位的模型输出", () => {
+    const response = {
+      v: 1,
+      a: {
+        a0: ["length", "长度", "n", "mm", [], "产品长度", null, null, "shared"],
+        a1: ["material", "材质", "t", null, [], "材质描述", null, null, "category"],
+        a2: ["capacity", "容量", "n", "", null, "L", [], [], "容量", null, null, "category"],
+      },
+      c: { a4: [[], ["a0", "a1", "a2"], []] },
+    };
+    const restored = parseGovernanceResponse(JSON.stringify(response), [document.nodes[2]!]);
+    expect(restored[0]?.properties.map((item) => item.unit)).toEqual(["mm", null, "L"]);
+  });
+
   test("治理提示词使用紧凑 a/c 结构，并把参考证据放在目标之后", () => {
     const target = document.nodes[2]!;
     const evidence = normalizeJdEvidence({ categories: [
