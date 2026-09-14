@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { randomUUID } from "node:crypto";
 import type { SemanticTemplateDocument } from "./semantic-review.ts";
 import { acceptedRevision, revisionFeedback, type RevisionResult } from "./attribute-revision.ts";
+import { adjudicationFingerprint } from "./revision-adjudication.ts";
 
 export interface RevisionState {
   version: "attribute-governance-state-v2";
@@ -16,6 +17,8 @@ export interface RevisionState {
     runDir: string;
     error?: string;
     feedback?: unknown;
+    adjudicationFingerprint?: string;
+    reviewedReference?: string;
   }>;
 }
 
@@ -62,7 +65,7 @@ export function mergeRevisionResults(state: RevisionState, results: RevisionResu
       if (!base) throw new Error(`缺少修订基准：${result.categoryId}`);
       templates.set(result.categoryId, acceptedRevision(base, result));
     }
-    records[result.categoryId] = { status: result.status, inputFingerprint: result.inputFingerprint, settledFingerprint: result.settledFingerprint, runDir, ...(result.error ? { error: result.error } : {}), ...(result.status === "accepted" ? {} : { feedback: revisionFeedback(result) }) };
+    records[result.categoryId] = { status: result.status, inputFingerprint: result.inputFingerprint, settledFingerprint: result.settledFingerprint, runDir, reviewedReference: result.reviewedReference ?? records[result.categoryId]?.reviewedReference, ...(result.error ? { error: result.error } : {}), ...(result.status === "accepted" ? {} : { feedback: revisionFeedback(result) }), ...(result.adjudication ? { adjudicationFingerprint: adjudicationFingerprint(result) } : {}) };
   }
   return { ...state, updatedAt: new Date().toISOString(), records, templates: { ...state.templates, generatedAt: new Date().toISOString(), categories: [...templates.values()].sort((a, b) => a.category.id.localeCompare(b.category.id)) } };
 }

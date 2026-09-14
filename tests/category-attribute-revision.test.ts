@@ -89,7 +89,7 @@ describe("以定稿为基础的属性修订", () => {
     expect(revisionInputFingerprint({ ...data, base: base([prop("changed")]) })).not.toBe(fingerprint);
     expect(revisionInputFingerprint({ ...data, category: candidateDoc([prop("new_definition")]).categories[0]! })).not.toBe(fingerprint);
     const proposalPrompt = buildRevisionPrompt(data); const evaluationPrompt = buildEvaluationPrompt(data, data.base);
-    expect(proposalPrompt.split("#CANDIDATES")[0]).toBe(evaluationPrompt.split("#PROPOSED")[0]);
+    expect(proposalPrompt.split("#BASE")[0]).toBe(evaluationPrompt.split("#PROPOSED")[0]);
   });
 
   test("日志完整行可恢复；并发写入串行落盘，锁防止多进程覆盖", async () => {

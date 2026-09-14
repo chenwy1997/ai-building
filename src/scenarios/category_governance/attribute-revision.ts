@@ -7,7 +7,7 @@ import type { AttributeProperty } from "./types.ts";
 import { addSemanticReviewUsage, emptySemanticReviewUsage, type SemanticReviewUsage, type SemanticTemplateDocument } from "./semantic-review.ts";
 
 export type AttributeTemplate = SemanticTemplateDocument["categories"][number];
-export const REVISION_PROTOCOL = "attribute-revision-v3";
+export const REVISION_PROTOCOL = "attribute-revision-v4";
 
 /** 两个阶段共用固定前缀。验收阶段不读取候选堆或提案理由，以降低相同噪声造成的锚定。 */
 export const REVISION_SYSTEM_PROMPT = `你负责三横类目属性模板的持续改进。类目 ID、名称和层级只读；治理对象只是当前末级类目的属性。按最后的 TASK 执行 propose 或 evaluate。
@@ -36,6 +36,7 @@ export interface RevisionInput {
   category: CategoryConsensus;
   base: AttributeTemplate;
   evidenceText: string;
+  reviewedReference?: string;
 }
 export interface RevisionPatch {
   categoryId: string;
@@ -64,6 +65,9 @@ export interface RevisionResult {
   status: "accepted" | "needs_review" | "failed";
   inputFingerprint: string;
   settledFingerprint?: string;
+  stopReason?: "unchanged_proposal" | "review_required";
+  adjudication?: { reviewer: string; sourceRun: string; sourceTemplateFingerprint: string; decision: unknown };
+  reviewedReference?: string;
   baseFingerprint: string;
   patch?: RevisionPatch;
   proposed?: AttributeTemplate;
@@ -93,16 +97,43 @@ export function revisionCandidateFingerprint(category: CategoryConsensus): strin
   return hashText(JSON.stringify([...revisionDefinitions(category).values()].map(propertyToTuple)));
 }
 export function revisionInputFingerprint(input: RevisionInput): string {
-  return hashText(JSON.stringify([REVISION_PROTOCOL, REVISION_SYSTEM_PROMPT, templateFingerprint(input.base), revisionCandidateFingerprint(input.category), input.evidenceText.trim()]));
+  return hashText(JSON.stringify([REVISION_PROTOCOL, REVISION_SYSTEM_PROMPT, templateFingerprint(input.base), revisionCandidateFingerprint(input.category), input.evidenceText.trim(), input.reviewedReference ?? ""]));
+}
+/** v3 的提案前缀未改；只用来识别相同数据的历史记录，不能拿旧响应冒充新验收。 */
+export function matchesRevisionInput(fingerprint: string | undefined, input: RevisionInput): boolean {
+  return fingerprint === revisionInputFingerprint(input) || (!input.reviewedReference && fingerprint === hashText(JSON.stringify(["attribute-revision-v3", REVISION_SYSTEM_PROMPT, templateFingerprint(input.base), revisionCandidateFingerprint(input.category), input.evidenceText.trim()])));
+}
+function evidencePrefix(input: RevisionInput): string {
+  return `#CATEGORY\n${JSON.stringify(input.category.category)}\n#EVIDENCE\n${input.evidenceText.trim() || "暂无商品证据"}${input.reviewedReference ? `\n#REVIEWED_REFERENCE\n${input.reviewedReference}` : ""}`;
 }
 export function revisionCommonPrefix(input: RevisionInput): string {
-  return `#CATEGORY\n${JSON.stringify(input.category.category)}\n#EVIDENCE\n${input.evidenceText.trim() || "暂无商品证据"}\n#BASE\n${JSON.stringify(templateTuples(input.base))}`;
+  return `${evidencePrefix(input)}\n#BASE\n${JSON.stringify(templateTuples(input.base))}`;
 }
 export function buildRevisionPrompt(input: RevisionInput, feedback?: unknown): string {
-  return `${revisionCommonPrefix(input)}\n#CANDIDATES\n${JSON.stringify(Object.fromEntries([...revisionDefinitions(input.category)].map(([ref, p]) => [ref, propertyToTuple(p)])))}\n#TASK\npropose${feedback ? `\n#FEEDBACK\n${JSON.stringify(feedback)}` : ""}`;
+  const defects = attributeContractIssues(input.base);
+  return `${revisionCommonPrefix(input)}\n#CANDIDATES\n${JSON.stringify(Object.fromEntries([...revisionDefinitions(input.category)].map(([ref, p]) => [ref, propertyToTuple(p)])))}${defects.length ? `\n#LOCAL_CONTRACT_ISSUES\n${JSON.stringify(defects)}` : ""}\n#TASK\npropose${feedback ? `\n#FEEDBACK\n${JSON.stringify(feedback)}` : ""}`;
+}
+function readableProperties(properties: AttributeProperty[]): Record<string, unknown> {
+  return Object.fromEntries([...properties].sort((a, b) => a.key.localeCompare(b.key)).map(p => [p.key, {
+    name: p.name, type: p.type, required: p.required,
+    ...(p.unit ? { unit: p.unit } : {}), ...(p.options?.length ? { options: p.options } : {}),
+    ...(p.description ? { description: p.description } : {}), ...(p.format ? { format: p.format } : {}),
+    ...(p.example ? { example: p.example } : {}),
+  }]));
 }
 export function buildEvaluationPrompt(input: RevisionInput, proposed: AttributeTemplate, feedback?: string): string {
-  return `${revisionCommonPrefix(input)}\n#PROPOSED\n${JSON.stringify(templateTuples(proposed))}\n#TASK\nevaluate${feedback ? `\n#FORMAT_ERROR\n${feedback}` : ""}`;
+  const current = [...proposed.shared, ...proposed.properties];
+  const currentByKey = new Map(current.map(p => [p.key, p]));
+  const old = [...input.base.shared, ...input.base.properties];
+  const removed = old.filter(p => !currentByKey.has(p.key));
+  const changed = old.filter(p => currentByKey.has(p.key) && JSON.stringify(propertyToTuple(p)) !== JSON.stringify(propertyToTuple(currentByKey.get(p.key)!)));
+  // 不把 BASE 与当前属性并排当两份完整模板；有字段名的对象避免十元组位置读错。
+  const prefix = evidencePrefix(input);
+  return `${prefix}\n#PROPOSED\n${JSON.stringify(readableProperties(current))}\n#HISTORY_NOT_CURRENT\n${JSON.stringify({ removed: readableProperties(removed), previousDefinitionsOfChangedKeys: readableProperties(changed) })}\n#TASK\nevaluate
+本轮只有 PROPOSED 是完整的拟采用模板。HISTORY_NOT_CURRENT 是变更前的历史，不属于当前模板；removed 中的属性已经删除。duplicate 只能引用 PROPOSED 中至少两个真实存在的不同 key，不能把历史字段算作重复。
+以 type 的英文含义读取字段：text 可以没有 options；number 表示单值，不能装区间；区间使用 text 并明确单位/格式是合法定义。样本未覆盖不等于不适用，required=false 不代表所有商品都须填写。
+只把当前确实仍存在、会妨碍填写或选型的问题放进 issues。已经修正、描述已明确、无需修改、可接受、只需确认的观察不属于问题；不能为了凑问题而附加任意缺项。没有实际阻断问题就 accept 且 issues=[]。
+scope/definition/unsupported/duplicate 的 keys 必须全部来自 PROPOSED。missing_core 用尚不存在的建议 key（或 $template）；regression 指明删除或修改损害了什么基本信息，不能单凭“与历史不同”判错。${feedback ? `\n#FORMAT_ERROR\n${feedback}` : ""}`;
 }
 
 function object(text: string): Record<string, unknown> {
@@ -179,11 +210,29 @@ export function applyRevisionPatch(base: AttributeTemplate, patch: RevisionPatch
   for (const item of patch.remove) selected.delete(item.key);
   for (const item of patch.upsert) selected.set(item.property.key, item.property);
   const properties = [...selected.values()].sort((a, b) => a.key.localeCompare(b.key));
-  validateAttributeProperties(properties);
-  return { category: base.category, shared: properties.filter(p => p.scope === "shared"), properties: properties.filter(p => p.scope === "category"), notes: patch.upsert.length || patch.remove.length ? patch.defer.map(d => `${d.key}：${d.reason}`) : base.notes };
+  const template = { category: base.category, shared: properties.filter(p => p.scope === "shared"), properties: properties.filter(p => p.scope === "category"), notes: patch.upsert.length || patch.remove.length ? patch.defer.map(d => `${d.key}：${d.reason}`) : base.notes };
+  const defects = attributeContractIssues(template);
+  if (defects.length) throw new Error(defects.map(d => d.reason).join("；"));
+  return template;
 }
 
-export function parseRevisionJudgment(text: string, proposed: AttributeTemplate): RevisionJudgment {
+export function attributeContractIssues(template: AttributeTemplate): QualityIssue[] {
+  const properties = [...template.shared, ...template.properties];
+  const issues: QualityIssue[] = [];
+  // 未修改的旧属性也要检查，不能绕过新属性使用的基本值域约定。
+  for (const p of properties) {
+    try { parseRevisionTuple(propertyToTuple(p)); }
+    catch (error) { issues.push({ keys: [p.key], code: "definition", reason: `${p.key}：${error instanceof Error ? error.message : error}` }); }
+    const choice = p.type === "single" || p.type === "multi";
+    if (choice && !p.options?.length) issues.push({ keys: [p.key], code: "empty_enum", reason: `${p.key} 没有枚举选项，请明确修订该属性` });
+    if (!choice && p.options?.length) issues.push({ keys: [p.key], code: "unexpected_enum", reason: `${p.key} 的类型与 options 不一致，请明确修订该属性` });
+  }
+  try { validateAttributeProperties(properties); }
+  catch (error) { issues.push({ keys: ["$template"], code: "definition", reason: error instanceof Error ? error.message : String(error) }); }
+  return issues;
+}
+
+export function parseRevisionJudgment(text: string, proposed: AttributeTemplate, base?: AttributeTemplate): RevisionJudgment {
   const data = object(text);
   if (data.category_id !== proposed.category.id) throw new Error("验收 category_id 与输入不一致");
   if (data.verdict !== "accept" && data.verdict !== "revise") throw new Error("验收 verdict 必须为 accept/revise");
@@ -198,6 +247,17 @@ export function parseRevisionJudgment(text: string, proposed: AttributeTemplate)
     return { keys, code, reason: nonempty(item.reason, "issue.reason") };
   });
   if ((data.verdict === "accept") !== (issues.length === 0)) throw new Error("accept 必须无问题，revise 必须给出具体问题");
+  const current = new Set([...proposed.shared, ...proposed.properties].map(p => p.key));
+  const old = new Map(base ? [...base.shared, ...base.properties].map(p => [p.key, p]) : []);
+  const now = new Map([...proposed.shared, ...proposed.properties].map(p => [p.key, p]));
+  for (const issue of issues) {
+    if (new Set(issue.keys).size !== issue.keys.length) throw new Error("验收问题的 keys 不得重复");
+    if (issue.code === "duplicate" && (issue.keys.length < 2 || issue.keys.some(k => !current.has(k)))) throw new Error("重复问题必须引用至少两个当前 PROPOSED 中的属性；已删除的历史属性不算重复");
+    if (["scope", "definition", "unsupported"].includes(issue.code) && issue.keys.some(k => !current.has(k))) throw new Error("验收引用了当前 PROPOSED 不存在的属性，请核对历史与当前模板");
+    if (issue.code === "missing_core" && issue.keys.some(k => current.has(k))) throw new Error("缺失问题引用的属性已在 PROPOSED 中，请检查实际定义而非声称不存在");
+    if (issue.code === "regression" && base && issue.keys.some(k => k !== "$template" && !old.has(k))) throw new Error("退化问题必须指向旧模板中被修改或删除的属性");
+    if (issue.code === "regression" && base && issue.keys.some(k => k === "$template" ? templateFingerprint(base) === templateFingerprint(proposed) : now.has(k) && JSON.stringify(propertyToTuple(old.get(k)!)) === JSON.stringify(propertyToTuple(now.get(k)!)))) throw new Error("退化问题引用的属性未变化，请指出实际丢失或改变的信息");
+  }
   return { categoryId: proposed.category.id, verdict: data.verdict, issues, templateFingerprint: templateFingerprint(proposed) };
 }
 
@@ -216,6 +276,7 @@ export async function reviseCategory(input: RevisionInput, options: {
   let feedback: unknown = options.feedback;
   let evaluationError: string | undefined;
   let awaitingEvaluation = false;
+  const rejectedProposals = new Map<string, RevisionJudgment>();
   const call = async (stage: RevisionTrace["stage"], cycle: number, user: string): Promise<string> => {
     const request = { messages: [{ role: "system" as const, content: REVISION_SYSTEM_PROMPT }, { role: "user" as const, content: user }], temperature: 0.1, max_tokens: stage === "propose" ? 4_000 : 2_000, thinking: { type: "disabled" as const } };
     const event: RevisionTrace = { categoryId: result.categoryId, cycle, stage, request };
@@ -235,10 +296,15 @@ export async function reviseCategory(input: RevisionInput, options: {
       if (!awaitingEvaluation) {
         result.patch = parseRevisionPatch(await call("propose", cycle, buildRevisionPrompt(input, feedback)), input);
         result.proposed = applyRevisionPatch(input.base, result.patch);
+        const prior = rejectedProposals.get(templateFingerprint(result.proposed));
+        if (prior) {
+          result.judgment = prior; result.status = "needs_review"; result.error = undefined;
+          result.stopReason = "unchanged_proposal"; return result;
+        }
         awaitingEvaluation = true;
         result.judgment = undefined;
       }
-      result.judgment = parseRevisionJudgment(await call("evaluate", cycle, buildEvaluationPrompt(input, result.proposed!, evaluationError)), result.proposed!);
+      result.judgment = parseRevisionJudgment(await call("evaluate", cycle, buildEvaluationPrompt(input, result.proposed!, evaluationError)), result.proposed!, input.base);
       evaluationError = undefined;
       if (result.judgment.verdict === "accept") {
         result.status = "accepted";
@@ -247,6 +313,7 @@ export async function reviseCategory(input: RevisionInput, options: {
         return result;
       }
       result.status = "needs_review";
+      rejectedProposals.set(templateFingerprint(result.proposed!), result.judgment);
       result.error = undefined;
       feedback = revisionFeedback(result);
       awaitingEvaluation = false;
@@ -257,6 +324,7 @@ export async function reviseCategory(input: RevisionInput, options: {
       else feedback = { formatError: result.error };
     }
   }
+  if (result.status === "needs_review") result.stopReason = "review_required";
   return result;
 }
 
