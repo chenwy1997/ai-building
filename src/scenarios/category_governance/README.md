@@ -140,6 +140,15 @@ bun run category-governance:semantic-review --limit=10 --dry-run
 
 启动日志会列出候选文件、来源批次、可用类目数和实际选中数量；候选不足时给出提示，运行 manifest 保存相同信息及本次类目 ID。显式 `--limit` 对 `--category` 范围同样生效，`--all` 与 `--limit` 不能同时使用。
 
+全量完成后如果仍有失败，不要重新跑全部类目，直接只重试稳定文件中的失败类目：
+
+```bash
+bun run category-governance:semantic-review \
+  --failed-only --concurrency=128 --attempts=2 --direct
+```
+
+`--failed-only` 可以和 `--category` 组合，用于只重试某一个失败类目；成功结果会替换旧失败记录，仍失败的才会继续留在错误列表中。
+
 ```bash
 # 先生成一个类目的请求，不调用模型，检查输入和缓存前缀
 bun run category-governance:semantic-review --category="手机" --limit=1 --dry-run

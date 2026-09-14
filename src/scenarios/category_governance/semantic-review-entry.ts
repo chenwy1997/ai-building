@@ -24,6 +24,7 @@ const HELP = `
   --category=...       只审阅指定类目名称、完整路径、完整 ID 或短 ID
   --limit=10           从候选库中最多审阅 N 个类目，不会自动生成候选；未指定范围时默认 10
   --all                明确允许审阅全部共识类目
+  --failed-only        只重试稳定审阅文件中上次失败的类目
   --concurrency=64     并发请求数；auto 为 64，max 为 2500，可显式指定 1–2500
   --attempts=2         单类目失败重试次数
   --consensus=...      共识文件路径，默认 output/<version>/consensus/attribute-candidates-v1.json
@@ -66,11 +67,20 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const consensusPath = flags.consensus ?? join(workspace, "output", version, "consensus", "attribute-candidates-v1.json");
   const consensus = await readJsonFile<AttributeConsensusDocument>(consensusPath);
   const context = await readContextDocument(workspace, version);
+  const stableReviewPath = join(workspace, "output", version, "semantic-review", "attribute-reviews-v1.json");
   const byId = new Map(context.nodes.map((node) => [node.id, node]));
   const selector = flags.category ?? flags["category-id"];
+  const failedOnly = boolFlag(flags["failed-only"]);
+  let failedIds: Set<string> | undefined;
+  if (failedOnly) {
+    let previous: SemanticReviewDocument;
+    try { previous = await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { throw new Error("--failed-only 找不到稳定语义审阅文件"); }
+    failedIds = new Set((previous.errors ?? []).map((item) => item.categoryId));
+    if (failedIds.size === 0) throw new Error("当前没有失败的语义审阅类目");
+  }
   const candidateCategories = consensus.categories.filter((category) => {
     const node = byId.get(category.category.id);
-    return node && (!selector || matches(node, selector));
+    return node && (!selector || matches(node, selector)) && (!failedIds || failedIds.has(category.category.id));
   });
   if (candidateCategories.length === 0) throw new Error("没有找到可审阅的共识类目");
   if (boolFlag(flags.all) && flags.limit !== undefined) throw new Error("--all 和 --limit 不能同时指定");
@@ -87,6 +97,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     requestedLimit: requestedLimit ?? null,
     concurrency,
     workerCount,
+    failedOnly,
     categoryIds: categories.map((item) => item.category.id),
   };
   console.log(`候选库：${consensusPath}（来源 ${consensus.sourceRuns.map((id) => `run-${id}`).join(", ")}）`);
@@ -99,7 +110,6 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   let evidence: JdEvidenceDocument | undefined;
   try { evidence = await loadJdEvidence(evidencePath); } catch { /* 京东证据可选 */ }
   const runDir = join(workspace, "output", version, "semantic-review", `run-${runStamp()}`);
-  const stableReviewPath = join(workspace, "output", version, "semantic-review", "attribute-reviews-v1.json");
   const stableTemplatePath = join(workspace, "output", version, "semantic-review", "attribute-templates-v1.json");
   const provider = flags.provider ?? "deepseek";
   const model = flags.model ?? "flash";
