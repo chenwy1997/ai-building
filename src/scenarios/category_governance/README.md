@@ -41,7 +41,7 @@ bun run cli scenario:run category_governance run pipeline ./sanheng-standard-cat
 
 短 ID 是由真实类目 ID 做 SHA-256 后截取的稳定指纹，并非随机数。真正的输入溯源以 `manifest.json` 的 `source.path`、`source.sha256`、`importId` 为准，`category-tree.json` 同样保留 `sourcePath`、`sourceSha256`、`importId`；每个治理请求和结果文件也会携带同样的输入指纹。每次治理运行直接写入 `output/v1/run-<runId>/`，不会与其他输入或批次配置混在一起；`merge` 默认合并最新 run，也可用 `--run-id=<id>` 指定。旧版本的 `output/v1/level-*` 结果仍可兼容读取。
 
-治理入口实际读取固定的 `context/v1/category-tree.json`，再根据目标类目生成本批次的精简文本，不会扫描目录中所有 `.std.txt`。`.std.txt` 是便于人工检查和复用的压缩导出；真正发送给模型的完整 system/user 输入保存在每个 `attempt-*.request.json`。启动日志会显示输入路径、导入记录 ID 和原始文件 SHA-256，运行 manifest 还记录归一化上下文的 SHA-256。`--attempts=3` 表示一个批次最多尝试三次，失败时会把校验原因反馈给下一次请求；只有最终成功的那一份写入结果表。
+治理入口实际读取固定的 `context/v1/category-tree.json`，再根据目标类目生成本批次的精简文本，不会扫描目录中所有 `.std.txt`。`.std.txt` 是便于人工检查和复用的压缩导出；真正发送给模型的完整 system/user 输入保存在每个 `attempt-*.request.json`。启动日志会显示输入路径、导入记录 ID 和原始文件 SHA-256，运行 manifest 还记录归一化上下文的 SHA-256。`--attempts=3` 表示一个批次最多尝试三次，失败时会把校验原因反馈给下一次请求；每个通过校验的类目立即写入结果表，同批其余失败类目单独重试。
 
 为了利用 DeepSeek 的前缀缓存，批次请求会先放入同一类目组的固定压缩上下文，再放本批次变化的目标类目；运行开始时每个类目组先完成一个预热请求，缓存落盘后才并发发送剩余批次。运行结束会打印并在 manifest 的 `usage` 中保存输入、输出、总 token 以及 `promptCacheHitTokens` 和 `promptCacheMissTokens`，可以据此调整 `group-depth`、`batch-size` 和并发策略。DeepSeek 官方说明只有从输入起始位置完整匹配的前缀才会计入缓存命中，缓存本身是尽力而为。[上下文硬盘缓存说明](https://api-docs.deepseek.com/zh-cn/guides/kv_cache/)
 
@@ -149,14 +149,18 @@ bun run category-governance:semantic-review \
 
 `--failed-only` 可以和 `--category` 组合，用于只重试某一个失败类目；成功结果会替换旧失败记录，仍失败的才会继续留在错误列表中。
 
-主治理批次如果有失败请求，使用 `--retry-run=<run编号>` 只重试该 run 的失败批次，例如：
+主治理批次如果有失败请求，使用 `--retry-run=<run编号>` 自动恢复并补跑，例如：
 
 ```bash
 bun run category-governance \
-  --retry-run=27 --concurrency=128 --batch-size=12 --attempts=2 --direct
+  --retry-run=28 --retry-batch-size=4 --concurrency=128 --attempts=2 --direct
 ```
 
-它不会重新发送 run-27 已成功的批次；重试产生新的 run 编号，汇总时把原全量 run 和重试 run 一起传给 `consensus`。
+命令先读取该 run 及其来源 run 的本地失败响应，按类目独立校验并恢复合格结果（不调用模型）。只修复末尾闭合符错配等明确的格式问题，不补造被截断的正文、类目 ID、属性或单位。仍缺失或校验不合格的类目按 `--retry-batch-size` 拆分，默认每次最多 4 个；可设为 1 做最后的定点补跑。目标来自历史请求里的准确 ID，因此不依赖原来的批次名称、`batch-size` 或随机串。
+
+每次响应也会先保存成功类目，下一次尝试仅发送剩余失败类目。日志和 manifest 分别记录本地恢复数、本次模型成功数、失败请求数、待补跑类目数；所有模型返回的 token 都计入用量，包括格式校验失败的响应。补跑读取本地京东证据，不访问京东 VOP。
+
+新结果保存在 `output/v1/run-<新编号>/<批次>/results.json`，一个批次只保留一份合格结果，文件中记录历史响应的来源。Excel 导出、合并和共识命令兼容这个文件及旧版 `attempt-xxx.json`。重试产生新的 run 编号，汇总时把原全量 run 和重试 run 一起传给 `consensus`；原文件与冻结基线保持不变。`--dry-run` 可预览剩余请求，不调用模型。
 新增类目进入共识库后，使用 `--unreviewed-only` 只运行尚未有语义终审记录的类目，避免把已完成的 11,000 多个类目再次计费。
 冻结 v1 后又产生新批次时，使用 `--changed-only` 对比冻结候选基线，只审阅属性定义或候选状态确实变化的类目：
 

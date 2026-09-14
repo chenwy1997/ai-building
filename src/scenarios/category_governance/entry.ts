@@ -31,7 +31,8 @@ const HELP = `
   --concurrency=64       并发请求数；传 max 使用 2500，传 auto 使用 64，最高允许 2500
   --batch-size=12        每次请求包含的末级类目数
   --attempts=1           每个批次最多尝试次数；失败会带着校验原因重试
-  --retry-run=27         只重试指定治理运行中最终失败的批次，不重发成功批次
+  --retry-run=27         先从历史原文恢复合格结果，再只补跑失败类目（也可填 run-27）
+  --retry-batch-size=4   补跑时每次最多包含的类目数；独立于原 run 的 batch-size
   --category=...         可选：类目 ID、短 ID、名称或完整路径；不传则全量
   --category-id=...      --category 的别名
   --input=...            可选：先导入新类目文件，再开始治理
@@ -96,6 +97,7 @@ export async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const direct = boolFlag(flags.direct) || boolFlag(flags["no-proxy"]);
   const workspace = flags.workspace ?? workspaceRoot();
   const categorySelector = flags.category ?? flags["category-id"];
+  if (flags["retry-batch-size"] && !flags["retry-run"]) throw new Error("--retry-batch-size 需要同时指定 --retry-run");
 
   if (direct && provider === "deepseek") {
     addNoProxy("api.deepseek.com");
@@ -121,7 +123,8 @@ export async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       console.log(`已导入 ${imported.document.nodes.length} 个类目，末级 ${imported.document.leafCount}`);
     }
 
-    console.log(`开始治理：${categorySelector ? `类目 ${categorySelector}` : "全部末级类目"}，并发 ${concurrency}，批量 ${batchSize}，重复 ${attempts}`);
+    const scope = flags["retry-run"] ? `补跑 ${flags["retry-run"]} 的失败类目` : categorySelector ? `类目 ${categorySelector}` : "全部末级类目";
+    console.log(`开始治理：${scope}，并发 ${concurrency}，每请求最多 ${flags["retry-run"] ? flags["retry-batch-size"] ?? 4 : batchSize} 类目，最多尝试 ${attempts} 次`);
     const result = await runGovernance({
       database,
       ai,
@@ -138,6 +141,7 @@ export async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       jdEvidencePath: flags["jd-evidence"],
       jdEvidenceEnabled: !boolFlag(flags["no-jd-evidence"]),
       retryRunId: flags["retry-run"],
+      retryBatchSize: flags["retry-batch-size"] ? asInt(flags["retry-batch-size"], 4) : undefined,
       onProgress: (progress) => {
         if (progress.completed === progress.total || progress.completed % 10 === 0) {
           console.log(`进度 ${progress.completed}/${progress.total}，已生成 ${progress.success} 个类目结果，失败 ${progress.errors}`);
@@ -145,6 +149,7 @@ export async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
       },
     });
     console.log(`治理完成：请求 ${result.requestCount}，成功类目 ${result.successCount}，失败请求 ${result.errorCount}`);
+    console.log(`类目统计：本地恢复 ${result.recoveredCategoryCount}，本次模型成功 ${result.successCount - result.recoveredCategoryCount}，待补跑 ${result.failedCategoryCount}`);
     console.log(`Token：输入 ${result.promptTokens}，输出 ${result.completionTokens}，合计 ${result.totalTokens}`);
     console.log(`输入缓存：命中 ${result.promptCacheHitTokens} tokens，未命中 ${result.promptCacheMissTokens} tokens`);
     console.log(`输出目录：${result.outputDir}`);

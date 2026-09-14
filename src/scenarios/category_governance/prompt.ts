@@ -12,7 +12,7 @@ export const CATEGORY_GOVERNANCE_SYSTEM_PROMPT = `你是商品类目治理专家
 6. 输出严格为 JSON，不要 Markdown、解释性前后缀或代码围栏。使用下面约定的 a/c 紧凑结构，每个目标类目必须有且只有一条结果。
 7. a 是本批次属性字典：相同的完整十元组只定义一次；c 的 key 是输入中的短 category_id，值为 [shared属性引用, category属性引用, notes]。
 8. 属性十元组顺序固定为 [0:key,1:name,2:type代码,3:required,4:unit,5:options,6:description,7:format,8:example,9:scope]，不要增加或省略位置；type代码 t=text、n=number、b=boolean、s=single、m=multi、d=date、f=file；required 必填写"*"，非必填写""。
-9. 有量纲的 number 属性（例如尺寸、容量、内存、电池、重量、长度、宽度、高度、厚度、电压、功率、速度、频率、直径）必须把单位写入 unit，不能只写在 description；确实无量纲的年份、数量才可 unit=null。unit、format、example 不确定时填 null，description 不确定时填空字符串，options 必须是字符串数组；不要给十元组增加字段。scope 只能是 shared 或 category。
+9. 这里设计的是属性模板，不是填写某件商品的数据：有量纲的 number 属性必须为模板选择一个行业常用的统一计量单位并写入 unit，不能只写在 description，也不能因为商品数据未知就填 null。不同商品的原始单位由填报时换算。无量纲数字或不涉及计量的属性才可 unit=null；规格编码按语义选择 text/single，不把编码数字当实测量。format、example 不确定时填 null，description 不确定时填空字符串，options 必须是字符串数组；不要给十元组增加字段。scope 只能是 shared 或 category。
 10. 避免语义重复：如果已有“网络制式”，不要再增加“是否支持5G”；如果已有更具体的像素、容量或尺寸属性，不要再返回含义重叠的泛化属性。
 11. 京东证据中的 seen=x/y 表示该属性在 x 个样本商品、共 y 个样本商品中出现，只表示观察频次，不等于必填。seen=1 的字段只能作为弱候选，不能单独据此设为必填或生成稳定枚举；只有在当前类目具有明确行业意义时才保留。
 12. 京东证据里的“无、未公布、暂无、不详、未知”可能是缺失占位值，不要直接写入 options；只有当前属性本身确实表达是否具备某功能时，才可把它转换为 boolean 或“有/无”语义。京东商品字段、类目路径和营销字段都可能有噪声，不能因为出现频次高就照抄。
@@ -43,8 +43,11 @@ export function buildGovernanceUserPrompt(input: {
 ${input.categoryText}
 
 请只输出紧凑 JSON，结构固定为：
-{"v":1,"a":{"a0":["brand","品牌","t","",null,[],"商品品牌",null,null,"shared"]},"c":{"目标短category_id":[["a0"],["a1"],[]]}}
+{"v":1,"a":{"a0":["brand","品牌","t","",null,[],"商品品牌",null,null,"shared"],"a1":["length","长度","n","","mm",[],"长度统一以毫米填报",null,null,"category"]},"c":{"目标短category_id":[["a0"],["a1"],[]]}}
+上述属性只展示十元组顺序及文本/数值单位的写法，不要求每个类目都有品牌或长度。
 a 是属性字典，c 的每个值依次是 shared 引用数组、类目专属属性引用数组、说明数组。不要输出 items、category 对象或任何字典之外的属性定义。最终 c 的 key 集合必须与目标类目的短 category_id 完全一致，不能遗漏、重复或新增。
+只定义当前目标实际需要且引用的属性，优先保留有区分和采购价值的字段，无需穷举。shared 也必须逐类目判断适用性，不能把整本属性字典套用给每个类目。notes 只写确有必要的不确定项，否则填 []。输出压紧的单行 JSON。
+属性的计量语义必须清楚：物理测量用 number 并在 unit 填统一的计量单位；不要另建“长度单位”等属性来替代 unit。计数应在名称中写清计数对象（例如“卡位数量”“可夹页数”），可无量纲，避免笼统叫“容量”。规格编码依据业务含义使用 text/single，不能把编码中的数字误当实测量。数值若可能使用多种单位，选行业常用单位统一表达；不能为通过校验而编造单位或把物理测量改成含义模糊的文本。
 
 目标末级类目（必须全部返回）：
 ${JSON.stringify(targets)}

@@ -103,6 +103,13 @@ function looksLikeUnit(value: unknown): value is string {
   return /^(?:英寸|吋|万像素|像素|Hz|k?Hz|W|kW|mW|mAh|Ah|V|mV|A|mA|mm|cm|m|km|kg|g|mg|GB|TB|MB|KB|GiB|TiB|℃|°C|Pa|kPa|Mbps|Gbps|dB|L|mL|平方米|平方厘米|立方米|个|台|级|%|元)$/iu.test(value.trim());
 }
 
+function normalizeUnit(value: unknown): string | null {
+  if (value == null) return null;
+  if (typeof value === "string") return value;
+  if (Array.isArray(value) && value.length === 1 && typeof value[0] === "string") return value[0];
+  throw new Error("unit 必须是单个单位字符串或 null");
+}
+
 function parseProperty(value: unknown): AttributeProperty {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("属性必须是对象");
   const p = value as Record<string, unknown>;
@@ -112,7 +119,7 @@ function parseProperty(value: unknown): AttributeProperty {
   const type = normalizeType(p.type, options);
   return {
     key: normalizeKey(p.key, name), name, type, required: normalizeRequired(p.required),
-    unit: scalarText(p.unit), options,
+    unit: normalizeUnit(p.unit), options,
     description: scalarText(p.description) ?? "", format: scalarText(p.format),
     example: scalarText(p.example), scope: normalizeScope(p.scope),
   };
@@ -121,19 +128,20 @@ function parseProperty(value: unknown): AttributeProperty {
 export function tupleToProperty(value: unknown): AttributeProperty {
   if (!Array.isArray(value)) throw new Error("压缩属性必须是数组");
   let tuple: unknown[] = value;
-  // 兼容模型省略 required 的 9 元组；数字属性的第 3 位若是字符串则视为 unit。
-  if (tuple.length === 9 && typeof tuple[8] === "string" && Array.isArray(tuple[4]) && typeof tuple[5] === "string") {
-    tuple = [tuple[0], tuple[1], tuple[2], "", tuple[2] === "n" && typeof tuple[3] === "string" ? tuple[3] : null,
+  // 兼容省略 required 的 9 元组；只有第 3 位明确为单位或 null 时才补空位。
+  if (tuple.length === 9 && typeof tuple[8] === "string" && Array.isArray(tuple[4]) && typeof tuple[5] === "string" &&
+      (tuple[3] === null || looksLikeUnit(tuple[3]))) {
+    tuple = [tuple[0], tuple[1], tuple[2], "", tuple[3],
       tuple[4], tuple[5], tuple[6], tuple[7], tuple[8]];
   }
   // 兼容模型在 options 后多插入一个空数组的 12 元组。
-  if (tuple.length === 12 && typeof tuple[11] === "string" && Array.isArray(tuple[6]) && Array.isArray(tuple[7]) &&
+  if (tuple.length === 12 && tuple[4] === null && typeof tuple[11] === "string" && Array.isArray(tuple[6]) && Array.isArray(tuple[7]) && tuple[7].length === 0 &&
       (tuple[5] === null || typeof tuple[5] === "string") && typeof tuple[8] === "string") {
     tuple = [tuple[0], tuple[1], tuple[2], tuple[3], tuple[5], tuple[6], tuple[8], tuple[9], tuple[10], tuple[11]];
   }
   // 11 元组的同一变体：多余数组位于 description 之前。
   if (tuple.length === 11 && tuple[4] === null && (tuple[5] === null || typeof tuple[5] === "string") &&
-      Array.isArray(tuple[6]) && Array.isArray(tuple[7]) && typeof tuple[8] === "string" && typeof tuple[10] === "string") {
+      Array.isArray(tuple[6]) && Array.isArray(tuple[7]) && tuple[7].length === 0 && typeof tuple[8] === "string" && typeof tuple[10] === "string") {
     tuple = [tuple[0], tuple[1], tuple[2], tuple[3], tuple[5], tuple[6], tuple[8], tuple[9], null, tuple[10]];
   }
   // 兼容模型偶尔在 unit 前多插入一个 null 的 11 元组：去掉多余占位后按标准十元组解析。
@@ -215,56 +223,131 @@ function validateProperties(properties: AttributeProperty[], options: { allowMis
   if (properties.length === 0) throw new Error("类目属性不能为空");
   const keys = new Set<string>();
   const names = new Set<string>();
+  const errors: string[] = [];
   for (const p of properties) {
-    if (keys.has(p.key) || names.has(p.name)) throw new Error(`重复属性：${p.key}/${p.name}`);
+    if (keys.has(p.key) || names.has(p.name)) errors.push(`重复属性：${p.key}/${p.name}`);
     // 对有明确量纲的数字属性，要求把单位放入结构化 unit，不能只藏在 description 中。
     // 比值、系数和等级是无量纲数字；名称里可能包含“压力/流量”，不能误判为缺少单位。
-    const dimensionless = /比例|比值|压力比|系数|等级|级别/u.test(p.name);
+    const dimensionless = /比例|比值|压力比|系数|因数|等级|级别/u.test(p.name);
     if (!options.allowMissingUnits && p.type === "number" && !p.unit && !dimensionless && /尺寸|容量|电池|内存|长度|宽度|高度|厚度|重量|电压|功率|速度|频率|直径|面积|体积|温度|压力|流量|距离|像素/u.test(p.name)) {
-      throw new Error(`数字属性 ${p.name} 必须填写 unit`);
+      errors.push(`数字属性 ${p.name} 必须填写 unit`);
     }
     keys.add(p.key); names.add(p.name);
   }
+  if (errors.length > 0) throw new Error(errors.join("；"));
 }
 
-export function parseGovernanceResponse(text: string, targets: CategoryNode[], options: { allowMissingUnits?: boolean } = {}): GovernanceResult[] {
+// 只修复末尾闭合符号的错配；不补正文、属性、类目 ID 或截断的字符串。
+function repairClosingDelimiters(text: string): string | null {
+  const stack: string[] = [];
+  let quoted = false;
+  let escaped = false;
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i]!;
+    if (quoted) {
+      if (escaped) escaped = false;
+      else if (char === "\\") escaped = true;
+      else if (char === '"') quoted = false;
+    } else if (char === '"') quoted = true;
+    else if (char === "[") stack.push("]");
+    else if (char === "{") stack.push("}");
+    else if (char === "]" || char === "}") {
+      if (char !== stack.at(-1)) {
+        if (!/^[\s\]}]+$/u.test(text.slice(i))) return null;
+        return text.slice(0, i) + stack.reverse().join("");
+      }
+      stack.pop();
+    }
+  }
+  return null;
+}
+
+export interface GovernanceParseResult {
+  results: GovernanceResult[];
+  errors: Array<{ categoryId: string; error: string }>;
+  repairedClosingDelimiters: boolean;
+  ignoredCategoryIds: string[];
+}
+
+/** 每个类目独立验证；失败的类目继续保留错误，不能凭规则补造属性或单位。 */
+export function parseGovernanceResponsePartial(text: string, targets: CategoryNode[], options: { allowMissingUnits?: boolean } = {}): GovernanceParseResult {
   const clean = text.trim().replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "");
-  const data = JSON.parse(clean) as Record<string, unknown>;
+  let data: Record<string, unknown>;
+  let repairedClosingDelimiters = false;
+  try {
+    data = JSON.parse(clean);
+  } catch (error) {
+    const repaired = repairClosingDelimiters(clean);
+    if (!repaired) throw error;
+    try { data = JSON.parse(repaired); } catch { throw error; }
+    repairedClosingDelimiters = true;
+  }
+  if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("响应必须是 JSON 对象");
   const aliases = new Map(targets.flatMap((node) => [[node.id, node], [shortCategoryId(node.id), node]] as const));
-  const normalized: GovernanceResult[] = [];
-  if (data.a && data.c) {
-    const dictionary = data.a as Record<string, unknown>;
+  const entries = new Map<string, unknown[]>();
+  const ignoredCategoryIds: string[] = [];
+  const add = (id: string, value: unknown): void => {
+    const node = aliases.get(id);
+    if (!node) { ignoredCategoryIds.push(id); return; }
+    const values = entries.get(node.id) ?? [];
+    values.push(value);
+    entries.set(node.id, values);
+  };
+  const compact = Boolean(data.a && data.c);
+  if (compact) {
+    if (typeof data.a !== "object" || Array.isArray(data.a) || typeof data.c !== "object" || Array.isArray(data.c)) {
+      throw new Error("a/c 必须是字典对象");
+    }
     for (const [id, refs] of Object.entries(data.c as Record<string, unknown>)) {
-      if (!Array.isArray(refs) || refs.length !== 3) throw new Error(`类目 ${id} 的引用格式无效`);
-      const node = aliases.get(id);
-      // 模型偶尔在 c 中附带 __unused__、*_dup 等辅助键；只要目标类目完整，
-      // 忽略这些非目标项，避免一条无关键拖垮同批 12 个有效类目。
-      if (!node) continue;
-      const expand = (values: unknown): AttributeProperty[] => {
-        if (!Array.isArray(values)) throw new Error("属性引用必须为数组");
-        return values.map((key) => {
-          if (typeof key !== "string" || !Object.hasOwn(dictionary, key)) throw new Error(`未知属性引用：${key}`);
-          return tupleToProperty(dictionary[key]);
-        });
-      };
-      const parts = dedupePropertyParts(expand(refs[0]), expand(refs[1]));
-      normalized.push({ category: {id: node.id, name: node.name, path: node.pathNames}, ...parts, notes: parseNotes(refs[2]) });
+      add(id, refs);
     }
   } else {
     const items = data.items;
     if (!Array.isArray(items)) throw new Error("响应必须包含 items 或 a/c 字典");
     for (const item of items) {
-      const node = aliases.get(item?.category?.id);
-      if (!node) throw new Error(`输出包含非目标类目：${item?.category?.id}`);
-      if (!Array.isArray(item.properties)) throw new Error("properties 必须为数组");
-      const parts = dedupePropertyParts((item.shared ?? []).map(parseProperty), item.properties.map(parseProperty));
-      normalized.push({ category: {id: node.id, name: node.name, path: node.pathNames}, ...parts, notes: parseNotes(item.notes ?? []) });
+      add(String(item?.category?.id), item);
     }
   }
-  const actual = new Set(normalized.map((result) => result.category.id));
-  if (actual.size !== targets.length || targets.some((node) => !actual.has(node.id))) throw new Error("类目覆盖不完整或包含重复类目");
-  for (const result of normalized) validateProperties([...result.shared, ...result.properties], options);
-  return normalized;
+  const results: GovernanceResult[] = [];
+  const errors: GovernanceParseResult["errors"] = [];
+  for (const node of targets) {
+    try {
+      const values = entries.get(node.id) ?? [];
+      if (values.length !== 1) throw new Error(values.length === 0 ? "缺少目标类目" : "目标类目重复（完整 ID 与短 ID 也不能同时出现）");
+      let parts: ReturnType<typeof dedupePropertyParts>;
+      let notes: string[];
+      if (compact) {
+        const refs = values[0];
+        if (!Array.isArray(refs) || refs.length !== 3) throw new Error("类目引用格式无效");
+        const dictionary = data.a as Record<string, unknown>;
+        const expand = (refs: unknown): AttributeProperty[] => {
+          if (!Array.isArray(refs)) throw new Error("属性引用必须为数组");
+          return refs.map((key) => {
+            if (typeof key !== "string" || !Object.hasOwn(dictionary, key)) throw new Error(`未知属性引用：${key}`);
+            return tupleToProperty(dictionary[key]);
+          });
+        };
+        parts = dedupePropertyParts(expand(refs[0]), expand(refs[1]));
+        notes = parseNotes(refs[2]);
+      } else {
+        const item = values[0] as Record<string, unknown>;
+        if (!Array.isArray(item.properties) || (item.shared != null && !Array.isArray(item.shared))) throw new Error("properties/shared 必须为数组");
+        parts = dedupePropertyParts(((item.shared ?? []) as unknown[]).map(parseProperty), item.properties.map(parseProperty));
+        notes = parseNotes(item.notes);
+      }
+      validateProperties([...parts.shared, ...parts.properties], options);
+      results.push({ category: { id: node.id, name: node.name, path: node.pathNames }, ...parts, notes });
+    } catch (error) {
+      errors.push({ categoryId: node.id, error: error instanceof Error ? error.message : String(error) });
+    }
+  }
+  return { results, errors, repairedClosingDelimiters, ignoredCategoryIds };
+}
+
+export function parseGovernanceResponse(text: string, targets: CategoryNode[], options: { allowMissingUnits?: boolean } = {}): GovernanceResult[] {
+  const parsed = parseGovernanceResponsePartial(text, targets, options);
+  if (parsed.errors.length > 0) throw new Error(parsed.errors.map((item) => `${item.categoryId}: ${item.error}`).join("；"));
+  return parsed.results;
 }
 
 function parseNotes(value: unknown): string[] {

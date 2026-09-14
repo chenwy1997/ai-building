@@ -79,6 +79,8 @@ async function latestResponseFiles(runDir: string): Promise<string[]> {
   const files: string[] = [];
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
+    const acceptedResults = join(runDir, entry.name, "results.json");
+    if (await Bun.file(acceptedResults).exists()) { files.push(acceptedResults); continue; }
     const names = (await readdir(join(runDir, entry.name)))
       .filter((name) => /^attempt-\d+\.json$/u.test(name))
       .sort((a, b) => attemptNumber(a) - attemptNumber(b));
@@ -98,12 +100,15 @@ async function loadResults(version: string, runId: string): Promise<{ manifest: 
   const categories = categoryById(tree);
   const results: GovernanceResult[] = [];
   for (const responsePath of await latestResponseFiles(runDir)) {
-    const requestPath = responsePath.replace(/\.json$/u, ".request.json");
-    if (!(await Bun.file(requestPath).exists())) continue;
-    const request = JSON.parse(await Bun.file(requestPath).text()) as { categoryIds?: string[] };
-    const targets = (request.categoryIds ?? []).map((id) => categories.get(id)).filter((node): node is CategoryNode => Boolean(node));
+    const text = await Bun.file(responsePath).text();
+    const compact = JSON.parse(text) as { c: Record<string, unknown> };
+    const targets = Object.keys(compact.c).map((id) => {
+      const node = categories.get(id);
+      if (!node) throw new Error(`结果包含未导入类目：${id}`);
+      return node;
+    });
     if (targets.length === 0) continue;
-    results.push(...parseGovernanceResponse(await Bun.file(responsePath).text(), targets));
+    results.push(...parseGovernanceResponse(text, targets));
   }
   results.sort((a, b) => {
     const left = a.category.path.join("\u0001");

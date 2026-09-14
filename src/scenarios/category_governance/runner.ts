@@ -5,7 +5,8 @@ import type { SQL } from "bun";
 import type { AiService } from "../../ai/service.ts";
 import { readJsonFile, readTextFile, writeJsonFile, writeTextFile } from "../../facilities/json/files.ts";
 import { buildGovernanceUserPrompt, CATEGORY_GOVERNANCE_SYSTEM_PROMPT } from "./prompt.ts";
-import { compactTemplates, parseGovernanceResponse } from "./template-codec.ts";
+import { compactTemplates, parseGovernanceResponse, parseGovernanceResponsePartial } from "./template-codec.ts";
+import { planGovernanceRetry, type GovernanceRetryPlan, type RecoveredGovernanceResult } from "./retry.ts";
 import { mergeGovernanceResults } from "./merge.ts";
 import { categoryById } from "./category-tree.ts";
 import { outputPath, readContextDocument, writeContextBundle, workspaceRoot } from "./storage.ts";
@@ -21,6 +22,7 @@ interface Batch {
   nodes: CategoryNode[];
   text: string;
   referenceText: string;
+  repairError?: string;
 }
 
 function categoryMatches(node: CategoryNode, selector: string): boolean {
@@ -147,6 +149,7 @@ export async function runGovernance(options: {
   jdEvidencePath?: string;
   jdEvidenceEnabled?: boolean;
   retryRunId?: string;
+  retryBatchSize?: number;
   onProgress?: (progress: {
     completed: number;
     total: number;
@@ -163,6 +166,8 @@ export async function runGovernance(options: {
   totalTokens: number;
   promptCacheHitTokens: number;
   promptCacheMissTokens: number;
+  recoveredCategoryCount: number;
+  failedCategoryCount: number;
 }> {
   if (options.version !== "v1") {
     throw new Error(`数据库目前只初始化了 *_v1 表；治理 ${options.version} 前请新增对应版本迁移`);
@@ -188,19 +193,35 @@ export async function runGovernance(options: {
     console.log("京东参考证据：未启用（可放置 context/<version>/jd-attribute-evidence.json 后自动加载）");
   }
   const outputRootDir = outputPath(rootDir, options.version);
-  let batches = groupBatches(document, options.groupDepth, options.batchSize, options.categorySelector, jdEvidence);
+  let batches = options.retryRunId ? [] : groupBatches(document, options.groupDepth, options.batchSize, options.categorySelector, jdEvidence);
+  let retryPlan: GovernanceRetryPlan | undefined;
   if (options.retryRunId) {
-    const retryManifestPath = join(outputRootDir, `run-${options.retryRunId}`, "manifest.json");
-    const retryManifest = await readJsonFile<{ errors?: Array<{ key?: string }> }>(retryManifestPath);
-    const failedKeys = new Set((retryManifest.errors ?? []).map((error) => error.key).filter((key): key is string => Boolean(key)));
-    batches = batches.filter((batch) => failedKeys.has(batch.key));
-    if (batches.length === 0) throw new Error(`run-${options.retryRunId} 没有可重试的失败批次：${retryManifestPath}`);
-    console.log(`仅重试 run-${options.retryRunId} 的失败批次：${batches.length} 个；成功批次不会重复请求`);
+    if (options.categorySelector) throw new Error("--retry-run 按历史失败记录选择类目，不能同时使用 --category");
+    const retryBatchSize = options.retryBatchSize ?? 4;
+    if (!Number.isInteger(retryBatchSize) || retryBatchSize < 1) throw new Error("retry-batch-size 必须是正整数");
+    retryPlan = await planGovernanceRetry({ outputRoot: outputRootDir, runId: options.retryRunId, document, contextSha256: inputSource.contextSha256 });
+    if (retryPlan.groups.length === 0) throw new Error(`run-${retryPlan.runId} 没有需要补跑的类目`);
+    const contexts = new Map(makeContextChunks(document, retryPlan.groupDepth).map((chunk) => [chunk.rootId, chunk.text]));
+    batches = retryPlan.groups.flatMap((group) => {
+      const pending = group.nodes.filter((node) => !retryPlan!.recovered.has(node.id));
+      const chunks: Batch[] = [];
+      for (let offset = 0; offset < pending.length; offset += retryBatchSize) {
+        const nodes = pending.slice(offset, offset + retryBatchSize);
+        const rootId = nodes[0]!.pathIds[Math.min(retryPlan!.groupDepth, nodes[0]!.pathIds.length) - 1]!;
+        const text = contexts.get(rootId);
+        if (!text) throw new Error(`缺少失败类目的固定上下文：${rootId}`);
+        chunks.push({ key: `${group.key}-retry-${offset / retryBatchSize + 1}`, rootId, nodes, text, referenceText: buildJdEvidenceText(nodes, jdEvidence), repairError: group.error });
+      }
+      return chunks;
+    });
+    console.log(`补跑 run-${retryPlan.runId}：目标 ${retryPlan.groups.reduce((count, group) => count + group.nodes.length, 0)} 个类目，本地恢复 ${retryPlan.recovered.size} 个，剩余 ${batches.reduce((count, batch) => count + batch.nodes.length, 0)} 个，分 ${batches.length} 个请求（每次最多 ${retryBatchSize} 类目）`);
   }
+  const targetCategoryCount = retryPlan ? retryPlan.groups.reduce((count, group) => count + group.nodes.length, 0) : batches.reduce((count, batch) => count + batch.nodes.length, 0);
+  const groupDepth = retryPlan?.groupDepth ?? options.groupDepth;
   // 输出按运行批次归档；groupDepth 只属于输入分片配置，不再成为结果目录层级。
   const runRows = await options.database<{ id: number }[]>`
     INSERT INTO governance_runs_v1 (version, provider, model, group_depth, status, request_count, output_dir)
-    VALUES (${options.version}, ${options.provider}, ${options.model}, ${options.groupDepth}, 'running', ${batches.length}, ${outputRootDir})
+    VALUES (${options.version}, ${options.provider}, ${options.model}, ${groupDepth}, 'running', ${batches.length}, ${outputRootDir})
     RETURNING id
   `;
   const runId = runRows[0]?.id;
@@ -210,7 +231,7 @@ export async function runGovernance(options: {
     UPDATE governance_runs_v1 SET output_dir=${outputDir} WHERE id=${runId}
   `;
   const allResults: GovernanceResult[] = [];
-  const errors: Array<{ key: string; attempt: number; error: string }> = [];
+  const errors: Array<{ key: string; attempt: number; error: string; categoryIds: string[] }> = [];
   const attemptErrors: Array<{ key: string; attempt: number; error: string }> = [];
   let requestCount = 0;
   let promptTokens = 0;
@@ -219,6 +240,7 @@ export async function runGovernance(options: {
   let promptCacheHitTokens = 0;
   let promptCacheMissTokens = 0;
   let completedBatches = 0;
+  let recoveredCategoryCount = 0;
   const markProgress = (): void => {
     completedBatches += 1;
     options.onProgress?.({
@@ -228,35 +250,79 @@ export async function runGovernance(options: {
       errors: errors.length,
     });
   };
+
+  // 每批只保留一个合格结果文件，逐次追加新成功类目，避免导出遗漏或共识重复计票。
+  const persistResults = async (key: string, results: GovernanceResult[], rawText: string, attempt: number,
+    accumulated: GovernanceResult[], provenance: Record<string, unknown>): Promise<void> => {
+    if (results.length === 0) return;
+    // 存储错误向上抛出，不能被误当成模型错误而触发付费重试。
+    await options.database.begin(async (tx) => {
+      for (const result of results) {
+        await tx`
+          INSERT INTO attribute_templates_v1 (run_id, version, category_id, category_path_json, attempt, template_json, raw_response, validation_status)
+          VALUES (${runId}, ${document.version}, ${result.category.id}, ${result.category.path}::jsonb, ${attempt}, ${result}::jsonb, ${rawText}, 'valid')
+        `;
+      }
+    });
+    accumulated.push(...results);
+    await writeJsonFile(join(outputDir, key, "results.json"), {
+      ...compactTemplates(accumulated), meta: { runId, batch: key, source: inputSource, provenance },
+    }, { pretty: false, trailingNewline: true });
+    allResults.push(...results);
+  };
+
+  if (retryPlan && !options.dryRun) {
+    for (const group of retryPlan.groups) {
+      const accumulated: GovernanceResult[] = [];
+      const provenance: Record<string, unknown> = {};
+      const byResponse = new Map<string, RecoveredGovernanceResult[]>();
+      for (const node of group.nodes) {
+        const recovered = retryPlan.recovered.get(node.id);
+        if (!recovered) continue;
+        provenance[node.id] = { ...recovered.source, recovered: true };
+        const values = byResponse.get(recovered.source.path) ?? [];
+        values.push(recovered);
+        byResponse.set(recovered.source.path, values);
+      }
+      for (const values of byResponse.values()) {
+        await persistResults(`${group.key}-recovered`, values.map((value) => value.result), values[0]!.rawText, 0, accumulated, provenance);
+        recoveredCategoryCount += values.length;
+      }
+    }
+  }
   const processBatch = async (batch: Batch): Promise<void> => {
     const requestDir = join(outputDir, batch.key);
-    let lastError = "";
-    let succeeded = false;
+    let lastError = batch.repairError ?? "";
+    let pending = batch.nodes;
+    const accumulated: GovernanceResult[] = [];
+    const provenance: Record<string, unknown> = {};
     for (let attempt = 1; attempt <= Math.max(1, options.attempts); attempt += 1) {
       let rawText = "";
       let finishReason: string | null = null;
+      let responseUsage: unknown = null;
+      let parsed: ReturnType<typeof parseGovernanceResponsePartial> | undefined;
+      const attemptNodes = pending;
       const requestPath = join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.request.json`);
       const prompt = buildGovernanceUserPrompt({
         version: document.version,
         categoryText: batch.text,
-        targetCategories: batch.nodes,
-        referenceText: batch.referenceText,
+        targetCategories: attemptNodes,
+        referenceText: buildJdEvidenceText(attemptNodes, jdEvidence),
         repairError: lastError || undefined,
       });
       await writeJsonFile(requestPath, {
         system: CATEGORY_GOVERNANCE_SYSTEM_PROMPT,
         user: prompt,
-        categoryIds: batch.nodes.map((node) => node.id),
+        categoryIds: attemptNodes.map((node) => node.id),
         source: inputSource,
         jdEvidencePath: evidencePath,
-        jdEvidence: batch.referenceText || null,
+        jdEvidence: buildJdEvidenceText(attemptNodes, jdEvidence) || null,
         attempt,
       });
       if (options.dryRun) {
         requestCount += 1;
-        succeeded = true;
         markProgress();
-        break;
+        return;
       }
       try {
         requestCount += 1;
@@ -266,7 +332,8 @@ export async function runGovernance(options: {
             { role: "user", content: prompt },
           ],
           temperature: 0.2,
-          max_tokens: 32_000,
+          // 小批次不需要 32K 输出，限制重复字段失控时的花费。
+          max_tokens: Math.min(32_000, 2_048 + attemptNodes.length * 1_536),
           response_format: { type: "json_object" },
           thinking: { type: "disabled" },
         });
@@ -276,31 +343,21 @@ export async function runGovernance(options: {
         promptCacheHitTokens += response.usage?.prompt_cache_hit_tokens ?? 0;
         promptCacheMissTokens += response.usage?.prompt_cache_miss_tokens ?? 0;
         finishReason = response.choices[0]?.finish_reason ?? null;
+        responseUsage = response.usage ?? null;
         rawText = parseContent(response.choices[0]?.message.content);
-        const results = parseGovernanceResponse(rawText, batch.nodes);
-        const compact = compactTemplates(results);
-        await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.json`), {
-          ...compact,
-          meta: {
-            runId,
-            batch: batch.key,
-            attempt,
-            rawBytes: rawText.length,
-            source: inputSource,
-          },
-        });
-        for (const result of results) {
-          allResults.push(result);
-          await options.database`
-            INSERT INTO attribute_templates_v1 (run_id, version, category_id, category_path_json, attempt, template_json, raw_response, validation_status)
-            VALUES (${runId}, ${document.version}, ${result.category.id}, ${result.category.path}::jsonb, ${attempt}, ${result}::jsonb, ${rawText}, 'valid')
-          `;
-        }
-        succeeded = true;
-        markProgress();
-        break;
+        parsed = parseGovernanceResponsePartial(rawText, attemptNodes);
+        lastError = parsed.errors.map((item) => `${shortCategoryId(item.categoryId)}: ${item.error}`).join("；");
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error);
+      }
+      if (parsed?.results.length) {
+        for (const result of parsed.results) provenance[result.category.id] = { attempt, repairedClosingDelimiters: parsed.repairedClosingDelimiters };
+        await persistResults(batch.key, parsed.results, rawText, attempt, accumulated, provenance);
+        const accepted = new Set(parsed.results.map((result) => result.category.id));
+        pending = pending.filter((node) => !accepted.has(node.id));
+      }
+      if (pending.length === 0) { markProgress(); return; }
+      if (lastError) {
         attemptErrors.push({ key: batch.key, attempt, error: lastError });
         await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.error.json`), {
           error: lastError,
@@ -308,6 +365,10 @@ export async function runGovernance(options: {
           batch: batch.key,
           attempt,
           finishReason,
+          usage: responseUsage,
+          categoryIds: pending.map((node) => node.id),
+          acceptedCategoryIds: parsed?.results.map((result) => result.category.id) ?? [],
+          categoryErrors: parsed?.errors ?? [],
           rawBytes: rawText.length,
           source: inputSource,
         });
@@ -319,10 +380,8 @@ export async function runGovernance(options: {
         }
       }
     }
-    if (!succeeded) {
-      errors.push({ key: batch.key, attempt: Math.max(1, options.attempts), error: lastError || "未知错误" });
-      markProgress();
-    }
+    errors.push({ key: batch.key, attempt: Math.max(1, options.attempts), error: lastError || "未知错误", categoryIds: pending.map((node) => node.id) });
+    markProgress();
   };
 
   const runPhase = async (phase: Batch[], concurrency: number): Promise<void> => {
@@ -357,9 +416,13 @@ export async function runGovernance(options: {
   `;
   await writeJsonFile(join(outputDir, "manifest.json"), {
     runId, version: document.version, provider: options.provider, model: options.model,
-    groupDepth: options.groupDepth, batchSize: options.batchSize, attempts: options.attempts,
+    groupDepth, batchSize: options.batchSize, attempts: options.attempts,
     categorySelector: options.categorySelector ?? null,
-    retryRunId: options.retryRunId ?? null,
+    retryRunId: retryPlan?.runId ?? null,
+    retryBatchSize: retryPlan ? options.retryBatchSize ?? 4 : null,
+    targetCategoryCount, recoveredCategoryCount,
+    failedCategoryCount: errors.reduce((count, error) => count + error.categoryIds.length, 0),
+    recoverySourceRuns: retryPlan?.inspectedRunIds ?? [],
     jdEvidencePath: evidencePath,
     source: inputSource,
     requestCount, successCount: allResults.length, errorCount: errors.length, errors, attemptErrors,
@@ -378,6 +441,8 @@ export async function runGovernance(options: {
     totalTokens,
     promptCacheHitTokens,
     promptCacheMissTokens,
+    recoveredCategoryCount,
+    failedCategoryCount: errors.reduce((count, error) => count + error.categoryIds.length, 0),
   };
 }
 
