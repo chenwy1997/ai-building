@@ -106,6 +106,13 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const reviews: SemanticReviewResult[] = [];
   const errors: Array<{ categoryId: string; error: string }> = [];
   let promptTokens = 0; let completionTokens = 0; let totalTokens = 0; let promptCacheHitTokens = 0; let promptCacheMissTokens = 0; let reasoningTokens = 0;
+  let completed = 0;
+  const markProgress = (success: boolean): void => {
+    completed += 1;
+    if (completed === 1 || completed % 100 === 0 || completed === categories.length) {
+      console.log(`语义审阅进度：${completed}/${categories.length}，成功 ${reviews.length}，失败 ${errors.length}，本次${success ? "完成" : "失败"}`);
+    }
+  };
   try {
     let cursor = 0;
     const worker = async (): Promise<void> => {
@@ -151,6 +158,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
             if (attempt === attempts) errors.push({ categoryId: category.category.id, error: lastError });
           }
         }
+        markProgress(lastError.length === 0);
       }
     };
     await Promise.all(Array.from({ length: Math.min(concurrency, categories.length) }, () => worker()));
@@ -176,6 +184,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   console.log(`语义审阅完成：成功 ${reviews.length}，失败 ${errors.length}`);
   console.log(`模板：${stableTemplatePath}`);
   console.log(`缓存：命中 ${promptCacheHitTokens}，未命中 ${promptCacheMissTokens}`);
+  console.log(`Token：输入 ${promptTokens}，输出 ${completionTokens}，思考 ${reasoningTokens}，合计 ${totalTokens}`);
 }
 
 if (import.meta.main) main().catch((error) => { console.error(error instanceof Error ? error.message : String(error)); process.exitCode = 1; });
