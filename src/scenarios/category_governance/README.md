@@ -128,6 +128,18 @@ bun run category-governance:consensus \
 
 统计共识之后，可让模型做语义终审。终审可以保留、删除、标记复核或新增属性，代码只校验结构并应用结果：
 
+语义终审只读取候选库，`--limit=10` 表示最多审阅其中 10 个类目；`--all` 也只覆盖当前候选库。如果上次只汇总了手机样本，即使提高 limit 也仍只有一个类目。扩大范围前，先把包含全量类目的已有运行加入汇总，这一步在本地执行，不调用模型。例如：
+
+```bash
+# run-19 为已有全量结果，run-24/25/26 为后续手机样本
+bun run category-governance:consensus --run-id=19,24,25,26
+
+# 先核对候选范围和实际选中数量，不调用模型
+bun run category-governance:semantic-review --limit=10 --dry-run
+```
+
+启动日志会列出候选文件、来源批次、可用类目数和实际选中数量；候选不足时给出提示，运行 manifest 保存相同信息及本次类目 ID。显式 `--limit` 对 `--category` 范围同样生效，`--all` 与 `--limit` 不能同时使用。
+
 ```bash
 # 先生成一个类目的请求，不调用模型，检查输入和缓存前缀
 bun run category-governance:semantic-review --category="手机" --limit=1 --dry-run

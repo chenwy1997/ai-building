@@ -21,7 +21,7 @@ const HELP = `
 
 参数：
   --category=...       只审阅指定类目名称、完整路径、完整 ID 或短 ID
-  --limit=10           未指定类目时审阅前 N 个类目，默认 10
+  --limit=10           从候选库中最多审阅 N 个类目，不会自动生成候选；未指定范围时默认 10
   --all                明确允许审阅全部共识类目
   --concurrency=4      语义审阅并发数，默认 4
   --attempts=2         单类目失败重试次数
@@ -72,8 +72,23 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     return node && (!selector || matches(node, selector));
   });
   if (candidateCategories.length === 0) throw new Error("没有找到可审阅的共识类目");
-  const categories = boolFlag(flags.all) || selector ? candidateCategories : candidateCategories.slice(0, asInt(flags.limit, 10));
+  if (boolFlag(flags.all) && flags.limit !== undefined) throw new Error("--all 和 --limit 不能同时指定");
+  const requestedLimit = flags.limit !== undefined ? asInt(flags.limit, 10) : boolFlag(flags.all) || selector ? undefined : 10;
+  const categories = requestedLimit === undefined ? candidateCategories : candidateCategories.slice(0, requestedLimit);
   if (categories.length === 0) throw new Error("没有需要审阅的类目；可使用 --all");
+  const inputSummary = {
+    sourceConsensus: consensusPath,
+    sourceRuns: consensus.sourceRuns,
+    consensusCategoryCount: consensus.categories.length,
+    matchedCategoryCount: candidateCategories.length,
+    requestedLimit: requestedLimit ?? null,
+    categoryIds: categories.map((item) => item.category.id),
+  };
+  console.log(`候选库：${consensusPath}（来源 ${consensus.sourceRuns.map((id) => `run-${id}`).join(", ")}）`);
+  console.log(`候选类目 ${consensus.categories.length}，匹配 ${candidateCategories.length}，本次审阅 ${categories.length}${requestedLimit === undefined ? "" : `（上限 ${requestedLimit}）`}`);
+  if (requestedLimit !== undefined && candidateCategories.length < requestedLimit) {
+    console.warn(`候选不足：当前范围只有 ${candidateCategories.length} 个类目。--limit 只限制数量；扩大范围前请用 category-governance:consensus 汇总包含更多类目的已有批次。`);
+  }
   const evidencePath = flags["jd-evidence"] ?? join(workspace, "context", version, "jd-attribute-evidence.json");
   let evidence: JdEvidenceDocument | undefined;
   try { evidence = await loadJdEvidence(evidencePath); } catch { /* 京东证据可选 */ }
@@ -142,6 +157,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
     await databases?.closeAll();
   }
   if (dryRun) {
+    await writeJsonFile(join(runDir, "manifest.json"), { runDir, dryRun: true, ...inputSummary, categoryCount: categories.length, successCount: 0, errorCount: 0 });
     console.log(`已生成 ${categories.length} 个语义审阅请求：${runDir}`);
     return;
   }
@@ -155,7 +171,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   await writeJsonFile(stableTemplatePath, templates);
   await writeJsonFile(join(runDir, "attribute-reviews-v1.json"), { ...reviewDocument, reviews });
   await writeJsonFile(join(runDir, "attribute-templates-v1.json"), templates);
-  await writeJsonFile(join(runDir, "manifest.json"), { runDir, categoryCount: categories.length, successCount: reviews.length, errorCount: errors.length, mergedReviewCount: mergedReviews.length, previousReviewCount: previous?.reviews.length ?? 0, usage: reviewDocument.usage });
+  await writeJsonFile(join(runDir, "manifest.json"), { runDir, ...inputSummary, categoryCount: categories.length, successCount: reviews.length, errorCount: errors.length, mergedReviewCount: mergedReviews.length, previousReviewCount: previous?.reviews.length ?? 0, usage: reviewDocument.usage });
   console.log(`语义审阅完成：成功 ${reviews.length}，失败 ${errors.length}`);
   console.log(`模板：${stableTemplatePath}`);
   console.log(`缓存：命中 ${promptCacheHitTokens}，未命中 ${promptCacheMissTokens}`);
