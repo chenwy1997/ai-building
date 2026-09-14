@@ -27,6 +27,7 @@ export interface SemanticReviewDocument {
     totalTokens: number;
     promptCacheHitTokens: number;
     promptCacheMissTokens: number;
+    reasoningTokens?: number;
   };
   errors?: Array<{ categoryId: string; error: string }>;
 }

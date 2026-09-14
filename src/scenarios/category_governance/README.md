@@ -153,7 +153,7 @@ bun run category-governance:semantic-review \
   --limit=50 --concurrency=8 --attempts=2 --direct
 ```
 
-终审请求的系统提示词、类目、京东证据和输出协议位于前缀，候选统计放在末尾并稳定序列化，尽量复用 DeepSeek KV 缓存。第一版类目树只读，终审只能改变属性。为控制成本，`keep/drop/review` 只返回 key、动作和短理由，完整 property 只允许出现在 `add` 中。结果写入 `output/<version>/semantic-review/attribute-templates-v1.json`，同时保存每个类目的原始请求、模型返回、缓存命中 token 和失败原因。
+终审请求的系统提示词、类目、京东证据和输出协议位于前缀，候选统计放在末尾并稳定序列化，尽量复用 DeepSeek KV 缓存。第一版类目树只读，终审只能改变属性。终审请求关闭 V4flash 思考模式，避免把 reasoning token 计入每个属性的治理成本；为控制输出成本，`keep/drop/review` 只返回 key、动作和短理由，完整 property 只允许出现在 `add` 中。结果写入 `output/<version>/semantic-review/attribute-templates-v1.json`，同时保存每个类目的原始请求、模型返回、缓存命中 token、reasoning token 和失败原因。
 
 语义终审支持增量运行：稳定的 `attribute-reviews-v1.json` 会按类目合并，重复类目使用最新一次成功结果，未参与本批次的类目继续保留；每次运行目录仍保存本批次独立快照。因此可以先跑小样本、修正提示词，再逐批扩大范围，不会因为单批覆盖而丢失历史终审结果。
 

@@ -105,7 +105,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const ai = dryRun ? undefined : new AiService(new PostgresAiCatalog(databases!.publicDatabase()), loadAppConfig().masterKey);
   const reviews: SemanticReviewResult[] = [];
   const errors: Array<{ categoryId: string; error: string }> = [];
-  let promptTokens = 0; let completionTokens = 0; let totalTokens = 0; let promptCacheHitTokens = 0; let promptCacheMissTokens = 0;
+  let promptTokens = 0; let completionTokens = 0; let totalTokens = 0; let promptCacheHitTokens = 0; let promptCacheMissTokens = 0; let reasoningTokens = 0;
   try {
     let cursor = 0;
     const worker = async (): Promise<void> => {
@@ -125,7 +125,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
             const response = await ai!.chat(provider, model, {
               messages: [{ role: "system", content: SEMANTIC_REVIEW_SYSTEM_PROMPT }, { role: "user", content: prompt + (lastError ? `\n上次输出校验失败：${lastError}` : "") }],
               // DeepSeek 主治理入口已验证不带 response_format；保持同一请求形态，避免 V4flash 兼容差异。
-              temperature: 0.1, max_tokens: 6_000,
+              temperature: 0.1, max_tokens: 6_000, thinking: { type: "disabled" },
             });
             await writeJsonFile(join(requestDir, `attempt-${String(attempt).padStart(3, "0")}.response.json`), response);
             const message = response.choices[0]?.message;
@@ -143,6 +143,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
             totalTokens += response.usage?.total_tokens ?? 0;
             promptCacheHitTokens += response.usage?.prompt_cache_hit_tokens ?? 0;
             promptCacheMissTokens += response.usage?.prompt_cache_miss_tokens ?? 0;
+            reasoningTokens += response.usage?.completion_tokens_details?.reasoning_tokens ?? 0;
             lastError = "";
             break;
           } catch (error) {
@@ -165,7 +166,7 @@ async function main(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   let previous: SemanticReviewDocument | undefined;
   try { previous = await readJsonFile<SemanticReviewDocument>(stableReviewPath); } catch { /* 首次运行或旧文件损坏时从当前批次开始 */ }
   const mergedReviews = mergeSemanticReviews(previous?.reviews ?? [], reviews);
-  const reviewDocument: SemanticReviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews: mergedReviews, usage: { promptTokens, completionTokens, totalTokens, promptCacheHitTokens, promptCacheMissTokens }, errors };
+  const reviewDocument: SemanticReviewDocument = { version: "semantic-review-v1", generatedAt: new Date().toISOString(), sourceConsensus: consensusPath, reviews: mergedReviews, usage: { promptTokens, completionTokens, totalTokens, promptCacheHitTokens, promptCacheMissTokens, reasoningTokens }, errors };
   await writeJsonFile(stableReviewPath, reviewDocument);
   const templates = applySemanticReviews(consensus, mergedReviews);
   await writeJsonFile(stableTemplatePath, templates);
