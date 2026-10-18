@@ -1,0 +1,298 @@
+{
+  "status": "completed",
+  "model": {
+    "id": "deepseek",
+    "adapter": "deepseek_catalog",
+    "provider": "deepseek",
+    "model": "flash",
+    "family": "deepseek",
+    "timeoutMs": 90000,
+    "maxOutputTokens": 5200,
+    "maxInputChars": 60000,
+    "maxCalls": 4,
+    "maxUsd": 0.3,
+    "price": {
+      "input": 0.3,
+      "output": 1.2,
+      "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "checkedAt": "2026-10-18",
+      "note": "按峰时、输入缓存未命中估算上界，实际账单以平台为准。"
+    }
+  },
+  "requestHash": "bbaf071fe59ddb6f644d8891d007b4bb83e4beacc2e809a36a48700e60a67808",
+  "stage": "review-r2",
+  "startedAt": "2026-10-18T15:39:34.267Z",
+  "completedAt": "2026-10-18T15:39:42.644Z",
+  "content": {
+    "summary": "两属性草案总体可用，但品牌规则对“自身品牌”语义与证据一致性存在高风险：H06将标题词“舒克兔”与占位值“国产”并列，规则结果却输出候选“舒克兔”，未处理占位值冲突；B02自身品牌证据缺失但存在适配品牌，规则正确留缺项。湿巾片数规则对Q05赠品边界缺失、Q09抽片不换算、Q16伪造值、Q17范围错位均判断正确；H03/H04因“抽”与“片”口径未明，留缺项合理。建议修订品牌规则：占位值不得与真实品牌并列参与归一，且标题品牌词须经语义复核确认自身品牌。",
+    "checks": [
+      {
+        "attributeId": "common.brand",
+        "criteria": [
+          {
+            "criterionId": "relevance",
+            "verdict": "pass",
+            "reason": "三类目均挂载，对象为当前商品自身品牌。"
+          },
+          {
+            "criterionId": "business_value",
+            "verdict": "pass",
+            "reason": "支持展示、搜索、筛选，业务价值明确。"
+          },
+          {
+            "criterionId": "semantics",
+            "verdict": "pass",
+            "reason": "定义区分自身品牌与适配、供应商、产地。"
+          },
+          {
+            "criterionId": "scope",
+            "verdict": "pass",
+            "reason": "SKU级、当前商品自身，口径清晰。"
+          },
+          {
+            "criterionId": "type_unit",
+            "verdict": "pass",
+            "reason": "选项类型，无单位，符合字典归一。"
+          },
+          {
+            "criterionId": "requirement",
+            "verdict": "pass",
+            "reason": "必填但未知留缺项，无品牌须证据。"
+          },
+          {
+            "criterionId": "enum",
+            "verdict": "fail",
+            "reason": "占位值“国产”与真实品牌并列时未定义冲突处理。"
+          },
+          {
+            "criterionId": "rule",
+            "verdict": "fail",
+            "reason": "标题词“舒克兔”未经语义复核即当自身品牌候选。"
+          },
+          {
+            "criterionId": "evidence",
+            "verdict": "uncertain",
+            "reason": "H06标题词是否品牌需语义复核，规则未强制。"
+          },
+          {
+            "criterionId": "consistency",
+            "verdict": "pass",
+            "reason": "三类目共用公共定义，挂载一致。"
+          }
+        ]
+      },
+      {
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "criteria": [
+          {
+            "criterionId": "relevance",
+            "verdict": "pass",
+            "reason": "仅湿纸巾类目挂载，对象为单内包装。"
+          },
+          {
+            "criterionId": "business_value",
+            "verdict": "pass",
+            "reason": "支持规格比较、展示与筛选。"
+          },
+          {
+            "criterionId": "semantics",
+            "verdict": "pass",
+            "reason": "区分片、抽、张、层及整箱总量。"
+          },
+          {
+            "criterionId": "scope",
+            "verdict": "pass",
+            "reason": "SKU级、单个内包装、同销售范围明确。"
+          },
+          {
+            "criterionId": "type_unit",
+            "verdict": "pass",
+            "reason": "数值、片/包、正整数约束正确。"
+          },
+          {
+            "criterionId": "requirement",
+            "verdict": "pass",
+            "reason": "混合包、缺项、不适用区分清楚。"
+          },
+          {
+            "criterionId": "enum",
+            "verdict": "pass",
+            "reason": "数值属性无枚举，单位口径明确。"
+          },
+          {
+            "criterionId": "rule",
+            "verdict": "pass",
+            "reason": "前提充分，Q04/Q07/Q09反例均被拦截。"
+          },
+          {
+            "criterionId": "evidence",
+            "verdict": "pass",
+            "reason": "要求原值出现在引用原文，可定位。"
+          },
+          {
+            "criterionId": "consistency",
+            "verdict": "pass",
+            "reason": "与公共定义及类目挂载无矛盾。"
+          }
+        ]
+      }
+    ],
+    "findings": [
+      {
+        "id": "F01",
+        "attributeId": "common.brand",
+        "severity": "high",
+        "issue": "H06中“国产”为占位值、“舒克兔”为标题词，规则将两者并列后仅输出候选“舒克兔”，未处理占位值与真实品牌并存时的冲突或降级。",
+        "recommendation": "修订brand.resolve.v2：占位值不得与真实品牌并列参与归一；存在占位值+真实品牌时，真实品牌须经语义复核确认自身品牌后方可候选，否则needs_evidence。"
+      },
+      {
+        "id": "F02",
+        "attributeId": "common.brand",
+        "severity": "medium",
+        "issue": "标题中的品牌词（如“舒克兔”）被直接当作自身品牌观察，未强制语义复核其是否描述当前商品。",
+        "recommendation": "在规则前置条件中明确：标题品牌词须经独立评审确认描述对象为self，否则仅作候选证据。"
+      },
+      {
+        "id": "F03",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "severity": "low",
+        "issue": "H03/H04标题含“60片”“80抽”，但规则因抽片口径未明留缺项，与“片/包”直接证据缺失一致，属合理保守。",
+        "recommendation": "保持现状；如需提升覆盖率，可新增已审核的抽片等同转换规则，而非在现规则内换算。"
+      }
+    ],
+    "caseOpinions": [
+      {
+        "caseId": "Q02",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "filled",
+        "value": 50,
+        "reason": "同范围同规格且赠品明确，200÷4=50正确。"
+      },
+      {
+        "caseId": "Q04",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "明确混合规格，不得取平均，留缺项正确。"
+      },
+      {
+        "caseId": "Q05",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "赠品边界声明缺失，不能推导，留缺项正确。"
+      },
+      {
+        "caseId": "Q07",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "conflict",
+        "value": null,
+        "reason": "直接50与推导60冲突，不择一写入正确。"
+      },
+      {
+        "caseId": "Q09",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "80抽不自动换算为片，留缺项正确。"
+      },
+      {
+        "caseId": "Q15",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "not_applicable",
+        "value": null,
+        "reason": "纸巾盒类目未挂载该属性，正确。"
+      },
+      {
+        "caseId": "B02",
+        "attributeId": "common.brand",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "仅有适配品牌，无自身品牌证据，正确。"
+      },
+      {
+        "caseId": "B04",
+        "attributeId": "common.brand",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "“国产”为占位值，不代替品牌，正确。"
+      },
+      {
+        "caseId": "B05",
+        "attributeId": "common.brand",
+        "status": "enum_candidate",
+        "value": "示例新品牌",
+        "reason": "证据明确但字典外，保留候选正确。"
+      },
+      {
+        "caseId": "B08",
+        "attributeId": "common.brand",
+        "status": "filled",
+        "value": "无品牌",
+        "reason": "明确无品牌声明且有证据，正确。"
+      },
+      {
+        "caseId": "H01",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "filled",
+        "value": 80,
+        "reason": "标题明确80片/包，直接值正确。"
+      },
+      {
+        "caseId": "H03",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "仅60片与6包装，抽片口径未明，留缺项合理。"
+      },
+      {
+        "caseId": "H04",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "80抽非片，且无单包片数，留缺项合理。"
+      },
+      {
+        "caseId": "H06",
+        "attributeId": "common.brand",
+        "status": "conflict",
+        "value": null,
+        "reason": "占位值“国产”与标题词“舒克兔”并存，须先裁定自身品牌，不应直接输出候选。"
+      },
+      {
+        "caseId": "H05",
+        "attributeId": "common.brand",
+        "status": "filled",
+        "value": "全棉时代",
+        "reason": "精确别名归一，证据可定位，正确。"
+      },
+      {
+        "caseId": "Q16",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "invalid",
+        "value": null,
+        "reason": "观察值500未出现在引用原文，拒绝正确。"
+      },
+      {
+        "caseId": "Q17",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "直接值scope为carton非inner-pack，留缺项正确。"
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 15319,
+    "completion_tokens": 1760,
+    "total_tokens": 17079,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 15319
+  },
+  "estimatedUsd": 0.0067077,
+  "responseModel": "deepseek-flash",
+  "actualVersionKnown": false
+}

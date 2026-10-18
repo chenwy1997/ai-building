@@ -1,0 +1,943 @@
+[
+  {
+    "caseId": "Q01",
+    "productId": "fixture:Q01",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q01-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q01",
+    "productId": "fixture:Q01",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "Q01-e2"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "Q02",
+    "productId": "fixture:Q02",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q02-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q02",
+    "productId": "fixture:Q02",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50,
+    "unit": "片/包",
+    "reasonCode": "DERIVED_COUNT",
+    "reason": "同范围、同规格且赠品处理明确，使用受限除法。",
+    "evidenceIds": [
+      "Q02-e3",
+      "Q02-e4",
+      "Q02-e5",
+      "Q02-e6"
+    ],
+    "trace": [
+      "200片/sale-unit ÷ 4包/sale-unit = 50片/包"
+    ]
+  },
+  {
+    "caseId": "Q03",
+    "productId": "fixture:Q03",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q03-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q03",
+    "productId": "fixture:Q03",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "INCOMPLETE_PACK_CONTEXT",
+    "reason": "需要明确单包值，或同范围总片数/包数及同规格、赠品处理证据。",
+    "evidenceIds": [
+      "Q03-e3"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "Q04",
+    "productId": "fixture:Q04",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q04-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q04",
+    "productId": "fixture:Q04",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "MIXED_PACKS",
+    "reason": "已明确不同规格内包装，不能用平均数作为统一单包值。",
+    "evidenceIds": [
+      "Q04-e3",
+      "Q04-e4",
+      "Q04-e7",
+      "Q04-e6"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "Q05",
+    "productId": "fixture:Q05",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q05-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q05",
+    "productId": "fixture:Q05",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "INCOMPLETE_PACK_CONTEXT",
+    "reason": "需要明确单包值，或同范围总片数/包数及同规格、赠品处理证据。",
+    "evidenceIds": [
+      "Q05-e3",
+      "Q05-e4",
+      "Q05-e5"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "Q06",
+    "productId": "fixture:Q06",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q06-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q06",
+    "productId": "fixture:Q06",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "invalid",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "NON_INTEGER_DIVISION",
+    "reason": "总片数除以包数不是整数，不能四舍五入。",
+    "evidenceIds": [
+      "Q06-e3",
+      "Q06-e4",
+      "Q06-e5",
+      "Q06-e6"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "Q07",
+    "productId": "fixture:Q07",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q07-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q07",
+    "productId": "fixture:Q07",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "conflict",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_DERIVED_CONFLICT",
+    "reason": "直接值与符合前提的推导值冲突。",
+    "evidenceIds": [
+      "Q07-e7",
+      "Q07-e3",
+      "Q07-e4",
+      "Q07-e5",
+      "Q07-e6"
+    ],
+    "trace": [
+      "240片/sale-unit ÷ 4包/sale-unit = 60片/包"
+    ]
+  },
+  {
+    "caseId": "Q08",
+    "productId": "fixture:Q08",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q08-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q08",
+    "productId": "fixture:Q08",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "conflict",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_CONFLICT",
+    "reason": "明确单包数量之间有冲突。",
+    "evidenceIds": [
+      "Q08-e2",
+      "Q08-e3"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "Q09",
+    "productId": "fixture:Q09",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q09-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q09",
+    "productId": "fixture:Q09",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "UNIT_MISMATCH",
+    "reason": "片、抽、张、层及包装单位不自动换算。",
+    "evidenceIds": [
+      "Q09-e3"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "Q10",
+    "productId": "fixture:Q10",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q10-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q10",
+    "productId": "fixture:Q10",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "invalid",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "INVALID_QUANTITY",
+    "reason": "数量必须为安全范围内的正整数。",
+    "evidenceIds": [
+      "Q10-e3"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "Q11",
+    "productId": "fixture:Q11",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q11-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q11",
+    "productId": "fixture:Q11",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "SCOPE_MISMATCH",
+    "reason": "总片数和包数不处于同一销售范围。",
+    "evidenceIds": [
+      "Q11-e3",
+      "Q11-e7",
+      "Q11-e5",
+      "Q11-e6"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "Q12",
+    "productId": "fixture:Q12",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q12-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q12",
+    "productId": "fixture:Q12",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "invalid",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "EVIDENCE_MISMATCH",
+    "reason": "计算输入缺少当前商品可定位证据。",
+    "evidenceIds": [
+      "Q12-e2"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "Q13",
+    "productId": "fixture:Q13",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q13-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q13",
+    "productId": "fixture:Q13",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "invalid",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "EVIDENCE_MISMATCH",
+    "reason": "计算输入缺少当前商品可定位证据。",
+    "evidenceIds": [
+      "Q13-e2"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "Q14",
+    "productId": "fixture:Q14",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q14-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q14",
+    "productId": "fixture:Q14",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "Q14-e7",
+      "Q14-e3",
+      "Q14-e4",
+      "Q14-e5",
+      "Q14-e6"
+    ],
+    "trace": [
+      "200片/sale-unit ÷ 4包/sale-unit = 50片/包",
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "Q15",
+    "productId": "fixture:Q15",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "Q15-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "Q15",
+    "productId": "fixture:Q15",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "not_applicable",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "NO_BINDING",
+    "reason": "目标类目没有挂载本属性。",
+    "evidenceIds": [],
+    "trace": []
+  },
+  {
+    "caseId": "B01",
+    "productId": "fixture:B01",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "维达",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "B01-e3"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:vinda"
+  },
+  {
+    "caseId": "B01",
+    "productId": "fixture:B01",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "B01-e2"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "B02",
+    "productId": "fixture:B02",
+    "attributeId": "common.brand",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": null,
+    "reasonCode": "NO_SELF_BRAND",
+    "reason": "缺少明确自身品牌；供应商、适配品牌和国产等标签不代替品牌。",
+    "evidenceIds": [],
+    "trace": []
+  },
+  {
+    "caseId": "B02",
+    "productId": "fixture:B02",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "not_applicable",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "NO_BINDING",
+    "reason": "目标类目没有挂载本属性。",
+    "evidenceIds": [],
+    "trace": []
+  },
+  {
+    "caseId": "B03",
+    "productId": "fixture:B03",
+    "attributeId": "common.brand",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": null,
+    "reasonCode": "NO_SELF_BRAND",
+    "reason": "缺少明确自身品牌；供应商、适配品牌和国产等标签不代替品牌。",
+    "evidenceIds": [],
+    "trace": []
+  },
+  {
+    "caseId": "B03",
+    "productId": "fixture:B03",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "B03-e2"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "B04",
+    "productId": "fixture:B04",
+    "attributeId": "common.brand",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": null,
+    "reasonCode": "NO_SELF_BRAND",
+    "reason": "缺少明确自身品牌；供应商、适配品牌和国产等标签不代替品牌。",
+    "evidenceIds": [
+      "B04-e3"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "B04",
+    "productId": "fixture:B04",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "B04-e2"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "B05",
+    "productId": "fixture:B05",
+    "attributeId": "common.brand",
+    "status": "enum_candidate",
+    "value": "示例新品牌",
+    "unit": null,
+    "reasonCode": "OUTSIDE_REFERENCE_DICTIONARY",
+    "reason": "证据明确，但不在本次参考字典；保留原值，等待正式品牌映射。",
+    "evidenceIds": [
+      "B05-e3"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "B05",
+    "productId": "fixture:B05",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "B05-e2"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "B06",
+    "productId": "fixture:B06",
+    "attributeId": "common.brand",
+    "status": "conflict",
+    "value": null,
+    "unit": null,
+    "reasonCode": "BRAND_CONFLICT",
+    "reason": "存在不同的自身品牌证据，需核对组合装或来源。",
+    "evidenceIds": [
+      "B06-e1",
+      "B06-e3"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "B06",
+    "productId": "fixture:B06",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "B06-e2"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "B07",
+    "productId": "fixture:B07",
+    "attributeId": "common.brand",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": null,
+    "reasonCode": "NO_SELF_BRAND",
+    "reason": "缺少明确自身品牌；供应商、适配品牌和国产等标签不代替品牌。",
+    "evidenceIds": [],
+    "trace": []
+  },
+  {
+    "caseId": "B07",
+    "productId": "fixture:B07",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "B07-e2"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "B08",
+    "productId": "fixture:B08",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "无品牌",
+    "unit": null,
+    "reasonCode": "EXPLICIT_BRANDLESS",
+    "reason": "明确无品牌声明已作为试点选项。",
+    "evidenceIds": [
+      "B08-e3"
+    ],
+    "trace": [
+      "采用明确无品牌声明，未把空值或产地转成无品牌。"
+    ],
+    "dictionaryRef": "reference:brandless"
+  },
+  {
+    "caseId": "B08",
+    "productId": "fixture:B08",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "B08-e2"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "B09",
+    "productId": "fixture:B09",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "B09-e1"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "B09",
+    "productId": "fixture:B09",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "not_applicable",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "NO_BINDING",
+    "reason": "目标类目没有挂载本属性。",
+    "evidenceIds": [],
+    "trace": []
+  },
+  {
+    "caseId": "H01",
+    "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "H1-e3"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "H01",
+    "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 80,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "H1-e1"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "H02",
+    "productId": "ce7185fe-73dd-4dd4-b646-dce296addead",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "H2-e3"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "H02",
+    "productId": "ce7185fe-73dd-4dd4-b646-dce296addead",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 80,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "H2-e1"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "H03",
+    "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "H3-e3"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "H03",
+    "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "INCOMPLETE_PACK_CONTEXT",
+    "reason": "需要明确单包值，或同范围总片数/包数及同规格、赠品处理证据。",
+    "evidenceIds": [],
+    "trace": []
+  },
+  {
+    "caseId": "H04",
+    "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风",
+    "unit": null,
+    "reasonCode": "EXACT_BRAND_ALIAS",
+    "reason": "依据当前商品品牌证据归一。",
+    "evidenceIds": [
+      "H4-e3"
+    ],
+    "trace": [
+      "精确别名归一；参考字典ID未核实为生产ID。"
+    ],
+    "dictionaryRef": "reference:qingfeng"
+  },
+  {
+    "caseId": "H04",
+    "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "INCOMPLETE_PACK_CONTEXT",
+    "reason": "需要明确单包值，或同范围总片数/包数及同规格、赠品处理证据。",
+    "evidenceIds": [],
+    "trace": []
+  },
+  {
+    "caseId": "H05",
+    "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+    "attributeId": "common.brand",
+    "status": "enum_candidate",
+    "value": "全棉时代（PurCotton）",
+    "unit": null,
+    "reasonCode": "OUTSIDE_REFERENCE_DICTIONARY",
+    "reason": "证据明确，但不在本次参考字典；保留原值，等待正式品牌映射。",
+    "evidenceIds": [
+      "H5-e3"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "H05",
+    "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 70,
+    "unit": "片/包",
+    "reasonCode": "DIRECT_COUNT",
+    "reason": "直接证据明确单包片数。",
+    "evidenceIds": [
+      "H5-e1"
+    ],
+    "trace": [
+      "采用明确单包片数。"
+    ]
+  },
+  {
+    "caseId": "H06",
+    "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+    "attributeId": "common.brand",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": null,
+    "reasonCode": "NO_SELF_BRAND",
+    "reason": "缺少明确自身品牌；供应商、适配品牌和国产等标签不代替品牌。",
+    "evidenceIds": [
+      "H6-e3"
+    ],
+    "trace": []
+  },
+  {
+    "caseId": "H06",
+    "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null,
+    "unit": "片/包",
+    "reasonCode": "INCOMPLETE_PACK_CONTEXT",
+    "reason": "需要明确单包值，或同范围总片数/包数及同规格、赠品处理证据。",
+    "evidenceIds": [],
+    "trace": []
+  }
+]

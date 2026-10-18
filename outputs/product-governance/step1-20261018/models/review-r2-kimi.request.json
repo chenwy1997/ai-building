@@ -1,0 +1,1839 @@
+{
+  "requestHash": "87062e7f835eb0769a53e25e7c7e91628da50351dfa08a53246cb02bc11d8f35",
+  "config": {
+    "id": "kimi",
+    "adapter": "kimi_cli",
+    "provider": "kimi-code",
+    "model": "kimi-code/kimi-for-coding",
+    "family": "kimi",
+    "timeoutMs": 480000,
+    "maxOutputTokens": 5200,
+    "maxInputChars": 60000,
+    "maxCalls": 4,
+    "maxUsd": null,
+    "billing": "现有订阅，CLI不提供可靠逐次费用；记录调用次数与耗时，maxOutputTokens不支持硬限制。"
+  },
+  "payload": {
+    "task": {
+      "goal": "两个属性的建模、规则与多模型审核验证",
+      "stage": "cross_review_r2",
+      "purpose": "独立评审属性草案与案例，登记分歧",
+      "releaseId": "brand-wet-count-r2",
+      "previous": [
+        "independent_proposals",
+        "rule_evaluation"
+      ],
+      "outputs": [
+        "review",
+        "case_opinions"
+      ],
+      "allowedNext": [
+        "revision",
+        "adjudication"
+      ],
+      "categoryIds": [
+        "fd7a6576-b4bb-4ef0-a273-9de18cf571a2",
+        "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+        "1f96cac3-8498-4c32-936c-7a6a54b9320b"
+      ],
+      "attributeIds": [
+        "common.brand",
+        "wet_wipes.pieces_per_pack"
+      ]
+    },
+    "instructions": "你是独立评审员。评审两个匿名独立提案与统一草案，针对每个属性逐项给出全部10项rubric的意见（共20项）。必须审核下面每个指定案例（17项），只对指定属性发表意见，不漏项。规则结果只是待审结果，不是答案；依据原文、观察量和规则查错。合成案例检查规则，历史商品仅作演示，不计算生产准确率。发现问题时明确严重性与可执行修改，语义归属不能仅靠字符串包含判定。无需复述输入，理由每条尽量30字内。只输出JSON；caseOpinions状态只可用 filled/needs_evidence/conflict/invalid/enum_candidate/not_applicable，有值须为字符串或数值，其他状态value必须null。",
+    "standard": {
+      "schema": "product-governance-standard-v1",
+      "releaseId": "brand-wet-count-r2",
+      "status": "pilot_draft",
+      "categories": [
+        {
+          "id": "fd7a6576-b4bb-4ef0-a273-9de18cf571a2",
+          "name": "软包抽纸",
+          "path": "清洁用品>清洁纸品>卫生纸>软包抽纸"
+        },
+        {
+          "id": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "name": "湿纸巾",
+          "path": "清洁用品>清洁纸品>卫生纸>湿纸巾"
+        },
+        {
+          "id": "1f96cac3-8498-4c32-936c-7a6a54b9320b",
+          "name": "纸巾盒",
+          "path": "清洁用品>清洁纸品>纸品配件>纸巾盒"
+        }
+      ],
+      "attributes": [
+        {
+          "id": "common.brand",
+          "revision": 2,
+          "name": "品牌",
+          "kind": "公共属性",
+          "definition": "当前商品自身对外标识的产品品牌；明确无品牌时使用经证据确认的无品牌选项。",
+          "fieldType": "选项",
+          "unit": null,
+          "describes": "当前商品自身",
+          "excludedMeanings": [
+            "供应商名称",
+            "店铺名称",
+            "被适配设备的品牌",
+            "产地标签"
+          ],
+          "sourceRefs": [
+            "architecture",
+            "legacy-common",
+            "local-brand-reference",
+            "codex-review-r2"
+          ],
+          "ruleId": "brand.resolve.v2"
+        },
+        {
+          "id": "wet_wipes.pieces_per_pack",
+          "revision": 2,
+          "name": "每包片数",
+          "kind": "类目特性属性",
+          "definition": "一个同规格湿纸巾内包装中包含的完整湿巾片数，按当前SKU计算。",
+          "fieldType": "数值",
+          "unit": "片/包",
+          "describes": "当前SKU的一个内包装",
+          "excludedMeanings": [
+            "整箱总片数",
+            "层数",
+            "抽数",
+            "不同大小包的平均数"
+          ],
+          "sourceRefs": [
+            "architecture",
+            "legacy-wet-count",
+            "codex-review-r2"
+          ],
+          "ruleId": "wet_count.resolve.v2"
+        }
+      ],
+      "bindings": [
+        {
+          "categoryId": "fd7a6576-b4bb-4ef0-a273-9de18cf571a2",
+          "attributeId": "common.brand",
+          "required": true,
+          "applicability": "本类商品；明确无品牌须有对应证据",
+          "valueLevel": "SKU",
+          "scope": "当前商品自身",
+          "uses": [
+            "展示",
+            "搜索",
+            "筛选"
+          ],
+          "rationale": "首轮核实已有品牌字段，支持品牌展示和筛选；尚无可靠SPU关联，先落实到SKU。"
+        },
+        {
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "attributeId": "common.brand",
+          "required": true,
+          "applicability": "本类商品；明确无品牌须有对应证据",
+          "valueLevel": "SKU",
+          "scope": "当前商品自身",
+          "uses": [
+            "展示",
+            "搜索",
+            "筛选"
+          ],
+          "rationale": "与其他类目引用同一个公共定义；未知留缺项，不能从供应商或产地推断。"
+        },
+        {
+          "categoryId": "1f96cac3-8498-4c32-936c-7a6a54b9320b",
+          "attributeId": "common.brand",
+          "required": true,
+          "applicability": "本类商品；明确无品牌须有对应证据",
+          "valueLevel": "SKU",
+          "scope": "当前配件自身",
+          "uses": [
+            "展示",
+            "搜索",
+            "筛选"
+          ],
+          "rationale": "自身品牌和适配品牌分开；已有值也需核验。"
+        },
+        {
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "required": true,
+          "applicability": "具有统一单包口径的湿巾；混合包需要补充组成信息",
+          "valueLevel": "SKU",
+          "scope": "单个内包装",
+          "uses": [
+            "展示",
+            "筛选"
+          ],
+          "rationale": "明确数量和包装层级是首期采购参数核心信息；证据不足保持必填缺失。"
+        }
+      ],
+      "rules": [
+        {
+          "id": "brand.resolve.v2",
+          "operator": "brand_dictionary",
+          "inputContract": [
+            "带商品ID、原文定位与描述对象的品牌观察",
+            "可选的明确无品牌声明"
+          ],
+          "preconditions": [
+            "证据属于当前商品，引用片段存在",
+            "只采纳商品自身品牌",
+            "按明确别名归一，品牌冲突保留",
+            "无品牌必须明确声明，未知不能替代",
+            "品牌原值必须出现在引用原文中；引用存在仍不等于自身品牌语义成立，须经独立评审",
+            "标题、结构化品牌或图片冲突时不自动挑选来源；确认同SKU并裁定后才能填写"
+          ],
+          "formula": null,
+          "onFailure": "未知保留缺项；字典外保留候选；冲突保留双方证据。 候选由Codex复核→运营抽检→核验生产字典ID→发布新字典版本→重验受影响SKU；无品牌选项缺失沿用同一路径。",
+          "placeholders": [
+            "国产",
+            "通用",
+            "未知",
+            "无",
+            "N/A",
+            "无品牌"
+          ]
+        },
+        {
+          "id": "wet_count.resolve.v2",
+          "operator": "pieces_per_pack",
+          "inputContract": [
+            "明确的单包片数",
+            "或者同一销售范围内总片数与包数",
+            "同规格与赠品已排除的证据声明",
+            "同规格与赠品声明必须为布尔值；来源片段是否支持声明须语义复核"
+          ],
+          "preconditions": [
+            "证据属于当前商品，引用片段存在",
+            "片、张、抽、层不自动换算",
+            "所有数量为有限正整数",
+            "推导的总片数与包数处于同一销售范围",
+            "推导需要同规格和赠品处理明确",
+            "明确混合规格不能得出统一单包值",
+            "直接值与可推导值冲突时不择一写入",
+            "直接值范围标识必须为inner-pack，数量原值须在引用原文中出现",
+            "scope是经过语义确认的包装范围标识；只精确比较，不因文本相似自动合并",
+            "即使来源说明抽与片相同，本版本也不执行单位换算；须取得明确片数或新增已审核转换规则"
+          ],
+          "formula": "同一销售范围总片数 / 同一销售范围同规格包数",
+          "onFailure": "不四舍五入、不猜包数；原值和原因单列。 混合规格保留原文与组成信息补证请求，不填写主规格或平均数来替代全SKU的统一值。",
+          "directUnit": "片/包",
+          "totalUnit": "片",
+          "packsUnit": "包",
+          "directScope": "inner-pack"
+        }
+      ],
+      "brandDictionary": {
+        "kind": "local_reference",
+        "productionIdsVerified": false,
+        "entries": [
+          {
+            "id": "reference:qingfeng",
+            "name": "清风",
+            "aliases": [
+              "清风",
+              "Breeze"
+            ]
+          },
+          {
+            "id": "reference:vinda",
+            "name": "维达",
+            "aliases": [
+              "维达",
+              "Vinda"
+            ]
+          },
+          {
+            "id": "reference:purcotton",
+            "name": "全棉时代",
+            "aliases": [
+              "全棉时代",
+              "PurCotton",
+              "全棉时代（PurCotton）"
+            ]
+          },
+          {
+            "id": "reference:hearttex",
+            "name": "心相印",
+            "aliases": [
+              "心相印"
+            ]
+          },
+          {
+            "id": "reference:brandless",
+            "name": "无品牌",
+            "aliases": []
+          }
+        ]
+      },
+      "rubric": [
+        {
+          "id": "relevance",
+          "name": "类目相关",
+          "question": "适用于哪个类目和商品对象？"
+        },
+        {
+          "id": "business_value",
+          "name": "业务价值",
+          "question": "是否支持归类、展示、搜索或筛选？"
+        },
+        {
+          "id": "semantics",
+          "name": "语义单一",
+          "question": "公共/特性、商品自身/适配对象是否分清？"
+        },
+        {
+          "id": "scope",
+          "name": "层级与口径",
+          "question": "SKU、内包装和销售范围是否明确？"
+        },
+        {
+          "id": "type_unit",
+          "name": "类型单位",
+          "question": "五种类型、数值约束和单位是否正确？"
+        },
+        {
+          "id": "requirement",
+          "name": "适用必填",
+          "question": "未知、混合包装、缺项和不适用如何区分？"
+        },
+        {
+          "id": "enum",
+          "name": "枚举",
+          "question": "字典范围、别名、未知值和候选如何处理？"
+        },
+        {
+          "id": "rule",
+          "name": "计算规则",
+          "question": "前提充分吗，有哪些反例可能被误填？"
+        },
+        {
+          "id": "evidence",
+          "name": "来源证据",
+          "question": "能否定位当前商品原文，哪些判断仍需语义复核？"
+        },
+        {
+          "id": "consistency",
+          "name": "复用一致",
+          "question": "公共定义、挂载及不同类目间是否矛盾？"
+        }
+      ],
+      "sources": [
+        {
+          "id": "architecture",
+          "kind": "用户确认的业务设计",
+          "location": "src/scenarios/product_governance/docs/商品治理架构讨论稿.md",
+          "note": "2026-10-18确认，先实现两个属性的小流程。"
+        },
+        {
+          "id": "legacy-common",
+          "kind": "既有治理约定",
+          "location": "outputs/clean-paper-remaining-20261016/build_workbook.mjs:84",
+          "note": "公共主数据沿用，但仍须核实。"
+        },
+        {
+          "id": "legacy-wet-count",
+          "kind": "既有属性草稿",
+          "location": "outputs/clean-paper-remaining-20261016/attribute-model-all21.json#B69-01",
+          "note": "每包片数为既有草稿，本轮规则化验证。"
+        },
+        {
+          "id": "local-brand-reference",
+          "kind": "试点参考字典",
+          "location": "本文件brandDictionary",
+          "note": "仅用于本次品牌规范化验证，不是线上品牌ID，未完成生产品牌映射。"
+        },
+        {
+          "id": "codex-review-r2",
+          "kind": "Codex复核与多模型建议取舍",
+          "location": "outputs/product-governance/step1-20261018/codex-adjudication.json",
+          "note": "复合品牌别名按已有中英文别名与历史原文核对；不是生产品牌ID确认。"
+        }
+      ]
+    },
+    "independentProposals": [
+      {
+        "label": "方案1",
+        "content": {
+          "attributes": [
+            {
+              "name": "品牌",
+              "kind": "公共属性",
+              "definition": "商品所呈现并据以识别其市场来源的商标或品牌名称，取商品自身品牌，不取产地、供应商或适配品牌。以SKU为记录粒度；同一SKU只填一个主品牌，多品牌联名时填包装正面主要标识品牌，其余写入别名或备注。",
+              "fieldType": "文本",
+              "unit": null,
+              "scope": "SKU级；适用于软包抽纸、湿纸巾、纸巾盒3类；内包装与外包装品牌不一致时以最小可售单元包装标识为准。",
+              "requiredReason": "品牌是归类、展示、搜索与筛选的核心字段，缺失会削弱检索与同类比较，故设为必填；无可靠来源时留缺项，不推测。",
+              "applicableCategories": [
+                "fd7a6576-b4bb-4ef0-a273-9de18cf571a2",
+                "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+                "1f96cac3-8498-4c32-936c-7a6a54b9320b"
+              ],
+              "sources": [
+                "商品包装正面品牌标识",
+                "商品标题中的品牌词",
+                "商家提供的品牌授权或备案信息"
+              ],
+              "rules": [
+                "取SKU自身品牌，规范为包装标识的正式名称，保留原文大小写与符号",
+                "同一SKU仅一个主品牌值；联名或系列名不单独作为品牌",
+                "品牌未知时留空并标记缺项，不以产地、供应商、店铺名或适配品牌填充",
+                "内包装与外包装品牌冲突时以最小可售单元包装为准，并记录冲突"
+              ],
+              "counterexamples": [
+                "把“浙江制造”“广东产地”当作品牌",
+                "把供应商或代工厂名称当作品牌",
+                "把“适配XX品牌”的兼容对象当作品牌",
+                "把店铺名或系列名直接当作品牌"
+              ]
+            },
+            {
+              "name": "每包片数",
+              "kind": "类目特性属性",
+              "definition": "湿纸巾单个内包装（一包）内含的片数，按单包计数，不按整箱、整提或混合包装总量折算。仅当商品明确标注“片/包”且各包规格一致时填写；总量除以包数仅在总量与包数同规格同范围且赠品边界明确时可用。",
+              "fieldType": "数值",
+              "unit": "片/包",
+              "scope": "SKU级；仅适用于湿纸巾类目；以最小可售内包装为计数单位，整箱、整提、组合装不直接作为取值对象。",
+              "requiredReason": "每包片数是湿纸巾规格比较、筛选与展示的关键特性，缺失会影响同规格比较，故设为必填；无法确认单包片数时留缺项，不推测。",
+              "applicableCategories": [
+                "433be34e-e1cc-4b5f-b955-df3d802ed2ec"
+              ],
+              "sources": [
+                "商品包装标注的片数",
+                "商品标题或详情中的“片/包”规格",
+                "商家提供的规格说明"
+              ],
+              "rules": [
+                "取单个内包装的片数，单位为片/包，填正整数",
+                "仅当明确标注片/包且各包一致时直接填写",
+                "总量除以包数仅在总量与包数同规格同范围且赠品边界明确时使用，并记录计算依据",
+                "整箱、整提、混合包装或含赠品导致单包不一致时留缺项，不取均值",
+                "不把抽数、张数、层数或重量当作片数"
+              ],
+              "counterexamples": [
+                "把整箱总片数当每包片数",
+                "把整提多包总量除以包数得到的均值当单包片数，而各包规格或赠品边界不明",
+                "把混合包装中不同规格包的平均值当单包片数",
+                "把抽纸的抽数、张数或层数当湿纸巾片数",
+                "把重量克数换算推测为片数"
+              ]
+            }
+          ],
+          "risks": [
+            "品牌字段可能被产地、供应商、店铺名或适配品牌污染，需在审核中重点拦截",
+            "湿纸巾组合装、赠品装易导致单包片数误取总量或均值",
+            "无可靠SPU关联时以SKU为粒度，跨SKU聚合可能引入不一致",
+            "必填但未知留缺项，可能造成字段缺失率上升，需与展示和筛选策略配合"
+          ]
+        }
+      },
+      {
+        "label": "方案2",
+        "content": {
+          "attributes": [
+            {
+              "name": "品牌",
+              "kind": "公共属性",
+              "definition": "SKU在其最小销售包装上标注的自有品牌，即品牌权利人或经授权使用该商标的主体所注册的品牌名。按SKU建模（无可靠SPU关联，不合并SPU）；SKU若含多个商品单元，取该SKU整体标注的品牌。品牌须与产地、生产商/经销商、适配对象品牌相区分。",
+              "fieldType": "文本",
+              "unit": null,
+              "scope": "SKU级",
+              "requiredReason": "归类的核心必填字段，同时用于展示、搜索与筛选；值未知时留缺项，禁止臆测或沿用同类商品品牌。",
+              "applicableCategories": [
+                "fd7a6576-b4bb-4ef0-a273-9de18cf571a2",
+                "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+                "1f96cac3-8498-4c32-936c-7a6a54b9320b"
+              ],
+              "sources": [
+                "商品标题中的品牌名",
+                "最小销售包装正面/背面的品牌标识与商标文字",
+                "详情页品牌字段或品牌授权说明",
+                "平台品牌库/商标库条目"
+              ],
+              "rules": [
+                "填包装标注的自有品牌原文，可用通用别名归一，但不得替换为其他品牌。",
+                "产地、生产厂家、总经销商、供应商名称一律不作为品牌值。",
+                "纸巾盒等配件标注的'适配某品牌'，该被适配品牌不是本SKU品牌。",
+                "产品系列名、品名、型号、'同款/平替某品牌'中的他牌名称均不作为品牌。",
+                "联名/双品牌商品按平台品牌库映射为主品牌；映射缺失时留缺项并记录。",
+                "品牌与包装标注矛盾的（如标题品牌与包装图不符），以包装标识为准，仍存疑则留缺项。",
+                "未知品牌（无标识、无授权说明）留缺项，不得猜测或默认'无品牌'以外的值。"
+              ],
+              "counterexamples": [
+                "产地标注'日本进口'，品牌填'日本'——错误，产地非品牌。",
+                "包装标注经销商'XX商贸有限公司'，品牌填'XX商贸'——错误。",
+                "纸巾盒详情写'适配清风抽纸'，品牌填'清风'——错误，清风是被适配对象。",
+                "标题'某某牌同款湿巾'，品牌填'某某牌'——错误，平替表述不构成品牌。",
+                "标题与包装品牌不一致时直接采信标题——错误，须以包装标识为准。"
+              ]
+            },
+            {
+              "name": "每包片数",
+              "kind": "类目特性属性",
+              "definition": "单个内包装（最小零售包装单元）中所含湿巾本体的片数。'包'指消费者可直接取用的内包装单位，不是整箱、整提；SKU为整箱/多包装时，须先定位内包装再取其片数，且箱内各内包装须同规格同片数范围。",
+              "fieldType": "数值",
+              "unit": "片",
+              "scope": "SKU级",
+              "requiredReason": "湿纸巾的核心比价与筛选字段（片单价、用量评估），属必填；包装信息不足无法确认时留缺项。",
+              "applicableCategories": [
+                "433be34e-e1cc-4b5f-b955-df3d802ed2ec"
+              ],
+              "sources": [
+                "内包装正面标注（如'80片/包'）",
+                "详情页规格参数中的单片/单包规格",
+                "标题中明确写明的'XX片/包'",
+                "包装图或规格表中'内含N包×M片'的明示换算"
+              ],
+              "rules": [
+                "仅填单内包装片数；整箱装换算为总量÷内包装数时，须同规格、同片数范围，且换算依据来自明示的'N包×M片'或等值信息。",
+                "标题或详情只给出总量与包数且规格一致时可计算填值；存在赠品、试用装、不同片数规格混装时，赠品与异规格部分剔除，无法剔除则留缺项。",
+                "混合规格包装（如80片×5包+10片×5包）不得填平均片数，应按主规格填或留缺项并注明。",
+                "只有明确'片/包'或可明确换算的数值才可填；'抽'与'片'口径需包装明示一致（如标注80抽即80片）才可等同，否则留缺项。",
+                "赠品片数、附加棉柔巾/湿厕纸等其他品类不计入。",
+                "单包内多片连抽设计按标注片数填，不做折算。"
+              ],
+              "counterexamples": [
+                "整箱'800片×10包'填800——错误，应填80。",
+                "混装'80片×5包+10片×5包'填平均45片——错误。",
+                "'10包共800片，赠2包便携装'按800÷10=80填值但未确认赠品是否为同规格——存疑须核实赠品边界，否则留缺项。",
+                "标题仅写'共800片'无包数信息，臆测10包填80——错误，无换算依据须留缺项。",
+                "把整提软抽纸的'张数'概念套用到湿巾按张折算层数——不适用，湿巾按片不按张/层。"
+              ]
+            }
+          ],
+          "risks": [
+            "品牌值多来自卖家自填文本，存在错填/蹭名牌风险，建议与平台品牌库交叉校验后再发布。",
+            "'抽'与'片'口径在部分商品上不一致（连抽设计），仅凭标题换算可能错误，须以包装明示为准。",
+            "整箱装每包片数依赖包装图或规格表证据，缺图SKU留缺项比例可能较高。",
+            "多品牌联名商品的归一规则依赖品牌库映射质量，映射缺失时各模型口径易分歧，留缺项兜底。",
+            "湿纸巾类目内可能出现'湿巾+湿厕纸'组合装，需防止他品类数量混入每包片数。"
+          ]
+        }
+      }
+    ],
+    "cases": [
+      {
+        "input": {
+          "id": "Q02",
+          "label": "200片共4个同规格包",
+          "kind": "synthetic",
+          "productId": "fixture:Q02",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "Q02-e1",
+              "productId": "fixture:Q02",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/Q02"
+            },
+            {
+              "id": "Q02-e2",
+              "productId": "fixture:Q02",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/Q02"
+            },
+            {
+              "id": "Q02-e3",
+              "productId": "fixture:Q02",
+              "kind": "fixture",
+              "text": "200片；范围sale-unit",
+              "sourceRef": "合成规则案例/Q02"
+            },
+            {
+              "id": "Q02-e4",
+              "productId": "fixture:Q02",
+              "kind": "fixture",
+              "text": "4包；范围sale-unit",
+              "sourceRef": "合成规则案例/Q02"
+            },
+            {
+              "id": "Q02-e5",
+              "productId": "fixture:Q02",
+              "kind": "fixture",
+              "text": "4包均为相同规格",
+              "sourceRef": "合成规则案例/Q02"
+            },
+            {
+              "id": "Q02-e6",
+              "productId": "fixture:Q02",
+              "kind": "fixture",
+              "text": "总片数不含赠品",
+              "sourceRef": "合成规则案例/Q02"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "Q02-e1",
+              "quote": "商品品牌：清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [],
+          "totals": [
+            {
+              "value": 200,
+              "evidenceId": "Q02-e3",
+              "quote": "200片；范围sale-unit",
+              "unit": "片",
+              "scope": "sale-unit"
+            }
+          ],
+          "packs": [
+            {
+              "value": 4,
+              "evidenceId": "Q02-e4",
+              "quote": "4包；范围sale-unit",
+              "unit": "包",
+              "scope": "sale-unit"
+            }
+          ],
+          "homogeneous": {
+            "value": true,
+            "evidenceId": "Q02-e5",
+            "quote": "4包均为相同规格"
+          },
+          "giftsExcluded": {
+            "value": true,
+            "evidenceId": "Q02-e6",
+            "quote": "总片数不含赠品"
+          }
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "Q02",
+          "productId": "fixture:Q02",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "filled",
+          "value": 50,
+          "unit": "片/包",
+          "reasonCode": "DERIVED_COUNT",
+          "reason": "同范围、同规格且赠品处理明确，使用受限除法。",
+          "evidenceIds": [
+            "Q02-e3",
+            "Q02-e4",
+            "Q02-e5",
+            "Q02-e6"
+          ],
+          "trace": [
+            "200片/sale-unit ÷ 4包/sale-unit = 50片/包"
+          ]
+        }
+      },
+      {
+        "input": {
+          "id": "Q04",
+          "label": "混合大小包不能平均",
+          "kind": "synthetic",
+          "productId": "fixture:Q04",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "Q04-e1",
+              "productId": "fixture:Q04",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/Q04"
+            },
+            {
+              "id": "Q04-e2",
+              "productId": "fixture:Q04",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/Q04"
+            },
+            {
+              "id": "Q04-e3",
+              "productId": "fixture:Q04",
+              "kind": "fixture",
+              "text": "200片；范围sale-unit",
+              "sourceRef": "合成规则案例/Q04"
+            },
+            {
+              "id": "Q04-e4",
+              "productId": "fixture:Q04",
+              "kind": "fixture",
+              "text": "4包；范围sale-unit",
+              "sourceRef": "合成规则案例/Q04"
+            },
+            {
+              "id": "Q04-e5",
+              "productId": "fixture:Q04",
+              "kind": "fixture",
+              "text": "4包均为相同规格",
+              "sourceRef": "合成规则案例/Q04"
+            },
+            {
+              "id": "Q04-e6",
+              "productId": "fixture:Q04",
+              "kind": "fixture",
+              "text": "总片数不含赠品",
+              "sourceRef": "合成规则案例/Q04"
+            },
+            {
+              "id": "Q04-e7",
+              "productId": "fixture:Q04",
+              "kind": "fixture",
+              "text": "包含大小不同的内包装",
+              "sourceRef": "合成规则案例/Q04"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "Q04-e1",
+              "quote": "商品品牌：清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [],
+          "totals": [
+            {
+              "value": 200,
+              "evidenceId": "Q04-e3",
+              "quote": "200片；范围sale-unit",
+              "unit": "片",
+              "scope": "sale-unit"
+            }
+          ],
+          "packs": [
+            {
+              "value": 4,
+              "evidenceId": "Q04-e4",
+              "quote": "4包；范围sale-unit",
+              "unit": "包",
+              "scope": "sale-unit"
+            }
+          ],
+          "homogeneous": {
+            "value": false,
+            "evidenceId": "Q04-e7",
+            "quote": "包含大小不同的内包装"
+          },
+          "giftsExcluded": {
+            "value": true,
+            "evidenceId": "Q04-e6",
+            "quote": "总片数不含赠品"
+          }
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "Q04",
+          "productId": "fixture:Q04",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "needs_evidence",
+          "value": null,
+          "unit": "片/包",
+          "reasonCode": "MIXED_PACKS",
+          "reason": "已明确不同规格内包装，不能用平均数作为统一单包值。",
+          "evidenceIds": [
+            "Q04-e3",
+            "Q04-e4",
+            "Q04-e7",
+            "Q04-e6"
+          ],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "Q05",
+          "label": "赠品边界未明",
+          "kind": "synthetic",
+          "productId": "fixture:Q05",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "Q05-e1",
+              "productId": "fixture:Q05",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/Q05"
+            },
+            {
+              "id": "Q05-e2",
+              "productId": "fixture:Q05",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/Q05"
+            },
+            {
+              "id": "Q05-e3",
+              "productId": "fixture:Q05",
+              "kind": "fixture",
+              "text": "200片；范围sale-unit",
+              "sourceRef": "合成规则案例/Q05"
+            },
+            {
+              "id": "Q05-e4",
+              "productId": "fixture:Q05",
+              "kind": "fixture",
+              "text": "4包；范围sale-unit",
+              "sourceRef": "合成规则案例/Q05"
+            },
+            {
+              "id": "Q05-e5",
+              "productId": "fixture:Q05",
+              "kind": "fixture",
+              "text": "4包均为相同规格",
+              "sourceRef": "合成规则案例/Q05"
+            },
+            {
+              "id": "Q05-e6",
+              "productId": "fixture:Q05",
+              "kind": "fixture",
+              "text": "总片数不含赠品",
+              "sourceRef": "合成规则案例/Q05"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "Q05-e1",
+              "quote": "商品品牌：清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [],
+          "totals": [
+            {
+              "value": 200,
+              "evidenceId": "Q05-e3",
+              "quote": "200片；范围sale-unit",
+              "unit": "片",
+              "scope": "sale-unit"
+            }
+          ],
+          "packs": [
+            {
+              "value": 4,
+              "evidenceId": "Q05-e4",
+              "quote": "4包；范围sale-unit",
+              "unit": "包",
+              "scope": "sale-unit"
+            }
+          ],
+          "homogeneous": {
+            "value": true,
+            "evidenceId": "Q05-e5",
+            "quote": "4包均为相同规格"
+          }
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "Q05",
+          "productId": "fixture:Q05",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "needs_evidence",
+          "value": null,
+          "unit": "片/包",
+          "reasonCode": "INCOMPLETE_PACK_CONTEXT",
+          "reason": "需要明确单包值，或同范围总片数/包数及同规格、赠品处理证据。",
+          "evidenceIds": [
+            "Q05-e3",
+            "Q05-e4",
+            "Q05-e5"
+          ],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "Q07",
+          "label": "直接50与推导60冲突",
+          "kind": "synthetic",
+          "productId": "fixture:Q07",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "Q07-e1",
+              "productId": "fixture:Q07",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/Q07"
+            },
+            {
+              "id": "Q07-e2",
+              "productId": "fixture:Q07",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/Q07"
+            },
+            {
+              "id": "Q07-e3",
+              "productId": "fixture:Q07",
+              "kind": "fixture",
+              "text": "240片；范围sale-unit",
+              "sourceRef": "合成规则案例/Q07"
+            },
+            {
+              "id": "Q07-e4",
+              "productId": "fixture:Q07",
+              "kind": "fixture",
+              "text": "4包；范围sale-unit",
+              "sourceRef": "合成规则案例/Q07"
+            },
+            {
+              "id": "Q07-e5",
+              "productId": "fixture:Q07",
+              "kind": "fixture",
+              "text": "4包均为相同规格",
+              "sourceRef": "合成规则案例/Q07"
+            },
+            {
+              "id": "Q07-e6",
+              "productId": "fixture:Q07",
+              "kind": "fixture",
+              "text": "总片数不含赠品",
+              "sourceRef": "合成规则案例/Q07"
+            },
+            {
+              "id": "Q07-e7",
+              "productId": "fixture:Q07",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/Q07"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "Q07-e1",
+              "quote": "商品品牌：清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [
+            {
+              "value": 50,
+              "evidenceId": "Q07-e7",
+              "quote": "50片/包；范围inner-pack",
+              "unit": "片/包",
+              "scope": "inner-pack"
+            }
+          ],
+          "totals": [
+            {
+              "value": 240,
+              "evidenceId": "Q07-e3",
+              "quote": "240片；范围sale-unit",
+              "unit": "片",
+              "scope": "sale-unit"
+            }
+          ],
+          "packs": [
+            {
+              "value": 4,
+              "evidenceId": "Q07-e4",
+              "quote": "4包；范围sale-unit",
+              "unit": "包",
+              "scope": "sale-unit"
+            }
+          ],
+          "homogeneous": {
+            "value": true,
+            "evidenceId": "Q07-e5",
+            "quote": "4包均为相同规格"
+          },
+          "giftsExcluded": {
+            "value": true,
+            "evidenceId": "Q07-e6",
+            "quote": "总片数不含赠品"
+          }
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "Q07",
+          "productId": "fixture:Q07",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "conflict",
+          "value": null,
+          "unit": "片/包",
+          "reasonCode": "DIRECT_DERIVED_CONFLICT",
+          "reason": "直接值与符合前提的推导值冲突。",
+          "evidenceIds": [
+            "Q07-e7",
+            "Q07-e3",
+            "Q07-e4",
+            "Q07-e5",
+            "Q07-e6"
+          ],
+          "trace": [
+            "240片/sale-unit ÷ 4包/sale-unit = 60片/包"
+          ]
+        }
+      },
+      {
+        "input": {
+          "id": "Q09",
+          "label": "80抽不能直接当80片",
+          "kind": "synthetic",
+          "productId": "fixture:Q09",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "Q09-e1",
+              "productId": "fixture:Q09",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/Q09"
+            },
+            {
+              "id": "Q09-e2",
+              "productId": "fixture:Q09",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/Q09"
+            },
+            {
+              "id": "Q09-e3",
+              "productId": "fixture:Q09",
+              "kind": "fixture",
+              "text": "80抽/包；范围inner-pack",
+              "sourceRef": "合成规则案例/Q09"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "Q09-e1",
+              "quote": "商品品牌：清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [
+            {
+              "value": 80,
+              "evidenceId": "Q09-e3",
+              "quote": "80抽/包；范围inner-pack",
+              "unit": "抽/包",
+              "scope": "inner-pack"
+            }
+          ],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "Q09",
+          "productId": "fixture:Q09",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "needs_evidence",
+          "value": null,
+          "unit": "片/包",
+          "reasonCode": "UNIT_MISMATCH",
+          "reason": "片、抽、张、层及包装单位不自动换算。",
+          "evidenceIds": [
+            "Q09-e3"
+          ],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "Q15",
+          "label": "纸巾盒不挂湿巾片数",
+          "kind": "synthetic",
+          "productId": "fixture:Q15",
+          "categoryId": "1f96cac3-8498-4c32-936c-7a6a54b9320b",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "Q15-e1",
+              "productId": "fixture:Q15",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/Q15"
+            },
+            {
+              "id": "Q15-e2",
+              "productId": "fixture:Q15",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/Q15"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "Q15-e1",
+              "quote": "商品品牌：清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [
+            {
+              "value": 50,
+              "evidenceId": "Q15-e2",
+              "quote": "50片/包；范围inner-pack",
+              "unit": "片/包",
+              "scope": "inner-pack"
+            }
+          ],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "Q15",
+          "productId": "fixture:Q15",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "not_applicable",
+          "value": null,
+          "unit": "片/包",
+          "reasonCode": "NO_BINDING",
+          "reason": "目标类目没有挂载本属性。",
+          "evidenceIds": [],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "B02",
+          "label": "适配品牌不能当自身品牌",
+          "kind": "synthetic",
+          "productId": "fixture:B02",
+          "categoryId": "1f96cac3-8498-4c32-936c-7a6a54b9320b",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "B02-e1",
+              "productId": "fixture:B02",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/B02"
+            },
+            {
+              "id": "B02-e2",
+              "productId": "fixture:B02",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/B02"
+            },
+            {
+              "id": "B02-e3",
+              "productId": "fixture:B02",
+              "kind": "fixture",
+              "text": "适配清风分配器",
+              "sourceRef": "合成规则案例/B02"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "B02-e3",
+              "quote": "适配清风分配器",
+              "describes": "compatible"
+            }
+          ],
+          "direct": [
+            {
+              "value": 50,
+              "evidenceId": "B02-e2",
+              "quote": "50片/包；范围inner-pack",
+              "unit": "片/包",
+              "scope": "inner-pack"
+            }
+          ],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "common.brand",
+        "ruleResult": {
+          "caseId": "B02",
+          "productId": "fixture:B02",
+          "attributeId": "common.brand",
+          "status": "needs_evidence",
+          "value": null,
+          "unit": null,
+          "reasonCode": "NO_SELF_BRAND",
+          "reason": "缺少明确自身品牌；供应商、适配品牌和国产等标签不代替品牌。",
+          "evidenceIds": [],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "B04",
+          "label": "国产不能当品牌",
+          "kind": "synthetic",
+          "productId": "fixture:B04",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "B04-e1",
+              "productId": "fixture:B04",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/B04"
+            },
+            {
+              "id": "B04-e2",
+              "productId": "fixture:B04",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/B04"
+            },
+            {
+              "id": "B04-e3",
+              "productId": "fixture:B04",
+              "kind": "fixture",
+              "text": "品牌字段：国产",
+              "sourceRef": "合成规则案例/B04"
+            }
+          ],
+          "brands": [
+            {
+              "value": "国产",
+              "evidenceId": "B04-e3",
+              "quote": "品牌字段：国产",
+              "describes": "self"
+            }
+          ],
+          "direct": [
+            {
+              "value": 50,
+              "evidenceId": "B04-e2",
+              "quote": "50片/包；范围inner-pack",
+              "unit": "片/包",
+              "scope": "inner-pack"
+            }
+          ],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "common.brand",
+        "ruleResult": {
+          "caseId": "B04",
+          "productId": "fixture:B04",
+          "attributeId": "common.brand",
+          "status": "needs_evidence",
+          "value": null,
+          "unit": null,
+          "reasonCode": "NO_SELF_BRAND",
+          "reason": "缺少明确自身品牌；供应商、适配品牌和国产等标签不代替品牌。",
+          "evidenceIds": [
+            "B04-e3"
+          ],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "B05",
+          "label": "字典外品牌保留候选",
+          "kind": "synthetic",
+          "productId": "fixture:B05",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "B05-e1",
+              "productId": "fixture:B05",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/B05"
+            },
+            {
+              "id": "B05-e2",
+              "productId": "fixture:B05",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/B05"
+            },
+            {
+              "id": "B05-e3",
+              "productId": "fixture:B05",
+              "kind": "fixture",
+              "text": "商品自身品牌：示例新品牌",
+              "sourceRef": "合成规则案例/B05"
+            }
+          ],
+          "brands": [
+            {
+              "value": "示例新品牌",
+              "evidenceId": "B05-e3",
+              "quote": "商品自身品牌：示例新品牌",
+              "describes": "self"
+            }
+          ],
+          "direct": [
+            {
+              "value": 50,
+              "evidenceId": "B05-e2",
+              "quote": "50片/包；范围inner-pack",
+              "unit": "片/包",
+              "scope": "inner-pack"
+            }
+          ],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "common.brand",
+        "ruleResult": {
+          "caseId": "B05",
+          "productId": "fixture:B05",
+          "attributeId": "common.brand",
+          "status": "enum_candidate",
+          "value": "示例新品牌",
+          "unit": null,
+          "reasonCode": "OUTSIDE_REFERENCE_DICTIONARY",
+          "reason": "证据明确，但不在本次参考字典；保留原值，等待正式品牌映射。",
+          "evidenceIds": [
+            "B05-e3"
+          ],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "B08",
+          "label": "明确无品牌声明",
+          "kind": "synthetic",
+          "productId": "fixture:B08",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "B08-e1",
+              "productId": "fixture:B08",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/B08"
+            },
+            {
+              "id": "B08-e2",
+              "productId": "fixture:B08",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/B08"
+            },
+            {
+              "id": "B08-e3",
+              "productId": "fixture:B08",
+              "kind": "fixture",
+              "text": "本商品无品牌",
+              "sourceRef": "合成规则案例/B08"
+            }
+          ],
+          "brands": [],
+          "direct": [
+            {
+              "value": 50,
+              "evidenceId": "B08-e2",
+              "quote": "50片/包；范围inner-pack",
+              "unit": "片/包",
+              "scope": "inner-pack"
+            }
+          ],
+          "totals": [],
+          "packs": [],
+          "unbranded": {
+            "value": true,
+            "evidenceId": "B08-e3",
+            "quote": "本商品无品牌"
+          }
+        },
+        "targetAttributeId": "common.brand",
+        "ruleResult": {
+          "caseId": "B08",
+          "productId": "fixture:B08",
+          "attributeId": "common.brand",
+          "status": "filled",
+          "value": "无品牌",
+          "unit": null,
+          "reasonCode": "EXPLICIT_BRANDLESS",
+          "reason": "明确无品牌声明已作为试点选项。",
+          "evidenceIds": [
+            "B08-e3"
+          ],
+          "trace": [
+            "采用明确无品牌声明，未把空值或产地转成无品牌。"
+          ],
+          "dictionaryRef": "reference:brandless"
+        }
+      },
+      {
+        "input": {
+          "id": "H01",
+          "label": "清风x湿巾宝宝婴儿湿纸巾翻盖抽取式无刺激80片/包家用实惠装 4包/箱",
+          "kind": "historical",
+          "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+          "evidence": [
+            {
+              "id": "H1-e1",
+              "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+              "kind": "title",
+              "text": "清风x湿巾宝宝婴儿湿纸巾翻盖抽取式无刺激80片/包家用实惠装 4包/箱",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:477#title"
+            },
+            {
+              "id": "H1-e2",
+              "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+              "kind": "sale_spec",
+              "text": "抽纸",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:477#saleSpec"
+            },
+            {
+              "id": "H1-e3",
+              "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+              "kind": "brand",
+              "text": "清风",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:477#brand"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "H1-e3",
+              "quote": "清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [
+            {
+              "value": 80,
+              "unit": "片/包",
+              "scope": "inner-pack",
+              "evidenceId": "H1-e1",
+              "quote": "80片/包"
+            }
+          ],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "H01",
+          "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "filled",
+          "value": 80,
+          "unit": "片/包",
+          "reasonCode": "DIRECT_COUNT",
+          "reason": "直接证据明确单包片数。",
+          "evidenceIds": [
+            "H1-e1"
+          ],
+          "trace": [
+            "采用明确单包片数。"
+          ]
+        }
+      },
+      {
+        "input": {
+          "id": "H03",
+          "label": "清风湿厕纸60片便携抽取式家庭装 6包装 BWBW60EX-6B",
+          "kind": "historical",
+          "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+          "evidence": [
+            {
+              "id": "H3-e1",
+              "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+              "kind": "title",
+              "text": "清风湿厕纸60片便携抽取式家庭装 6包装 BWBW60EX-6B",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:93#title"
+            },
+            {
+              "id": "H3-e2",
+              "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+              "kind": "sale_spec",
+              "text": "BWBW60EX-6B",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:93#saleSpec"
+            },
+            {
+              "id": "H3-e3",
+              "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+              "kind": "brand",
+              "text": "清风",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:93#brand"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "H3-e3",
+              "quote": "清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "H03",
+          "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "needs_evidence",
+          "value": null,
+          "unit": "片/包",
+          "reasonCode": "INCOMPLETE_PACK_CONTEXT",
+          "reason": "需要明确单包值，或同范围总片数/包数及同规格、赠品处理证据。",
+          "evidenceIds": [],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "H04",
+          "label": "清风纯水湿巾EDI带盖抽取式80抽宝宝手口婴儿专用卫生家庭实惠装 3包",
+          "kind": "historical",
+          "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+          "evidence": [
+            {
+              "id": "H4-e1",
+              "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+              "kind": "title",
+              "text": "清风纯水湿巾EDI带盖抽取式80抽宝宝手口婴儿专用卫生家庭实惠装 3包",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:299#title"
+            },
+            {
+              "id": "H4-e2",
+              "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+              "kind": "sale_spec",
+              "text": "3包",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:299#saleSpec"
+            },
+            {
+              "id": "H4-e3",
+              "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+              "kind": "brand",
+              "text": "清风",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:299#brand"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "H4-e3",
+              "quote": "清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "H04",
+          "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "needs_evidence",
+          "value": null,
+          "unit": "片/包",
+          "reasonCode": "INCOMPLETE_PACK_CONTEXT",
+          "reason": "需要明确单包值，或同范围总片数/包数及同规格、赠品处理证据。",
+          "evidenceIds": [],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "H06",
+          "label": "舒克兔婴儿手口柔湿巾",
+          "kind": "historical",
+          "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+          "evidence": [
+            {
+              "id": "H6-e1",
+              "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+              "kind": "title",
+              "text": "舒克兔婴儿手口柔湿巾",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:61#title"
+            },
+            {
+              "id": "H6-e2",
+              "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+              "kind": "sale_spec",
+              "text": "",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:61#saleSpec"
+            },
+            {
+              "id": "H6-e3",
+              "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+              "kind": "brand",
+              "text": "国产",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:61#brand"
+            }
+          ],
+          "brands": [
+            {
+              "value": "国产",
+              "evidenceId": "H6-e3",
+              "quote": "国产",
+              "describes": "self"
+            },
+            {
+              "value": "舒克兔",
+              "describes": "self",
+              "evidenceId": "H6-e1",
+              "quote": "舒克兔"
+            }
+          ],
+          "direct": [],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "common.brand",
+        "ruleResult": {
+          "caseId": "H06",
+          "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+          "attributeId": "common.brand",
+          "status": "enum_candidate",
+          "value": "舒克兔",
+          "unit": null,
+          "reasonCode": "OUTSIDE_REFERENCE_DICTIONARY",
+          "reason": "证据明确，但不在本次参考字典；保留原值，等待正式品牌映射。",
+          "evidenceIds": [
+            "H6-e3",
+            "H6-e1"
+          ],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "H05",
+          "label": "全棉时代婴儿湿巾70片/包*3包 新生儿宝宝手口专用带盖湿纸巾",
+          "kind": "historical",
+          "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+          "evidence": [
+            {
+              "id": "H5-e1",
+              "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+              "kind": "title",
+              "text": "全棉时代婴儿湿巾70片/包*3包 新生儿宝宝手口专用带盖湿纸巾",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:420#title"
+            },
+            {
+              "id": "H5-e2",
+              "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+              "kind": "sale_spec",
+              "text": "湿巾",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:420#saleSpec"
+            },
+            {
+              "id": "H5-e3",
+              "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+              "kind": "brand",
+              "text": "全棉时代（PurCotton）",
+              "sourceRef": "scratch-attribute-eval/es-details.jsonl:420#brand"
+            }
+          ],
+          "brands": [
+            {
+              "value": "全棉时代（PurCotton）",
+              "evidenceId": "H5-e3",
+              "quote": "全棉时代（PurCotton）",
+              "describes": "self"
+            }
+          ],
+          "direct": [
+            {
+              "value": 70,
+              "unit": "片/包",
+              "scope": "inner-pack",
+              "evidenceId": "H5-e1",
+              "quote": "70片/包"
+            }
+          ],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "common.brand",
+        "ruleResult": {
+          "caseId": "H05",
+          "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+          "attributeId": "common.brand",
+          "status": "filled",
+          "value": "全棉时代",
+          "unit": null,
+          "reasonCode": "EXACT_BRAND_ALIAS",
+          "reason": "依据当前商品品牌证据归一。",
+          "evidenceIds": [
+            "H5-e3"
+          ],
+          "trace": [
+            "精确别名归一；参考字典ID未核实为生产ID。"
+          ],
+          "dictionaryRef": "reference:purcotton"
+        }
+      },
+      {
+        "input": {
+          "id": "Q16",
+          "label": "引用50片却提供500片拒绝",
+          "kind": "synthetic",
+          "productId": "fixture:Q16",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "Q16-e1",
+              "productId": "fixture:Q16",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/Q16"
+            },
+            {
+              "id": "Q16-e2",
+              "productId": "fixture:Q16",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/Q16"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "Q16-e1",
+              "quote": "商品品牌：清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [
+            {
+              "value": 500,
+              "evidenceId": "Q16-e2",
+              "quote": "50片/包；范围inner-pack",
+              "unit": "片/包",
+              "scope": "inner-pack"
+            }
+          ],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "Q16",
+          "productId": "fixture:Q16",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "invalid",
+          "value": null,
+          "unit": "片/包",
+          "reasonCode": "VALUE_NOT_IN_QUOTE",
+          "reason": "观察数量未出现在引用原文中，拒绝伪造或篡改数值。",
+          "evidenceIds": [
+            "Q16-e2"
+          ],
+          "trace": []
+        }
+      },
+      {
+        "input": {
+          "id": "Q17",
+          "label": "直接值范围不是内包装",
+          "kind": "synthetic",
+          "productId": "fixture:Q17",
+          "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+          "categoryBasis": "合成案例指定上下文，不代表真实商品",
+          "evidence": [
+            {
+              "id": "Q17-e1",
+              "productId": "fixture:Q17",
+              "kind": "fixture",
+              "text": "商品品牌：清风",
+              "sourceRef": "合成规则案例/Q17"
+            },
+            {
+              "id": "Q17-e2",
+              "productId": "fixture:Q17",
+              "kind": "fixture",
+              "text": "50片/包；范围inner-pack",
+              "sourceRef": "合成规则案例/Q17"
+            }
+          ],
+          "brands": [
+            {
+              "value": "清风",
+              "evidenceId": "Q17-e1",
+              "quote": "商品品牌：清风",
+              "describes": "self"
+            }
+          ],
+          "direct": [
+            {
+              "value": 50,
+              "evidenceId": "Q17-e2",
+              "quote": "50片/包；范围inner-pack",
+              "unit": "片/包",
+              "scope": "carton"
+            }
+          ],
+          "totals": [],
+          "packs": []
+        },
+        "targetAttributeId": "wet_wipes.pieces_per_pack",
+        "ruleResult": {
+          "caseId": "Q17",
+          "productId": "fixture:Q17",
+          "attributeId": "wet_wipes.pieces_per_pack",
+          "status": "needs_evidence",
+          "value": null,
+          "unit": "片/包",
+          "reasonCode": "DIRECT_SCOPE_MISMATCH",
+          "reason": "直接值没有定位到标准要求的单个内包装。",
+          "evidenceIds": [
+            "Q17-e2"
+          ],
+          "trace": []
+        }
+      }
+    ],
+    "engineSource": "import type {BrandObservation,CaseInput,Observed,Quantity,Rule,Standard,ValueResult} from './types.ts';\nimport stages from '../workflows/stages.json';\n\nexport function validateStandard(s:Standard):void {\n if(s.schema!=='product-governance-standard-v1')throw new Error('未知标准版本');\n const ids=new Set(s.attributes.map(a=>a.id)),rules=new Map(s.rules.map(r=>[r.id,r]));\n if(ids.size!==s.attributes.length||rules.size!==s.rules.length)throw new Error('定义ID重复');\n const categories=new Set(s.categories.map(c=>c.id)),keys=new Set<string>();\n if(categories.size!==s.categories.length||new Set(s.brandDictionary.entries.map(e=>e.id)).size!==s.brandDictionary.entries.length)throw new Error('类目或品牌字典ID重复');\n const aliases=new Map<string,string>();\n for(const entry of s.brandDictionary.entries)for(const alias of entry.aliases){const key=normalize(alias);if(aliases.has(key)&&aliases.get(key)!==entry.id)throw new Error('品牌别名歧义');aliases.set(key,entry.id);}\n for(const a of s.attributes){\n  if(!['文本','数值','是否','选项','日期'].includes(a.fieldType)||!a.definition||!a.sourceRefs.length||!rules.has(a.ruleId))throw new Error('属性定义不完整');\n  if(a.sourceRefs.some(id=>!s.sources.some(source=>source.id===id)))throw new Error('属性引用不存在的来源');\n  const op=rules.get(a.ruleId)!.operator;\n  if(op==='pieces_per_pack'&&(a.fieldType!=='数值'||a.unit!=='片/包'))throw new Error('计数规则与字段类型/单位不一致');\n  if(op==='brand_dictionary'&&a.fieldType!=='选项')throw new Error('品牌规则必须为选项');\n  if(!['pieces_per_pack','brand_dictionary'].includes(op))throw new Error('未注册的规则算子');\n }\n for(const b of s.bindings){const key=b.categoryId+'|'+b.attributeId;if(keys.has(key)||!ids.has(b.attributeId)||!categories.has(b.categoryId)||typeof b.required!=='boolean'||!['SKU','SPU'].includes(b.valueLevel))throw new Error('无效或重复挂载');keys.add(key);}\n}\nconst normalize=(s:string)=>s.normalize('NFKC').trim().replace(/\\s+/gu,' ').toLocaleLowerCase('en-US');\nexport function evaluate(s:Standard,c:CaseInput,attributeId:string):ValueResult {\n const attribute=s.attributes.find(a=>a.id===attributeId);if(!attribute)throw new Error('未知属性ID');\n const rule=s.rules.find(r=>r.id===attribute.ruleId);if(!rule)throw new Error('规则不存在');\n const refs=new Set<string>(),trace:string[]=[];\n const result=(status:ValueResult['status'],reasonCode:string,reason:string,value:string|number|null=null,dictionaryRef?:string):ValueResult=>({caseId:c.id,productId:c.productId,attributeId,status,value,unit:attribute.unit,reasonCode,reason,evidenceIds:[...refs],trace,dictionaryRef});\n if(!s.bindings.some(b=>b.categoryId===c.categoryId&&b.attributeId===attributeId))return result('not_applicable','NO_BINDING','目标类目没有挂载本属性。');\n const all=c.evidence.map(e=>e.id);if(new Set(all).size!==all.length)return result('invalid','DUPLICATE_EVIDENCE','证据ID重复。');\n const check=(o:Observed<unknown>):boolean=>{const evidence=c.evidence.find(e=>e.id===o.evidenceId);refs.add(o.evidenceId);return Boolean(evidence&&evidence.productId===c.productId&&typeof o.quote==='string'&&o.quote.length&&evidence.text.includes(o.quote));};\n if(rule.operator==='brand_dictionary'){\n  const owned=c.brands.filter(b=>b.describes==='self');\n  if(owned.some(b=>typeof b.value!=='string'||!check(b))||(c.unbranded&&!check(c.unbranded)))return result('invalid','EVIDENCE_MISMATCH','自身品牌观察缺少当前商品的可定位证据。');\n  if(owned.some(b=>!normalize(b.quote).includes(normalize(b.value)))||(c.unbranded&&typeof c.unbranded.value!=='boolean'))return result('invalid','OBSERVATION_MISMATCH','品牌原值必须出现在引用中，明确无品牌声明必须是布尔值。');\n  const placeholders=new Set((rule.placeholders??[]).map(normalize));\n  const values=owned.filter(b=>normalize(b.value)&&!placeholders.has(normalize(b.value)));\n  const mapped=values.map(b=>({raw:b.value,entry:s.brandDictionary.entries.find(e=>e.aliases.some(a=>normalize(a)===normalize(b.value)))}));\n  const unique=new Set(mapped.map(x=>x.entry?.id??'raw:'+normalize(x.raw)));\n  if(c.unbranded?.value===true){\n   if(unique.size)return result('conflict','BRAND_VS_BRANDLESS','明确无品牌声明与自身品牌证据冲突。');\n   const entry=s.brandDictionary.entries.find(e=>e.name==='无品牌');if(!entry)return result('enum_candidate','BRANDLESS_OPTION_MISSING','已明确无品牌，字典尚未配置对应选项。','无品牌');\n   trace.push('采用明确无品牌声明，未把空值或产地转成无品牌。');return result('filled','EXPLICIT_BRANDLESS','明确无品牌声明已作为试点选项。',entry.name,entry.id);\n  }\n  if(unique.size>1)return result('conflict','BRAND_CONFLICT','存在不同的自身品牌证据，需核对组合装或来源。');\n  if(!mapped.length)return result('needs_evidence','NO_SELF_BRAND','缺少明确自身品牌；供应商、适配品牌和国产等标签不代替品牌。');\n  const found=mapped[0]!;\n  if(!found.entry)return result('enum_candidate','OUTSIDE_REFERENCE_DICTIONARY','证据明确，但不在本次参考字典；保留原值，等待正式品牌映射。',found.raw);\n  trace.push('精确别名归一；参考字典ID未核实为生产ID。');return result('filled','EXACT_BRAND_ALIAS','依据当前商品品牌证据归一。',found.entry.name,found.entry.id);\n }\n if(rule.operator!=='pieces_per_pack')throw new Error('不允许执行未注册算子');\n const quantities=[...c.direct,...c.totals,...c.packs];\n if(quantities.some(q=>!check(q))||[c.homogeneous,c.giftsExcluded].some(q=>q&&!check(q)))return result('invalid','EVIDENCE_MISMATCH','计算输入缺少当前商品可定位证据。');\n if(quantities.some(q=>!Number.isSafeInteger(q.value)||q.value<=0))return result('invalid','INVALID_QUANTITY','数量必须为安全范围内的正整数。');\n if([c.homogeneous,c.giftsExcluded].some(o=>o&&typeof o.value!=='boolean'))return result('invalid','INVALID_QUALIFIER','同规格与赠品处理声明必须为布尔值。');\n if(c.homogeneous?.value===false)return result('needs_evidence','MIXED_PACKS','已明确不同规格内包装，不能用平均数作为统一单包值。');\n if(c.direct.some(q=>q.unit!==rule.directUnit)||c.totals.some(q=>q.unit!==rule.totalUnit)||c.packs.some(q=>q.unit!==rule.packsUnit))return result('needs_evidence','UNIT_MISMATCH','片、抽、张、层及包装单位不自动换算。');\n if(quantities.some(q=>![...q.quote.matchAll(/\\d+(?:\\.\\d+)?/gu)].some(m=>Number(m[0])===q.value)))return result('invalid','VALUE_NOT_IN_QUOTE','观察数量未出现在引用原文中，拒绝伪造或篡改数值。');\n if(rule.directScope&&c.direct.some(q=>q.scope!==rule.directScope))return result('needs_evidence','DIRECT_SCOPE_MISMATCH','直接值没有定位到标准要求的单个内包装。');\n const direct=[...new Set(c.direct.map(q=>q.value))];\n if(direct.length>1)return result('conflict','DIRECT_CONFLICT','明确单包数量之间有冲突。');\n let derived:number|undefined;\n if(c.totals.length&&c.packs.length&&c.homogeneous?.value===true&&c.giftsExcluded?.value===true){\n  const total=new Map(c.totals.map(q=>[`${q.scope}|${q.value}`,q]));const pack=new Map(c.packs.map(q=>[`${q.scope}|${q.value}`,q]));\n  if(total.size!==1||pack.size!==1)return result('conflict','MULTIPLE_TOTALS','同一次推导存在多组总量或包数。');\n  const t=[...total.values()][0]!,p=[...pack.values()][0]!;\n  if(!t.scope||t.scope!==p.scope)return result('needs_evidence','SCOPE_MISMATCH','总片数和包数不处于同一销售范围。');\n  if(t.value%p.value!==0)return result('invalid','NON_INTEGER_DIVISION','总片数除以包数不是整数，不能四舍五入。');\n  derived=t.value/p.value;trace.push(`${t.value}片/${t.scope} ÷ ${p.value}包/${p.scope} = ${derived}片/包`);\n }\n if(direct.length&&derived!==undefined&&direct[0]!==derived)return result('conflict','DIRECT_DERIVED_CONFLICT','直接值与符合前提的推导值冲突。');\n if(direct.length){trace.push('采用明确单包片数。');return result('filled','DIRECT_COUNT','直接证据明确单包片数。',direct[0]!);}\n if(derived!==undefined)return result('filled','DERIVED_COUNT','同范围、同规格且赠品处理明确，使用受限除法。',derived);\n return result('needs_evidence','INCOMPLETE_PACK_CONTEXT','需要明确单包值，或同范围总片数/包数及同规格、赠品处理证据。');\n}\n\nexport function describeTask(s:Standard,stage:string,previous:string[],outputs:string[]){const key=stage.replace(/_r\\d+$/,'') as keyof typeof stages;const step=stages[key];if(!step)throw new Error('工作流阶段未注册');return {goal:'两个属性的建模、规则与多模型审核验证',stage,purpose:step.purpose,releaseId:s.releaseId,previous,outputs,allowedNext:step.next,categoryIds:s.categories.map(c=>c.id),attributeIds:s.attributes.map(a=>a.id)};}\n",
+    "outputSchema": {
+      "summary": "",
+      "checks": [
+        {
+          "attributeId": "",
+          "criteria": [
+            {
+              "criterionId": "",
+              "verdict": "pass|fail|uncertain",
+              "reason": ""
+            }
+          ]
+        }
+      ],
+      "findings": [
+        {
+          "id": "独立唯一编号",
+          "attributeId": "",
+          "severity": "high|medium|low",
+          "issue": "",
+          "recommendation": ""
+        }
+      ],
+      "caseOpinions": [
+        {
+          "caseId": "",
+          "attributeId": "",
+          "status": "",
+          "value": null,
+          "reason": ""
+        }
+      ]
+    }
+  }
+}

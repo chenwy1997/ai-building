@@ -1,0 +1,176 @@
+[
+  {
+    "caseId": "Q01",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50
+  },
+  {
+    "caseId": "Q02",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50
+  },
+  {
+    "caseId": "Q03",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null
+  },
+  {
+    "caseId": "Q04",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null
+  },
+  {
+    "caseId": "Q05",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null
+  },
+  {
+    "caseId": "Q06",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "invalid",
+    "value": null
+  },
+  {
+    "caseId": "Q07",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "conflict",
+    "value": null
+  },
+  {
+    "caseId": "Q08",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "conflict",
+    "value": null
+  },
+  {
+    "caseId": "Q09",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null
+  },
+  {
+    "caseId": "Q10",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "invalid",
+    "value": null
+  },
+  {
+    "caseId": "Q11",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null
+  },
+  {
+    "caseId": "Q12",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "invalid",
+    "value": null
+  },
+  {
+    "caseId": "Q13",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "invalid",
+    "value": null
+  },
+  {
+    "caseId": "Q14",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "filled",
+    "value": 50
+  },
+  {
+    "caseId": "Q15",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "not_applicable",
+    "value": null
+  },
+  {
+    "caseId": "Q16",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "invalid",
+    "value": null
+  },
+  {
+    "caseId": "Q17",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "needs_evidence",
+    "value": null
+  },
+  {
+    "caseId": "Q18",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "status": "invalid",
+    "value": null
+  },
+  {
+    "caseId": "B01",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "维达"
+  },
+  {
+    "caseId": "B02",
+    "attributeId": "common.brand",
+    "status": "needs_evidence",
+    "value": null
+  },
+  {
+    "caseId": "B03",
+    "attributeId": "common.brand",
+    "status": "needs_evidence",
+    "value": null
+  },
+  {
+    "caseId": "B04",
+    "attributeId": "common.brand",
+    "status": "needs_evidence",
+    "value": null
+  },
+  {
+    "caseId": "B05",
+    "attributeId": "common.brand",
+    "status": "enum_candidate",
+    "value": "示例新品牌"
+  },
+  {
+    "caseId": "B06",
+    "attributeId": "common.brand",
+    "status": "conflict",
+    "value": null
+  },
+  {
+    "caseId": "B07",
+    "attributeId": "common.brand",
+    "status": "needs_evidence",
+    "value": null
+  },
+  {
+    "caseId": "B08",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "无品牌"
+  },
+  {
+    "caseId": "B09",
+    "attributeId": "common.brand",
+    "status": "filled",
+    "value": "清风"
+  },
+  {
+    "caseId": "B10",
+    "attributeId": "common.brand",
+    "status": "invalid",
+    "value": null
+  },
+  {
+    "caseId": "B11",
+    "attributeId": "common.brand",
+    "status": "conflict",
+    "value": null
+  }
+]

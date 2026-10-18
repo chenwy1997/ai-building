@@ -1,0 +1,13 @@
+{
+  "runId": "step1-20261018",
+  "createdAt": "2026-10-18T15:30:31.456Z",
+  "scope": "两个属性；规则反例与历史商品演示；不代表生产准确率",
+  "standardHash": "76c67d633653d82b0677a60bae1a8665a40955ad279d765a72c5064201c25669",
+  "caseHash": "e5ba7f8b3888d58159f21cdd955209bf8cb1a2b7e4cd5c554f6892b5110668cb",
+  "configHash": "b4cdb4426c9be9a3d5793c7af9dbb290e5a0085fdc4f2b8eb1e18cd4b1b60e4e",
+  "synthetic": 24,
+  "historical": 6,
+  "productionWrites": false,
+  "sourceSnapshot": "历史ES详情缓存的6条选定记录，非随机样本，未刷新上下架状态",
+  "categoryAssignment": "沿用历史建议归属，本轮没有重做分类审计"
+}

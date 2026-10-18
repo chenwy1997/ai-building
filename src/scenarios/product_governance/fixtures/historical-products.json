@@ -1,0 +1,51 @@
+{
+  "schema": "product-governance-historical-fixture-v1",
+  "source": "scratch-attribute-eval/es-details.jsonl",
+  "extractedFromRun": "step1-20261018",
+  "purpose": "首步离线复现的6条历史样例；非实时在售数据、非随机样本",
+  "recordsHash": "76cbe63790b009ca35a14e033fa8355ddb9aa368e26367044ad6b2eae77e87a9",
+  "records": [
+    {
+      "id": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+      "title": "清风x湿巾宝宝婴儿湿纸巾翻盖抽取式无刺激80片/包家用实惠装 4包/箱",
+      "saleSpec": "抽纸",
+      "brand": "清风",
+      "lineNo": 477
+    },
+    {
+      "id": "ce7185fe-73dd-4dd4-b646-dce296addead",
+      "title": "清风 BWB80CX纯水湿纸巾80片/包*12 家庭清洁不含酒精 手口可用",
+      "saleSpec": "BWB80CX",
+      "brand": "清风",
+      "lineNo": 177
+    },
+    {
+      "id": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+      "title": "清风湿厕纸60片便携抽取式家庭装 6包装 BWBW60EX-6B",
+      "saleSpec": "BWBW60EX-6B",
+      "brand": "清风",
+      "lineNo": 93
+    },
+    {
+      "id": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+      "title": "清风纯水湿巾EDI带盖抽取式80抽宝宝手口婴儿专用卫生家庭实惠装 3包",
+      "saleSpec": "3包",
+      "brand": "清风",
+      "lineNo": 299
+    },
+    {
+      "id": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+      "title": "全棉时代婴儿湿巾70片/包*3包 新生儿宝宝手口专用带盖湿纸巾",
+      "saleSpec": "湿巾",
+      "brand": "全棉时代（PurCotton）",
+      "lineNo": 420
+    },
+    {
+      "id": "d60c6257-4213-48db-8573-d99c1f56c937",
+      "title": "舒克兔婴儿手口柔湿巾",
+      "saleSpec": "",
+      "brand": "国产",
+      "lineNo": 61
+    }
+  ]
+}

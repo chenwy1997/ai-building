@@ -1,0 +1,138 @@
+{
+  "authority": "Codex",
+  "standardHash": "d67180f4667fa23dd7023c4f7c7ffbfd56c16823e2f392fa82e9fff87491a907",
+  "resultsHash": "bfaf4b94590df0bbfef04e1d70482d0c10c64365b179cdfd6d325295c181ab7b",
+  "stage": "pilot_result_not_production_release",
+  "fields": [
+    {
+      "caseId": "H01",
+      "attributeId": "common.brand",
+      "status": "filled",
+      "value": "清风",
+      "reason": "标题自身品牌与结构化品牌一致，按参考字典归一。",
+      "evidenceIds": [
+        "H1-e1",
+        "H1-e3"
+      ]
+    },
+    {
+      "caseId": "H01",
+      "attributeId": "wet_wipes.pieces_per_pack",
+      "status": "filled",
+      "value": 80,
+      "reason": "标题明确80片/包；4包/箱不改变单包值。销售规格“抽纸”保留为历史归属风险，本步未认定其类目已完成审核。",
+      "evidenceIds": [
+        "H1-e1",
+        "H1-e2"
+      ]
+    },
+    {
+      "caseId": "H02",
+      "attributeId": "common.brand",
+      "status": "filled",
+      "value": "清风",
+      "reason": "标题清风与品牌字段清风相互支持，无适配对象修饰。",
+      "evidenceIds": [
+        "H2-e1",
+        "H2-e3"
+      ]
+    },
+    {
+      "caseId": "H02",
+      "attributeId": "wet_wipes.pieces_per_pack",
+      "status": "filled",
+      "value": 80,
+      "reason": "原文80片/包*12，直接取80，不取整组960。",
+      "evidenceIds": [
+        "H2-e1"
+      ]
+    },
+    {
+      "caseId": "H03",
+      "attributeId": "common.brand",
+      "status": "filled",
+      "value": "清风",
+      "reason": "标题与品牌字段一致，品牌归一可作为样例结果。",
+      "evidenceIds": [
+        "H3-e1",
+        "H3-e3"
+      ]
+    },
+    {
+      "caseId": "H03",
+      "attributeId": "wet_wipes.pieces_per_pack",
+      "status": "needs_evidence",
+      "value": null,
+      "reason": "原文60片、6包装未明确60是单包还是总量；不伪造60片/包引用，也不计算60÷6。",
+      "evidenceIds": [
+        "H3-e1",
+        "H3-e2"
+      ]
+    },
+    {
+      "caseId": "H04",
+      "attributeId": "common.brand",
+      "status": "filled",
+      "value": "清风",
+      "reason": "标题与结构化品牌一致，参考字典可归一。",
+      "evidenceIds": [
+        "H4-e1",
+        "H4-e3"
+      ]
+    },
+    {
+      "caseId": "H04",
+      "attributeId": "wet_wipes.pieces_per_pack",
+      "status": "needs_evidence",
+      "value": null,
+      "reason": "原文80抽和3包，缺明确片数，不把抽直接改写为片。",
+      "evidenceIds": [
+        "H4-e1",
+        "H4-e2"
+      ]
+    },
+    {
+      "caseId": "H05",
+      "attributeId": "common.brand",
+      "status": "filled",
+      "value": "全棉时代",
+      "reason": "标题中文品牌和复合品牌字段指向相同已知中英文别名，补别名后归一；生产ID仍未核验。",
+      "evidenceIds": [
+        "H5-e1",
+        "H5-e3"
+      ]
+    },
+    {
+      "caseId": "H05",
+      "attributeId": "wet_wipes.pieces_per_pack",
+      "status": "filled",
+      "value": 70,
+      "reason": "原文70片/包*3包，单包明确70。",
+      "evidenceIds": [
+        "H5-e1"
+      ]
+    },
+    {
+      "caseId": "H06",
+      "attributeId": "common.brand",
+      "status": "enum_candidate",
+      "value": "舒克兔",
+      "reason": "国产是非品牌占位词；标题舒克兔婴儿手口柔湿巾中的舒克兔可保留待核候选。无正式品牌映射，不算已填。",
+      "evidenceIds": [
+        "H6-e1",
+        "H6-e3"
+      ]
+    },
+    {
+      "caseId": "H06",
+      "attributeId": "wet_wipes.pieces_per_pack",
+      "status": "needs_evidence",
+      "value": null,
+      "reason": "标题无数量，销售规格为空，不能猜片数。",
+      "evidenceIds": [
+        "H6-e1",
+        "H6-e2"
+      ]
+    }
+  ]
+}

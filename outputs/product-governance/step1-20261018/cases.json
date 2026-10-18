@@ -1,0 +1,1765 @@
+[
+  {
+    "id": "Q01",
+    "label": "明确50片/包",
+    "kind": "synthetic",
+    "productId": "fixture:Q01",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q01-e1",
+        "productId": "fixture:Q01",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q01"
+      },
+      {
+        "id": "Q01-e2",
+        "productId": "fixture:Q01",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q01"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q01-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "Q01-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "Q02",
+    "label": "200片共4个同规格包",
+    "kind": "synthetic",
+    "productId": "fixture:Q02",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q02-e1",
+        "productId": "fixture:Q02",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q02"
+      },
+      {
+        "id": "Q02-e2",
+        "productId": "fixture:Q02",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q02"
+      },
+      {
+        "id": "Q02-e3",
+        "productId": "fixture:Q02",
+        "kind": "fixture",
+        "text": "200片；范围sale-unit",
+        "sourceRef": "合成规则案例/Q02"
+      },
+      {
+        "id": "Q02-e4",
+        "productId": "fixture:Q02",
+        "kind": "fixture",
+        "text": "4包；范围sale-unit",
+        "sourceRef": "合成规则案例/Q02"
+      },
+      {
+        "id": "Q02-e5",
+        "productId": "fixture:Q02",
+        "kind": "fixture",
+        "text": "4包均为相同规格",
+        "sourceRef": "合成规则案例/Q02"
+      },
+      {
+        "id": "Q02-e6",
+        "productId": "fixture:Q02",
+        "kind": "fixture",
+        "text": "总片数不含赠品",
+        "sourceRef": "合成规则案例/Q02"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q02-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [],
+    "totals": [
+      {
+        "value": 200,
+        "evidenceId": "Q02-e3",
+        "quote": "200片；范围sale-unit",
+        "unit": "片",
+        "scope": "sale-unit"
+      }
+    ],
+    "packs": [
+      {
+        "value": 4,
+        "evidenceId": "Q02-e4",
+        "quote": "4包；范围sale-unit",
+        "unit": "包",
+        "scope": "sale-unit"
+      }
+    ],
+    "homogeneous": {
+      "value": true,
+      "evidenceId": "Q02-e5",
+      "quote": "4包均为相同规格"
+    },
+    "giftsExcluded": {
+      "value": true,
+      "evidenceId": "Q02-e6",
+      "quote": "总片数不含赠品"
+    }
+  },
+  {
+    "id": "Q03",
+    "label": "只有总片数",
+    "kind": "synthetic",
+    "productId": "fixture:Q03",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q03-e1",
+        "productId": "fixture:Q03",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q03"
+      },
+      {
+        "id": "Q03-e2",
+        "productId": "fixture:Q03",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q03"
+      },
+      {
+        "id": "Q03-e3",
+        "productId": "fixture:Q03",
+        "kind": "fixture",
+        "text": "200片；范围sale-unit",
+        "sourceRef": "合成规则案例/Q03"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q03-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [],
+    "totals": [
+      {
+        "value": 200,
+        "evidenceId": "Q03-e3",
+        "quote": "200片；范围sale-unit",
+        "unit": "片",
+        "scope": "sale-unit"
+      }
+    ],
+    "packs": []
+  },
+  {
+    "id": "Q04",
+    "label": "混合大小包不能平均",
+    "kind": "synthetic",
+    "productId": "fixture:Q04",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q04-e1",
+        "productId": "fixture:Q04",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q04"
+      },
+      {
+        "id": "Q04-e2",
+        "productId": "fixture:Q04",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q04"
+      },
+      {
+        "id": "Q04-e3",
+        "productId": "fixture:Q04",
+        "kind": "fixture",
+        "text": "200片；范围sale-unit",
+        "sourceRef": "合成规则案例/Q04"
+      },
+      {
+        "id": "Q04-e4",
+        "productId": "fixture:Q04",
+        "kind": "fixture",
+        "text": "4包；范围sale-unit",
+        "sourceRef": "合成规则案例/Q04"
+      },
+      {
+        "id": "Q04-e5",
+        "productId": "fixture:Q04",
+        "kind": "fixture",
+        "text": "4包均为相同规格",
+        "sourceRef": "合成规则案例/Q04"
+      },
+      {
+        "id": "Q04-e6",
+        "productId": "fixture:Q04",
+        "kind": "fixture",
+        "text": "总片数不含赠品",
+        "sourceRef": "合成规则案例/Q04"
+      },
+      {
+        "id": "Q04-e7",
+        "productId": "fixture:Q04",
+        "kind": "fixture",
+        "text": "包含大小不同的内包装",
+        "sourceRef": "合成规则案例/Q04"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q04-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [],
+    "totals": [
+      {
+        "value": 200,
+        "evidenceId": "Q04-e3",
+        "quote": "200片；范围sale-unit",
+        "unit": "片",
+        "scope": "sale-unit"
+      }
+    ],
+    "packs": [
+      {
+        "value": 4,
+        "evidenceId": "Q04-e4",
+        "quote": "4包；范围sale-unit",
+        "unit": "包",
+        "scope": "sale-unit"
+      }
+    ],
+    "homogeneous": {
+      "value": false,
+      "evidenceId": "Q04-e7",
+      "quote": "包含大小不同的内包装"
+    },
+    "giftsExcluded": {
+      "value": true,
+      "evidenceId": "Q04-e6",
+      "quote": "总片数不含赠品"
+    }
+  },
+  {
+    "id": "Q05",
+    "label": "赠品边界未明",
+    "kind": "synthetic",
+    "productId": "fixture:Q05",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q05-e1",
+        "productId": "fixture:Q05",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q05"
+      },
+      {
+        "id": "Q05-e2",
+        "productId": "fixture:Q05",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q05"
+      },
+      {
+        "id": "Q05-e3",
+        "productId": "fixture:Q05",
+        "kind": "fixture",
+        "text": "200片；范围sale-unit",
+        "sourceRef": "合成规则案例/Q05"
+      },
+      {
+        "id": "Q05-e4",
+        "productId": "fixture:Q05",
+        "kind": "fixture",
+        "text": "4包；范围sale-unit",
+        "sourceRef": "合成规则案例/Q05"
+      },
+      {
+        "id": "Q05-e5",
+        "productId": "fixture:Q05",
+        "kind": "fixture",
+        "text": "4包均为相同规格",
+        "sourceRef": "合成规则案例/Q05"
+      },
+      {
+        "id": "Q05-e6",
+        "productId": "fixture:Q05",
+        "kind": "fixture",
+        "text": "总片数不含赠品",
+        "sourceRef": "合成规则案例/Q05"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q05-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [],
+    "totals": [
+      {
+        "value": 200,
+        "evidenceId": "Q05-e3",
+        "quote": "200片；范围sale-unit",
+        "unit": "片",
+        "scope": "sale-unit"
+      }
+    ],
+    "packs": [
+      {
+        "value": 4,
+        "evidenceId": "Q05-e4",
+        "quote": "4包；范围sale-unit",
+        "unit": "包",
+        "scope": "sale-unit"
+      }
+    ],
+    "homogeneous": {
+      "value": true,
+      "evidenceId": "Q05-e5",
+      "quote": "4包均为相同规格"
+    }
+  },
+  {
+    "id": "Q06",
+    "label": "201除4不能取整",
+    "kind": "synthetic",
+    "productId": "fixture:Q06",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q06-e1",
+        "productId": "fixture:Q06",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q06"
+      },
+      {
+        "id": "Q06-e2",
+        "productId": "fixture:Q06",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q06"
+      },
+      {
+        "id": "Q06-e3",
+        "productId": "fixture:Q06",
+        "kind": "fixture",
+        "text": "201片；范围sale-unit",
+        "sourceRef": "合成规则案例/Q06"
+      },
+      {
+        "id": "Q06-e4",
+        "productId": "fixture:Q06",
+        "kind": "fixture",
+        "text": "4包；范围sale-unit",
+        "sourceRef": "合成规则案例/Q06"
+      },
+      {
+        "id": "Q06-e5",
+        "productId": "fixture:Q06",
+        "kind": "fixture",
+        "text": "4包均为相同规格",
+        "sourceRef": "合成规则案例/Q06"
+      },
+      {
+        "id": "Q06-e6",
+        "productId": "fixture:Q06",
+        "kind": "fixture",
+        "text": "总片数不含赠品",
+        "sourceRef": "合成规则案例/Q06"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q06-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [],
+    "totals": [
+      {
+        "value": 201,
+        "evidenceId": "Q06-e3",
+        "quote": "201片；范围sale-unit",
+        "unit": "片",
+        "scope": "sale-unit"
+      }
+    ],
+    "packs": [
+      {
+        "value": 4,
+        "evidenceId": "Q06-e4",
+        "quote": "4包；范围sale-unit",
+        "unit": "包",
+        "scope": "sale-unit"
+      }
+    ],
+    "homogeneous": {
+      "value": true,
+      "evidenceId": "Q06-e5",
+      "quote": "4包均为相同规格"
+    },
+    "giftsExcluded": {
+      "value": true,
+      "evidenceId": "Q06-e6",
+      "quote": "总片数不含赠品"
+    }
+  },
+  {
+    "id": "Q07",
+    "label": "直接50与推导60冲突",
+    "kind": "synthetic",
+    "productId": "fixture:Q07",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q07-e1",
+        "productId": "fixture:Q07",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q07"
+      },
+      {
+        "id": "Q07-e2",
+        "productId": "fixture:Q07",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q07"
+      },
+      {
+        "id": "Q07-e3",
+        "productId": "fixture:Q07",
+        "kind": "fixture",
+        "text": "240片；范围sale-unit",
+        "sourceRef": "合成规则案例/Q07"
+      },
+      {
+        "id": "Q07-e4",
+        "productId": "fixture:Q07",
+        "kind": "fixture",
+        "text": "4包；范围sale-unit",
+        "sourceRef": "合成规则案例/Q07"
+      },
+      {
+        "id": "Q07-e5",
+        "productId": "fixture:Q07",
+        "kind": "fixture",
+        "text": "4包均为相同规格",
+        "sourceRef": "合成规则案例/Q07"
+      },
+      {
+        "id": "Q07-e6",
+        "productId": "fixture:Q07",
+        "kind": "fixture",
+        "text": "总片数不含赠品",
+        "sourceRef": "合成规则案例/Q07"
+      },
+      {
+        "id": "Q07-e7",
+        "productId": "fixture:Q07",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q07"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q07-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "Q07-e7",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [
+      {
+        "value": 240,
+        "evidenceId": "Q07-e3",
+        "quote": "240片；范围sale-unit",
+        "unit": "片",
+        "scope": "sale-unit"
+      }
+    ],
+    "packs": [
+      {
+        "value": 4,
+        "evidenceId": "Q07-e4",
+        "quote": "4包；范围sale-unit",
+        "unit": "包",
+        "scope": "sale-unit"
+      }
+    ],
+    "homogeneous": {
+      "value": true,
+      "evidenceId": "Q07-e5",
+      "quote": "4包均为相同规格"
+    },
+    "giftsExcluded": {
+      "value": true,
+      "evidenceId": "Q07-e6",
+      "quote": "总片数不含赠品"
+    }
+  },
+  {
+    "id": "Q08",
+    "label": "两个直接值冲突",
+    "kind": "synthetic",
+    "productId": "fixture:Q08",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q08-e1",
+        "productId": "fixture:Q08",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q08"
+      },
+      {
+        "id": "Q08-e2",
+        "productId": "fixture:Q08",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q08"
+      },
+      {
+        "id": "Q08-e3",
+        "productId": "fixture:Q08",
+        "kind": "fixture",
+        "text": "60片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q08"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q08-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "Q08-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      },
+      {
+        "value": 60,
+        "evidenceId": "Q08-e3",
+        "quote": "60片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "Q09",
+    "label": "80抽不能直接当80片",
+    "kind": "synthetic",
+    "productId": "fixture:Q09",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q09-e1",
+        "productId": "fixture:Q09",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q09"
+      },
+      {
+        "id": "Q09-e2",
+        "productId": "fixture:Q09",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q09"
+      },
+      {
+        "id": "Q09-e3",
+        "productId": "fixture:Q09",
+        "kind": "fixture",
+        "text": "80抽/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q09"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q09-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 80,
+        "evidenceId": "Q09-e3",
+        "quote": "80抽/包；范围inner-pack",
+        "unit": "抽/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "Q10",
+    "label": "零片数拒绝",
+    "kind": "synthetic",
+    "productId": "fixture:Q10",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q10-e1",
+        "productId": "fixture:Q10",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q10"
+      },
+      {
+        "id": "Q10-e2",
+        "productId": "fixture:Q10",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q10"
+      },
+      {
+        "id": "Q10-e3",
+        "productId": "fixture:Q10",
+        "kind": "fixture",
+        "text": "0片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q10"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q10-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 0,
+        "evidenceId": "Q10-e3",
+        "quote": "0片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "Q11",
+    "label": "总量与包数销售范围不一致",
+    "kind": "synthetic",
+    "productId": "fixture:Q11",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q11-e1",
+        "productId": "fixture:Q11",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q11"
+      },
+      {
+        "id": "Q11-e2",
+        "productId": "fixture:Q11",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q11"
+      },
+      {
+        "id": "Q11-e3",
+        "productId": "fixture:Q11",
+        "kind": "fixture",
+        "text": "200片；范围sale-unit",
+        "sourceRef": "合成规则案例/Q11"
+      },
+      {
+        "id": "Q11-e4",
+        "productId": "fixture:Q11",
+        "kind": "fixture",
+        "text": "4包；范围sale-unit",
+        "sourceRef": "合成规则案例/Q11"
+      },
+      {
+        "id": "Q11-e5",
+        "productId": "fixture:Q11",
+        "kind": "fixture",
+        "text": "4包均为相同规格",
+        "sourceRef": "合成规则案例/Q11"
+      },
+      {
+        "id": "Q11-e6",
+        "productId": "fixture:Q11",
+        "kind": "fixture",
+        "text": "总片数不含赠品",
+        "sourceRef": "合成规则案例/Q11"
+      },
+      {
+        "id": "Q11-e7",
+        "productId": "fixture:Q11",
+        "kind": "fixture",
+        "text": "4包；范围different-carton",
+        "sourceRef": "合成规则案例/Q11"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q11-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [],
+    "totals": [
+      {
+        "value": 200,
+        "evidenceId": "Q11-e3",
+        "quote": "200片；范围sale-unit",
+        "unit": "片",
+        "scope": "sale-unit"
+      }
+    ],
+    "packs": [
+      {
+        "value": 4,
+        "evidenceId": "Q11-e7",
+        "quote": "4包；范围different-carton",
+        "unit": "包",
+        "scope": "different-carton"
+      }
+    ],
+    "homogeneous": {
+      "value": true,
+      "evidenceId": "Q11-e5",
+      "quote": "4包均为相同规格"
+    },
+    "giftsExcluded": {
+      "value": true,
+      "evidenceId": "Q11-e6",
+      "quote": "总片数不含赠品"
+    }
+  },
+  {
+    "id": "Q12",
+    "label": "跨商品证据拒绝",
+    "kind": "synthetic",
+    "productId": "fixture:Q12",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q12-e1",
+        "productId": "fixture:Q12",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q12"
+      },
+      {
+        "id": "Q12-e2",
+        "productId": "other-product",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q12"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q12-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "Q12-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "Q13",
+    "label": "伪造引用片段拒绝",
+    "kind": "synthetic",
+    "productId": "fixture:Q13",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q13-e1",
+        "productId": "fixture:Q13",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q13"
+      },
+      {
+        "id": "Q13-e2",
+        "productId": "fixture:Q13",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q13"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q13-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "Q13-e2",
+        "quote": "不存在的片段",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "Q14",
+    "label": "直接与推导一致",
+    "kind": "synthetic",
+    "productId": "fixture:Q14",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q14-e1",
+        "productId": "fixture:Q14",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q14"
+      },
+      {
+        "id": "Q14-e2",
+        "productId": "fixture:Q14",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q14"
+      },
+      {
+        "id": "Q14-e3",
+        "productId": "fixture:Q14",
+        "kind": "fixture",
+        "text": "200片；范围sale-unit",
+        "sourceRef": "合成规则案例/Q14"
+      },
+      {
+        "id": "Q14-e4",
+        "productId": "fixture:Q14",
+        "kind": "fixture",
+        "text": "4包；范围sale-unit",
+        "sourceRef": "合成规则案例/Q14"
+      },
+      {
+        "id": "Q14-e5",
+        "productId": "fixture:Q14",
+        "kind": "fixture",
+        "text": "4包均为相同规格",
+        "sourceRef": "合成规则案例/Q14"
+      },
+      {
+        "id": "Q14-e6",
+        "productId": "fixture:Q14",
+        "kind": "fixture",
+        "text": "总片数不含赠品",
+        "sourceRef": "合成规则案例/Q14"
+      },
+      {
+        "id": "Q14-e7",
+        "productId": "fixture:Q14",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q14"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q14-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "Q14-e7",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [
+      {
+        "value": 200,
+        "evidenceId": "Q14-e3",
+        "quote": "200片；范围sale-unit",
+        "unit": "片",
+        "scope": "sale-unit"
+      }
+    ],
+    "packs": [
+      {
+        "value": 4,
+        "evidenceId": "Q14-e4",
+        "quote": "4包；范围sale-unit",
+        "unit": "包",
+        "scope": "sale-unit"
+      }
+    ],
+    "homogeneous": {
+      "value": true,
+      "evidenceId": "Q14-e5",
+      "quote": "4包均为相同规格"
+    },
+    "giftsExcluded": {
+      "value": true,
+      "evidenceId": "Q14-e6",
+      "quote": "总片数不含赠品"
+    }
+  },
+  {
+    "id": "Q15",
+    "label": "纸巾盒不挂湿巾片数",
+    "kind": "synthetic",
+    "productId": "fixture:Q15",
+    "categoryId": "1f96cac3-8498-4c32-936c-7a6a54b9320b",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "Q15-e1",
+        "productId": "fixture:Q15",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/Q15"
+      },
+      {
+        "id": "Q15-e2",
+        "productId": "fixture:Q15",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/Q15"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "Q15-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "Q15-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "B01",
+    "label": "Vinda别名归一",
+    "kind": "synthetic",
+    "productId": "fixture:B01",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "B01-e1",
+        "productId": "fixture:B01",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/B01"
+      },
+      {
+        "id": "B01-e2",
+        "productId": "fixture:B01",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/B01"
+      },
+      {
+        "id": "B01-e3",
+        "productId": "fixture:B01",
+        "kind": "fixture",
+        "text": "商品品牌Vinda",
+        "sourceRef": "合成规则案例/B01"
+      }
+    ],
+    "brands": [
+      {
+        "value": "Vinda",
+        "evidenceId": "B01-e3",
+        "quote": "商品品牌Vinda",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "B01-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "B02",
+    "label": "适配品牌不能当自身品牌",
+    "kind": "synthetic",
+    "productId": "fixture:B02",
+    "categoryId": "1f96cac3-8498-4c32-936c-7a6a54b9320b",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "B02-e1",
+        "productId": "fixture:B02",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/B02"
+      },
+      {
+        "id": "B02-e2",
+        "productId": "fixture:B02",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/B02"
+      },
+      {
+        "id": "B02-e3",
+        "productId": "fixture:B02",
+        "kind": "fixture",
+        "text": "适配清风分配器",
+        "sourceRef": "合成规则案例/B02"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "B02-e3",
+        "quote": "适配清风分配器",
+        "describes": "compatible"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "B02-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "B03",
+    "label": "供应商不能当品牌",
+    "kind": "synthetic",
+    "productId": "fixture:B03",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "B03-e1",
+        "productId": "fixture:B03",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/B03"
+      },
+      {
+        "id": "B03-e2",
+        "productId": "fixture:B03",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/B03"
+      },
+      {
+        "id": "B03-e3",
+        "productId": "fixture:B03",
+        "kind": "fixture",
+        "text": "供应商：维达",
+        "sourceRef": "合成规则案例/B03"
+      }
+    ],
+    "brands": [
+      {
+        "value": "维达",
+        "evidenceId": "B03-e3",
+        "quote": "供应商：维达",
+        "describes": "supplier"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "B03-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "B04",
+    "label": "国产不能当品牌",
+    "kind": "synthetic",
+    "productId": "fixture:B04",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "B04-e1",
+        "productId": "fixture:B04",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/B04"
+      },
+      {
+        "id": "B04-e2",
+        "productId": "fixture:B04",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/B04"
+      },
+      {
+        "id": "B04-e3",
+        "productId": "fixture:B04",
+        "kind": "fixture",
+        "text": "品牌字段：国产",
+        "sourceRef": "合成规则案例/B04"
+      }
+    ],
+    "brands": [
+      {
+        "value": "国产",
+        "evidenceId": "B04-e3",
+        "quote": "品牌字段：国产",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "B04-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "B05",
+    "label": "字典外品牌保留候选",
+    "kind": "synthetic",
+    "productId": "fixture:B05",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "B05-e1",
+        "productId": "fixture:B05",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/B05"
+      },
+      {
+        "id": "B05-e2",
+        "productId": "fixture:B05",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/B05"
+      },
+      {
+        "id": "B05-e3",
+        "productId": "fixture:B05",
+        "kind": "fixture",
+        "text": "商品自身品牌：示例新品牌",
+        "sourceRef": "合成规则案例/B05"
+      }
+    ],
+    "brands": [
+      {
+        "value": "示例新品牌",
+        "evidenceId": "B05-e3",
+        "quote": "商品自身品牌：示例新品牌",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "B05-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "B06",
+    "label": "同SKU自身品牌冲突",
+    "kind": "synthetic",
+    "productId": "fixture:B06",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "B06-e1",
+        "productId": "fixture:B06",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/B06"
+      },
+      {
+        "id": "B06-e2",
+        "productId": "fixture:B06",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/B06"
+      },
+      {
+        "id": "B06-e3",
+        "productId": "fixture:B06",
+        "kind": "fixture",
+        "text": "包装上的商品品牌：维达",
+        "sourceRef": "合成规则案例/B06"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "B06-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      },
+      {
+        "value": "维达",
+        "evidenceId": "B06-e3",
+        "quote": "包装上的商品品牌：维达",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "B06-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "B07",
+    "label": "缺品牌不自动无品牌",
+    "kind": "synthetic",
+    "productId": "fixture:B07",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "B07-e1",
+        "productId": "fixture:B07",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/B07"
+      },
+      {
+        "id": "B07-e2",
+        "productId": "fixture:B07",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/B07"
+      }
+    ],
+    "brands": [],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "B07-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "B08",
+    "label": "明确无品牌声明",
+    "kind": "synthetic",
+    "productId": "fixture:B08",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "B08-e1",
+        "productId": "fixture:B08",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/B08"
+      },
+      {
+        "id": "B08-e2",
+        "productId": "fixture:B08",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/B08"
+      },
+      {
+        "id": "B08-e3",
+        "productId": "fixture:B08",
+        "kind": "fixture",
+        "text": "本商品无品牌",
+        "sourceRef": "合成规则案例/B08"
+      }
+    ],
+    "brands": [],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "B08-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": [],
+    "unbranded": {
+      "value": true,
+      "evidenceId": "B08-e3",
+      "quote": "本商品无品牌"
+    }
+  },
+  {
+    "id": "B09",
+    "label": "自身品牌与适配品牌分开",
+    "kind": "synthetic",
+    "productId": "fixture:B09",
+    "categoryId": "1f96cac3-8498-4c32-936c-7a6a54b9320b",
+    "categoryBasis": "合成案例指定上下文，不代表真实商品",
+    "evidence": [
+      {
+        "id": "B09-e1",
+        "productId": "fixture:B09",
+        "kind": "fixture",
+        "text": "商品品牌：清风",
+        "sourceRef": "合成规则案例/B09"
+      },
+      {
+        "id": "B09-e2",
+        "productId": "fixture:B09",
+        "kind": "fixture",
+        "text": "50片/包；范围inner-pack",
+        "sourceRef": "合成规则案例/B09"
+      },
+      {
+        "id": "B09-e3",
+        "productId": "fixture:B09",
+        "kind": "fixture",
+        "text": "适配维达设备",
+        "sourceRef": "合成规则案例/B09"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "B09-e1",
+        "quote": "商品品牌：清风",
+        "describes": "self"
+      },
+      {
+        "value": "维达",
+        "evidenceId": "B09-e3",
+        "quote": "适配维达设备",
+        "describes": "compatible"
+      }
+    ],
+    "direct": [
+      {
+        "value": 50,
+        "evidenceId": "B09-e2",
+        "quote": "50片/包；范围inner-pack",
+        "unit": "片/包",
+        "scope": "inner-pack"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "H01",
+    "label": "清风x湿巾宝宝婴儿湿纸巾翻盖抽取式无刺激80片/包家用实惠装 4包/箱",
+    "kind": "historical",
+    "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+    "evidence": [
+      {
+        "id": "H1-e1",
+        "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+        "kind": "title",
+        "text": "清风x湿巾宝宝婴儿湿纸巾翻盖抽取式无刺激80片/包家用实惠装 4包/箱",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:477#title"
+      },
+      {
+        "id": "H1-e2",
+        "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+        "kind": "sale_spec",
+        "text": "抽纸",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:477#saleSpec"
+      },
+      {
+        "id": "H1-e3",
+        "productId": "cd2d7430-e65e-456a-b2e3-29f85dcd6d25",
+        "kind": "brand",
+        "text": "清风",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:477#brand"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "H1-e3",
+        "quote": "清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 80,
+        "unit": "片/包",
+        "scope": "inner-pack",
+        "evidenceId": "H1-e1",
+        "quote": "80片/包"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "H02",
+    "label": "清风 BWB80CX纯水湿纸巾80片/包*12 家庭清洁不含酒精 手口可用",
+    "kind": "historical",
+    "productId": "ce7185fe-73dd-4dd4-b646-dce296addead",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+    "evidence": [
+      {
+        "id": "H2-e1",
+        "productId": "ce7185fe-73dd-4dd4-b646-dce296addead",
+        "kind": "title",
+        "text": "清风 BWB80CX纯水湿纸巾80片/包*12 家庭清洁不含酒精 手口可用",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:177#title"
+      },
+      {
+        "id": "H2-e2",
+        "productId": "ce7185fe-73dd-4dd4-b646-dce296addead",
+        "kind": "sale_spec",
+        "text": "BWB80CX",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:177#saleSpec"
+      },
+      {
+        "id": "H2-e3",
+        "productId": "ce7185fe-73dd-4dd4-b646-dce296addead",
+        "kind": "brand",
+        "text": "清风",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:177#brand"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "H2-e3",
+        "quote": "清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 80,
+        "unit": "片/包",
+        "scope": "inner-pack",
+        "evidenceId": "H2-e1",
+        "quote": "80片/包"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "H03",
+    "label": "清风湿厕纸60片便携抽取式家庭装 6包装 BWBW60EX-6B",
+    "kind": "historical",
+    "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+    "evidence": [
+      {
+        "id": "H3-e1",
+        "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+        "kind": "title",
+        "text": "清风湿厕纸60片便携抽取式家庭装 6包装 BWBW60EX-6B",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:93#title"
+      },
+      {
+        "id": "H3-e2",
+        "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+        "kind": "sale_spec",
+        "text": "BWBW60EX-6B",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:93#saleSpec"
+      },
+      {
+        "id": "H3-e3",
+        "productId": "c2796b75-9f03-4bb9-a6d0-186a08882315",
+        "kind": "brand",
+        "text": "清风",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:93#brand"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "H3-e3",
+        "quote": "清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "H04",
+    "label": "清风纯水湿巾EDI带盖抽取式80抽宝宝手口婴儿专用卫生家庭实惠装 3包",
+    "kind": "historical",
+    "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+    "evidence": [
+      {
+        "id": "H4-e1",
+        "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+        "kind": "title",
+        "text": "清风纯水湿巾EDI带盖抽取式80抽宝宝手口婴儿专用卫生家庭实惠装 3包",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:299#title"
+      },
+      {
+        "id": "H4-e2",
+        "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+        "kind": "sale_spec",
+        "text": "3包",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:299#saleSpec"
+      },
+      {
+        "id": "H4-e3",
+        "productId": "cf0278b1-0d71-4535-b9d0-61fd69309ea9",
+        "kind": "brand",
+        "text": "清风",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:299#brand"
+      }
+    ],
+    "brands": [
+      {
+        "value": "清风",
+        "evidenceId": "H4-e3",
+        "quote": "清风",
+        "describes": "self"
+      }
+    ],
+    "direct": [],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "H05",
+    "label": "全棉时代婴儿湿巾70片/包*3包 新生儿宝宝手口专用带盖湿纸巾",
+    "kind": "historical",
+    "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+    "evidence": [
+      {
+        "id": "H5-e1",
+        "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+        "kind": "title",
+        "text": "全棉时代婴儿湿巾70片/包*3包 新生儿宝宝手口专用带盖湿纸巾",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:420#title"
+      },
+      {
+        "id": "H5-e2",
+        "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+        "kind": "sale_spec",
+        "text": "湿巾",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:420#saleSpec"
+      },
+      {
+        "id": "H5-e3",
+        "productId": "e4322449-6d18-4cc6-ba82-47ab783ceb68",
+        "kind": "brand",
+        "text": "全棉时代（PurCotton）",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:420#brand"
+      }
+    ],
+    "brands": [
+      {
+        "value": "全棉时代（PurCotton）",
+        "evidenceId": "H5-e3",
+        "quote": "全棉时代（PurCotton）",
+        "describes": "self"
+      }
+    ],
+    "direct": [
+      {
+        "value": 70,
+        "unit": "片/包",
+        "scope": "inner-pack",
+        "evidenceId": "H5-e1",
+        "quote": "70片/包"
+      }
+    ],
+    "totals": [],
+    "packs": []
+  },
+  {
+    "id": "H06",
+    "label": "舒克兔婴儿手口柔湿巾",
+    "kind": "historical",
+    "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+    "categoryId": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+    "categoryBasis": "2026-10-14历史归属复核建议；本轮只验证两个属性，未重新进行全量归属审核。",
+    "evidence": [
+      {
+        "id": "H6-e1",
+        "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+        "kind": "title",
+        "text": "舒克兔婴儿手口柔湿巾",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:61#title"
+      },
+      {
+        "id": "H6-e2",
+        "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+        "kind": "sale_spec",
+        "text": "",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:61#saleSpec"
+      },
+      {
+        "id": "H6-e3",
+        "productId": "d60c6257-4213-48db-8573-d99c1f56c937",
+        "kind": "brand",
+        "text": "国产",
+        "sourceRef": "scratch-attribute-eval/es-details.jsonl:61#brand"
+      }
+    ],
+    "brands": [
+      {
+        "value": "国产",
+        "evidenceId": "H6-e3",
+        "quote": "国产",
+        "describes": "self"
+      }
+    ],
+    "direct": [],
+    "totals": [],
+    "packs": []
+  }
+]

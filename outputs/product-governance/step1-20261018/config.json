@@ -1,0 +1,38 @@
+{
+  "schema": "product-governance-pilot-v1",
+  "maxExternalCalls": 8,
+  "models": [
+    {
+      "id": "deepseek",
+      "adapter": "deepseek_catalog",
+      "provider": "deepseek",
+      "model": "flash",
+      "family": "deepseek",
+      "timeoutMs": 90000,
+      "maxOutputTokens": 5200,
+      "maxInputChars": 60000,
+      "maxCalls": 4,
+      "maxUsd": 0.3,
+      "price": {
+        "input": 0.3,
+        "output": 1.2,
+        "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+        "checkedAt": "2026-10-18",
+        "note": "按峰时、输入缓存未命中估算上界，实际账单以平台为准。"
+      }
+    },
+    {
+      "id": "kimi",
+      "adapter": "kimi_cli",
+      "provider": "kimi-code",
+      "model": "kimi-code/kimi-for-coding",
+      "family": "kimi",
+      "timeoutMs": 180000,
+      "maxOutputTokens": 5200,
+      "maxInputChars": 60000,
+      "maxCalls": 4,
+      "maxUsd": null,
+      "billing": "现有订阅，CLI不提供可靠逐次费用；记录调用次数与耗时，maxOutputTokens不支持硬限制。"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "status": "failed",
+  "model": {
+    "id": "kimi",
+    "adapter": "kimi_cli",
+    "provider": "kimi-code",
+    "model": "kimi-code/kimi-for-coding",
+    "family": "kimi",
+    "timeoutMs": 180000,
+    "maxOutputTokens": 5200,
+    "maxInputChars": 60000,
+    "maxCalls": 4,
+    "maxUsd": null,
+    "billing": "现有订阅，CLI不提供可靠逐次费用；记录调用次数与耗时，maxOutputTokens不支持硬限制。"
+  },
+  "requestHash": "2cf87f234ef272b708a1c5e831439620fd71546df0232df51c843578a4854069",
+  "stage": "review-r1",
+  "startedAt": "2026-10-18T15:35:43.742Z",
+  "completedAt": "2026-10-18T15:38:43.995Z",
+  "error": "Kimi退出码143；stderr未进入报告，避免记录会话内部信息",
+  "actualVersionKnown": false
+}

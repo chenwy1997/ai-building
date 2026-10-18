@@ -1,0 +1,20 @@
+{
+  "revision": "r2",
+  "attributes": 2,
+  "bindings": 4,
+  "syntheticCases": 29,
+  "syntheticChecks": 29,
+  "passed": 29,
+  "historicalProducts": 6,
+  "historicalApplicableSlots": 12,
+  "historicalFilledSlots": 8,
+  "completedCalls": 5,
+  "failedCalls": 2,
+  "reviewModels": [
+    "deepseek",
+    "kimi"
+  ],
+  "productionAccuracy": null,
+  "productionWrites": false,
+  "adjudicationStatus": "pilot_accepted_with_limits"
+}

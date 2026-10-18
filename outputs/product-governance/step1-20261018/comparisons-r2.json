@@ -1,0 +1,461 @@
+[
+  {
+    "caseId": "Q02",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "filled",
+      "value": 50
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "Q02",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "filled",
+        "value": 50,
+        "reason": "同范围同规格且赠品明确，200÷4=50正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "Q02",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "filled",
+        "value": 50,
+        "reason": "同范围同规格赠品明确，200÷4=50推导正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "Q04",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "needs_evidence",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "Q04",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "明确混合规格，不得取平均，留缺项正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "Q04",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "异规格混合禁平均，退回补证正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "Q05",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "needs_evidence",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "Q05",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "赠品边界声明缺失，不能推导，留缺项正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "Q05",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "赠品排除未声明，推导前提不足"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "Q07",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "conflict",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "Q07",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "conflict",
+        "value": null,
+        "reason": "直接50与推导60冲突，不择一写入正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "Q07",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "conflict",
+        "value": null,
+        "reason": "直接50与推导60冲突，保留双方不取舍正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "Q09",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "needs_evidence",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "Q09",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "80抽不自动换算为片，留缺项正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "Q09",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "80抽单位非片，不自动换算正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "Q15",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "not_applicable",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "Q15",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "not_applicable",
+        "value": null,
+        "reason": "纸巾盒类目未挂载该属性，正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "Q15",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "not_applicable",
+        "value": null,
+        "reason": "纸巾盒未挂载本属性，不适用正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "Q16",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "invalid",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "Q16",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "invalid",
+        "value": null,
+        "reason": "观察值500未出现在引用原文，拒绝正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "Q16",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "invalid",
+        "value": null,
+        "reason": "500未出现于引用原文，拒绝伪造正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "Q17",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "needs_evidence",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "Q17",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "直接值scope为carton非inner-pack，留缺项正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "Q17",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "直接值scope为carton非内包装，缺证据正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "B02",
+    "attributeId": "common.brand",
+    "engine": {
+      "status": "needs_evidence",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "B02",
+        "attributeId": "common.brand",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "仅有适配品牌，无自身品牌证据，正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "B02",
+        "attributeId": "common.brand",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "适配品牌非自身品牌，缺自身证据正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "B04",
+    "attributeId": "common.brand",
+    "engine": {
+      "status": "needs_evidence",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "B04",
+        "attributeId": "common.brand",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "“国产”为占位值，不代替品牌，正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "B04",
+        "attributeId": "common.brand",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "国产为占位词非品牌，剔除正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "B05",
+    "attributeId": "common.brand",
+    "engine": {
+      "status": "enum_candidate",
+      "value": "示例新品牌"
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "B05",
+        "attributeId": "common.brand",
+        "status": "enum_candidate",
+        "value": "示例新品牌",
+        "reason": "证据明确但字典外，保留候选正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "B05",
+        "attributeId": "common.brand",
+        "status": "enum_candidate",
+        "value": "示例新品牌",
+        "reason": "证据明确但字典外，保留候选正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "B08",
+    "attributeId": "common.brand",
+    "engine": {
+      "status": "filled",
+      "value": "无品牌"
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "B08",
+        "attributeId": "common.brand",
+        "status": "filled",
+        "value": "无品牌",
+        "reason": "明确无品牌声明且有证据，正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "B08",
+        "attributeId": "common.brand",
+        "status": "filled",
+        "value": "无品牌",
+        "reason": "明确无品牌声明且字典有对应选项，正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "H01",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "filled",
+      "value": 80
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "H01",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "filled",
+        "value": 80,
+        "reason": "标题明确80片/包，直接值正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "H01",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "filled",
+        "value": 80,
+        "reason": "标题明示80片/包，演示取值正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "H03",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "needs_evidence",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "H03",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "仅60片与6包装，抽片口径未明，留缺项合理。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "H03",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "无定位观察故缺证据；补60片/包观察可取60"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "H04",
+    "attributeId": "wet_wipes.pieces_per_pack",
+    "engine": {
+      "status": "needs_evidence",
+      "value": null
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "H04",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "80抽非片，且无单包片数，留缺项合理。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "H04",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "80抽非片且无数量观察，缺证据正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "H05",
+    "attributeId": "common.brand",
+    "engine": {
+      "status": "filled",
+      "value": "全棉时代"
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "H05",
+        "attributeId": "common.brand",
+        "status": "filled",
+        "value": "全棉时代",
+        "reason": "精确别名归一，证据可定位，正确。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "H05",
+        "attributeId": "common.brand",
+        "status": "filled",
+        "value": "全棉时代",
+        "reason": "别名全棉时代（PurCotton）精确归一正确"
+      }
+    ],
+    "disagreement": false
+  },
+  {
+    "caseId": "H06",
+    "attributeId": "common.brand",
+    "engine": {
+      "status": "enum_candidate",
+      "value": "舒克兔"
+    },
+    "opinions": [
+      {
+        "modelId": "deepseek",
+        "caseId": "H06",
+        "attributeId": "common.brand",
+        "status": "conflict",
+        "value": null,
+        "reason": "占位值“国产”与标题词“舒克兔”并存，须先裁定自身品牌，不应直接输出候选。"
+      },
+      {
+        "modelId": "kimi",
+        "caseId": "H06",
+        "attributeId": "common.brand",
+        "status": "enum_candidate",
+        "value": "舒克兔",
+        "reason": "占位国产剔除，标题品牌字典外候选可接受"
+      }
+    ],
+    "disagreement": true
+  }
+]

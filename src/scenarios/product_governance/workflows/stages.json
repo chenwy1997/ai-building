@@ -1,0 +1,10 @@
+{
+ "independent_proposal":{"purpose":"独立形成属性候选","next":["draft_synthesis"]},
+ "draft_synthesis":{"purpose":"合并提案并解释取舍","next":["rule_evaluation"]},
+ "rule_evaluation":{"purpose":"按冻结标准计算并检查边界案例","next":["cross_review"]},
+ "cross_review":{"purpose":"独立评审属性草案与案例，登记分歧","next":["revision","adjudication"]},
+ "revision":{"purpose":"修订标准及规则，形成新版本重验","next":["rule_evaluation"]},
+ "adjudication":{"purpose":"Codex结合证据逐条裁定","next":["export_report","revision"]},
+ "export_report":{"purpose":"交付可审明细与流程记录","next":["operations_sampling"]},
+ "operations_sampling":{"purpose":"运营随机抽查，沉淀外部验证依据","next":["revision","expansion_decision"]}
+}

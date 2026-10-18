@@ -1,0 +1,17 @@
+{"stage":"prepared","status":"completed","standardHash":"76c67d633653d82b0677a60bae1a8665a40955ad279d765a72c5064201c25669","caseHash":"e5ba7f8b3888d58159f21cdd955209bf8cb1a2b7e4cd5c554f6892b5110668cb","at":"2026-10-18T15:30:31.460Z"}
+{"stage":"proposal","model":"kimi","status":"running","requestHash":"879372a2f597f4f35589cb8bcd1cd753327e91c508a43609e7d39ff84dc5ec96","at":"2026-10-18T15:30:35.543Z"}
+{"stage":"proposal","model":"deepseek","status":"running","requestHash":"d51f5bdbc9c2e14735846a91f05c3b226d027a100e90dd3f6ca08357e5d11417","at":"2026-10-18T15:30:35.543Z"}
+{"stage":"proposal","model":"deepseek","status":"completed","requestHash":"d51f5bdbc9c2e14735846a91f05c3b226d027a100e90dd3f6ca08357e5d11417","at":"2026-10-18T15:30:41.515Z"}
+{"stage":"proposal","model":"kimi","status":"failed","requestHash":"879372a2f597f4f35589cb8bcd1cd753327e91c508a43609e7d39ff84dc5ec96","at":"2026-10-18T15:31:35.097Z"}
+{"stage":"proposal-repair","model":"kimi","status":"running","requestHash":"9070118dab9419b61534842d3454410f2eb599ab2ce306bff4af22ccd6468c51","at":"2026-10-18T15:33:46.272Z"}
+{"stage":"proposal-repair","model":"kimi","status":"completed","requestHash":"9070118dab9419b61534842d3454410f2eb599ab2ce306bff4af22ccd6468c51","at":"2026-10-18T15:35:32.749Z"}
+{"stage":"review-r1","model":"kimi","status":"running","requestHash":"2cf87f234ef272b708a1c5e831439620fd71546df0232df51c843578a4854069","at":"2026-10-18T15:35:43.742Z"}
+{"stage":"review-r1","model":"deepseek","status":"running","requestHash":"08857cd19805bd2f230c73b375dbac263d63d374eee974f0a5a839061db16d54","at":"2026-10-18T15:35:43.742Z"}
+{"stage":"review-r1","model":"deepseek","status":"completed","requestHash":"08857cd19805bd2f230c73b375dbac263d63d374eee974f0a5a839061db16d54","at":"2026-10-18T15:35:50.056Z"}
+{"stage":"review-r1","model":"kimi","status":"failed","requestHash":"2cf87f234ef272b708a1c5e831439620fd71546df0232df51c843578a4854069","at":"2026-10-18T15:38:43.995Z"}
+{"stage":"review-r2","model":"kimi","status":"running","requestHash":"87062e7f835eb0769a53e25e7c7e91628da50351dfa08a53246cb02bc11d8f35","at":"2026-10-18T15:39:34.267Z"}
+{"stage":"review-r2","model":"deepseek","status":"running","requestHash":"bbaf071fe59ddb6f644d8891d007b4bb83e4beacc2e809a36a48700e60a67808","at":"2026-10-18T15:39:34.267Z"}
+{"stage":"review-r2","model":"deepseek","status":"completed","requestHash":"bbaf071fe59ddb6f644d8891d007b4bb83e4beacc2e809a36a48700e60a67808","at":"2026-10-18T15:39:42.646Z"}
+{"stage":"review-r2","model":"kimi","status":"completed","requestHash":"87062e7f835eb0769a53e25e7c7e91628da50351dfa08a53246cb02bc11d8f35","at":"2026-10-18T15:44:02.781Z"}
+{"stage":"adjudication","status":"completed","authority":"Codex","standardHash":"d67180f4667fa23dd7023c4f7c7ffbfd56c16823e2f392fa82e9fff87491a907","resultsHash":"175ef7fc645b204a1f5b4103a9f3130d3d6df2bdd4667ada01ae66d6bcb57e3e","at":"2026-10-18T15:46:38.915Z"}
+{"stage":"export_report","status":"completed","path":"/Users/sanheng/Project/cwy/ai-building/outputs/product-governance/step1-20261018/品牌与每包片数_首步治理结果.html","revision":"r2","at":"2026-10-18T15:50:08.342Z"}

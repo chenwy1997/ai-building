@@ -1,0 +1,291 @@
+{
+  "status": "completed",
+  "model": {
+    "id": "deepseek",
+    "adapter": "deepseek_catalog",
+    "provider": "deepseek",
+    "model": "flash",
+    "family": "deepseek",
+    "timeoutMs": 90000,
+    "maxOutputTokens": 5200,
+    "maxInputChars": 60000,
+    "maxCalls": 4,
+    "maxUsd": 0.3,
+    "price": {
+      "input": 0.3,
+      "output": 1.2,
+      "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "checkedAt": "2026-10-18",
+      "note": "按峰时、输入缓存未命中估算上界，实际账单以平台为准。"
+    }
+  },
+  "requestHash": "08857cd19805bd2f230c73b375dbac263d63d374eee974f0a5a839061db16d54",
+  "stage": "review-r1",
+  "startedAt": "2026-10-18T15:35:43.742Z",
+  "completedAt": "2026-10-18T15:35:50.054Z",
+  "content": {
+    "summary": "两属性草案总体可用，但存在若干需修订点：品牌字段类型与规则算子绑定、无品牌选项证据要求、湿巾片数对'抽/片'口径与混合包装的处理、以及部分案例规则结果与证据不一致。",
+    "checks": [
+      {
+        "attributeId": "common.brand",
+        "criteria": [
+          {
+            "criterionId": "relevance",
+            "verdict": "pass",
+            "reason": "适用于三类商品自身品牌，对象明确。"
+          },
+          {
+            "criterionId": "business_value",
+            "verdict": "pass",
+            "reason": "支持展示、搜索、筛选，价值明确。"
+          },
+          {
+            "criterionId": "semantics",
+            "verdict": "pass",
+            "reason": "区分自身品牌与适配、供应商、产地。"
+          },
+          {
+            "criterionId": "scope",
+            "verdict": "pass",
+            "reason": "SKU级、当前商品自身，口径清楚。"
+          },
+          {
+            "criterionId": "type_unit",
+            "verdict": "pass",
+            "reason": "选项类型无单位，符合字典归一。"
+          },
+          {
+            "criterionId": "requirement",
+            "verdict": "pass",
+            "reason": "未知留缺项，无品牌需明确声明。"
+          },
+          {
+            "criterionId": "enum",
+            "verdict": "uncertain",
+            "reason": "字典为试点参考，未验证生产ID，别名覆盖有限。"
+          },
+          {
+            "criterionId": "rule",
+            "verdict": "pass",
+            "reason": "前提含证据定位、自身品牌、冲突保留。"
+          },
+          {
+            "criterionId": "evidence",
+            "verdict": "pass",
+            "reason": "要求当前商品可定位原文，语义需复核。"
+          },
+          {
+            "criterionId": "consistency",
+            "verdict": "pass",
+            "reason": "三类目共用同一公共定义，无矛盾。"
+          }
+        ]
+      },
+      {
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "criteria": [
+          {
+            "criterionId": "relevance",
+            "verdict": "pass",
+            "reason": "仅挂湿纸巾类目，对象为单内包装。"
+          },
+          {
+            "criterionId": "business_value",
+            "verdict": "pass",
+            "reason": "支持规格比较、展示与筛选。"
+          },
+          {
+            "criterionId": "semantics",
+            "verdict": "pass",
+            "reason": "排除整箱总片数、层数、抽数、均值。"
+          },
+          {
+            "criterionId": "scope",
+            "verdict": "pass",
+            "reason": "SKU级、单个内包装、同销售范围明确。"
+          },
+          {
+            "criterionId": "type_unit",
+            "verdict": "pass",
+            "reason": "数值、片/包、正整数约束正确。"
+          },
+          {
+            "criterionId": "requirement",
+            "verdict": "pass",
+            "reason": "混合包需补组成，证据不足保持缺失。"
+          },
+          {
+            "criterionId": "enum",
+            "verdict": "pass",
+            "reason": "数值型无枚举，单位口径已限定。"
+          },
+          {
+            "criterionId": "rule",
+            "verdict": "uncertain",
+            "reason": "推导前提较严，但'抽=片'等同未在规则中约束。"
+          },
+          {
+            "criterionId": "evidence",
+            "verdict": "pass",
+            "reason": "要求可定位原文与范围标注。"
+          },
+          {
+            "criterionId": "consistency",
+            "verdict": "pass",
+            "reason": "仅湿纸巾挂载，与品牌定义无冲突。"
+          }
+        ]
+      }
+    ],
+    "findings": [
+      {
+        "id": "F01",
+        "attributeId": "common.brand",
+        "severity": "medium",
+        "issue": "品牌字典为试点参考，productionIdsVerified为false，别名覆盖有限，字典外品牌仅保留候选。",
+        "recommendation": "在发布前补充生产品牌映射与别名表，明确候选转正流程。"
+      },
+      {
+        "id": "F02",
+        "attributeId": "common.brand",
+        "severity": "low",
+        "issue": "无品牌选项依赖字典存在'无品牌'条目，缺失时仅返回候选，规则未规定补建流程。",
+        "recommendation": "在规则中明确无品牌选项缺失时的补建与审核路径。"
+      },
+      {
+        "id": "F03",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "severity": "medium",
+        "issue": "规则未明确'抽'与'片'在包装明示一致时可否等同，易被误填。",
+        "recommendation": "在preconditions中增加'抽/片口径须包装明示一致'的约束。"
+      },
+      {
+        "id": "F04",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "severity": "low",
+        "issue": "混合包装仅返回needs_evidence，未要求记录主规格或组成信息。",
+        "recommendation": "要求混合包补充组成信息字段，便于后续复核。"
+      },
+      {
+        "id": "F05",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "severity": "low",
+        "issue": "推导要求同scope，但未约束totals与packs的销售范围文本一致性判定方式。",
+        "recommendation": "明确scope比较采用规范化字符串，避免同义不同写导致误判。"
+      }
+    ],
+    "caseOpinions": [
+      {
+        "caseId": "Q02",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "filled",
+        "value": 50,
+        "reason": "同范围同规格且赠品明确，200÷4=50正确。"
+      },
+      {
+        "caseId": "Q04",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "明确混合规格，不能取平均，规则结果正确。"
+      },
+      {
+        "caseId": "Q05",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "缺giftsExcluded证据，无法推导，结果正确。"
+      },
+      {
+        "caseId": "Q07",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "conflict",
+        "value": null,
+        "reason": "直接50与推导60冲突，保留双方证据正确。"
+      },
+      {
+        "caseId": "Q09",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "抽与片不自动换算，结果正确。"
+      },
+      {
+        "caseId": "Q15",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "not_applicable",
+        "value": null,
+        "reason": "纸巾盒类目未挂载该属性，正确。"
+      },
+      {
+        "caseId": "B02",
+        "attributeId": "common.brand",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "仅有适配品牌，无自身品牌，正确。"
+      },
+      {
+        "caseId": "B04",
+        "attributeId": "common.brand",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "国产为占位符，不代替品牌，正确。"
+      },
+      {
+        "caseId": "B05",
+        "attributeId": "common.brand",
+        "status": "enum_candidate",
+        "value": "示例新品牌",
+        "reason": "字典外自身品牌，保留候选正确。"
+      },
+      {
+        "caseId": "B08",
+        "attributeId": "common.brand",
+        "status": "filled",
+        "value": "无品牌",
+        "reason": "明确无品牌声明，采用试点选项正确。"
+      },
+      {
+        "caseId": "H01",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "filled",
+        "value": 80,
+        "reason": "标题明示80片/包，直接值正确。"
+      },
+      {
+        "caseId": "H03",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "标题60片但未明示单包口径，需补证据。"
+      },
+      {
+        "caseId": "H04",
+        "attributeId": "wet_wipes.pieces_per_pack",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "仅80抽与3包，抽片未明示一致，需补证据。"
+      },
+      {
+        "caseId": "H06",
+        "attributeId": "common.brand",
+        "status": "needs_evidence",
+        "value": null,
+        "reason": "品牌字段为国产占位，无自身品牌证据。"
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 13411,
+    "completion_tokens": 1535,
+    "total_tokens": 14946,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 13411
+  },
+  "estimatedUsd": 0.0058652999999999995,
+  "responseModel": "deepseek-flash",
+  "actualVersionKnown": false
+}
