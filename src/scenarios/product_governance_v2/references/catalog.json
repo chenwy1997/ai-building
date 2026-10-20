@@ -1,0 +1,24 @@
+{
+  "version": "2026-10-20-local-reference-registration",
+  "sources": [
+    {
+      "id": "zkh-local-bd26f43247ede6f4",
+      "kind": "reference_dataset",
+      "platform": "震坤行（用户提供本地Excel）",
+      "originalPath": "/Users/sanheng/Downloads/震坤行类目属性案例模板.xlsx",
+      "fileSha256": "bd26f43247ede6f4ed4783fd2a9f75c4cd636f07fb9d3a5391ed11f9d3ec71a9",
+      "manifest": "outputs/product-governance-v2/reference-library/zkh/bd26f43247ede6f4/manifest.json",
+      "scopeReference": {
+        "sanhengCategoryId": "8ee638a9-2cd7-4bf4-ac31-536b6a3a1f5d",
+        "referenceTemplateId": "M45112",
+        "referenceCategoryPath": "杂品>清洁卫浴用品>卫生用品>清洁纸品",
+        "sheet": "1295分类模板",
+        "rows": [4184, 4185, 4186, 4187, 4188, 4189, 4190, 4191, 4192, 4193, 4194, 4195],
+        "relation": "清洁纸品纸类的上位参考，不与三横21个末级一一等同；纸巾盒等配件须单独判断。",
+        "knownLimitations": ["层数枚举有重复与范围重叠", "部分单选字段缺枚举值", "套装组合方式含洗护用品示例，不适合直接复用"]
+      },
+      "usageStatus": "已导入及人工核对；首轮三类的DeepSeek调用没有使用，后续作为新版本参考输入。",
+      "policy": "优先读取本地原表，不以网站抓取替代。此文件与三横旧21类答案不同，可用于从零建模。记录文件hash、Sheet、行号、模板编号与原始单元格；采纳需说明适用性，不能直接继承必填和枚举。"
+    }
+  ]
+}

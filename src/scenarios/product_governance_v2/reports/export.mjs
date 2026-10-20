@@ -15,6 +15,10 @@ const definitions=[
  ['Codex裁定',['末级类目','状态','抽查属性ID','裁定说明','遗留事项','属性卡哈希','审核时间'],data.decisions,[18,25,65,110,100,68,28]],
  ['调用成本',['请求ID','调用类型','业务阶段','状态','响应模型','输入Token','缓存命中Token','输出Token','思考Token','费用估算上界(元)','预留上界(元)','耗时(秒)','开始时间','完成时间'],data.calls,[70,18,22,20,35,17,19,17,17,22,22,17,28,28]],
 ];
+if(data.localReference){
+ definitions.splice(3,0,['本地模板采纳',['序号','类目ID','完整类目路径','末级类目','参考模板','参考属性','原表必填','原表类型','原表枚举/示例','最终处理','目标属性ID','处理理由','落地方式','来源Sheet','来源行','本地来源定位','DS初步处理','DS初步理由'],data.localReference,[8,40,48,18,16,22,14,14,80,18,60,100,100,22,12,100,18,100]]);
+ definitions.push(['共用规则',['规则ID','统一业务规则','程序检查及语义审核分工','规则版本'],data.sharedRules,[14,100,100,30]]);
+}
 for(const [name,headers,rows,widths] of definitions){
  const sh=wb.worksheets.add(name);sh.showGridLines=false;
  const end=rows.length+5,last=col(headers.length-1);
@@ -59,17 +63,25 @@ const notes=[
  ['本轮边界',`已完成${data.summary.categories}/${data.summary.targetCategories}类建模；其余${data.summary.targetCategories-data.summary.categories}类待扩展。`],
  ['样本口径',`每类从ES商品源随机抽10件在售商品。仅标题/规格及来源资料辅助建模；${data.summary.matchedSamples}件符合、${data.summary.wrongSamples}件错挂、${data.summary.uncertainSamples}件待确认。小样本比例不能外推为全类错挂率。`],
  ['纸巾盒限制','随机10件仅2件符合，仍需补正样本验证；不表示类目下无商品。'],
- ['来源说明','使用本轮实际检索网页、ES标题规格、DeepSeek候选和Codex裁定；未输入旧21类属性答案，本轮未读取震坤行词典。2个登录页不作为证据。'],
+ ['来源说明',data.summary.referenceReview?'已将本地《震坤行类目属性案例模板.xlsx》的M45112清洁纸品12个字段纳入三类DS复核及Codex裁定，合计36项采纳判断。每项保留原必填、类型、枚举、Sheet与行号。本轮未新增网页检索，未读取三横旧21类答案。':'震坤行来源为用户提供的本地《震坤行类目属性案例模板.xlsx》，非网站抓取。首轮三类模型调用漏接该文件；现已登记并核对1295分类模板第4184—4195行、M45112清洁纸品12个字段，待下一版本引用。首轮属性仍基于ES资料、网页、DS提议及Codex裁定；未输入三横旧属性答案。网页登录页与本地文件无关。'],
  ['审核说明','每类DS完整语义审核一次，后续定点修正。DS末轮意见已在Codex裁定/评审与修改页逐项处置；模型通过不等于准确率。'],
  ['输入Token',data.summary.inputTokens],['其中缓存命中Token',data.summary.cachedInputTokens],
  ['输入缓存命中率',null],
- ['下一步','将本轮公共定义、必填不可因缺证降级等裁定纳入下一标准版本，补充纸巾盒正样本，再铺满21类；沿用本轮累计预算。'],
+ ['下一步',data.summary.referenceReview?'本地参考复核及共用规则固化已完成，属性卡待运营审核。下一步补纸巾盒正样本、用新增组合规则检查真实商品，再扩其余18类；沿用累计预算。':'将本地震坤行M45112作为上位参考做差异复核，逐项判断适用性；同步固化共用规则、补纸巾盒正样本，再铺满21类。沿用累计预算，不把本次登记冒记为已进行模型审核。'],
 ];
 overview.getRange(`A${n+17}:B${n+25}`).values=notes;
 overview.getRange(`A${n+17}:B${n+25}`).format.wrapText=true;
 overview.getRange(`B${n+24}`).formulas=[[`=IFERROR(B${n+23}/B${n+22},0)`]];
 overview.getRange(`B${n+24}`).setNumberFormat('0.0%');
 for(let i=0;i<notes.length;i++)overview.getRange(`A${n+17+i}:B${n+17+i}`).format.rowHeight=typeof notes[i][1]==='string'?Math.max(36,Math.ceil(notes[i][1].length/18)*16):26;
+if(data.summary.referenceReview){
+ overview.getRange(`A${n+28}:B${n+33}`).values=[
+  ['本地模板判断总数',data.summary.referenceDecisions],['采纳',data.summary.adopted],['调整采纳',data.summary.adjusted],['不采纳为类目属性',data.summary.notAdopted],
+  ['本轮开始前累计费用(元)',data.summary.priorCostUpperEstimate],['本轮新增费用估算上界(元)',null]];
+ overview.getRange(`B${n+33}`).formulas=[[`=B${n+11}-B${n+32}`]];
+ overview.getRange(`B${n+32}:B${n+33}`).setNumberFormat('0.000000');
+ overview.getRange(`A${n+28}:B${n+33}`).format.rowHeight=28;
+}
 const cost=wb.worksheets.getItem('调用成本');if(cr){cost.getRange(`J6:K${cr+5}`).setNumberFormat('0.000000');cost.getRange(`L6:L${cr+5}`).setNumberFormat('0.0');}
 await fs.mkdir(path.join(run,'report-qa'),{recursive:true});
 wb.recalculate();
@@ -83,5 +95,11 @@ for(const [name] of definitions){
 }
 const notesPreview=await wb.render({sheetName:'建模总览',range:`A${n+17}:B${n+25}`,scale:1,format:'png'});
 await fs.writeFile(path.join(run,'report-qa','总览口径说明.png'),new Uint8Array(await notesPreview.arrayBuffer()));
+if(data.localReference){
+ for(const [name,range,label] of [['本地模板采纳','J5:M8','采纳理由'],['建模总览',`A${n+28}:B${n+33}`,'参考复核统计']]){
+  const preview=await wb.render({sheetName:name,range,scale:1,format:'png'});
+  await fs.writeFile(path.join(run,'report-qa',label+'.png'),new Uint8Array(await preview.arrayBuffer()));
+ }
+}
 await (await SpreadsheetFile.exportXlsx(wb)).save(out);
 console.log(JSON.stringify({output:out,sheets:definitions.length,attributes:data.cards.length,summary:summary.ndjson}));
