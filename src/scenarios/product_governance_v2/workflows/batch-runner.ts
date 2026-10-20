@@ -13,7 +13,17 @@ export async function runBatch(args:string[]){
  const root=resolve(opt('budget-run','outputs/product-governance-v2/clean-paper-20261020')),revision=opt('revision');
  if(!/^[a-zA-Z0-9_-]{1,80}$/.test(revision))throw Error('--revision is required (letters/digits/-/_)');
  const dir=join(root,'batches',revision),manifestFile=join(dir,'manifest.json');
- if(command==='batch-status'){console.log(JSON.stringify(await read(join(dir,'summary.json')),null,2));return;}
+ if(command==='batch-status'){
+  const summary=await read(join(dir,'summary.json')),statusFile=join(dir,'codex-adjudication','status.json');
+  if(await exists(statusFile)){
+   const adjudication=await read(statusFile),final=await read(join(dir,'codex-adjudication','final-card.json'));
+   const original=await read(join(dir,'categories',adjudication.categoryId,'result.json'));
+   if(hash(final.card)!==adjudication.finalCardHash||hash(original.card)!==adjudication.baseCandidateHash)
+    throw Error('adjudication hash mismatch');
+   summary.codexAdjudication=adjudication; // Keep the historical model pipeline state visible.
+  }
+  console.log(JSON.stringify(summary,null,2));return;
+ }
  const ids=opt('category-ids',opt('category-id')).split(',').map(x=>x.trim()).filter(Boolean);
  if(!ids.length)throw Error('--category-ids is required');
  const concurrency=concurrencyValue(opt('concurrency','32'));

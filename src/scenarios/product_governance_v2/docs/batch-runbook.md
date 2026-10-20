@@ -70,6 +70,8 @@ bun src/scenarios/product_governance_v2/cli.ts batch-status \
 
 另用盒装抽纸单类跑通新入口，新增14次调用、估算0.4604元，产生17项候选属性，程序检查通过，状态为待Codex裁定。原命令恢复新增调用为0。本次共估算1.2519元；费用为返回Token按账本高峰单价估算，不是供应商账单。
 
+后续裁定：该17项候选已经Codex逐项审查，保留4项、修订12项、移出交易主数据1项，补回2项遗漏及1项共同遗漏，独立形成19项待运营审核稿。详情见该批 `codex-adjudication/盒装抽纸候选属性裁定与旧卡对比.md`。`batch-status` 同时展示历史模型流程状态和经hash核对的Codex裁定状态，不覆盖原响应。旧、新初始完整卡请求实际均为none，此比较不是思考档位A/B。
+
 ## 输出与当前边界
 
 每批输出到 `<budget-run>/batches/<revision>/`：
