@@ -1,8 +1,8 @@
 import {join} from 'node:path';
 import {exists,hash,read,save,Ledger,tokenCost} from '../runtime/store.ts';
 import {validate,type Schema} from '../domain/meta.ts';
-import {parseOutput} from '../domain/normalize.ts';
-import {fixedPrefixInput} from './prefix.ts';
+import {parseOutput,normalizeModelKnowledgeQuotes} from '../domain/normalize.ts';
+import {fixedPrefixInput,layeredPrefixInput} from './prefix.ts';
 const ORIGIN='https://api.deepseek.com';
 /** REST only. No provider fallback and no credentials in persisted request bodies. */
 export class DeepSeek{
@@ -69,21 +69,25 @@ export class DeepSeek{
   }
   throw new Error('retry limit reached '+id);
  }
- async generate(stage:string,input:any,schema:Schema,maxTokens=14000,effort:'low'|'none'='low',options:{layout?:'legacy'|'fixed-prefix';reuseLegacy?:boolean}={}){
+ async generate(stage:string,input:any,schema:Schema,maxTokens=14000,effort:'low'|'none'='none',options:{layout?:'legacy'|'fixed-prefix'|'layered';reuseLegacy?:boolean}={}){
   const legacy={model:'deepseek-flash',instructions:this.instructions,input:JSON.stringify({stage,...input}),reasoning:{effort},max_output_tokens:maxTokens,
    text:{format:{type:'json_schema',name:'governance_'+stage.replace(/[^a-z0-9_]/gi,'_'),schema}}};
-  const prefix=fixedPrefixInput(stage,input);
+  const prefix=options.layout==='layered'?layeredPrefixInput(stage,input):fixedPrefixInput(stage,input);
   let body={...legacy,input:options.layout==='legacy'?legacy.input:prefix.text};
   // Layout optimization must not repay completed or unresolved historical requests.
   const legacyFolder=join(this.run,'calls',hash({path:'/responses',body:legacy}));
-  if(options.reuseLegacy!==false&&(await exists(join(legacyFolder,'response.json'))||await exists(join(legacyFolder,'attempt-0.json'))))body=legacy;
+  if(options.reuseLegacy!==false){
+   const v1={...legacy,input:fixedPrefixInput(stage,input).text},v1Folder=join(this.run,'calls',hash({path:'/responses',body:v1}));
+   if(await exists(join(legacyFolder,'response.json'))||await exists(join(legacyFolder,'attempt-0.json')))body=legacy;
+   else if(await exists(join(v1Folder,'response.json'))||await exists(join(v1Folder,'attempt-0.json')))body=v1;
+  }
   await save(join(this.run,'calls',hash({path:'/responses',body}),'layout.json'),{
-   version:body.input===legacy.input?'legacy':'fixed-prefix-v1',
+   version:body.input===legacy.input?'legacy':body.input===fixedPrefixInput(stage,input).text?'fixed-prefix-v1':'layered-v2',
    prefixHash:prefix.prefixHash,prefixCharacters:prefix.prefixCharacters,
   });
   let raw=await this.request('/responses',body,'responses');
   let effectiveBody=body;
-  if(raw.status==='incomplete'&&raw.incomplete_details?.reason==='max_output_tokens'){
+  if(effort!=='none'&&raw.status==='incomplete'&&raw.incomplete_details?.reason==='max_output_tokens'){
    // One explicit recovery for a known incomplete response. No retry of successful stages.
    effectiveBody={...body,reasoning:{effort:'none'}};
    const recovered=await this.request('/responses',effectiveBody,'responses');
@@ -109,6 +113,21 @@ export class DeepSeek{
    await save(join(this.run,'calls',hash({path:'/responses',body:effectiveBody}),'root-marker-normalization.json'),{
     inputHash:before,parsedHash:hash(parsed),rule:'remove undeclared root type=object schema marker only',stage,
    });
+  }
+  const claims=normalizeModelKnowledgeQuotes(parsed);
+  if(claims.changes.length){
+   await save(join(this.run,'calls',hash({path:'/responses',body:effectiveBody}),'model-claim-normalization.json'),{
+    originalHash:hash(parsed),normalizedHash:hash(claims.value),changes:claims.changes,
+    rule:'model-knowledge remains an unverified model proposal, never an external quote'});
+   parsed=claims.value;
+  }
+  if(schema.properties?.dimensions?.items?.properties?.candidates&&Array.isArray(parsed?.dimensions)){
+   const empty=parsed.dimensions.filter((d:any)=>Array.isArray(d.candidates)&&d.candidates.length===0);
+   if(empty.length){
+    await save(join(this.run,'calls',hash({path:'/responses',body:effectiveBody}),'empty-outline-groups.json'),{
+     originalHash:hash(parsed),removed:empty,rule:'omit empty candidate groups; public definitions remain in shared context; no attribute is added or deleted'});
+    parsed={...parsed,dimensions:parsed.dimensions.filter((d:any)=>!Array.isArray(d.candidates)||d.candidates.length>0)};
+   }
   }
   const errors=validate(schema,parsed);if(errors.length)throw new Error('schema: '+errors.slice(0,8).join(';'));
   return {value:parsed,responseModel:raw.model,callHash:hash({path:'/responses',body:effectiveBody}),responseId:raw.id};

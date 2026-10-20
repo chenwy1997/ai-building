@@ -3,6 +3,10 @@ import {mkdir,rm} from 'node:fs/promises';
 import {prepare,execute} from './workflows/attributes.ts';
 import {read,exists,save,now,hash} from './runtime/store.ts';
 const args=process.argv.slice(2),command=args.shift();
+if(command?.startsWith('batch-')){
+ const {runBatch}=await import('./workflows/batch-runner.ts');
+ await runBatch([command,...args]);process.exit(process.exitCode??0);
+}
 const opt=(key:string,fallback='')=>{const i=args.indexOf('--'+key);return i<0?fallback:args[i+1]??fallback;};
 const run=resolve(opt('run','outputs/product-governance-v2/clean-paper-20261020'));
 const id=opt('category-id'),phase=opt('phase','pilot');

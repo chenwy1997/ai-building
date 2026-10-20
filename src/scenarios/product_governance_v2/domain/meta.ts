@@ -32,7 +32,7 @@ export const outlineSchema=obj({
  dimensions:arr(obj({name:text,purpose:text,candidates:arr(obj({name:text,definition:text,fieldType:str('文本','数值','是否','选项','日期'),use:text,sourceIds:strings}),1)}),1),
  unresolved:strings,
 });
-export const findingSchema=obj({attributeId:text,criterion:str('遗漏','重复','适用性','必填','层级','单位口径','公式','枚举','来源','其他'),severity:str('high','medium','low'),issue:text,recommendation:text});
+export const findingSchema=obj({attributeId:text,criterion:str('名称','遗漏','重复','适用性','必填','层级','单位口径','公式','枚举','来源','其他'),severity:str('high','medium','low'),issue:text,recommendation:text});
 export const reviewSchema=obj({categoryId:text,verdict:str('pass','revise','uncertain'),summary:text,findings:arr(findingSchema)});
 export const repairSchema=obj({
  replacements:arr(obj({attribute:attributeSchema,binding:bindingSchema,rule:ruleSchema,provenance:obj({attributeId:text,claims:arr(sourceClaim,1)})})),
