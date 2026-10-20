@@ -39,7 +39,12 @@ for(const c of f.branch.filter((x:any)=>x.isLeaf)){
  if(c.name==='中心抽大卷纸'){for(const e of R('cat.rolls_per_case').examples)if(/6卷.*4提/.test(e.input))e.input+='，明确本SKU整箱销售';for(const e of R('cat.rolls_per_pack').examples)e.reason=e.reason.replace('无中间包装层级','未说明中间包装层级');}
  if(c.name==='平板卫生纸')patch('category.sheets_per_pack','350张/包×4包取350；100张×4包仅在语义明确前项为每包张数时取100，整箱共100张不能当每包100张。');
  if(c.name==='生活用纸'){B('paper.commercial_jumbo').scope='当前SKU的卷筒纸或盘纸';B('paper.total_rolls').rationale='当纸张形态为卷筒/盘纸且按卷计数时，销售总卷数用于采购数量比较；缺证计缺项，非卷状不适用。';patch('paper.roll_length','仅给整箱总长、节数或张数不直接当单卷长度，也不做未声明的推导。');}
- if(c.name==='一次性日杂'){B('pack.unit').requiredness='always';B('pack.unit').condition='';B('pack.unit').scope='当前SKU单件计数单位，与销售总数量配套；数值缺失不妨碍保留已知单位。';patch('pack.total_qty','按箱或包销售仍应记录单件总量；缺每包单件数为missing，不以外包装销售豁免。');}
+ if(c.name==='一次性日杂'){
+  B('pack.unit').requiredness='always';B('pack.unit').condition='';B('pack.unit').scope='当前SKU单件计数单位，与销售总数量配套；数值缺失不妨碍保留已知单位。';patch('pack.total_qty','按箱或包销售仍应记录单件总量；缺每包单件数为missing，不以外包装销售豁免。');
+  for(const x of d.sampleDecisions)if(x.status==='matched'){x.status='uncertain';x.reason='纸杯/纸盘主体可识别，但与V2餐具类目的承接边界待运营确认；不能先按一次性日杂已匹配统计。';}
+  d.sampleMatched=0;card.unresolved.push('8件纸杯/纸盘原模型matched改为待确认，本类无最终确认匹配样本；当前属性仅为纸基日用品候选范围建模。');
+  for(const p of card.provenance)if(p.claims.some((x:any)=>x.sourceId.startsWith('sample-'))){p.claims=p.claims.filter((x:any)=>!x.sourceId.startsWith('sample-'));p.claims.push({sourceId:'codex-r3-adjudication',relation:'提出',claim:'基于纸基日用品候选范围提出；实际纸杯纸盘归属待确认，不作为本类已验证商品证据。',quote:''});}
+ }
  if(c.name==='枕巾')patch('attr.package_form','箱装是外层容器描述；不能仅据该词把箱数充当包数或直接作为数量因子。');
  if(c.name==='大卷纸'){A('cat.roll.sales_unit').enumPolicy='单选当前SKU交易计价单位；枚举外原词作为候选。包装形式描述容器，不能据其换算数量。';}
  if(c.name==='大卷擦手纸'){R('cat.25f165b5.paper_roll_form').onMissing='unknown并计核心必填缺项，不因结构值缺失更改适用性。';B('cat.25f165b5.rolls_per_case').condition+=' 整箱证据可直接来自原始标题、规格或交易计价单位，不依赖属性字段先已填写。';}

@@ -10,7 +10,7 @@ const specs=[
  ['完整属性卡',['序号','类目ID','完整类目路径','末级类目','属性ID','属性名','公共/特性','建模维度','字段类型','单位','必填策略','触发条件','SKU/SPU','取值口径','属性定义','描述对象','用途','采用及必填理由','枚举值','枚举边界及扩充','排除含义','运营审核状态','运营意见'],d.cards,[8,40,48,18,35,28,18,22,13,28,14,75,12,75,85,50,24,85,70,90,60,20,60],5],
  ['规则与反例',['末级类目','类目ID','属性ID','属性名','直接填写规则','计算算子','计算公式','输入及口径','前提条件','缺失处理','冲突处理','合成正反例'],d.rules,[20,40,35,28,90,14,55,80,85,80,80,100],5],
  ['本地模板采纳',['序号','类目ID','完整类目路径','末级类目','参考模板','参考属性','原表必填','原表类型','原表枚举/示例','最终处理','目标属性ID','处理理由','落地说明','来源Sheet','来源行','本地来源定位'],d.references,[8,40,48,20,16,24,14,14,70,18,75,110,70,24,14,100],5],
- ['商品参考样本',['末级类目','类目ID','商品源ID','原始标题','销售规格','归属判断','判断理由','ES获取时间'],d.samples,[20,40,40,100,75,15,100,30],5],
+ ['商品参考样本',['末级类目','类目ID','商品源ID','原始标题','销售规格','归属判断','判断理由','ES获取时间UTC'],d.samples,[20,40,40,100,75,15,100,30],5],
  ['来源依据',['末级类目','属性ID','属性名','关系','主张','来源平台','来源类型','来源定位','原文引用','内容哈希'],d.sources,[20,35,28,12,95,30,25,95,100,70],5],
  ['审核与裁定',['末级类目','阶段','属性ID','模型意见或修改','模型建议','Codex处理','处理说明'],d.reviews,[20,25,35,110,100,110,85],5],
  ['规则回归',['末级类目','案例ID','属性ID','合成输入','预期','实际结果','结果','验证范围'],d.regression,[20,12,32,85,35,35,14,60],5],
@@ -66,7 +66,7 @@ await fs.writeFile(path.join(qa,'summary.json'),check.ndjson);
 const errors=await wb.inspect({kind:'match',searchTerm:'#REF!|#DIV/0!|#VALUE!|#NAME\\?|#NUM!|#SPILL!|#CALC!',options:{useRegex:true,maxResults:50},summary:'formula check'});
 await fs.writeFile(path.join(qa,'formula-errors.json'),errors.ndjson);
 for(const [name] of specs){
- if(process.env.QA_CHANGED_ONLY&&!['商品参考样本','调用成本'].includes(name))continue;
+ if(process.env.QA_CHANGED_ONLY&&!(process.env.QA_CHANGED_SHEETS??'商品参考样本,调用成本').split(',').includes(name))continue;
  const range=name==='治理总览'?'A1:J11':name==='口径与下一步'?'A1:B9':name==='调用成本'?'D5:L9':process.env.QA_CHANGED_ONLY?'F5:H8':'A1:F8';
  const preview=await wb.render({sheetName:name,range,scale:1,format:'png'});
  await fs.writeFile(path.join(qa,name+'.png'),new Uint8Array(await preview.arrayBuffer()));
