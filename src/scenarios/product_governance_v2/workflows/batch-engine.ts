@@ -5,7 +5,7 @@ import {checkCard,applyRepair} from '../domain/validate.ts';
 import {checkSharedRules} from '../domain/shared-rules.ts';
 import {normalizeSampleIds,normalizeModelKnowledgeQuotes} from '../domain/normalize.ts';
 import {obj,str,arr} from '../trial/contracts.ts';
-import {coverageIds,coverageSchema,checkCoverage,consistencySignals} from '../domain/quality-checks.ts';
+import {coverageIds,coverageSchema,checkCoverage,consistencySignals,conceptChecklist,conceptSchema,checkConceptCoverage} from '../domain/quality-checks.ts';
 export const commonSchema=obj({attributes:arr(attributeSchema),rules:arr(ruleSchema),provenance:cardSchema.properties!.provenance!,unresolved:arr(str())});
 export const compactCardSchema=obj({...cardSchema.properties!,sharedIds:arr(str())});
 export const referenceReviewSchema=obj({...reviewSchema.properties!,referenceDecisions:arr(obj({sourceId:str(),action:str('采纳','调整采纳','不采纳'),targetIds:arr(str()),reason:str()}))});
@@ -23,8 +23,9 @@ export function assembleCard(compact:any,common:any){
 type Call=(stage:string,input:any,schema:any,tokens:number)=>Promise<any>;
 /** One resumable modeling flow. Network, budget and frozen context supplied by the runner. */
 export async function batchEngine(dir:string,manifest:any,call:Call,concurrency:number){
- const quality=manifest.protocol==='batch-v2-quality';
- const reviewContract=quality?obj({...referenceReviewSchema.properties!,coverageChecks:coverageSchema}):referenceReviewSchema;
+ const concepts=manifest.protocol==='batch-v3-concepts';
+ const quality=concepts||manifest.protocol==='batch-v2-quality';
+ const reviewContract=quality?obj({...referenceReviewSchema.properties!,coverageChecks:coverageSchema,...(concepts?{conceptChecks:conceptSchema}:{})}):referenceReviewSchema;
  async function stage(folder:string,name:string,input:any,schema:any,tokens:number){
   if(input.sources&&input.sharedContext?.referenceSources){
    const sharedIds=new Set(input.sharedContext.referenceSources.map((s:any)=>s.id));
@@ -39,6 +40,7 @@ export async function batchEngine(dir:string,manifest:any,call:Call,concurrency:
  }
  const modelSource={id:'model-knowledge',kind:'model_knowledge',platform:'DeepSeek',locator:'calls原始请求与响应',text:'模型提出，外部出处未核验',hash:hash('model-knowledge'),retrievedAt:manifest.createdAt,mode:'proposal_only'};
  const sharedBase={candidates:manifest.contextNodes,referenceSources:manifest.references,validationPolicy:manifest.sharedPolicy??{},
+  ...(concepts?{conceptChecklist,conceptPolicy:'每个概念逐项判断业务适用性；这些是问题而非强制属性清单。已有数量+单位可以覆盖同一概念，不新增同义字段。层数不能代表原料。缺证不代表不适用。'}:{}),
   publicPolicy:'common.brand与common.model为本期优先公共定义；其他场景字段在类目内独立建模，同名不自动共享。'};
  let common=await stage(dir,'common_definitions',{sharedContext:sharedBase,sources:[modelSource,...manifest.references],
   task:'先提出common.brand品牌、common.model型号/货号两份完整公共定义、规则和来源；每组正反例明确为合成。其他属性留给类目内判断。绑定在各类目分别决定。只返回这两个ID且每组1:1；模型知识quote为空，不编造外部出处。'},commonSchema,5000);
@@ -124,13 +126,13 @@ export async function batchEngine(dir:string,manifest:any,call:Call,concurrency:
   let card=assembleCard(assembly,common);
   const check=(c:any)=>[...checkCard(c,category.id,evidence),...checkSharedRules(c)];
   let errors=check(card);
-  let signals=quality?consistencySignals(card):[],coverageErrors:string[]=[];
+  let signals=quality?consistencySignals(card,concepts):[],coverageErrors:string[]=[];
   let review=await stage(folder,'review',{...base,card,sources:evidence,programErrors:errors,sharedEchoes,
    ...(quality?{coverageRequired:coverageIds,consistencySignals:signals,sampleCoverage:{total:raw.length,matched:matched.size},
     qualityTask:'按标准10逐组返回coverageChecks，covered引用现有属性，not_applicable说明业务理由，unresolved同步列findings；不能有层数就声称原料维度完整。核对枚举/例子、抽/张和提/箱、SKU绑定及缺证三态；零明确正样本需记录验证限制，不伪称商品验证通过。'}:{}),
    task:'对本类完整语义审核一次，检查命名、遗漏、枚举、口径、核心必填、来源与相邻边界。referenceDecisions对sources中每个reference_dataset恰好一条适用性判断，目标ID存在，不适用写原因。避免仅润色导致返工。'},reviewContract,6000);
-  let coverageChecks=review.coverageChecks;
-  if(quality)coverageErrors=checkCoverage(review,card);
+  let coverageChecks=review.coverageChecks,conceptChecks=review.conceptChecks;
+  if(quality)coverageErrors=[...checkCoverage(review,card),...(concepts?checkConceptCoverage(review,card):[])];
   const extras=review.referenceDecisions.filter((x:any)=>x.sourceId==='model-knowledge');
   if(extras.length)await save(join(folder,'reference-decisions-extra.json'),{extras,reason:'model proposal is retained separately; it is not a local reference row'});
   const decisions=review.referenceDecisions.filter((x:any)=>x.sourceId!=='model-knowledge');
@@ -156,16 +158,18 @@ export async function batchEngine(dir:string,manifest:any,call:Call,concurrency:
    if(hash(extracted)!==sharedHash)throw Error('repair attempted shared definition change');
    card=candidate;errors=check(card);
    const changedIds=patch.replacements.map((r:any)=>r.attribute.id);
-   if(quality)signals=consistencySignals(card);
+   if(quality)signals=consistencySignals(card,concepts);
    review=await stage(folder,'recheck'+round,{...base,card,sources:evidence,changedIds,removedIds:patch.removeIds,
+    ...(concepts?{previousConceptChecks:conceptChecks,conceptTask:'逐概念保留未改决策，仅更新变更及依赖的引用；needs_attribute须修复或给业务不适用理由，不能靠总维度covered掩盖遗漏。'}:{}),
     ...(quality?{previousCoverage:coverageChecks,coverageRequired:coverageIds,consistencySignals:signals,
      qualityTask:'同步六组coverageChecks的有效属性引用与状态；未变组沿用已有理由，仅重验变更及依赖。语义线索不机械采纳，核对对象/条件后给理由。'}:{}),
-    previousFindings:review.findings,programErrors:errors,task:'仅重验变更项和依赖，已解决的问题关闭，未改项不重新全审。未解决保留；不将证据缺失认定为属性不需要。'},quality?obj({...reviewSchema.properties!,coverageChecks:coverageSchema}):reviewSchema,quality?5000:3500);
-   if(quality){coverageChecks=review.coverageChecks;coverageErrors=checkCoverage(review,card);}
+    previousFindings:review.findings,programErrors:errors,task:'仅重验变更项和依赖，已解决的问题关闭，未改项不重新全审。未解决保留；不将证据缺失认定为属性不需要。'},quality?obj({...reviewSchema.properties!,coverageChecks:coverageSchema,...(concepts?{conceptChecks:conceptSchema}:{})}):reviewSchema,quality?5000:3500);
+   if(quality){coverageChecks=review.coverageChecks;conceptChecks=review.conceptChecks;coverageErrors=[...checkCoverage(review,card),...(concepts?checkConceptCoverage(review,card):[])];}
    history.push({stage:'repair'+round,changedIds,errors,review});
   }
   await save(out,{category,card,cardHash:hash(card),standardHash:manifest.standardHash,
    status:errors.length?'blocked_program':review.findings.length||review.verdict!=='pass'||card.unresolved.length||common.unresolved.length||commonReview.findings.length||(quality&&(coverageErrors.length||signals.length||!matched.size))?'needs_codex_decision':'awaiting_codex_spotcheck',
+   ...(concepts?{conceptChecks}:{}),
    ...(quality?{coverageChecks,coverageErrors,consistencySignals:signals,validationLimitations:matched.size?[]:['无明确归属正样本，不能声称商品验证通过']}:{}),
    commonWarnings,sharedEchoes,programErrors:errors,review,referenceDecisions:decisions,history,sampleTotal:raw.length,sampleMatched:matched.size,sampleDecisions:outline.samples,sources:evidence});
  },{initial:concurrency,max:concurrency,auto:false});

@@ -4,7 +4,7 @@ import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {read} from '../runtime/store.ts';
-import {coverageIds} from '../domain/quality-checks.ts';
+import {coverageIds,conceptChecklist} from '../domain/quality-checks.ts';
 import {applyDirected} from '../workflows/directed-audit.ts';
 
 test('directed delta preserves baseline and rejects unauthorized changes and core downgrades',()=>{
@@ -18,7 +18,7 @@ test('directed delta preserves baseline and rejects unauthorized changes and cor
  expect(()=>applyDirected(card,{...patch,edits:[{attributeId:'x',group:'attributes',field:'id',valueJson:'"renamed"'}]},decision)).toThrow('invalid directed field');
 });
 
-test('existing-card audit never regenerates, applies scoped patch and resumes without calls',async()=>{
+for(const protocol of ['existing-audit-v1','existing-audit-v2-concepts'])test('existing-card audit never regenerates, applies scoped patch and resumes without calls '+protocol,async()=>{
  const dir=await mkdtemp(join(tmpdir(),'existing-audit-'));
  const a={id:'material',name:'材质',kind:'类目特性属性',definition:'本体原料',describes:'本体',fieldType:'文本',unit:'',excludedMeanings:[],enumValues:[],enumPolicy:''};
  const b={attributeId:a.id,requiredness:'optional',condition:'',valueLevel:'SKU',scope:'本商品',uses:['展示'],rationale:'材料差异'};
@@ -30,9 +30,18 @@ test('existing-card audit never regenerates, applies scoped patch and resumes wi
  const patch={replacements:[{attribute:{...a,definition:'配件本体的原料'},binding:b,rule:r,provenance:p}],removeIds:[],dimensions:card.dimensions,unresolved:[],changes:['限定本体']};
  expect(guardAuditPatch(card,patch,review)).toEqual([]);
  expect(guardAuditPatch(card,patch,{...review,findings:[]})).toContain('unreported field changed material');
- const m={protocol:'existing-audit-v1',standardHash:'fixed',categories:[{id:'c',name:'配件'}],entries:[{category:{id:'c',name:'配件'},card,sources:[{id:'model-knowledge',kind:'model_knowledge'}],sampleContext:{}}]};
+ expect(guardAuditPatch({...card,bindings:[{...b,requiredness:'always'}]},patch,review)).toContain('core downgrade material');
+ const m={protocol,standardHash:'fixed',categories:[{id:'c',name:'配件'}],entries:[{category:{id:'c',name:'配件'},card,sources:[{id:'model-knowledge',kind:'model_knowledge'}],sampleContext:{}}]};
  let calls=0;
- const call=async(stage:string)=>{calls++;return {value:stage==='existing_review'?review:stage==='existing_patch'?patch:{...review,verdict:'pass',findings:[]}};};
+ const call=async(stage:string,input:any)=>{
+  calls++;
+  if(protocol==='existing-audit-v2-concepts')expect(input.sharedContext.conceptChecklist).toHaveLength(12);
+  let value:any=stage==='existing_review'?{...review}:stage==='existing_patch'?patch:{...review,verdict:'pass',findings:[]};
+  if(protocol==='existing-audit-v2-concepts'&&stage!=='existing_patch')
+   value.conceptChecks=conceptChecklist.map(c=>({conceptId:c.id,status:c.id==='body_material'?'covered':'not_applicable',
+    attributeIds:c.id==='body_material'?['material']:[],reason:c.id==='body_material'?'明确本体材质':'本测试对象无此业务含义'}));
+  return {value};
+ };
  try{
   const result=await auditExisting(dir,m,call,32);expect(result.errors).toEqual([]);expect(calls).toBe(3);
   const out=await read(join(dir,'categories/c/result.json'));

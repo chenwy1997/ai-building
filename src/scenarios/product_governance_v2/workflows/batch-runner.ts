@@ -34,7 +34,7 @@ export async function runBatch(args:string[]){
   const {config}=await read(manifestFile);
   const requested={rootIds:[...new Set(ids)].sort(),sampleCount,samplesFrom:samplesFrom?resolve(samplesFrom):null};
   const frozen={rootIds:config.rootIds,sampleCount:config.sampleCount,samplesFrom:config.samplesFrom};
-  if(hash(requested)!==hash(frozen)||!['batch-v1-layered-v2','batch-v2-quality'].includes(config.protocol))
+  if(hash(requested)!==hash(frozen)||!['batch-v1-layered-v2','batch-v2-quality','batch-v3-concepts'].includes(config.protocol))
    throw Error('manifest frozen; use new revision for changed selection/sampling/protocol');
   // Resume with the saved tree, source text and standards, even when the latest files change.
  }else{
@@ -55,7 +55,7 @@ export async function runBatch(args:string[]){
  }
  const config={rootIds:[...new Set(ids)].sort(),treeHash:hash(tree),standardHash:hash(meta),standards:meta.standards,sharedPolicy:meta.sharedPolicy,
   contextNodes,categories,references,referenceByCategory,sampleCount,samplesFrom:samplesFrom?resolve(samplesFrom):null,
-  model:'deepseek-flash',effort:'none',protocol:'batch-v2-quality'};
+  model:'deepseek-flash',effort:'none',protocol:'batch-v3-concepts'};
  await save(manifestFile,{config,createdAt:now()});
  }
  const m=await read(manifestFile),manifest={...m.config,createdAt:m.createdAt};

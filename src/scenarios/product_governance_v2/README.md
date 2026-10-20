@@ -200,7 +200,7 @@ bun src/scenarios/product_governance_v2/reports/prepare-closure.ts <run>
 
 ```sh
 bun src/scenarios/product_governance_v2/cli.ts batch-audit-plan --revision remaining-review --category-ids <末级或父级ID列表> --concurrency 32
-bun src/scenarios/product_governance_v2/cli.ts batch-audit-run --revision remaining-review --category-ids <相同ID列表> --phase review --concurrency 32
+bun src/scenarios/product_governance_v2/cli.ts batch-audit-run --revision remaining-review --category-ids <相同ID列表> --phase all --concurrency 32
 bun src/scenarios/product_governance_v2/cli.ts batch-audit-repair --audit-dir <审核批次目录> --decisions <裁定方向JSON> --concurrency 32
 ```
 
@@ -208,6 +208,8 @@ bun src/scenarios/product_governance_v2/cli.ts batch-audit-repair --audit-dir <�
 - 修复命令读取明确的允许修改ID和允许新增ID，只返回字段差异；禁止删除原属性、修改公共定义和降低核心必填。
 - Codex裁定异常、必要新增与模型分歧；运营仍负责业务抽检。模型一致或程序通过均不代表准确率。
 - 每个阶段保存请求、原始响应及断点。重复执行跳过已有结果；失败只处理失败项。
-- 为控制耗时，先选择 `--phase review`，确定修复范围后执行字段补丁；不反复重写整卡。`--phase all` 保留为明确要求自动首修时的选项。
+- 新建批次采用 `batch-v3-concepts`，已有卡审核采用 `existing-audit-v2-concepts`：六组覆盖之外逐项判断12个独立概念，已覆盖、不适用或待补属性均给理由。不是每类强制新增12项。
+- 常规 `--phase all` 自动串联DeepSeek复核、范围受限的首修和变更重验，普通合格项进入抽检；残留异常才交Codex。`--phase review` 仅供明确要停在诊断结果时使用。`batch-audit-repair` 是异常裁定后的可选定点工具，不是每类的必经人工步骤。
+- 概念表并入原有请求，复用固定上下文；不为每个概念单独调用模型。新协议启用新增检查，历史冻结批次保持原协议与断点，不为标准升级重跑。
 - Excel同步只更新受影响属性及试填字段，保留其他类目、商品证据和运营意见；新增无证字段不伪填。
 

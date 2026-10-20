@@ -74,7 +74,7 @@ export async function directedAudit(dir:string,decisionsFile:string,concurrency=
   }
   const errors=[...checkCard(applied.card,entry.category.id,entry.sources),...checkSharedRules(applied.card)];
   await save(out,{category:entry.category,baseHash:hash(entry.card),card:applied.card,cardHash:hash(applied.card),sources:entry.sources,
-   changes:applied.changes,quoteCorrections,programErrors:errors,signals:consistencySignals(applied.card),unresolved:patch.unresolved,
+   changes:applied.changes,quoteCorrections,programErrors:errors,signals:consistencySignals(applied.card,m.protocol==='existing-audit-v2-concepts'),unresolved:patch.unresolved,
    decision:d,summary:patch.summary,status:'awaiting_codex_final'});
   console.log(JSON.stringify({category:entry.category.name,changes:applied.changes.length,attributes:applied.card.attributes.length,errors}));
  },{initial:concurrency,max:concurrency,auto:false});
