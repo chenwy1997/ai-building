@@ -35,3 +35,11 @@ test('402 stops subsequent requests without another provider call',()=>withClien
  let calls=0;globalThis.fetch=(async()=>{calls++;return Response.json({error:'no credit'},{status:402});}) as any;
  await expect(c.search('a')).rejects.toThrow('402');await expect(c.search('b')).rejects.toThrow('stopped');expect(calls).toBe(1);
 }));
+test('switching layout reuses historical completed requests unless benchmark explicitly opts out',()=>withClient(async c=>{
+ let calls=0;globalThis.fetch=(async()=>{calls++;return Response.json(completed());}) as any;
+ const input={card:{rules:['stable']},productId:'one'};
+ const old=await c.generate('fill',input,schema,100,'none',{layout:'legacy'});
+ const reused=await c.generate('fill',input,schema,100,'none');expect(reused.callHash).toBe(old.callHash);expect(calls).toBe(1);
+ const fresh=await c.generate('fill',input,schema,100,'none',{reuseLegacy:false});expect(fresh.callHash).not.toBe(old.callHash);expect(calls).toBe(2);
+ await c.generate('fill',input,schema,100,'none',{reuseLegacy:false});expect(calls).toBe(2);
+}));
