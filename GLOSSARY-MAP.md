@@ -3,6 +3,7 @@
 ## 业务上下文
 
 - [商品治理](./src/scenarios/product_governance/GLOSSARY.md)：统一类目属性标准，形成商品归属建议、属性值和可追溯的审核交付结果。
+- [商品治理 V2](./src/scenarios/product_governance_v2/GLOSSARY.md)：以 DeepSeek 批量执行、统一建模与分步检查重新探索属性治理方法；已完成首批三类建模试点。
 
 ## 与既有业务的关系
 
