@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "validation21-codex-review-v1",
+  "type": "object",
+  "required": ["products"],
+  "properties": {
+    "schema": {"const":"validation21-codex-review-v1"},
+    "reviewer": {"const":"Codex"},
+    "standardHash": {"type":"string"},
+    "products": {"type":"array","items":{"$ref":"#/$defs/product"}}
+  },
+  "$defs": {
+    "ref": {"type":"object","required":["evidenceId","quote"],"properties":{"evidenceId":{"type":"string","minLength":1},"quote":{"type":"string","minLength":1}}},
+    "field": {
+      "type":"object","required":["value","status","reason"],
+      "properties": {
+        "value": {}, "status":{"enum":["filled","needs_evidence","conflict","invalid","enum_candidate","not_applicable"]},
+        "unit":{"type":["string","null"]},"per":{"type":["string","null"]},"evidenceId":{"type":["string","null"]},"quote":{"type":["string","null"]},
+        "reason":{"type":"string","minLength":1},"calculation":{"type":["object","null"]},"weightScope":{"type":["string","null"]},"declarationEvidence":{"anyOf":[{"$ref":"#/$defs/ref"},{"type":"null"}]}
+      }
+    },
+    "product": {
+      "type":"object","required":["key","category","fields","conditionFacts","reviewNotes"],
+      "properties": {
+        "key":{"type":"string","pattern":"^C[0-9]{2}-[0-9]{2}$"},
+        "category":{"type":"object","required":["status","reason"],"properties":{"status":{"enum":["matched","wrong","uncertain"]},"targetId":{"type":["string","null"]},"targetName":{"type":["string","null"]},"targetConfirmed":{"type":"boolean"},"reason":{"type":"string","minLength":1}}},
+        "fields":{"type":"object","additionalProperties":{"$ref":"#/$defs/field"}},
+        "conditionFacts":{"type":"array","items":{"type":"object","required":["fact","value"],"properties":{"fact":{"type":"string"},"value":{"enum":[true,false,null,"unknown"]},"status":{"enum":["known","unknown","conflict"]},"evidenceId":{"type":["string","null"]},"quote":{"type":["string","null"]}}}},
+        "evidence":{"type":"array"},"visualEvidence":{"type":"array"},"imageVerified":{"type":"boolean"},
+        "ruleDecisions":{"type":"array","items":{"type":"object","required":["attributeId","code","decision","reason"],"properties":{"attributeId":{"type":"string"},"code":{"type":"string"},"decision":{"enum":["accepted","corrected"]},"reason":{"type":"string","minLength":8},"evidence":{"type":"array","items":{"$ref":"#/$defs/ref"}}}}},
+        "reviewNotes":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},"productHash":{"type":"string"},"standardHash":{"type":"string"}
+      }
+    }
+  }
+}

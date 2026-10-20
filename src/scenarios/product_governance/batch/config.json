@@ -1,0 +1,11 @@
+{
+  "runId":"three-category-20261019",
+  "seed":20261019,
+  "samplePerCategory":50,
+  "maxExternalCalls":50,
+  "models":[
+    {"id":"deepseek","adapter":"deepseek_catalog","provider":"deepseek","model":"flash","family":"deepseek","timeoutMs":150000,"maxOutputTokens":12000,"maxInputChars":140000,"maxCalls":30,"maxUsd":4,"price":{"input":0.3,"output":1.2,"source":"https://api-docs.deepseek.com/quick_start/pricing/","checkedAt":"2026-10-18"}},
+    {"id":"kimi","adapter":"kimi_cli","provider":"kimi-code","model":"kimi-code/kimi-for-coding","family":"kimi","timeoutMs":480000,"maxOutputTokens":12000,"maxInputChars":140000,"maxCalls":20,"maxUsd":null}
+  ],
+  "billingNote":"DeepSeek按既有价格上界估算，实际账单为准；Kimi使用既有CLI订阅，逐次费用及输出token硬上限不可获得。各模型串行记账。"
+}

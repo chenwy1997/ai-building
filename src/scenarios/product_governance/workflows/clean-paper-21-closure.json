@@ -1,0 +1,193 @@
+{
+  "schema": "product-governance-closure-plan-v1",
+  "confirmedOn": "2026-10-19",
+  "timezone": "Asia/Shanghai",
+  "scope": {
+    "level": 2,
+    "name": "清洁纸品",
+    "leafCategories": [
+      {
+        "id": "fd7a6576-b4bb-4ef0-a273-9de18cf571a2",
+        "name": "软包抽纸",
+        "path": "清洁用品>清洁纸品>卫生纸>软包抽纸"
+      },
+      {
+        "id": "c7e8d056-d834-4432-95a2-981e6e20e640",
+        "name": "盒装抽纸",
+        "path": "清洁用品>清洁纸品>卫生纸>盒装抽纸"
+      },
+      {
+        "id": "9fda0128-630c-4756-b26f-248e8fdc3db5",
+        "name": "有芯小卷纸",
+        "path": "清洁用品>清洁纸品>卫生纸>有芯小卷纸"
+      },
+      {
+        "id": "433be34e-e1cc-4b5f-b955-df3d802ed2ec",
+        "name": "湿纸巾",
+        "path": "清洁用品>清洁纸品>卫生纸>湿纸巾"
+      },
+      {
+        "id": "34f24759-db54-474a-9af5-2370c3b56e51",
+        "name": "中心抽大卷纸",
+        "path": "清洁用品>清洁纸品>卫生纸>中心抽大卷纸"
+      },
+      {
+        "id": "a23fbc6e-8400-4e14-8043-632364402001",
+        "name": "抽式擦手纸",
+        "path": "清洁用品>清洁纸品>擦手纸>抽式擦手纸"
+      },
+      {
+        "id": "9ec50fc0-a510-43f4-a1f3-1c86f6e1b0f7",
+        "name": "手帕纸",
+        "path": "清洁用品>清洁纸品>卫生纸>手帕纸"
+      },
+      {
+        "id": "511563d5-477d-4730-852e-58f9805dc522",
+        "name": "无芯小卷纸",
+        "path": "清洁用品>清洁纸品>卫生纸>无芯小卷纸"
+      },
+      {
+        "id": "69d8ff06-f670-4ca8-89e5-d6e1c497244f",
+        "name": "洗脸巾",
+        "path": "清洁用品>清洁纸品>卫生纸>洗脸巾"
+      },
+      {
+        "id": "eb42a48e-c62b-4f2c-87ea-ca27021c31b6",
+        "name": "餐巾纸",
+        "path": "清洁用品>清洁纸品>卫生纸>餐巾纸"
+      },
+      {
+        "id": "15c851c5-7435-4843-8df6-4bd61dd3c1d5",
+        "name": "厨房纸巾",
+        "path": "清洁用品>清洁纸品>卫生纸>厨房纸巾"
+      },
+      {
+        "id": "6ca63ad6-33b6-40a2-bf85-a5719a6dd32a",
+        "name": "大卷纸",
+        "path": "清洁用品>清洁纸品>卫生纸>大卷纸"
+      },
+      {
+        "id": "25f165b5-7ada-48c1-9c1e-337c6e0b11a2",
+        "name": "大卷擦手纸",
+        "path": "清洁用品>清洁纸品>擦手纸>大卷擦手纸"
+      },
+      {
+        "id": "1f96cac3-8498-4c32-936c-7a6a54b9320b",
+        "name": "纸巾盒",
+        "path": "清洁用品>清洁纸品>纸品配件>纸巾盒"
+      },
+      {
+        "id": "542a38bf-4f0a-4725-a0a3-455ebbe8a66c",
+        "name": "枕巾",
+        "path": "清洁用品>清洁纸品>卫生纸>枕巾"
+      },
+      {
+        "id": "ef61450e-4bfe-443e-a061-bb42c7d2b256",
+        "name": "坐垫纸",
+        "path": "清洁用品>清洁纸品>卫生纸>坐垫纸"
+      },
+      {
+        "id": "fab47077-a93f-4938-912f-1a05b60be7a8",
+        "name": "一次性日杂",
+        "path": "清洁用品>清洁纸品>卫生纸>一次性日杂"
+      },
+      {
+        "id": "a8e1db2a-732d-42e3-aeed-f76066c30060",
+        "name": "生活用纸",
+        "path": "清洁用品>清洁纸品>卫生纸>生活用纸"
+      },
+      {
+        "id": "91e53b72-a433-4f2c-ae15-78d00045f602",
+        "name": "平板卫生纸",
+        "path": "清洁用品>清洁纸品>卫生纸>平板卫生纸"
+      },
+      {
+        "id": "66d9c6c0-4e07-4c79-9fcb-ebff831d2763",
+        "name": "卷纸配件",
+        "path": "清洁用品>清洁纸品>纸品配件>卷纸配件"
+      },
+      {
+        "id": "817bd803-59b6-42df-993f-8f4f26851988",
+        "name": "擦手纸配件",
+        "path": "清洁用品>清洁纸品>纸品配件>擦手纸配件"
+      }
+    ],
+    "expandOutsideScope": false,
+    "outOfScopeMigrationTargets": "记录V2目标与迁移建议，不自动扩充属性治理范围"
+  },
+  "status": "cards-reviewed-product-regression-next",
+  "currentEvidence": {
+    "standard": "outputs/product-governance/clean-paper-21-revision-20261019/design/standard.json",
+    "latestTrial": "outputs/product-governance/clean-paper-five-20261019/analysis/final.json",
+    "operationsAudited": false,
+    "onlineAccepted": false,
+    "previousStandard": "outputs/product-governance/clean-paper-five-20261019/design/standard.json",
+    "standardStatus": "Codex终审离线候选；运营未审核",
+    "cardReview": "outputs/product-governance/clean-paper-21-revision-20261019/design/adjudication.json",
+    "regressionPlan": "outputs/product-governance/clean-paper-21-revision-20261019/regression-plan.json"
+  },
+  "steps": [
+    {
+      "id": "revise",
+      "name": "属性卡、边界、共用规则与震坤行逐项对照",
+      "status": "completed_offline"
+    },
+    {
+      "id": "review",
+      "name": "四模型独立审核属性卡与Codex裁定",
+      "status": "completed_offline",
+      "dependsOn": [
+        "revise"
+      ]
+    },
+    {
+      "id": "regress",
+      "name": "受影响历史商品按新版本重验",
+      "status": "planned",
+      "dependsOn": [
+        "review"
+      ]
+    },
+    {
+      "id": "coverage",
+      "name": "补齐21类内的验证覆盖及新样本",
+      "status": "planned",
+      "dependsOn": [
+        "regress"
+      ]
+    },
+    {
+      "id": "operations",
+      "name": "运营抽检、修复与复验",
+      "status": "planned",
+      "dependsOn": [
+        "coverage"
+      ]
+    },
+    {
+      "id": "online",
+      "name": "小范围线上同步、展示、搜索筛选及回滚验收",
+      "status": "planned",
+      "dependsOn": [
+        "operations"
+      ]
+    },
+    {
+      "id": "close",
+      "name": "21类闭环复盘",
+      "status": "planned",
+      "dependsOn": [
+        "online"
+      ]
+    }
+  ],
+  "rules": {
+    "freezeInFlightStandards": true,
+    "retainHistoricalResults": true,
+    "excludeWrongAndUncertainFromOriginalCategoryRates": true,
+    "modelConsensusIsAccuracy": false,
+    "thresholds": "根据运营抽检与业务验收确认，不预设任意通过率",
+    "productionExecution": "离线计划不触发生产写入；须先完成可审变更集和业务确认"
+  },
+  "revisionRun": "outputs/product-governance/clean-paper-21-revision-20261019"
+}

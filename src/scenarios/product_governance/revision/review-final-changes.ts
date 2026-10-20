@@ -1,0 +1,12 @@
+import {join} from 'node:path';
+import {read,save,digest} from '../runtime/storage.ts';
+import {AVAILABLE_MODELS,ROOT} from '../expansion/settings.ts';
+import {invoke} from '../expansion/model-run.ts';
+const RUN=join(ROOT,'outputs/product-governance/clean-paper-21-revision-20261019');
+const s:any=await read(join(RUN,'design/standard.json'));
+const ids=['paper.quantity','paper.count_unit','paper.inner_unit','hand.fold','hand.fold_original','paper.nominal_mass','paper.mass_basis','face.form','kitchen.form','paper.dispense','roll.length','pillow.sales_count','pillow.count_unit'];
+const cats=s.categories.filter((c:any)=>['软包抽纸','盒装抽纸','湿纸巾','抽式擦手纸','洗脸巾','厨房纸巾','纸巾盒','餐巾纸','坐垫纸'].includes(c.name));
+const payload={task:'独立复核Codex裁定后的关键修改：只指出这次补丁新增的真实阻断问题，不以缺数据为理由降低核心，不推测未给出的实现。最多3项。原模型意见不是权威。',standardHash:digest(s),boundaries:s.categories.map((c:any)=>({id:c.id,name:c.name,boundary:c.boundary})),changes:{count:'软包/盒装/湿巾由固定抽/片迁移为数量+原计数单位+内包装单位三元。层累计张不能当成品张，禁止按层数猜换算。',fold:'几何折型或厂商明确原称至少一个有证据即完成折叠信息；原称不等于已知几何或设备可兼容。',length:'厨房/洗脸卷式容量OR允许明确单卷长度，不以是否分节排除长度路线。',gate:'先确认归属；wrong/uncertain或目标未确认不计填充率。仅明确不适用排除槽位，条件未知仍待补。'},definitions:s.definitions.filter((d:any)=>ids.includes(d.id)),bindings:s.bindings.filter((b:any)=>cats.some((c:any)=>c.id===b.categoryId)&&ids.includes(b.attributeId)).map((b:any)=>({category:cats.find((c:any)=>c.id===b.categoryId).name,...b})),groups:s.requirementGroups,conditionFacts:s.conditionFactDefinitions,requirednessContract:s.requirednessContract,crossFieldRules:s.crossFieldRules,runtime:'事实须注册且有当前SKU原文或独立验证图片证据；三值逻辑。组成员不重复算独立核心，未选路径未知不阻断已完成适用路径。纯选填缺值不阻断必填全齐。标称质量不满足净纸重。',output:{standardHash:digest(s),overall:'pass|revise',issues:[{categoryId:'关联类目ID或shared',attributeId:'字段ID',severity:'high|medium|low',problem:'仅具体真实问题',proposedFix:'可执行修正'}],notes:[]},instruction:'只输出严格JSON。不能从类别名构造商品参数，不能使用多模型票数当准确率。'};
+await save(join(RUN,'design/final-changes-review.input.json'),payload);
+const result=await Promise.all(AVAILABLE_MODELS.map(async m=>{const r=await invoke('final-changes-review',{...m,maxCalls:12},payload,v=>v?.standardHash===digest(s)&&Array.isArray(v?.issues),RUN);return {model:m.id,completed:!!r,issues:r?.content.issues.length};}));
+console.log(JSON.stringify(result));
