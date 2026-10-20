@@ -147,3 +147,34 @@ bun src/scenarios/product_governance_v2/trial/supplement-and-review.ts <run> --c
 ```
 
 原始响应、验证失败、补丁及统计保存在`<run>/trial/cache-validation-v1/`；`summary.json`为机器可读对比。验证隔离区不作为正式填写结果，格式失败和残留冲突必须经后续裁定后才能交付。
+
+## 三类收口与21类属性建模（closure-r3）
+
+本轮只完成已授权的两个阶段：先处理原3类共用规则和隔离实验问题，再补齐18类属性卡。没有重跑历史整批商品填写，也没有执行生产同步。
+
+- `standards/07-trial-closure.md`固定单包/总量、独立计算输入、包装层级未知状态、多值选项、印花/压花、同品上下文与本地模板适用性规则。
+- 原3类共56条绑定，13个合成规则案例均有实际DeepSeek响应并通过预期检查。这不是商品准确率。
+- 新增18类各随机抽10件ES在售商品标题和规格用于建模。合并原30件参考快照，共210件。新旧真实商品试填仍保留在历史输出。
+- 21类最终339条属性绑定；公共定义统一，但类目特性ID按类目作用域区分。每类完成DeepSeek完整语义复核；后续仅修改和复核受影响部分。Codex裁定包含采纳、澄清和驳回模型误报，不能将模型一致视为验收通过。
+- 本地震坤行M45112上位模板12项×21类，共252项采纳判断，保留文件哈希、Sheet与行号。未向生成模型输入旧三横21类答案。
+- 枕巾、生活用纸、卷纸配件随机样本中没有确认匹配；另有低覆盖类目。属性候选已整理，枚举仍需有效商品补证。一次性日杂、生活用纸、枕巾、坐垫纸存在运营边界确认项，均未改V2树。
+- 本轮新增费用估算¥8.92636168，累计¥19.006674；原run的¥50账本不重置，包含失败与修复费用。新增输入缓存命中率38.87%，仅代表这一批实际请求。
+
+修订输出在`<run>/revisions/closure-r3/`。旧run冻结文件、旧卡和旧Excel不覆盖。`pilot-gate.json`只允许后续属性建模，**不代表商品验证、运营验收或线上发布通过**。修订的`final-cards.json`及各类`final.json`是当前交付快照；`finalFieldChanges`保留最后裁定前后字段差异。
+
+```bash
+# 以下入口按已确认流程依次运行；已有请求和结果从断点复用
+bun src/scenarios/product_governance_v2/workflows/close-pilot.ts <run>
+bun src/scenarios/product_governance_v2/workflows/finalize-closure.ts <run>
+bun src/scenarios/product_governance_v2/workflows/expand-attributes.ts <run> collect
+bun src/scenarios/product_governance_v2/workflows/expand-attributes.ts <run> run
+# 本轮隔离失败的修复与显式Codex裁定，不是通用自动业务裁判
+bun src/scenarios/product_governance_v2/workflows/recover-expansion.ts <run>
+bun src/scenarios/product_governance_v2/workflows/adjudicate-expansion.ts <run>
+bun src/scenarios/product_governance_v2/workflows/recheck-expansion.ts <run>
+bun src/scenarios/product_governance_v2/workflows/finalize-expansion.ts <run>
+bun src/scenarios/product_governance_v2/reports/prepare-closure.ts <run>
+# export-closure.mjs 通过桌面捆绑 @oai/artifact-tool 导出修订Excel
+```
+
+`domain/normalize-card.ts`只执行可追踪的格式修复：ID大小写、结构化引用、模型知识伪引文和已冻结公共规则。属性语义、必填与边界仍须显式裁定。不要将本轮人工裁定脚本直接套到未来不同类目或不同输入。
