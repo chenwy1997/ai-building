@@ -8,6 +8,7 @@ import {join} from 'node:path';
 import {save,read} from '../runtime/store.ts';
 import {validate} from '../domain/meta.ts';
 import {normalizeModelKnowledgeQuotes} from '../domain/normalize.ts';
+import {coverageIds,checkCoverage,consistencySignals} from '../domain/quality-checks.ts';
 test('layered shared context is lossless and invariant under task/category changes',()=>{
  const shared={reference:[{text:'原文 不能压缩 1.0',id:'a'}],units:['张','抽']};
  const a=layeredPrefixInput('outline',{sharedContext:shared,category:{id:'a'},value:null});
@@ -16,7 +17,7 @@ test('layered shared context is lossless and invariant under task/category chang
  expect(JSON.parse(a.text)).toEqual({sharedContext:shared,instance:{category:{id:'a'},value:null,stage:'outline'}});
  expect(governanceInstructions({b:'乙',a:'甲'})).toBe(governanceInstructions({a:'甲',b:'乙'}));
 });
-test('batch runs shared-first, category review/repair, isolates failures and resumes without replay',async()=>{
+for(const protocol of ['batch-v1-layered-v2','batch-v2-quality'])test('batch shared-first/review/repair/resume '+protocol,async()=>{
  const dir=await mkdtemp(join(tmpdir(),'governance-batch-'));
  const attr=(id:string,name:string)=>({id,name,kind:id.startsWith('common.')?'公共属性':'类目特性属性',definition:'明确的'+name,describes:'当前商品'+name,fieldType:'文本',unit:'',excludedMeanings:[],enumValues:[],enumPolicy:''});
  const rule=(id:string)=>({attributeId:id,directRule:'按原文',operator:'direct',inputs:[],formula:'',preconditions:[],onMissing:'缺失',onConflict:'待核',
@@ -24,7 +25,7 @@ test('batch runs shared-first, category review/repair, isolates failures and res
  const prov=(id:string)=>({attributeId:id,claims:[{sourceId:'model-knowledge',relation:'提出',claim:'业务候选',quote:''}]});
  const common={attributes:[attr('common.brand','品牌'),attr('common.model','型号/货号')],rules:['common.brand','common.model'].map(rule),provenance:['common.brand','common.model'].map(prov),unresolved:[]};
  const categories=['a','b'].map(id=>({id,parentId:'r',name:id,path:'r>'+id,isLeaf:true}));
- const manifest={standardHash:'frozen',createdAt:'2026-10-20',categories,contextNodes:categories,references:[],referenceByCategory:{}};
+ const manifest={protocol,standardHash:'frozen',createdAt:'2026-10-20',categories,contextNodes:categories,references:[],referenceByCategory:{}};
  const calls:string[]=[];let fail=true;
  try{
   for(const c of categories)await save(join(dir,'samples',c.id+'.json'),{queryFile:'raw',fetchedAt:'2026-10-20',products:[{id:'p'+c.id,title:'样本',saleSpec:'',detailStatusConflicts:[]}]});
@@ -43,6 +44,8 @@ test('batch runs shared-first, category review/repair, isolates failures and res
    else if(stage==='repair1')value={replacements:[{attribute:attr('local','产品参数'),binding:bindings[0],rule:rule('local'),provenance:prov('local')}],removeIds:[],
     dimensions:[{name:'识别',purpose:'区分',attributeIds:ids}],unresolved:[],changes:['明确参数名']};
    else value={categoryId:input.category.id,verdict:'pass',summary:'修复完成',findings:[]};
+   if(protocol==='batch-v2-quality'&&(stage==='review'||stage.startsWith('recheck')))
+    value.coverageChecks=coverageIds.map(checkId=>({checkId,status:'covered',attributeIds:['local'],reason:'测试夹具：当前属性覆盖'}));
    expect(validate(schema,value)).toEqual([]);
    return {value,callHash:stage};
   };
@@ -81,4 +84,18 @@ test('global warmed queue skips completed tasks and honors bound',async()=>{
   active++;max=Math.max(max,active);await Bun.sleep(2);active--;done.push(x);
  },3);
  expect(r.errors).toEqual([]);expect(r.skipped).toBe(1);expect(max).toBe(3);
+});
+test('quality checks flag contradictory examples and missing review dimensions without inventing fields',()=>{
+ const card={attributes:[{id:'fragrance',enumValues:['柠檬香'],unit:''},{id:'count',enumValues:[],unit:'包'},{id:'size',enumValues:[],unit:'mm'}],
+  bindings:[{attributeId:'count',requiredness:'conditional'}],
+  rules:[{attributeId:'fragrance',operator:'direct',examples:[{input:'柠檬香盒装纸',expected:'枚举外待确认'}]},
+   {attributeId:'count',operator:'multiply',preconditions:['可整除'],onMissing:'不必填',examples:[]},
+   {attributeId:'size',operator:'direct',preconditions:['不随原文换算'],examples:[]}]};
+ expect(consistencySignals(card).map(x=>x.code)).toEqual(['Q_ENUM_EXAMPLE','Q_MULTIPLY_DIVISION','Q_MISSING_APPLICABILITY','Q_UNIT_CONVERSION']);
+ expect(checkCoverage({coverageChecks:[]},card)).toContain('Q_COVERAGE: six unique review dimensions required');
+ expect(checkCoverage({coverageChecks:coverageIds.map(checkId=>({checkId,status:'covered',attributeIds:['invented'],reason:'x'}))},card)).toHaveLength(6);
+ card.rules[0]!.examples=[{input:'柠檬香盒装纸',expected:'柠檬香'}];
+ card.rules[1]!.preconditions=['乘法不要求可整除'];card.rules[1]!.onMissing='已知适用缺数量为missing';
+ card.rules[2]!.preconditions=['明确cm可换算mm'];
+ expect(consistencySignals(card)).toEqual([]);
 });

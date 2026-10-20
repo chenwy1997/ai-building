@@ -1,7 +1,8 @@
 """Explicit Codex decisions for the frozen 2026-10-20 box-tissue smoke.
 
 Offline only; not a reusable classifier or an automatic publication command.
-Original model outputs and the 21-category delivery remain immutable.
+Original model outputs and the frozen comparison baseline remain immutable.
+Later delivery is recorded separately in delivery-status.json.
 """
 import copy
 import hashlib
@@ -25,7 +26,9 @@ def save(name, x):
     (OUT / name).write_text(json.dumps(x, ensure_ascii=False, indent=2) + "\n")
 
 new = read(BATCH / "categories" / CID / "result.json")
-old = next(x for x in read(ROOT / "revisions/closure-r3/final-cards.json") if x["category"]["id"] == CID)
+baseline = OUT / "comparison-baseline.json"
+old = read(baseline) if baseline.exists() else next(
+    x for x in read(ROOT / "revisions/closure-r3/final-cards.json") if x["category"]["id"] == CID)
 assert digest(new["card"]) == "6b52ba9d3aa4696ce35b02e59bf7b3637c4af18554609a99e38e7e6a6ea92435"
 assert digest(old["card"]) == "5c4cbf1eb2c9558b8d19fdf497b7b2f25371abe64d66e0f5be47fed3ef6dd09a"
 card = copy.deepcopy(new["card"])
