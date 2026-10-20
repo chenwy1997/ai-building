@@ -3,6 +3,24 @@ import {mkdir,rm} from 'node:fs/promises';
 import {prepare,execute} from './workflows/attributes.ts';
 import {read,exists,save,now,hash} from './runtime/store.ts';
 const args=process.argv.slice(2),command=args.shift();
+if(command==='batch-audit-repair'){
+ const {directedAudit}=await import('./workflows/directed-audit.ts');
+ const opt=(k:string,d='')=>{const i=args.indexOf('--'+k);return i<0?d:args[i+1]??d;};
+ const dir=resolve(opt('audit-dir')),decisions=opt('decisions');
+ const concurrency=Number(opt('concurrency','32'));
+ if(!opt('audit-dir')||!decisions)throw Error('--audit-dir and --decisions required');
+ if(!Number.isInteger(concurrency)||concurrency<1||concurrency>2500)throw Error('invalid concurrency');
+ const scheduler=join(dir,'directed-scheduler.lock');await mkdir(scheduler);
+ try{
+  const result=await directedAudit(dir,resolve(decisions),concurrency);
+  if(result.errors.length)process.exitCode=1;
+ }finally{await rm(scheduler,{recursive:true});}
+ process.exit(process.exitCode??0);
+}
+if(command?.startsWith('batch-audit-')){
+ const {runExistingAudit}=await import('./workflows/existing-audit.ts');
+ await runExistingAudit([command,...args]);process.exit(process.exitCode??0);
+}
 if(command?.startsWith('batch-')){
  const {runBatch}=await import('./workflows/batch-runner.ts');
  await runBatch([command,...args]);process.exit(process.exitCode??0);

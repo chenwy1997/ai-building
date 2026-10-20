@@ -193,3 +193,21 @@ bun src/scenarios/product_governance_v2/reports/prepare-closure.ts <run>
 已实现：属性生成前读取每类10件ES在售商品标题/规格，先判断归属，仅将matched样本交给属性生成及语义复核；同时使用本地震坤行参考。此机制支持样本辅助建模，但尚未独立形成可计数、可追溯的枚举候选聚合表，不能声称已覆盖全部在售商品的属性取值。
 
 后续重点：按类目汇总符合归属的样本所体现的用途、形态、材质、计量层级和明确选项原文，记录代表商品与来源；据此发现缺失属性、枚举候选及口径冲突。只定点修改受影响属性卡，不重新逐商品填完整卡。仅因商品资料缺失，不取消有价值属性或降低核心必填；随机样本不能证明枚举穷尽。
+# 已有属性卡的批量复核
+
+已有卡走 `batch-audit-*`，不会调用属性重新生成阶段。默认并发上限32，关闭思考；
+实际并发不超过尚待处理的类目数，同一类目的复核与修复按依赖顺序执行。
+
+```sh
+bun src/scenarios/product_governance_v2/cli.ts batch-audit-plan --revision remaining-review --category-ids <末级或父级ID列表> --concurrency 32
+bun src/scenarios/product_governance_v2/cli.ts batch-audit-run --revision remaining-review --category-ids <相同ID列表> --phase review --concurrency 32
+bun src/scenarios/product_governance_v2/cli.ts batch-audit-repair --audit-dir <审核批次目录> --decisions <裁定方向JSON> --concurrency 32
+```
+
+- DeepSeek负责每类完整语义复核、提出遗漏和矛盾；程序检查类型、公式和六组覆盖记录。
+- 修复命令读取明确的允许修改ID和允许新增ID，只返回字段差异；禁止删除原属性、修改公共定义和降低核心必填。
+- Codex裁定异常、必要新增与模型分歧；运营仍负责业务抽检。模型一致或程序通过均不代表准确率。
+- 每个阶段保存请求、原始响应及断点。重复执行跳过已有结果；失败只处理失败项。
+- 为控制耗时，先选择 `--phase review`，确定修复范围后执行字段补丁；不反复重写整卡。`--phase all` 保留为明确要求自动首修时的选项。
+- Excel同步只更新受影响属性及试填字段，保留其他类目、商品证据和运营意见；新增无证字段不伪填。
+
