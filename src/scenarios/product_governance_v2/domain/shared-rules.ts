@@ -1,8 +1,16 @@
-import policy from '../standards/shared-policy.json';
-export {policy as sharedPolicy};
-export function checkSharedRules(card:any):string[]{
+import defaultPolicy from '../standards/shared-policy.json';
+export {defaultPolicy as sharedPolicy};
+export function checkSharedRules(card:any,policy:any=defaultPolicy):string[]{
  const errors:string[]=[],attrs=new Map<string,any>(card.attributes.map((a:any)=>[a.id,a])),bs=new Map<string,any>(card.bindings.map((b:any)=>[b.attributeId,b]));
  for(const id of policy.commonIds)if(!attrs.has(id)||attrs.get(id).kind!=='公共属性'||attrs.get(id).fieldType!=='文本')errors.push(`R01:${id}:shared text definition required`);
+ for(const a of card.attributes){
+  if(policy.commonDisplayNames&&a.kind==='公共属性'&&!policy.commonIds.includes(a.id))errors.push(`R10:${a.id}:public definition must be explicitly registered`);
+  const displayName=(policy.commonDisplayNames??{})[a.id];
+  if(displayName&&a.name&&a.name!==displayName)errors.push(`R09:${a.id}:display name must be ${displayName}`);
+  if((policy.skuBaseFieldNames??[]).includes(a.name))errors.push(`R10:${a.id}:sales unit belongs to skuBase.salesUnit, not category attributes`);
+ }
+ for(const b of card.bindings)if(policy.valueLevel&&b.valueLevel!==policy.valueLevel)errors.push(`R03:${b.attributeId}:must use SKU`);
+ for(const dim of card.dimensions??[])if((policy.dimensionAliases??{})[dim.name])errors.push(`R10:dimension ${dim.name}:use ${policy.dimensionAliases[dim.name]}`);
  // This is a protected minimum, not an exhaustive whitelist of required fields.
  for(const id of (policy.requiredByCategory as any)[card.categoryId]??[])if(bs.get(id)?.requiredness!=='always')errors.push(`R02:${id}:protected core must stay required`);
  for(const id of (policy.skuByCategory as any)[card.categoryId]??[])if(bs.has(id)&&bs.get(id).valueLevel!=='SKU')errors.push(`R03:${id}:must use SKU`);

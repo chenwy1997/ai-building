@@ -1,6 +1,17 @@
 {
-  "version": "2026-10-20-r2",
+  "version": "2026-10-21-r4",
+  "unitRoleProtocol": "unit-role-v1",
   "commonIds": ["common.brand", "common.model"],
+  "commonDisplayNames": {"common.brand":"品牌","common.model":"型号"},
+  "valueLevel": "SKU",
+  "skuBaseFieldNames": ["销售单位","交易单位","计价单位"],
+  "dimensionAliases": {
+    "尺寸":"尺寸规格","规格与尺寸":"尺寸规格","尺寸与规格":"尺寸规格","单张规格":"尺寸规格",
+    "包装计量":"包装与计量","包装与销售":"包装与计量","包装与销售形态":"包装与计量","组合销售":"包装与计量",
+    "材料结构":"材料与结构","材质与结构":"材料与结构",
+    "用途性能":"用途与性能","使用性能":"用途与性能",
+    "公共识别":"识别信息","公共标识":"识别信息","公共主数据":"识别信息","品牌与型号":"识别信息","识别与品牌":"识别信息","采购识别":"识别信息"
+  },
   "requiredByCategory": {
     "fd7a6576-b4bb-4ef0-a273-9de18cf571a2": ["common.brand", "sheets_per_pack", "total_packs", "ply_count"],
     "433be34e-e1cc-4b5f-b955-df3d802ed2ec": ["common.brand", "pieces_per_pack", "packs_per_sales_unit", "primary_use"],
@@ -14,11 +25,14 @@
   "rules": [
     {"id":"R01","rule":"公共定义统一，类目绑定独立；同名不同口径不合并。","check":"公共ID及字段类型检查；发布时registry检查共享定义内容一致"},
     {"id":"R02","rule":"核心必填不得因缺资料降级；条件必填只由业务适用性触发。","check":"保护已裁定核心字段；拦截以有资料/来源明示为适用条件；DS复核业务理由"},
-    {"id":"R03","rule":"包装数量、尺寸、香型等可随SKU变化的字段不能合并到SPU。","check":"已登记字段SKU绑定检查；新增字段由DS语义审核"},
+    {"id":"R03","rule":"当前阶段全部类目属性按SKU管理，包括品牌和型号。","check":"所有属性绑定valueLevel必须为SKU；兼容解析历史SPU记录"},
     {"id":"R04","rule":"其他是已知枚举外值；缺证为unknown；unknown不是false或零。","check":"拦截unknown/未知作为枚举值及反例中缺证落其他；语义复核补充"},
     {"id":"R05","rule":"总量、单包量、层数、张/抽/片必须分开；同质同范围有独立证据才能乘除，禁止循环派生。","check":"数量计算执行器检查证据范围、同质、赠品、直接证据和正整数；规则语义由DS/Codex复核"},
     {"id":"R06","rule":"纸品属性不传播到纸巾盒；材质不等于工艺，结构不等于用途，颜色不等于规格。","check":"纸巾盒不接纸品层数/香型等ID；新增语义由DS/Codex审核"},
     {"id":"R07","rule":"外部Excel按文件hash、Sheet、行号引用；必填、类型、枚举和示例均须适用性判断。","check":"快照hash与行号核验；12行逐类形成采纳矩阵；引用原文检查"},
-    {"id":"R08","rule":"模型通过不等于准确率；原记录保留，修改仅定点重验，沿用同一累计预算。","check":"版本快照、调用缓存、变更hash及同一ledger"}
+    {"id":"R08","rule":"模型通过不等于准确率；原记录保留，修改仅定点重验，沿用同一累计预算。","check":"版本快照、调用缓存、变更hash及同一ledger"},
+    {"id":"R09","rule":"展示名优先行业常用词；common.model名为型号，货号等原文标签放定义或别名。","check":"共享展示名检查；其他语义改名由DS提出并复核"},
+    {"id":"R10","rule":"公共属性须显式登记；销售单位归SKU基础信息；维度同义词归一。","check":"公共ID登记、基础字段边界与dimensionAliases检查"},
+    {"id":"R11","rule":"单位候选按交易、内容计数或固定计量逐项判断；必要配套单位保留。","check":"DS返回unitRoleDecisions，程序检查覆盖及数量字段引用；语义异常交Codex"}
   ]
 }

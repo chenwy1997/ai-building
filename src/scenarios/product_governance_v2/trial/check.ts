@@ -15,7 +15,12 @@ export function checkTrial(result:any,card:any,evidence:any[]):string[]{
    if(v.reasonCode!=='none')error('filled with missing reason');
    if(a.fieldType==='数值'&&(!/^-?\d+(\.\d+)?$/.test(v.value)||!Number.isFinite(Number(v.value))))error('numeric type');
    if(a.fieldType==='是否'&&!['true','false'].includes(v.value))error('boolean type');
-   if(a.fieldType==='选项'&&v.enumStatus!==(a.enumValues.includes(v.value)?'in':'out'))error('enum status mismatch');
+   if(a.fieldType==='选项'){
+    const multiple=!/单选|不允许多值|不可多选/.test(a.enumPolicy)&&/多值|多选|中文分号/.test(a.enumPolicy);
+    const values=multiple?v.value.split('；').map((s:string)=>s.trim()):[v.value];
+    const inside=values.every((s:string)=>s&&a.enumValues.includes(s));
+    if(v.enumStatus!==(inside?'in':'out'))error('enum status mismatch');
+   }
    if(a.fieldType!=='选项'&&v.enumStatus!=='not_enum')error('non enum status mismatch');
    const {operator,operands,formula}=v.calculation;
    if(operator!=='none'){

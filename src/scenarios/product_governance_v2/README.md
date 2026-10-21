@@ -1,6 +1,14 @@
 # 商品治理 V2：DeepSeek 批量属性建模
 
-当前状态：**已完成清洁纸品21类属性命名复核稿（346条绑定），同步103件小样本、1704条属性试填明细。小样本用于检查属性及枚举，尚不开展全量商品填写或填充率评估。**
+- [Codex独立审核大纲](reviewers/codex/审核大纲.md)：与DeepSeek执行上下文分开；先程序检查和差异摘要，再审异常、公共定义及抽查，集中返修并明确停止条件。`reviewers/codex/prepare-review.mjs`只生成离线审核包，不调用模型、不自动判通过。
+
+当前状态：**2026-10-21按业务反馈由官方DeepSeek修订清洁纸品21类，保留352条类目属性绑定，9条销售单位转SKU基础信息；保留103件小样本、1734条类目属性试填明细。交付23个Sheet的精简运营视图，完整建模和证据留在本地。**
+
+- [属性边界与运营交付](standards/11-attribute-boundaries-and-delivery.md)：公共定义登记、全SKU、销售单位归基础信息、同义维度、行业常用名称和统一排版。
+- 本轮输出：`outputs/product-governance-v2/clean-paper-review-layout-20261021/`。`ds-approved-cards.json`为DS产出及Codex异常裁定稿，`sku-base-fields.json`保留移出字段和45条原试填记录，`attribute-library.json`保留公共与类目定义。未改线上。
+- 模型执行 `business-feedback-run --cards-from <final-cards.json> --output <新目录> --concurrency 32`：固定规范和公共定义前置，类目返回紧凑补丁、复核基于原卡加有效变更，成功项断点复用。自动结果为候选，异常和抽查通过后再由`apply-business-feedback.ts`投影交付字段。
+- Excel使用`reports/export-business-review.mjs`与`review-layout.mjs`统一导出：15列属性卡、公共/特性紧跟属性名、分组浅色两级表头、15pt普通行；左侧冻结序号、完整类目路径、末级类目、属性ID、属性名，标准类目ID归入右侧“类目补充”。使用桌面捆绑artifact-tool；仅改排版不调用模型。
+- 新批量的单位角色检查由冻结的`unitRoleProtocol=unit-role-v1`开启：DeepSeek逐项返回交易/内容计数/固定计量的角色、配套数量ID及理由，程序检查覆盖和引用。关键词只提名候选，不决定删除；必要的内容计数单位保留。旧冻结批次不因新协议而重复调用。
 
 - [第一版架构基线与实施顺序](docs/architecture-draft.md)
 - [业务术语](GLOSSARY.md)

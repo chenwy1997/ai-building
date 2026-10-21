@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {Workbook,SpreadsheetFile} from '@oai/artifact-tool';
 const rev=path.resolve(process.argv[2]),d=JSON.parse(await fs.readFile(path.join(rev,'report-data.json'),'utf8'));
+const trial=await fs.readFile(path.join(rev,'trial-report.json'),'utf8').then(JSON.parse).catch(e=>{if(e.code==='ENOENT')return null;throw e;});
 const wb=Workbook.create(),qa=path.join(rev,'report-qa');
 const col=n=>{let s='';for(n++;n;n=Math.floor((n-1)/26))s=String.fromCharCode(65+(n-1)%26)+s;return s;};
 const safe=x=>typeof x==='string'&&/^[=+@]/.test(x)?"'"+x:x;
@@ -17,6 +18,20 @@ const specs=[
  ['调用成本',['请求ID','调用类型','状态','输入Token','缓存命中Token','输出Token','已发生费用估算(元)','未确定预留(元)','耗时(秒)','开始时间UTC','结束时间UTC','所属阶段'],d.calls,[70,18,20,18,20,18,24,24,18,30,30,18],5],
  ['口径与下一步',['项目','说明'],d.notes,[26,135],5],
 ];
+if(trial){
+ const detailHeaders=['序号','类目ID','完整类目路径','属性ID','属性名','商品源ID','商品标题','销售规格','必填策略','字段类型','单位','试填状态','试填值','原始值/候选','枚举状态','现有枚举','采纳来源','证据原文','计算公式','缺失主因','填写或排除说明','归属状态','建议V2目标路径','建议V2目标ID','目标状态','样本批次','总体分母','必填分母','已填写计数','必填已填计数','运营审核','运营意见','证据定位'];
+ const detailWidths=[8,40,48,35,26,40,95,65,14,13,26,18,35,60,20,70,28,100,55,30,100,22,65,40,35,30,15,15,15,18,20,55,90];
+ specs.unshift(
+  ['试填评估',['末级类目','明细商品数','纳入商品数','归属排除数','可适用项数','已填写项数','总体填充率','必填项数','必填已填数','必填填充率','不适用项数','枚举外已填','京东参与已填','条件未知项数'],trial.metrics,[22,16,16,16,18,18,18,18,18,18,18,18,20,20],5],
+  ...trial.sheets.map(x=>[x.name,detailHeaders,x.rows,detailWidths,5]),
+  ['缺失原因',['缺失主因','未填项数','占全部未填项','其中必填未填','占必填未填项'],trial.missing,[32,20,24,24,24],5],
+  ['商品试填裁定',['末级类目','商品源ID','商品标题','属性ID','原值或复核问题','最终值或处理','理由或建议'],trial.decisions,[22,40,90,35,105,105,105],5],
+ );
+ d.notes[0][1]='21类完整属性卡、按末级类目分Sheet的逐商品逐属性试填及评估。归属排除商品也列明原因，未纳入填充率。';
+ d.notes[1][1]='210件原参考样本加9件历史有效补充纸巾盒商品，共219件明细；按最终归属核对纳入。已有有效属性和京东证据复用，仅按新版卡补新字段及变化字段。';
+ d.notes[3][1]='纸巾盒Sheet已合并原10件随机样本与9件历史有效补充样本。历史有效证据复用，值按当前卡核对。';
+ d.notes[10][1]='运营抽检本次试填及枚举外候选，优先确认边界并补有效样本；修正属性口径后定点重验，不据本次填充率宣称准确率或直接同步生产。';
+}
 for(const [name,headers,rows,widths,start]of specs){
  const s=wb.worksheets.add(name),last=col(headers.length-1),end=start+rows.length;s.showGridLines=false;
  s.getRange(`A1:${last}${end+1}`).format.font={name:'Arial',size:11,color:'#243247'};
@@ -40,9 +55,32 @@ for(const [name,headers,rows,widths,start]of specs){
   s.freezePanes.freezeColumns(1);s.getRange(`V6:V${end}`).dataValidation={rule:{type:'list',values:['待运营审核','通过','需修改']}};
   s.getRange(`V6:W${end}`).format.fill='#FFF2CC';
  }
+ if(trial?.sheets.some(x=>x.name===name)&&rows.length){
+  s.freezePanes.freezeColumns(1);
+  s.getRange(`AE6:AE${end}`).dataValidation={rule:{type:'list',values:['待运营审核','通过','需修改']}};
+  s.getRange(`AE6:AF${end}`).format.fill='#FFF2CC';
+ }
+}
+if(trial){
+ const t=wb.worksheets.getItem('试填评估'),last=trial.metrics.length+5,total=last+2;
+ for(let i=0;i<trial.metrics.length;i++){
+  const row=i+6,name=trial.metrics[i][0],end=trial.sheets.find(x=>x.name===name).rows.length+5;
+  for(const [target,source]of [['E','AA'],['F','AC'],['H','AB'],['I','AD']])t.getRange(`${target}${row}`).formulas=[[`=SUM('${name}'!${source}6:${source}${end})`]];
+  t.getRange(`G${row}`).formulas=[[`=IF(E${row}=0,"n.a.",F${row}/E${row})`]];
+  t.getRange(`J${row}`).formulas=[[`=IF(H${row}=0,"n.a.",I${row}/H${row})`]];
+ }
+ t.getRange(`A${total}`).values=[['总体']];
+ for(const c of ['B','C','D','E','F','H','I','K','L','M','N'])t.getRange(`${c}${total}`).formulas=[[`=SUM(${c}6:${c}${last})`]];
+ t.getRange(`G${total}`).formulas=[[`=F${total}/E${total}`]];t.getRange(`J${total}`).formulas=[[`=I${total}/H${total}`]];
+ t.getRange(`G6:G${total}`).setNumberFormat('0.0%');t.getRange(`J6:J${total}`).setNumberFormat('0.0%');
+ t.mergeCells(`A${total+2}:H${total+4}`);t.getRange(`A${total+2}`).values=[[trial.summary.notes]];t.getRange(`A${total+2}:H${total+4}`).format={wrapText:true,verticalAlignment:'top',fill:'#FFF2CC'};
+ t.getRange(`A${total+6}:B${total+8}`).values=[['本次补明细新增费用估算(元)',trial.summary.incrementCost],['累计费用估算(元)',trial.summary.cumulativeCost],['直接复用未变属性值数',trial.summary.reusedAttributes]];
+ const m=wb.worksheets.getItem('缺失原因'),end=trial.missing.length+5;
+ for(let r=6;r<=end;r++){m.getRange(`C${r}`).formulas=[[`=IF(SUM(B6:B${end})=0,"n.a.",B${r}/SUM(B6:B${end}))`]];m.getRange(`E${r}`).formulas=[[`=IF(SUM(D6:D${end})=0,"n.a.",D${r}/SUM(D6:D${end}))`]];}
+ m.getRange(`C6:C${end}`).setNumberFormat('0.0%');m.getRange(`E6:E${end}`).setNumberFormat('0.0%');
 }
 const s=wb.worksheets.getItem('治理总览'),n=d.overview.length,costEnd=d.calls.length+5;
-s.mergeCells('A3:H3');s.getRange('A3').values=[['原3类规则收口后补齐18类。当前为属性建模审核稿，尚未开展新增18类商品批量试填。']];s.getRange('A3:H3').format.rowHeight=30;
+s.mergeCells('A3:H3');s.getRange('A3').values=[[trial?'21类属性卡及文本试填。按末级类目分Sheet，包含三横文字证据与已确认同品的京东补充。':'原3类规则收口后补齐18类。当前为属性建模审核稿，尚未开展新增18类商品批量试填。']];s.getRange('A3:H3').format.rowHeight=30;
 s.getRange('A5:B11').values=[['末级类目数',d.summary.categories],['属性绑定数',null],['参考商品样本数',null],['本轮新增费用估算(元)',null],['累计费用估算(元)',null],['累计预算上限(元)',d.summary.budget],['可用预算(元)',null]];
 s.getRange('B6').formulas=[[`=SUM(D15:D${n+14})`]];
 s.getRange('B7').formulas=[[`=SUM(G15:G${n+14})`]];
@@ -66,8 +104,9 @@ await fs.writeFile(path.join(qa,'summary.json'),check.ndjson);
 const errors=await wb.inspect({kind:'match',searchTerm:'#REF!|#DIV/0!|#VALUE!|#NAME\\?|#NUM!|#SPILL!|#CALC!',options:{useRegex:true,maxResults:50},summary:'formula check'});
 await fs.writeFile(path.join(qa,'formula-errors.json'),errors.ndjson);
 for(const [name] of specs){
+ if(process.env.QA_TRIAL_ONLY&&!trial?.sheets.some(x=>x.name===name)&&!['试填评估','缺失原因','商品试填裁定','治理总览','口径与下一步','调用成本'].includes(name))continue;
  if(process.env.QA_CHANGED_ONLY&&!(process.env.QA_CHANGED_SHEETS??'商品参考样本,调用成本').split(',').includes(name))continue;
- const range=name==='治理总览'?'A1:J11':name==='口径与下一步'?'A1:B9':name==='调用成本'?'D5:L9':process.env.QA_CHANGED_ONLY?'F5:H8':'A1:F8';
+ const range=trial?.sheets.some(x=>x.name===name)?'L5:O8':name==='试填评估'?`A5:J${trial.metrics.length+7}`:name==='治理总览'?'A1:J11':name==='口径与下一步'?'A1:B9':name==='调用成本'?'D5:L9':process.env.QA_CHANGED_ONLY?'F5:H8':'A1:F8';
  const preview=await wb.render({sheetName:name,range,scale:1,format:'png'});
  await fs.writeFile(path.join(qa,name+'.png'),new Uint8Array(await preview.arrayBuffer()));
 }

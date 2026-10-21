@@ -8,6 +8,7 @@ import {join} from 'node:path';
 import {save,read} from '../runtime/store.ts';
 import {validate} from '../domain/meta.ts';
 import {normalizeModelKnowledgeQuotes} from '../domain/normalize.ts';
+import {sharedPolicy} from '../domain/shared-rules.ts';
 import {coverageIds,checkCoverage,consistencySignals,conceptChecklist,checkConceptCoverage,repairReview} from '../domain/quality-checks.ts';
 test('layered shared context is lossless and invariant under task/category changes',()=>{
  const shared={reference:[{text:'原文 不能压缩 1.0',id:'a'}],units:['张','抽']};
@@ -17,15 +18,16 @@ test('layered shared context is lossless and invariant under task/category chang
  expect(JSON.parse(a.text)).toEqual({sharedContext:shared,instance:{category:{id:'a'},value:null,stage:'outline'}});
  expect(governanceInstructions({b:'乙',a:'甲'})).toBe(governanceInstructions({a:'甲',b:'乙'}));
 });
-for(const protocol of ['batch-v1-layered-v2','batch-v2-quality','batch-v3-concepts'])test('batch shared-first/review/repair/resume '+protocol,async()=>{
+for(const protocol of ['batch-v1-layered-v2','batch-v2-quality','batch-v3-concepts','batch-v3-concepts-unit-roles'])test('batch shared-first/review/repair/resume '+protocol,async()=>{
  const dir=await mkdtemp(join(tmpdir(),'governance-batch-'));
  const attr=(id:string,name:string)=>({id,name,kind:id.startsWith('common.')?'公共属性':'类目特性属性',definition:'明确的'+name,describes:'当前商品'+name,fieldType:'文本',unit:'',excludedMeanings:[],enumValues:[],enumPolicy:''});
  const rule=(id:string)=>({attributeId:id,directRule:'按原文',operator:'direct',inputs:[],formula:'',preconditions:[],onMissing:'缺失',onConflict:'待核',
   examples:[{input:'合成例：甲',expected:'甲',reason:'有原文'},{input:'合成例：无',expected:'缺失',reason:'无原文'}]});
  const prov=(id:string)=>({attributeId:id,claims:[{sourceId:'model-knowledge',relation:'提出',claim:'业务候选',quote:''}]});
- const common={attributes:[attr('common.brand','品牌'),attr('common.model','型号/货号')],rules:['common.brand','common.model'].map(rule),provenance:['common.brand','common.model'].map(prov),unresolved:[]};
+ const common={attributes:[attr('common.brand','品牌'),attr('common.model','型号')],rules:['common.brand','common.model'].map(rule),provenance:['common.brand','common.model'].map(prov),unresolved:[]};
  const categories=['a','b'].map(id=>({id,parentId:'r',name:id,path:'r>'+id,isLeaf:true}));
- const manifest={protocol,standardHash:'frozen',createdAt:'2026-10-20',categories,contextNodes:categories,references:[],referenceByCategory:{}};
+ const units=protocol==='batch-v3-concepts-unit-roles';
+ const manifest={protocol:units?'batch-v3-concepts':protocol,...(units?{sharedPolicy:{...sharedPolicy,unitRoleProtocol:'unit-role-v1'}}:{}),standardHash:'frozen',createdAt:'2026-10-20',categories,contextNodes:categories,references:[],referenceByCategory:{}};
  const calls:string[]=[];let fail=true;
  try{
   for(const c of categories)await save(join(dir,'samples',c.id+'.json'),{queryFile:'raw',fetchedAt:'2026-10-20',products:[{id:'p'+c.id,title:'样本',saleSpec:'',detailStatusConflicts:[]}]});
@@ -46,7 +48,7 @@ for(const protocol of ['batch-v1-layered-v2','batch-v2-quality','batch-v3-concep
    else value={categoryId:input.category.id,verdict:'pass',summary:'修复完成',findings:[]};
    if(protocol!=='batch-v1-layered-v2'&&(stage==='review'||stage.startsWith('recheck')))
     value.coverageChecks=coverageIds.map(checkId=>({checkId,status:'covered',attributeIds:['local'],reason:'测试夹具：当前属性覆盖'}));
-   if(protocol==='batch-v3-concepts'&&(stage==='review'||stage.startsWith('recheck'))){
+   if(protocol.startsWith('batch-v3-concepts')&&(stage==='review'||stage.startsWith('recheck'))){
     // A false overall pass must not suppress a declared concept omission.
     if(stage==='review'){value.verdict='pass';value.findings=[];}
     value.conceptChecks=conceptChecklist.map(c=>({conceptId:c.id,
@@ -54,6 +56,7 @@ for(const protocol of ['batch-v1-layered-v2','batch-v2-quality','batch-v3-concep
      attributeIds:c.id==='body_material'&&stage!=='review'?['local']:[],
      reason:c.id==='body_material'?'夹具的本体参数需要明确':'本测试对象没有该业务维度'}));
    }
+   if(units&&(stage==='review'||stage.startsWith('recheck')))value.unitRoleDecisions=[];
    expect(validate(schema,value)).toEqual([]);
    return {value,callHash:stage};
   };
@@ -65,6 +68,7 @@ for(const protocol of ['batch-v1-layered-v2','batch-v2-quality','batch-v3-concep
   expect(second.errors).toEqual([]);expect(second.completed).toBe(2);
   expect(calls.slice(before).every(c=>c.endsWith(':b'))).toBe(true);
   const result=await read(join(dir,'categories','a','result.json'));
+  if(units){expect(result.unitRoleDecisions).toEqual([]);expect(result.unitRoleErrors).toEqual([]);}
   expect(result.card.attributes.find((a:any)=>a.id==='local').name).toBe('产品参数');
   expect(result.card.attributes.find((a:any)=>a.id==='common.brand')).toEqual(common.attributes[0]);
   expect(()=>assembleCard({...result.card,sharedIds:['common.brand','common.model']},common)).toThrow('referenced');

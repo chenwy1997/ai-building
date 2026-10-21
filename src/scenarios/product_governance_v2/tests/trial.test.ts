@@ -13,3 +13,11 @@ test('trial values reject unsupported evidence, formula errors and fake enum cov
 test('text-only JD tool never imports image alt text or script contents',()=>{
  expect(productText('<p>尺寸10cm</p><img alt=\"红色\" src=\"x\"><script>材质PP</script>')).toBe('尺寸10cm');
 });
+test('multi-option validation follows the card and never treats a combined label as one enum',()=>{
+ const card={attributes:[{id:'use',fieldType:'选项',enumValues:['吸油','吸水'],enumPolicy:'多个用途用中文分号分隔'}],bindings:[{attributeId:'use',requiredness:'optional'}]};
+ const value={attributeId:'use',status:'filled',value:'吸油；吸水',enumStatus:'in',reasonCode:'none',evidence:[{id:'title',quote:'吸油吸水'}],calculation:{operator:'none',operands:[],formula:''}};
+ expect(checkTrial({values:[value]},card,[{id:'title',text:'吸油吸水'}])).toEqual([]);
+ expect(checkTrial({values:[{...value,value:'吸油；消毒'}]},card,[{id:'title',text:'吸油吸水'}]).join()).toContain('enum status mismatch');
+ card.attributes[0]!.enumPolicy='单选，不允许多值';
+ expect(checkTrial({values:[value]},card,[{id:'title',text:'吸油吸水'}]).join()).toContain('enum status mismatch');
+});

@@ -3,6 +3,14 @@ import {mkdir,rm} from 'node:fs/promises';
 import {prepare,execute} from './workflows/attributes.ts';
 import {read,exists,save,now,hash} from './runtime/store.ts';
 const args=process.argv.slice(2),command=args.shift();
+if(command==='business-feedback-run'){
+ const opt=(k:string,d='')=>{const i=args.indexOf('--'+k);return i<0?d:args[i+1]??d;};
+ const {concurrencyValue}=await import('./runtime/batch.ts');
+ const {runBusinessFeedback}=await import('./workflows/business-feedback.ts');
+ if(!opt('output')||!opt('cards-from'))throw Error('--output and --cards-from required');
+ await runBusinessFeedback(resolve(opt('output')),resolve(opt('cards-from')),resolve(opt('budget-run','outputs/product-governance-v2/clean-paper-20261020')),concurrencyValue(opt('concurrency','32')));
+ process.exit(0);
+}
 if(command==='batch-audit-repair'){
  const {directedAudit}=await import('./workflows/directed-audit.ts');
  const opt=(k:string,d='')=>{const i=args.indexOf('--'+k);return i<0?d:args[i+1]??d;};

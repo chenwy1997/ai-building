@@ -6,6 +6,7 @@ import {checkSharedRules} from '../domain/shared-rules.ts';
 import {normalizeSampleIds,normalizeModelKnowledgeQuotes} from '../domain/normalize.ts';
 import {obj,str,arr} from '../trial/contracts.ts';
 import {coverageIds,coverageSchema,checkCoverage,consistencySignals,conceptChecklist,conceptSchema,checkConceptCoverage} from '../domain/quality-checks.ts';
+import {unitRoleSchema,unitCandidates,checkUnitRoles} from '../domain/unit-roles.ts';
 export const commonSchema=obj({attributes:arr(attributeSchema),rules:arr(ruleSchema),provenance:cardSchema.properties!.provenance!,unresolved:arr(str())});
 export const compactCardSchema=obj({...cardSchema.properties!,sharedIds:arr(str())});
 export const referenceReviewSchema=obj({...reviewSchema.properties!,referenceDecisions:arr(obj({sourceId:str(),action:str('采纳','调整采纳','不采纳'),targetIds:arr(str()),reason:str()}))});
@@ -25,7 +26,9 @@ type Call=(stage:string,input:any,schema:any,tokens:number)=>Promise<any>;
 export async function batchEngine(dir:string,manifest:any,call:Call,concurrency:number){
  const concepts=manifest.protocol==='batch-v3-concepts';
  const quality=concepts||manifest.protocol==='batch-v2-quality';
- const reviewContract=quality?obj({...referenceReviewSchema.properties!,coverageChecks:coverageSchema,...(concepts?{conceptChecks:conceptSchema}:{})}):referenceReviewSchema;
+ const unitRolesEnabled=manifest.sharedPolicy?.unitRoleProtocol==='unit-role-v1';
+ const unitFields=unitRolesEnabled?{unitRoleDecisions:unitRoleSchema}:{};
+ const reviewContract=obj({...referenceReviewSchema.properties!,...(quality?{coverageChecks:coverageSchema,...(concepts?{conceptChecks:conceptSchema}:{})}:{}),...unitFields});
  async function stage(folder:string,name:string,input:any,schema:any,tokens:number){
   if(input.sources&&input.sharedContext?.referenceSources){
    const sharedIds=new Set(input.sharedContext.referenceSources.map((s:any)=>s.id));
@@ -43,13 +46,13 @@ export async function batchEngine(dir:string,manifest:any,call:Call,concurrency:
   ...(concepts?{conceptChecklist,conceptPolicy:'每个概念逐项判断业务适用性；这些是问题而非强制属性清单。已有数量+单位可以覆盖同一概念，不新增同义字段。层数不能代表原料。缺证不代表不适用。'}:{}),
   publicPolicy:'common.brand与common.model为本期优先公共定义；其他场景字段在类目内独立建模，同名不自动共享。'};
  let common=await stage(dir,'common_definitions',{sharedContext:sharedBase,sources:[modelSource,...manifest.references],
-  task:'先提出common.brand品牌、common.model型号/货号两份完整公共定义、规则和来源；每组正反例明确为合成。其他属性留给类目内判断。绑定在各类目分别决定。只返回这两个ID且每组1:1；模型知识quote为空，不编造外部出处。'},commonSchema,5000);
+  task:'先提出common.brand品牌、common.model型号两份完整公共定义、规则和来源；货号等原文标签放定义中，不把不同标识无条件等同。每组正反例明确为合成。其他属性留给类目内判断。绑定均为SKU。只返回这两个ID且每组1:1；模型知识quote为空，不编造外部出处。'},commonSchema,5000);
  function checkCommon(c:any){
   const ids=c.attributes.map((a:any)=>a.id).sort();
   if(hash(ids)!==hash(['common.brand','common.model']))return ['unexpected public definitions'];
-  const card={categoryId:'shared',boundary:{includes:'公共识别',excludes:[]},dimensions:[{name:'公共识别',purpose:'识别',attributeIds:ids}],
+  const card={categoryId:'shared',boundary:{includes:'公共识别',excludes:[]},dimensions:[{name:'识别信息',purpose:'识别',attributeIds:ids}],
    ...c,bindings:ids.map((attributeId:string)=>({attributeId,requiredness:'optional',condition:'',valueLevel:'SKU',scope:'各类目分别绑定',uses:['展示'],rationale:'公共识别'}))};
-  return [...checkCard(card,'shared',[modelSource,...manifest.references]),...checkSharedRules(card)];
+  return [...checkCard(card,'shared',[modelSource,...manifest.references]),...checkSharedRules(card,manifest.sharedPolicy)];
  }
  let commonErrors=checkCommon(common);
  let commonReview=await stage(dir,'common_review',{sharedContext:sharedBase,common,programErrors:commonErrors,
@@ -128,10 +131,12 @@ export async function batchEngine(dir:string,manifest:any,call:Call,concurrency:
   let errors=check(card);
   let signals=quality?consistencySignals(card,concepts):[],coverageErrors:string[]=[];
   let review=await stage(folder,'review',{...base,card,sources:evidence,programErrors:errors,sharedEchoes,
+   ...(unitRolesEnabled?{unitRoleCandidates:unitCandidates(card),unitRoleTask:'逐项返回单位候选的角色、真实配套数量ID和理由。不要按单位或销售字样删除；内容计数单位保留，真实交易单位才归SKU基础信息。对象限定仅在确有歧义时出现在名称，测量边界保留在定义。'}:{}),
    ...(quality?{coverageRequired:coverageIds,consistencySignals:signals,sampleCoverage:{total:raw.length,matched:matched.size},
     qualityTask:'按标准10逐组返回coverageChecks，covered引用现有属性，not_applicable说明业务理由，unresolved同步列findings；不能有层数就声称原料维度完整。核对枚举/例子、抽/张和提/箱、SKU绑定及缺证三态；零明确正样本需记录验证限制，不伪称商品验证通过。'}:{}),
    task:'对本类完整语义审核一次，检查命名、遗漏、枚举、口径、核心必填、来源与相邻边界。referenceDecisions对sources中每个reference_dataset恰好一条适用性判断，目标ID存在，不适用写原因。避免仅润色导致返工。'},reviewContract,6000);
   let coverageChecks=review.coverageChecks,conceptChecks=review.conceptChecks;
+  let unitRoleDecisions=review.unitRoleDecisions??[],unitRoleErrors=unitRolesEnabled?checkUnitRoles(card,unitRoleDecisions):[];
   if(quality)coverageErrors=[...checkCoverage(review,card),...(concepts?checkConceptCoverage(review,card):[])];
   const extras=review.referenceDecisions.filter((x:any)=>x.sourceId==='model-knowledge');
   if(extras.length)await save(join(folder,'reference-decisions-extra.json'),{extras,reason:'model proposal is retained separately; it is not a local reference row'});
@@ -139,8 +144,9 @@ export async function batchEngine(dir:string,manifest:any,call:Call,concurrency:
   if(decisions.length!==refs.length||new Set(decisions.map((x:any)=>x.sourceId)).size!==refs.length||
    decisions.some((x:any)=>!refs.some((s:any)=>s.id===x.sourceId)||x.targetIds.some((id:string)=>!card.attributes.some((a:any)=>a.id===id))))throw Error('reference decision coverage');
   const history:any[]=[{stage:'initial',errors,review}],sharedHash=hash(common);
-  for(let round=1;round<=2&&(errors.length||review.findings.length||coverageErrors.length||signals.length);round++){
+  for(let round=1;round<=2&&(errors.length||review.findings.length||coverageErrors.length||signals.length||unitRoleErrors.length);round++){
    const patch=await stage(folder,'repair'+round,{...base,card,sources:evidence,programErrors:errors,review,
+    ...(unitRolesEnabled?{unitRoleErrors}:{}),
     ...(quality?{coverageErrors,consistencySignals:signals}:{}),
     task:'仅返回变更单项及依赖，未改项不输出。公共定义规则和出处冻结，允许调整本类绑定但不改公共含义。维度映射同步，规则正反例为合成，不改证据原文。不确定留unresolved。'},repairSchema,12000);
    const safePatch=structuredClone(patch),rejected:any[]=[];
@@ -160,15 +166,18 @@ export async function batchEngine(dir:string,manifest:any,call:Call,concurrency:
    const changedIds=patch.replacements.map((r:any)=>r.attribute.id);
    if(quality)signals=consistencySignals(card,concepts);
    review=await stage(folder,'recheck'+round,{...base,card,sources:evidence,changedIds,removedIds:patch.removeIds,
+    ...(unitRolesEnabled?{unitRoleCandidates:unitCandidates(card),previousUnitRoleDecisions:unitRoleDecisions,unitRoleTask:'保留未变的角色判断，重验修改及配套数量ID；不以单位字样删除内容计数单位。返回当前单位候选的完整unitRoleDecisions。'}:{}),
     ...(concepts?{previousConceptChecks:conceptChecks,conceptTask:'逐概念保留未改决策，仅更新变更及依赖的引用；needs_attribute须修复或给业务不适用理由，不能靠总维度covered掩盖遗漏。'}:{}),
     ...(quality?{previousCoverage:coverageChecks,coverageRequired:coverageIds,consistencySignals:signals,
      qualityTask:'同步六组coverageChecks的有效属性引用与状态；未变组沿用已有理由，仅重验变更及依赖。语义线索不机械采纳，核对对象/条件后给理由。'}:{}),
-    previousFindings:review.findings,programErrors:errors,task:'仅重验变更项和依赖，已解决的问题关闭，未改项不重新全审。未解决保留；不将证据缺失认定为属性不需要。'},quality?obj({...reviewSchema.properties!,coverageChecks:coverageSchema,...(concepts?{conceptChecks:conceptSchema}:{})}):reviewSchema,quality?5000:3500);
+    previousFindings:review.findings,programErrors:errors,task:'仅重验变更项和依赖，已解决的问题关闭，未改项不重新全审。未解决保留；不将证据缺失认定为属性不需要。'},obj({...reviewSchema.properties!,...(quality?{coverageChecks:coverageSchema,...(concepts?{conceptChecks:conceptSchema}:{})}:{}),...unitFields}),quality?5000:3500);
+   if(unitRolesEnabled){unitRoleDecisions=review.unitRoleDecisions;unitRoleErrors=checkUnitRoles(card,unitRoleDecisions);}
    if(quality){coverageChecks=review.coverageChecks;conceptChecks=review.conceptChecks;coverageErrors=[...checkCoverage(review,card),...(concepts?checkConceptCoverage(review,card):[])];}
    history.push({stage:'repair'+round,changedIds,errors,review});
   }
   await save(out,{category,card,cardHash:hash(card),standardHash:manifest.standardHash,
-   status:errors.length?'blocked_program':review.findings.length||review.verdict!=='pass'||card.unresolved.length||common.unresolved.length||commonReview.findings.length||(quality&&(coverageErrors.length||signals.length||!matched.size))?'needs_codex_decision':'awaiting_codex_spotcheck',
+   status:errors.length?'blocked_program':review.findings.length||review.verdict!=='pass'||card.unresolved.length||common.unresolved.length||commonReview.findings.length||unitRoleErrors.length||(quality&&(coverageErrors.length||signals.length||!matched.size))?'needs_codex_decision':'awaiting_codex_spotcheck',
+   ...(unitRolesEnabled?{unitRoleDecisions,unitRoleErrors}:{}),
    ...(concepts?{conceptChecks}:{}),
    ...(quality?{coverageChecks,coverageErrors,consistencySignals:signals,validationLimitations:matched.size?[]:['无明确归属正样本，不能声称商品验证通过']}:{}),
    commonWarnings,sharedEchoes,programErrors:errors,review,referenceDecisions:decisions,history,sampleTotal:raw.length,sampleMatched:matched.size,sampleDecisions:outline.samples,sources:evidence});
