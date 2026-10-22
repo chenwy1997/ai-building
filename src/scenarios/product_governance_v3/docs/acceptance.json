@@ -1,0 +1,153 @@
+{
+  "kind": "constructed_offline_wiring_acceptance",
+  "releaseId": "4fd28b7687c2c4c0135197f253cc8226759d90c6405f92c6bf7d11b7cb39f253",
+  "snapshotVersion": "dd42295afd032b56f1c868cb4154e57547b1aca955bc8d7dcb8f2e9425a6aa80",
+  "stages": [
+    {
+      "stage": "family-modeling",
+      "runKey": "0e63ef3bfdc2f554e99394e951e5618f4678f99ad00e03cc8d44404e11bedafc",
+      "status": "program_pass_pending_human",
+      "requests": 2,
+      "cachedResponses": 0,
+      "modelToolCalls": 1,
+      "actualMaterialHashes": [
+        {
+          "path": "skills/family-modeling/SKILL.md",
+          "sha256": "6de3f179f53ae9b77fd2faebd1dea292685427a5fca8b56bd350540b50d439c4"
+        },
+        {
+          "path": "skills/family-modeling/references/cases.md",
+          "sha256": "06465219af58cb014066eeb02e7dd4b31ddfd6cb701530e64f517c6da944b238"
+        }
+      ],
+      "knowledge": [
+        {
+          "id": "clean-paper-fixture",
+          "sha256": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+          "offset": 0,
+          "end": 315
+        }
+      ]
+    },
+    {
+      "stage": "sku-filling",
+      "runKey": "5af8f6b1fe78253bea8e93b6bbd668c6a0b09604205bb26a20683ca7d115236c",
+      "status": "program_pass_pending_human",
+      "requests": 2,
+      "cachedResponses": 0,
+      "modelToolCalls": 1,
+      "actualMaterialHashes": [
+        {
+          "path": "skills/sku-filling/SKILL.md",
+          "sha256": "c67f68c182d13b1305f7bb8efee679826f1864bc894fef2faa46e13e437c31d9"
+        },
+        {
+          "path": "skills/sku-filling/references/cases.md",
+          "sha256": "4385063203e18e09a6cb160a60beb9ac8d467f42c0a1562ad6b0df3c5790c49f"
+        }
+      ],
+      "knowledge": [
+        {
+          "id": "clean-paper-fixture",
+          "sha256": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+          "offset": 0,
+          "end": 315
+        }
+      ]
+    },
+    {
+      "stage": "review-assistance",
+      "runKey": "e10b5de1d607f6b8d3cdb8ea62808c675f467de6253b215c9b552530653b19ef",
+      "status": "program_pass_pending_human",
+      "requests": 2,
+      "cachedResponses": 0,
+      "modelToolCalls": 1,
+      "actualMaterialHashes": [
+        {
+          "path": "skills/review-assistance/SKILL.md",
+          "sha256": "e70d93f6f71f2afc11a9442d0ccab73d4d55acb11e18c4ef5acc438f6d3a8655"
+        },
+        {
+          "path": "skills/review-assistance/references/cases.md",
+          "sha256": "f22f16d3885f5a528904c89e14b74a191f3ce0666992b631788cc67713e2e7b3"
+        }
+      ],
+      "knowledge": [
+        {
+          "id": "clean-paper-fixture",
+          "sha256": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+          "offset": 0,
+          "end": 315
+        }
+      ]
+    },
+    {
+      "stage": "domain-research",
+      "runKey": "32e2cc55cd6d3e99d0e18cf3163c8093c0b893c62992228e35a054ce50877860",
+      "status": "program_pass_pending_human",
+      "requests": 2,
+      "cachedResponses": 0,
+      "modelToolCalls": 1,
+      "actualMaterialHashes": [
+        {
+          "path": "skills/domain-research/SKILL.md",
+          "sha256": "010a8e9c7605d3136b137cf68820cdd90663c18c4f69bec66bd36dc291c1dcc9"
+        },
+        {
+          "path": "skills/domain-research/references/cases.md",
+          "sha256": "6f9df5e55f17824775e2039e054e460b67757dc8d003b4323b2b8cc1c9e9c3b3"
+        }
+      ],
+      "knowledge": [
+        {
+          "id": "clean-paper-fixture",
+          "sha256": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+          "offset": 0,
+          "end": 315
+        }
+      ]
+    }
+  ],
+  "externalNetworkCalls": 0,
+  "paidModelCalls": 0,
+  "productionWrites": 0,
+  "businessAccuracyEvaluated": false,
+  "humanAuditCapabilityEvaluated": false,
+  "excelVisualAcceptancePerformed": false,
+  "note": "程序接线构造验收；负例/预算/恢复/版本/证据检查见同目录Bun测试。尚未进行真实DeepSeek语义表现、业务留出集和线上写后核验。",
+  "verifiedAt": "2026-10-22",
+  "verification": {
+    "v3Tests": {
+      "passed": 45,
+      "failed": 0,
+      "command": "bun test ./src/scenarios/product_governance_v3"
+    },
+    "relatedV2Regression": {
+      "passed": 18,
+      "failed": 0,
+      "command": "bun test ./src/scenarios/product_governance_v2/tests/core.test.ts ./src/scenarios/product_governance_v2/tests/cache.test.ts"
+    },
+    "scopedTypecheck": "passed",
+    "skillValidation": {
+      "passed": 4,
+      "validator": "skill-creator/scripts/quick_validate.py"
+    },
+    "resume": {
+      "sentRequests": 0,
+      "cachedResponses": 8
+    },
+    "realTree": {
+      "path": "scratch-category-baseline-20261010/mapped-tree.json",
+      "nodes": 13587,
+      "treeVersion": "32102e942847d5d03deb350cc73de5f295fe12866cf17513e5496e8e71cff943",
+      "searchQuery": "小卷纸",
+      "matchingIds": [
+        "15216d47-17c6-4b18-9391-83097f6f7447",
+        "67adeef9-8c1f-47e2-ad72-462ad35a5a75"
+      ],
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "subtreeLeaves": 16,
+      "mode": "local_read_only"
+    }
+  }
+}
