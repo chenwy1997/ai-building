@@ -1,10 +1,19 @@
 import { join } from "node:path";
-import { canonical, hash, save, Blocked, type Task } from "./core.ts";
+import {
+  canonical,
+  hash,
+  save,
+  Blocked,
+  type Task,
+  type AttributeDefinition,
+  type AttributeBinding,
+} from "./core.ts";
 import { assemble } from "./context.ts";
 import type { Release } from "./release.ts";
 import type { DataSnapshot } from "./snapshot.ts";
 import type { ResponsesClient, InputItem } from "./responses.ts";
 import { checkResult } from "./checks.ts";
+import { projectNative } from "./native-contract.ts";
 
 export interface Limits {
   maxRounds: number;
@@ -58,6 +67,13 @@ export async function runStage(options: {
     mode: client.mode,
   });
   try {
+    const knowledgeGaps = plan.tools.knowledgeGaps();
+    if (task.stage !== "domain-research" && knowledgeGaps.length)
+      throw new Blocked(
+        "knowledge_dependency",
+        "required knowledge is not ready; route to research/preparation before requesting a dependent candidate: " +
+          knowledgeGaps.join("; "),
+      );
     for (let round = 0; round < limits.maxRounds; round++) {
       const body = {
         model: "deepseek-flash",
@@ -149,22 +165,52 @@ export async function runStage(options: {
       } catch {
         throw new Blocked("final_json", "final output must be strict JSON");
       }
-      const checks = checkResult(task, result, plan.tools),
-        artifact = {
-          runKey,
-          mode: client.mode,
-          snapshotKind: snapshot.data.kind,
-          releaseId: release.id,
-          manifest: plan.manifest,
-          requestKeys,
-          toolCount,
-          result,
-          checks,
-          toolEvents: plan.tools.events,
-          adoption: checks.errors.length ? "not_eligible" : "pending_human",
-          productionWrites: 0,
-          businessRepairs: 0,
-        };
+      const checks = checkResult(task, result, plan.tools);
+      const modeled = result as {
+        attributes: AttributeDefinition[];
+        bindings: AttributeBinding[];
+      };
+      const nativeProjections =
+        task.stage === "family-modeling" && !checks.errors.length
+          ? modeled.attributes.map((a) =>
+              projectNative(
+                a,
+                modeled.bindings.find((b) => b.attributeId === a.id)!,
+              ),
+            )
+          : [];
+      const artifact = {
+        runKey,
+        mode: client.mode,
+        snapshotKind: snapshot.data.kind,
+        releaseId: release.id,
+        manifest: plan.manifest,
+        requestKeys,
+        toolCount,
+        result,
+        checks,
+        nativeProjections,
+        toolEvents: plan.tools.events,
+        actualReads: {
+          knowledge: [...plan.tools.knowledgeReads].map(([id, ranges]) => ({
+            id,
+            version: release.knowledge[id]!.sha256,
+            ranges,
+          })),
+          sources: [...plan.tools.sourceReads].map(([id, ranges]) => ({
+            id,
+            version: hash(snapshot.source(id, task)),
+            ranges,
+          })),
+          calculationPolicies: [...plan.tools.policyReads].map(
+            ([id, version]) => ({ id, version }),
+          ),
+          toolHistoryHash: hash(plan.tools.events),
+        },
+        adoption: checks.errors.length ? "not_eligible" : "pending_human",
+        productionWrites: 0,
+        businessRepairs: 0,
+      };
       await save(runPath + ".result.json", artifact);
       return artifact;
     }
@@ -177,6 +223,8 @@ export async function runStage(options: {
       toolCount,
       toolEvents: plan.tools.events,
       status: "program_blocked",
+      code: error instanceof Blocked ? error.code : "stage_error",
+      knowledgeGaps: plan.tools.knowledgeGaps(),
       error: String(error),
       adoption: "not_eligible",
     });

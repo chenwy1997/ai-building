@@ -37,6 +37,8 @@ import {
   functionCall,
   finalMessage,
   attribute,
+  binding,
+  prepareFixtureFacts,
   fixtureValues,
 } from "./fixtures.ts";
 
@@ -68,7 +70,7 @@ async function runMock(
   return {
     artifact: await runStage({
       release,
-      snapshot: new DataSnapshot(snapshot),
+      snapshot: new DataSnapshot(prepareFixtureFacts(snapshot)),
       task: fixtureTask(stage),
       client,
       outDir: dir,
@@ -86,7 +88,7 @@ async function checked(
 ) {
   const plan = await assemble(
     release,
-    new DataSnapshot(snapshot),
+    new DataSnapshot(prepareFixtureFacts(snapshot)),
     fixtureTask(stage),
   );
   return checkResult(fixtureTask(stage), output, plan.tools);
@@ -258,7 +260,10 @@ describe("modeling invariants and the accepted sibling-category correction", () 
     blocks(plan.input.candidateProgramChecks!, "R14");
     const output = fixtureOutput("review-assistance");
     output.findings = [];
-    blocks(checkResult(task, output, plan.tools), "R14");
+    const finalChecks = checkResult(task, output, plan.tools);
+    blocks(finalChecks, "R14");
+    expect(finalChecks.executedChecks).toContain("sku-values");
+    expect(finalChecks.executedChecks).toContain("calculation");
   });
   test("cored/coreless both inherit the common 是否无芯 definition", async () => {
     const snap = new DataSnapshot(fixtureSnapshot());
@@ -269,6 +274,7 @@ describe("modeling invariants and the accepted sibling-category correction", () 
       const task = { ...fixtureTask("family-modeling"), categoryId },
         plan = await assemble(release, snap, task);
       const output = { ...fixtureOutput("family-modeling"), categoryId };
+      output.bindings.forEach((b: any) => (b.categoryId = categoryId));
       expect(checkResult(task, output, plan.tools).status).toBe(
         "program_pass_pending_human",
       );
@@ -287,9 +293,9 @@ describe("modeling invariants and the accepted sibling-category correction", () 
   });
   test("binary requiredness and all-SKU are schema constraints", async () => {
     const output = fixtureOutput("family-modeling");
-    output.attributes[0].requiredness = "conditional";
+    output.bindings[0].requiredness = "conditional";
     blocks(await checked("family-modeling", output), "R02");
-    output.attributes[0].requiredness = "optional";
+    output.bindings[0].requiredness = "optional";
     output.attributes[0].valueLevel = "SPU";
     blocks(await checked("family-modeling", output), "R01");
   });
@@ -302,7 +308,7 @@ describe("modeling invariants and the accepted sibling-category correction", () 
     expect(plan.instructions).toContain("STRING+OPTION");
     expect(plan.instructions).toContain("PropertyInstanceOnCategoryInstance");
     const output = fixtureOutput("family-modeling");
-    output.attributes[1].searchable = true;
+    output.bindings[1].searchable = true;
     blocks(await checked("family-modeling", output), "R01");
   });
   test("system ownership excludes basic fields without blanket model-name blacklist", async () => {
@@ -312,7 +318,6 @@ describe("modeling invariants and the accepted sibling-category correction", () 
         id: "native",
         name: "规格名称",
         conceptKey: "x",
-        differenceReason: "test",
       }),
     );
     blocks(await checked("family-modeling", output), "R01");
@@ -323,6 +328,11 @@ describe("modeling invariants and the accepted sibling-category correction", () 
         name: "适配分配器型号",
         conceptKey: "fit.dispenser",
         fieldType: "text",
+      }),
+    );
+    output.bindings.push(
+      binding("fit-model", {
+        categoryId: output.categoryId,
         differenceReason: "独立适配用途",
       }),
     );
@@ -337,7 +347,6 @@ describe("modeling invariants and the accepted sibling-category correction", () 
         id: "unit-only",
         name: "每包数量计量单位",
         conceptKey: "pack.unit",
-        differenceReason: "test",
       }),
     );
     blocks(await checked("family-modeling", output), "R06");
@@ -345,9 +354,7 @@ describe("modeling invariants and the accepted sibling-category correction", () 
     output.attributes[1].unit = null;
     blocks(await checked("family-modeling", output), "R06");
     output.attributes[1].unit = "层";
-    output.attributes.push(
-      attribute({ id: "duplicate", differenceReason: "test" }),
-    );
+    output.attributes.push(attribute({ id: "duplicate" }));
     blocks(await checked("family-modeling", output), "R07");
     output.attributes.pop();
     output.attributes[0].multi = true;
@@ -417,6 +424,7 @@ describe("facts, state, scope, and arithmetic are connected to final checks", ()
         enumValues: ["无香", "花香"],
       });
     data.families[0]!.attributes.push(option);
+    data.families[0]!.bindings.push(binding(option.id));
     data.attributes.push(option);
     data.sources[0]!.text += "香型无香。";
     data.sources[0]!.facts.push({
@@ -475,6 +483,18 @@ describe("facts, state, scope, and arithmetic are connected to final checks", ()
         "R14",
       );
     }
+    const wrongAssumptionUnit = fixtureSnapshot();
+    wrongAssumptionUnit.sources[0]!.facts.find(
+      (f) => f.conceptKey === "sales.gifts",
+    )!.unit = "件";
+    blocks(
+      await checked(
+        "sku-filling",
+        fixtureOutput("sku-filling"),
+        wrongAssumptionUnit,
+      ),
+      "R14",
+    );
   });
   test("read source ID alone does not mean the quote was read", async () => {
     const snap = new DataSnapshot(fixtureSnapshot()),
@@ -517,13 +537,34 @@ describe("facts, state, scope, and arithmetic are connected to final checks", ()
       data.families[0]!.attributes[2]!.unit = "卷/提";
       data.derivationPolicies.push({
         id: "division-policy",
+        version: "fixture-division-1",
+        rationale: "构造除法反例",
         operator: "divide",
         targetConceptKey: "paper.total_rolls",
         inputConceptKeys: ["a", "b"],
         targetUnit: "卷/提",
+        factors: [
+          {
+            conceptKey: "a",
+            unit: "卷/销售单位",
+            kind: "count",
+            min: 0,
+            max: null,
+          },
+          {
+            conceptKey: "b",
+            unit: "提/销售单位",
+            kind: "count",
+            min: 0,
+            max: null,
+          },
+        ],
+        resultKind: "count",
       });
       const output = fixtureOutput("sku-filling");
       output.values[2].derivation = {
+        policyId: "division-policy",
+        policyVersion: "fixture-division-1",
         operator: "divide",
         inputs: [
           { sourceId: "fixture-source", factId: "div-a" },
@@ -555,21 +596,36 @@ describe("facts, state, scope, and arithmetic are connected to final checks", ()
       unit: "mm",
     });
     data.families[0]!.attributes.push(target);
+    data.families[0]!.bindings.push(binding(target.id));
     data.derivationPolicies.push({
       id: "length-conversion",
+      version: "fixture-convert-1",
+      rationale: "构造长度换算",
       operator: "convert",
       targetConceptKey: "length",
       inputConceptKeys: ["length"],
       targetUnit: "mm",
+      factors: [
+        {
+          conceptKey: "length",
+          unit: "cm",
+          kind: "measurement",
+          min: 0,
+          max: null,
+        },
+      ],
+      resultKind: "measurement",
     });
     const plan = await assemble(
       release,
-      new DataSnapshot(data),
+      new DataSnapshot(prepareFixtureFacts(data)),
       fixtureTask("sku-filling"),
     );
     const args = {
       attributeId: "length-mm",
       derivation: {
+        policyId: "length-conversion",
+        policyVersion: "fixture-convert-1",
         operator: "convert",
         inputs: [{ sourceId: "fixture-source", factId: "length-cm" }],
         targetUnit: "mm",
@@ -578,10 +634,11 @@ describe("facts, state, scope, and arithmetic are connected to final checks", ()
     expect((await plan.tools.call("calculate_value", args)).value).toBe(20);
     source.facts.find((f) => f.id === "length-cm")!.unit = "抽";
     target.unit = "张";
+    data.derivationPolicies[1]!.factors[0]!.unit = "抽";
     data.derivationPolicies[1]!.targetUnit = "张";
     const bad = await assemble(
       release,
-      new DataSnapshot(data),
+      new DataSnapshot(prepareFixtureFacts(data)),
       fixtureTask("sku-filling"),
     );
     args.derivation.targetUnit = "张";
@@ -665,14 +722,16 @@ describe("facts, state, scope, and arithmetic are connected to final checks", ()
   test("bad snapshot evidence, duplicate IDs, and source-version changes are not ignored", () => {
     const bad = fixtureSnapshot();
     bad.sources[0]!.facts[0]!.quote = "never present";
-    expect(() => new DataSnapshot(bad)).toThrow("quote");
+    expect(() => new DataSnapshot(prepareFixtureFacts(bad))).toThrow("quote");
     const duplicate = fixtureSnapshot();
     duplicate.sources.push(duplicate.sources[0]!);
     expect(() => new DataSnapshot(duplicate)).toThrow("duplicate");
     const a = new DataSnapshot(fixtureSnapshot()),
       changed = fixtureSnapshot();
     changed.sources[0]!.version = "revision-2";
-    expect(new DataSnapshot(changed).version).not.toBe(a.version);
+    expect(new DataSnapshot(prepareFixtureFacts(changed)).version).not.toBe(
+      a.version,
+    );
   });
 });
 
@@ -846,6 +905,8 @@ describe("tool permissions, request limits, and offline boundary", () => {
     );
     const local = fixtureSnapshot();
     local.kind = "local";
+    local.sources = [];
+    local.products = [];
     await expect(
       assemble(
         release,

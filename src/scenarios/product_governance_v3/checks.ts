@@ -2,7 +2,8 @@ import {
   canonical,
   validate,
   normalized,
-  type Attribute,
+  type AttributeDefinition,
+  type AttributeBinding,
   type CheckReport,
   type Task,
   type Finding,
@@ -11,6 +12,10 @@ import { outputSchemas, type FilledValue } from "./contracts.ts";
 import { RULES, STAGE_RULES } from "./release.ts";
 import type { ToolRegistry } from "./tools.ts";
 import { calculate, resolveFact } from "./calculation.ts";
+import {
+  definitionConfigErrors,
+  valueConstraintErrors,
+} from "./native-contract.ts";
 
 // These checks establish structural consistency and provenance, not the truth of domain judgments.
 export function checkResult(
@@ -19,6 +24,7 @@ export function checkResult(
   tools: ToolRegistry,
 ): CheckReport {
   const errors: Finding[] = [],
+    executed = new Set<string>(["output-contract"]),
     add = (ruleId: string, objectId: string, message: string) =>
       errors.push({ ruleId, objectId, message });
   const schemaErrors = validate(outputSchemas[task.stage], result);
@@ -28,13 +34,39 @@ export function checkResult(
         ? "R02"
         : error.includes("valueLevel")
           ? "R01"
-          : "CONTRACT",
+          : error.includes("defaultValue")
+            ? "R10"
+            : /numberConfig|textConfig|optionConfig|enumValues|\.multi|fieldType/.test(
+                  error,
+                )
+              ? "R08"
+              : "CONTRACT",
       task.categoryId,
       error,
     );
   if (schemaErrors.length) return report();
   const value = result as any,
     snapshot = tools.snapshot;
+  executed.add("knowledge-coverage");
+  const gaps = tools.knowledgeGaps();
+  if (gaps.length) {
+    if (task.stage !== "domain-research")
+      for (const gap of gaps)
+        add(
+          "R11",
+          task.categoryId,
+          "knowledge prerequisite unresolved: " + gap,
+        );
+    else if (
+      !value.unresolved.length ||
+      !value.questions.some((q: any) => q.needsProfessionalReview)
+    )
+      add(
+        "R17",
+        task.categoryId,
+        "knowledge gap requires an explicit unresolved professional question",
+      );
+  }
   if (value.categoryId !== task.categoryId)
     add(
       "CONTRACT",
@@ -66,28 +98,46 @@ export function checkResult(
     return null;
   };
   if (task.stage === "family-modeling") {
+    executed.add("family-contract");
     const baseline = snapshot.baseline(task),
-      attributes = value.attributes as Attribute[];
+      attributes = value.attributes as AttributeDefinition[],
+      bindings = value.bindings as AttributeBinding[];
     if (value.baselineVersion !== (baseline?.version ?? null))
       add("R05", task.categoryId, "wrong/absent baseline version");
-    checkDefinitions(attributes);
+    checkDefinitions(attributes, bindings);
+    if (
+      bindings.length !== attributes.length ||
+      new Set(bindings.map((b) => b.attributeId)).size !== bindings.length ||
+      bindings.some(
+        (b) =>
+          b.categoryId !== task.categoryId ||
+          !attributes.some((a) => a.id === b.attributeId),
+      )
+    )
+      add(
+        "CONTRACT",
+        task.categoryId,
+        "each definition needs exactly one binding to the task leaf",
+      );
     for (const a of attributes) {
-      for (const sourceId of a.sourceIds)
-        try {
-          snapshot.source(sourceId, task);
-          if (!tools.sourceReads.has(sourceId)) throw Error();
-        } catch {
-          add("R11", a.id, "unread/out-of-scope source " + sourceId);
-        }
+      const binding = bindings.find((b) => b.attributeId === a.id);
+      if (!binding) {
+        add("CONTRACT", a.id, "missing category binding");
+        continue;
+      }
+      for (const ref of a.references) {
+        const error = tools.referenceError(ref);
+        if (error) add("R11", a.id, error);
+      }
       if (
-        a.baselineAttributeId &&
-        !baseline?.attributes.some((b) => b.id === a.baselineAttributeId)
+        binding.baselineAttributeId &&
+        !baseline?.attributes.some((b) => b.id === binding.baselineAttributeId)
       )
         add("R03", a.id, "unknown inherited attribute");
       if (
         baseline &&
         !baseline.attributes.some((b) => b.id === a.id) &&
-        !a.differenceReason
+        !binding.differenceReason?.trim()
       )
         add("R03", a.id, "leaf addition needs a business difference reason");
     }
@@ -97,7 +147,7 @@ export function checkResult(
         add("R03", b.id, "applicable family attribute omitted");
         continue;
       }
-      const fields: (keyof Attribute)[] = [
+      const fields: (keyof AttributeDefinition)[] = [
         "name",
         "conceptKey",
         "definition",
@@ -106,29 +156,64 @@ export function checkResult(
         "unit",
         "enumValues",
         "multi",
-        "requiredness",
         "valueLevel",
-        "isKeySpec",
-        "isPublic",
-        "searchable",
+        "numberConfig",
+        "textConfig",
+        "optionConfig",
+        "defaultValue",
       ];
+      const binding = bindings.find((x) => x.attributeId === a.id);
       if (
         fields.some((f) => canonical(a[f]) !== canonical(b[f])) ||
-        a.baselineAttributeId !== b.id
+        binding?.baselineAttributeId !== b.id
       )
         add(
           "R03",
           a.id,
           "shared definition changed; propose a baseline revision separately",
         );
+      const baselineBinding =
+        baseline!.bindings.find(
+          (x) => x.attributeId === b.id && x.categoryId === task.categoryId,
+        ) ??
+        baseline!.bindings.find(
+          (x) => x.attributeId === b.id && x.categoryId === null,
+        )!;
+      const bindingFields: (keyof AttributeBinding)[] = [
+        "requiredness",
+        "requirednessReason",
+        "isKeySpec",
+        "isPublic",
+        "searchable",
+        "displayInTitle",
+        "displayInList",
+        "sortIndex",
+        "uses",
+      ];
+      if (
+        binding &&
+        bindingFields.some(
+          (f) => canonical(binding[f]) !== canonical(baselineBinding[f]),
+        ) &&
+        !binding.differenceReason?.trim()
+      )
+        add(
+          "R03",
+          a.id,
+          "leaf binding change needs a business difference reason; shared definition stays unchanged",
+        );
     }
   } else if (task.stage === "sku-filling") {
+    executed.add("sku-values");
     if (value.productId !== task.productId)
       add("R09", String(value.productId), "output SKU must equal task SKU");
     const attributes = snapshot.attributes(task),
       values = value.values as FilledValue[],
       seen = new Set<string>();
-    checkDefinitions(attributes);
+    checkDefinitions(
+      attributes,
+      attributes.map((a) => a.binding),
+    );
     for (const v of values) {
       const a = attributes.find((a) => a.id === v.attributeId);
       if (!a) {
@@ -137,6 +222,9 @@ export function checkResult(
       }
       if (seen.has(a.id)) add("CONTRACT", a.id, "duplicate value");
       seen.add(a.id);
+      const sameValue = (x: unknown, y: unknown) =>
+        canonical(a.multi && Array.isArray(x) ? [...x].sort() : x) ===
+        canonical(a.multi && Array.isArray(y) ? [...y].sort() : y);
       const facts = v.evidence
         .map((e) => readEvidence(e, a.id))
         .filter((f) => f !== null);
@@ -180,13 +268,8 @@ export function checkResult(
           !a.enumValues.includes(v.value as string))
       )
         add("R08", a.id, "value type/option outside fixed contract");
-      if (
-        a.fieldType === "date" &&
-        (typeof v.value !== "string" ||
-          !/^\d{4}-\d{2}-\d{2}$/.test(v.value) ||
-          Number.isNaN(Date.parse(v.value)))
-      )
-        add("R08", a.id, "invalid ISO date");
+      for (const error of valueConstraintErrors(a, v.value))
+        add("R08", a.id, error);
       if (!v.evidence.length) add("R09", a.id, "known value needs evidence");
       const conflicting = snapshot.data.sources
         .filter((s) => s.productId === task.productId)
@@ -198,7 +281,7 @@ export function checkResult(
               f.scope === a.scope &&
               f.unit === a.unit &&
               tools.has(s.id, f.quote) &&
-              canonical(f.value) !== canonical(v.value),
+              !sameValue(f.value, v.value),
           ),
         );
       if (conflicting.length)
@@ -208,6 +291,7 @@ export function checkResult(
           "read same-scope facts disagree; preserve conflict instead of choosing or calculating over them",
         );
       if (v.derivation) {
+        executed.add("calculation");
         try {
           const computed = calculate(snapshot, task, a, v.derivation, tools);
           if (v.value !== computed.value)
@@ -236,7 +320,7 @@ export function checkResult(
             f.conceptKey === a.conceptKey &&
             f.scope === a.scope &&
             f.unit === a.unit &&
-            canonical(f.value) === canonical(v.value),
+            sameValue(f.value, v.value),
         )
       ) {
         add(
@@ -250,6 +334,7 @@ export function checkResult(
       if (!seen.has(a.id))
         add("CONTRACT", a.id, "missing value/status for contract attribute");
   } else if (task.stage === "review-assistance") {
+    executed.add("candidate-recheck");
     const candidate = task.candidate as {
       stage?: unknown;
       result?: unknown;
@@ -260,26 +345,29 @@ export function checkResult(
       !Object.hasOwn(candidate, "result")
     )
       add("CONTRACT", task.categoryId, "review needs a typed candidate");
-    else
-      errors.push(
-        ...checkResult(
-          {
-            ...task,
-            stage: candidate.stage as "family-modeling" | "sku-filling",
-            candidate: null,
-          },
-          candidate.result,
-          tools,
-        ).errors,
+    else {
+      const candidateReport = checkResult(
+        {
+          ...task,
+          stage: candidate.stage as "family-modeling" | "sku-filling",
+          candidate: null,
+        },
+        candidate.result,
+        tools,
       );
+      errors.push(...candidateReport.errors);
+      for (const id of candidateReport.executedChecks) executed.add(id);
+    }
     for (const f of value.findings) {
       if (!RULES.some((r) => r[0] === f.ruleId))
         add("CONTRACT", f.objectId, "unknown rule ID");
-      for (const id of f.sourceIds)
-        if (!tools.sourceReads.has(id))
-          add("R09", f.objectId, "unread review evidence");
+      for (const ref of f.references) {
+        const error = tools.referenceError(ref);
+        if (error) add("R09", f.objectId, error);
+      }
     }
   } else {
+    executed.add("research-references");
     for (const id of value.knowledgeIdsConsulted)
       if (!tools.knowledgeReadIds.has(id))
         add("R11", id, "knowledge was not read");
@@ -292,12 +380,18 @@ export function checkResult(
       if (!available.has(id))
         add("R04", id, "family ID not found in task context");
     for (const q of value.questions)
-      for (const id of q.sourceIds)
-        if (!tools.sourceReads.has(id))
-          add("R11", id, "unread research evidence");
+      for (const ref of q.references) {
+        const error = tools.referenceError(ref);
+        if (error) add("R11", task.categoryId, error);
+      }
   }
   return report();
-  function checkDefinitions(attributes: Attribute[]) {
+  function checkDefinitions(
+    attributes: AttributeDefinition[],
+    bindings: AttributeBinding[],
+  ) {
+    executed.add("definitions");
+    executed.add("native-config");
     const ids = new Set<string>(),
       concepts = new Set<string>(),
       names = new Set<string>();
@@ -344,17 +438,27 @@ export function checkResult(
         );
       if (a.fieldType !== "option" && a.enumValues.length)
         add("R08", a.id, "non-option must not carry an enum");
-      if (a.searchable && !["text", "option"].includes(a.fieldType))
-        add(
-          "R01",
-          a.id,
-          "current keyword indexing supports text/option only; do not claim numeric/boolean filtering is already supported",
-        );
-      if (
-        (a.searchable && !a.uses.includes("search")) ||
-        (a.isPublic && !a.uses.includes("display"))
-      )
-        add("R07", a.id, "search/public capability needs its stated use");
+      for (const error of definitionConfigErrors(a)) add("R08", a.id, error);
+      for (const b of bindings.filter((b) => b.attributeId === a.id)) {
+        if (b.searchable && !["text", "option"].includes(a.fieldType))
+          add(
+            "R01",
+            a.id,
+            "current keyword indexing supports text/option only; do not claim numeric/boolean filtering is already supported",
+          );
+        if (
+          (b.searchable && !b.uses.includes("search")) ||
+          (b.isKeySpec && !b.uses.includes("selection")) ||
+          ((b.isPublic || b.displayInTitle || b.displayInList) &&
+            !b.uses.includes("display")) ||
+          ((b.displayInTitle || b.displayInList) && !b.isPublic)
+        )
+          add(
+            "R07",
+            a.id,
+            "binding capability needs its stated selection/search/display use and valid public exposure",
+          );
+      }
     }
   }
   function report(): CheckReport {
@@ -364,6 +468,8 @@ export function checkResult(
       humanReviewRules: STAGE_RULES[task.stage].filter(
         (id) => RULES.find((r) => r[0] === id)?.[2] !== "program",
       ),
+      executedChecks: [...executed],
+      knowledgeGaps: tools.knowledgeGaps(),
     };
   }
 }

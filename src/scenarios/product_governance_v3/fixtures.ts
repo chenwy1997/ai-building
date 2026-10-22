@@ -1,6 +1,11 @@
 import {
   jsonClone,
-  type Attribute,
+  hash,
+  factPreparationHash,
+  REQUIRED_SYSTEM_OWNERS,
+  STAGES,
+  type AttributeDefinition,
+  type AttributeBinding,
   type Snapshot,
   type Stage,
   type Task,
@@ -9,29 +14,74 @@ import type { FilledValue } from "./contracts.ts";
 import type { FetchLike, InputItem } from "./responses.ts";
 
 // Constructed integration cases only. These are not published business definitions or real SKU IDs.
-export function attribute(overrides: Partial<Attribute> = {}): Attribute {
+export function attribute(
+  overrides: Partial<AttributeDefinition> = {},
+): AttributeDefinition {
+  const fieldType = overrides.fieldType ?? "boolean";
   return {
     id: "fixture-coreless",
     name: "是否无芯",
     conceptKey: "paper.coreless",
     definition: "同一SKU纸卷是否没有纸芯",
     scope: "sales-unit",
-    fieldType: "boolean",
+    fieldType,
     unit: null,
     enumValues: [],
     multi: false,
-    requiredness: "optional",
     valueLevel: "SKU",
+    numberConfig:
+      fieldType === "number"
+        ? { isInt: false, precision: null, min: null, max: null }
+        : null,
+    textConfig:
+      fieldType === "text"
+        ? {
+            format: "ANY",
+            minLength: null,
+            maxLength: null,
+            displayMethod: null,
+            trim: true,
+          }
+        : null,
+    optionConfig:
+      fieldType === "option" ? { minCount: null, maxCount: null } : null,
+    defaultValue: null,
+    rationale: "构造样例：对照同族定义",
+    references: [],
+    ...overrides,
+  };
+}
+export function binding(
+  attributeId: string,
+  overrides: Partial<AttributeBinding> = {},
+): AttributeBinding {
+  return {
+    attributeId,
+    categoryId: null,
+    requiredness: "optional",
+    requirednessReason: "构造样例：必要性尚未核实，先选填",
     isKeySpec: false,
     isPublic: true,
     searchable: false,
+    displayInTitle: false,
+    displayInList: false,
+    sortIndex: 1,
     uses: ["selection", "comparison", "search", "display"],
-    rationale: "构造样例：对照同族定义",
     baselineAttributeId: null,
     differenceReason: null,
-    sourceIds: [],
     ...overrides,
   };
+}
+// Explicit test-data preparation only, never used by runtime or real snapshots.
+export function prepareFixtureFacts(data: Snapshot) {
+  if (data.kind !== "fixture")
+    throw Error("only constructed fixtures may use this helper");
+  for (const s of data.sources)
+    s.factPreparation = {
+      ...s.factPreparation,
+      contentHash: factPreparationHash(s),
+    };
+  return data;
 }
 export function fixtureSnapshot(): Snapshot {
   const attrs = [
@@ -105,23 +155,19 @@ export function fixtureSnapshot(): Snapshot {
       isLeaf: true,
     },
   ];
-  return {
-    version: "fixture-1",
+  const data: Snapshot = {
+    format: 2,
+    version: "fixture-2",
     kind: "fixture",
     tree: { nodes },
-    systemFields: [
-      { key: "brandId", names: ["品牌"], conceptKeys: ["common.brand"] },
-      {
-        key: "supplierId",
-        names: ["供应商"],
-        conceptKeys: ["common.supplier"],
-      },
-      {
-        key: "salesUnit",
-        names: ["销售单位", "规格名称"],
-        conceptKeys: ["sales.unit", "sales.spec"],
-      },
-    ],
+    systemFields: jsonClone(REQUIRED_SYSTEM_OWNERS),
+    systemFieldCoverage: {
+      version: "fixture-ownership-1",
+      source: "constructed fixture; not a production inventory",
+      sourceHash: "pending",
+      status: "complete",
+      coveredKeys: ["brandId", "supplierId", "salesUnit", "specName"],
+    },
     families: [
       {
         id: "fixture-roll-family",
@@ -130,6 +176,7 @@ export function fixtureSnapshot(): Snapshot {
         status: "confirmed",
         runId: null,
         attributes: attrs,
+        bindings: attrs.map((a) => binding(a.id)),
       },
     ],
     attributes: jsonClone(attrs),
@@ -207,19 +254,66 @@ export function fixtureSnapshot(): Snapshot {
             kind: "direct",
           },
         ],
+        factPreparation: {
+          status: "reviewed",
+          kind: "fixture",
+          recordId: "fixture-preparation-1",
+          contentHash: "pending",
+        },
       },
     ],
     knowledgeIds: ["clean-paper-fixture", "hardware-fixture"],
+    knowledgeRequirements: [
+      {
+        id: "fixture-paper-required",
+        categoryIds: [
+          "fixture-coreless-category",
+          "fixture-cored-category",
+          "fixture-seat-category",
+        ],
+        stages: STAGES,
+        knowledgeIds: ["clean-paper-fixture"],
+        reason: "构造验收必读范围，不是专业类目标准",
+      },
+      {
+        id: "fixture-bolt-required",
+        categoryIds: ["fixture-bolt-category"],
+        stages: STAGES,
+        knowledgeIds: ["hardware-fixture"],
+        reason: "构造专业疑点分流",
+      },
+    ],
     derivationPolicies: [
       {
         id: "fixture-total-policy",
+        version: "fixture-policy-1",
+        rationale: "构造均一无赠品组合计数",
         operator: "multiply",
         targetConceptKey: "paper.total_rolls",
         inputConceptKeys: ["paper.rolls_per_bundle", "paper.bundles_per_sale"],
         targetUnit: "卷/销售单位",
+        factors: [
+          {
+            conceptKey: "paper.rolls_per_bundle",
+            unit: "卷/提",
+            kind: "count",
+            min: 0,
+            max: null,
+          },
+          {
+            conceptKey: "paper.bundles_per_sale",
+            unit: "提/销售单位",
+            kind: "count",
+            min: 0,
+            max: null,
+          },
+        ],
+        resultKind: "count",
       },
     ],
   };
+  data.systemFieldCoverage.sourceHash = hash(data.systemFields);
+  return prepareFixtureFacts(data);
 }
 export function fixtureTask(stage: Stage): Task {
   return {
@@ -269,6 +363,8 @@ export function fixtureValues(): FilledValue[] {
         evidence("bundles", "每销售单位4提"),
       ],
       derivation: {
+        policyId: "fixture-total-policy",
+        policyVersion: "fixture-policy-1",
         operator: "multiply",
         inputs: [
           { sourceId: "fixture-source", factId: "per-bundle" },
@@ -286,9 +382,11 @@ export function fixtureOutput(stage: Stage): any {
     return {
       categoryId,
       baselineVersion: "fixture-baseline-1",
-      attributes: fixtureSnapshot().attributes.map((a) => ({
-        ...a,
-        baselineAttributeId: a.id,
+      attributes: fixtureSnapshot().attributes,
+      bindings: fixtureSnapshot().families[0]!.bindings.map((b) => ({
+        ...b,
+        categoryId,
+        baselineAttributeId: b.attributeId,
       })),
       unresolved: ["构造样例，需人工判定必要性"],
     };
@@ -308,7 +406,7 @@ export function fixtureOutput(stage: Stage): any {
           objectId: "fixture-candidate",
           severity: "medium",
           issue: "构造候选仍需人工采用，离线模拟不证明审核能力",
-          sourceIds: [],
+          references: [],
         },
       ],
       unresolved: ["尚未进行真实业务和小屏验收"],
@@ -320,7 +418,7 @@ export function fixtureOutput(stage: Stage): any {
       {
         topic: "重量口径",
         impact: "不可将净重与标称重量直接合并",
-        sourceIds: [],
+        references: [],
         needsProfessionalReview: true,
       },
     ],
@@ -371,7 +469,7 @@ export function scriptedFetch(
   return { fetch, requests };
 }
 export function happyScript(stage: Stage) {
-  const call =
+  let call =
     stage === "sku-filling"
       ? functionCall("calculate_value", {
           attributeId: "fixture-total",
@@ -395,15 +493,56 @@ export function happyScript(stage: Stage) {
               length: 8000,
             });
   return scriptedFetch([
-    [
-      {
-        type: "reasoning",
-        content: [
-          { type: "reasoning_text", text: "offline fixture reasoning" },
-        ],
-      },
-      call,
-    ],
+    (request) => {
+      if (stage === "sku-filling") {
+        const input = JSON.parse(request.input[0].content);
+        const target = input.contractAttributes.find(
+          (a: any) => a.id === "fixture-total",
+        );
+        const policy = input.sharedContext.calculationPolicies
+          .flatMap((p: any) => p.items)
+          .find(
+            (p: any) =>
+              p.targetConceptKey === target.conceptKey &&
+              p.targetUnit === target.unit,
+          );
+        if (!policy)
+          throw Error(
+            "calculation policy was not discoverable in actual request",
+          );
+        const inputs = policy.factors.map((factor: any) => {
+          for (const s of input.evidence) {
+            const fact = s.facts.find(
+              (f: any) =>
+                f.conceptKey === factor.conceptKey &&
+                f.unit === factor.unit &&
+                f.scope === target.scope,
+            );
+            if (fact) return { sourceId: s.id, factId: fact.id };
+          }
+          throw Error("required policy factor absent from actual request");
+        });
+        call = functionCall("calculate_value", {
+          attributeId: target.id,
+          derivation: {
+            policyId: policy.id,
+            policyVersion: policy.version,
+            operator: policy.operator,
+            targetUnit: policy.targetUnit,
+            inputs,
+          },
+        });
+      }
+      return [
+        {
+          type: "reasoning",
+          content: [
+            { type: "reasoning_text", text: "offline fixture reasoning" },
+          ],
+        },
+        call,
+      ];
+    },
     (request) => {
       const returned = request.input.find(
         (i: any) =>

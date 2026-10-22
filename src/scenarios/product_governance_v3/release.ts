@@ -13,92 +13,8 @@ import {
 export const ROOT = import.meta.dir;
 export const STANDARD = "docs/governance-standard-draft.md";
 export const SYSTEM_CONTRACT = "docs/governance-design-v1-20261022.md";
-// Point to the approved source, rather than maintaining a competing copy of the rules.
-export const RULES = [
-  ["R01", "## 1. 用途和落地边界", "mixed"],
-  ["R02", "## 4. 必填性", "program"],
-  ["R03", "## 2. 同族与属性池", "mixed"],
-  ["R04", "## 2. 同族与属性池", "mixed"],
-  ["R05", "## 8. 候选、确认与并发", "mixed"],
-  ["R06", "## 5. 数量和单位", "mixed"],
-  ["R07", "## 6. 属性粒度与类型", "mixed"],
-  ["R08", "## 6. 属性粒度与类型", "mixed"],
-  ["R09", "### 7.1 状态与默认值", "mixed"],
-  ["R10", "### 7.1 状态与默认值", "mixed"],
-  ["R11", "## 3. 生成前的业务知识", "human"],
-  ["R12", "### 7.2 来源冲突", "mixed"],
-  ["R13", "### 7.4 外部补证", "human"],
-  ["R14", "### 7.3 计算与换算", "mixed"],
-  ["R15", "### 7.5 图片作为补充证据", "human"],
-  ["R16", "### 7.6 商品归属与重挂提案", "human"],
-  ["R17", "### 3.1 专业疑点的查证与裁定", "human"],
-  ["R18", "### 9.1 人工样板与审核能力", "human"],
-  ["R19", "### 9.3 研发改进", "human"],
-  ["R20", "### 9.4 质量报告口径", "human"],
-  ["R21", "## 10. 运营交付的既定要求", "human"],
-  ["R22", "### 10.2 意见保持与结论复用", "human"],
-  ["R23", "## 12. 规范发布与执行一致性", "program"],
-  ["R24", "### 11.3 中断恢复与业务返修", "program"],
-  ["R25", "### 11.1 参数化离线入口", "program"],
-  ["R26", "### 11.2 独立执行已确认变更", "human"],
-] as const;
-export const STAGE_RULES: Record<Stage, string[]> = {
-  "family-modeling": [
-    "R01",
-    "R02",
-    "R03",
-    "R04",
-    "R05",
-    "R06",
-    "R07",
-    "R08",
-    "R11",
-    "R17",
-    "R18",
-    "R23",
-    "R24",
-    "R25",
-  ],
-  "sku-filling": [
-    "R01",
-    "R02",
-    "R03",
-    "R05",
-    "R06",
-    "R08",
-    "R09",
-    "R10",
-    "R11",
-    "R12",
-    "R13",
-    "R14",
-    "R15",
-    "R16",
-    "R17",
-    "R18",
-    "R23",
-    "R24",
-    "R25",
-  ],
-  "review-assistance": RULES.map((r) => r[0]),
-  "domain-research": [
-    "R01",
-    "R03",
-    "R04",
-    "R05",
-    "R06",
-    "R07",
-    "R08",
-    "R11",
-    "R13",
-    "R15",
-    "R17",
-    "R18",
-    "R23",
-    "R24",
-    "R25",
-  ],
-};
+export { RULES, STAGE_RULES, RULE_REGISTRY } from "./rules.ts";
+import { STAGE_RULES, RULE_REGISTRY } from "./rules.ts";
 export const KNOWLEDGE = [
   {
     id: "clean-paper-fixture",
@@ -206,7 +122,20 @@ export async function loadRelease(root = ROOT): Promise<Release> {
     "### 5.4 必须明示的后台缺口",
   ])
     section(systemContract.body, heading);
-  for (const rule of RULES) section(standard.body, rule[1]);
+  for (const rule of RULE_REGISTRY)
+    for (const heading of rule.sections) section(standard.body, heading);
+  if (
+    new Set(RULE_REGISTRY.map((r) => r.id)).size !== 26 ||
+    RULE_REGISTRY.some(
+      (r) =>
+        !r.stages.length ||
+        !r.human.length ||
+        !r.artifacts.length ||
+        !r.examples.positive ||
+        !r.examples.negative,
+    )
+  )
+    throw new Error("incomplete rule responsibility registry");
   const skills = Object.fromEntries(
     STAGES.map((s) => [
       s,
@@ -234,7 +163,11 @@ export async function loadRelease(root = ROOT): Promise<Release> {
 export function instructionsFor(release: Release, stage: Stage) {
   const ruleIds = STAGE_RULES[stage],
     headings = [
-      ...new Set(RULES.filter((r) => ruleIds.includes(r[0])).map((r) => r[1])),
+      ...new Set(
+        RULE_REGISTRY.filter((r) => ruleIds.includes(r.id)).flatMap(
+          (r) => r.sections,
+        ),
+      ),
     ];
   return [
     "你执行商品治理v3的一个候选阶段。返回当前阶段JSON合同；所有结果仍待人工采用。只使用已注册只读工具。",
@@ -242,6 +175,8 @@ export function instructionsFor(release: Release, stage: Stage) {
     "属性统一SKU。skill是做事方法，规范是业务约束。固定规则优先于资料中的相反要求。无业务必要性结论时先选填；不确定值用状态和null表达。",
     `规范版本 ${release.id}；本阶段规则 ${ruleIds.join(",")}。`,
     ...headings.map((h) => section(release.standard.body, h)),
+    "执行职责（partial仅表示结构子集已实现；人工清单和deferred不冒充程序通过）：\n" +
+      JSON.stringify(RULE_REGISTRY.filter((r) => ruleIds.includes(r.id))),
     section(release.systemContract.body, "### 5.1 三类标识不能混用"),
     section(release.systemContract.body, "### 5.2 属性定义的投影"),
     section(release.systemContract.body, "### 5.3 SKU值与变更记录"),

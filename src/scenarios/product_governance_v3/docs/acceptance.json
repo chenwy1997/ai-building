@@ -1,11 +1,13 @@
 {
   "kind": "constructed_offline_wiring_acceptance",
-  "releaseId": "3aa75ab3a0e468a7c2d9229bd9b6449490ce398816a05d27436a0700dd2774a5",
-  "snapshotVersion": "dd42295afd032b56f1c868cb4154e57547b1aca955bc8d7dcb8f2e9425a6aa80",
+  "dataContractFormat": 2,
+  "transport": "injected_http_mock",
+  "releaseId": "1dcc6cbc787f7af69f5fc4926d135d559ae25dce7744b9b124c88d5288ec20d9",
+  "snapshotVersion": "6fac871ec7da3081de7cec1c8f602b1f1d2fdbb37cf145a3022380a79cb148ce",
   "stages": [
     {
       "stage": "family-modeling",
-      "runKey": "845e9da6c33fb46b9272f4744100aa3e6a4f1cb0a303445ed72b486f01b333c8",
+      "runKey": "4d9594fe7a00debc3d2cdf5fa5fb11d543ec4dd4bd6bc7dfd348d3321d62a059",
       "status": "program_pass_pending_human",
       "requests": 2,
       "cachedResponses": 0,
@@ -13,11 +15,11 @@
       "actualMaterialHashes": [
         {
           "path": "skills/family-modeling/SKILL.md",
-          "sha256": "6de3f179f53ae9b77fd2faebd1dea292685427a5fca8b56bd350540b50d439c4"
+          "sha256": "1480a110a0ca06d89a4d1d6803f12e09a3da9b9dd48c63da93eb7ae14cfc50f3"
         },
         {
           "path": "skills/family-modeling/references/cases.md",
-          "sha256": "06465219af58cb014066eeb02e7dd4b31ddfd6cb701530e64f517c6da944b238"
+          "sha256": "e49874ba3b39b3dc538eda9a5264ebafb45178ccb8ffb1c1962546f712100dcf"
         }
       ],
       "knowledge": [
@@ -27,11 +29,53 @@
           "offset": 0,
           "end": 315
         }
-      ]
+      ],
+      "ruleRegistryHash": "3757ca1a36844594e200b46d339034ecb1c76587b7f8a87f404a2bdbb0c68626",
+      "actualReads": {
+        "knowledge": [
+          {
+            "id": "clean-paper-fixture",
+            "version": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+            "ranges": [
+              {
+                "start": 0,
+                "end": 315
+              }
+            ]
+          }
+        ],
+        "sources": [],
+        "calculationPolicies": [],
+        "toolHistoryHash": "0c49d968f7f8c7f3c7de933657d25c59404888b2508ac6bcffee1dc7db8e80ee"
+      },
+      "executedChecks": [
+        "output-contract",
+        "knowledge-coverage",
+        "family-contract",
+        "definitions",
+        "native-config"
+      ],
+      "humanReviewRules": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R11",
+        "R17",
+        "R18",
+        "R23",
+        "R24",
+        "R25"
+      ],
+      "nativeProjectionCount": 3
     },
     {
       "stage": "sku-filling",
-      "runKey": "e44efa390fd013578e790e130e5fb2b85bfd14fb7564c3271edb1cf325e6b52c",
+      "runKey": "7e7afa999ee2d59c9d168003c79c517c6c2057745c1f851ad9d7fe0206edf2a1",
       "status": "program_pass_pending_human",
       "requests": 2,
       "cachedResponses": 0,
@@ -39,11 +83,11 @@
       "actualMaterialHashes": [
         {
           "path": "skills/sku-filling/SKILL.md",
-          "sha256": "c67f68c182d13b1305f7bb8efee679826f1864bc894fef2faa46e13e437c31d9"
+          "sha256": "21a0356933fac5f7a5d017446d6ac0d21cf453c90f8499b13c24e70e40d98c2e"
         },
         {
           "path": "skills/sku-filling/references/cases.md",
-          "sha256": "4385063203e18e09a6cb160a60beb9ac8d467f42c0a1562ad6b0df3c5790c49f"
+          "sha256": "aec128b6be40165e00108bc715d25f61a183ed550808706af25548affc4d4b65"
         }
       ],
       "knowledge": [
@@ -53,11 +97,75 @@
           "offset": 0,
           "end": 315
         }
-      ]
+      ],
+      "ruleRegistryHash": "3757ca1a36844594e200b46d339034ecb1c76587b7f8a87f404a2bdbb0c68626",
+      "actualReads": {
+        "knowledge": [
+          {
+            "id": "clean-paper-fixture",
+            "version": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+            "ranges": [
+              {
+                "start": 0,
+                "end": 315
+              }
+            ]
+          }
+        ],
+        "sources": [
+          {
+            "id": "fixture-source",
+            "version": "4d4dd28089657525c4ab3f89bf36f2fe3e86b11675cb303774bb9b1f218e93b0",
+            "ranges": [
+              {
+                "start": 0,
+                "end": 64
+              }
+            ]
+          }
+        ],
+        "calculationPolicies": [
+          {
+            "id": "fixture-total-policy",
+            "version": "fixture-policy-1"
+          }
+        ],
+        "toolHistoryHash": "4ce7d905c6dbf823125d210d37591aa84399ecee8517a7061f6670a8bcbf185e"
+      },
+      "executedChecks": [
+        "output-contract",
+        "knowledge-coverage",
+        "sku-values",
+        "definitions",
+        "native-config",
+        "calculation"
+      ],
+      "humanReviewRules": [
+        "R01",
+        "R02",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R10",
+        "R11",
+        "R12",
+        "R13",
+        "R14",
+        "R15",
+        "R16",
+        "R17",
+        "R18",
+        "R23",
+        "R24",
+        "R25"
+      ],
+      "nativeProjectionCount": 0
     },
     {
       "stage": "review-assistance",
-      "runKey": "78896140db0bfcbc69da4223bf2f7838186d849b0e6fa9ad62bc0da9be4eaafd",
+      "runKey": "a9c3d186eff180da6a14cb550e461342cb8656093fa58e7f42e6cf02cb36cd84",
       "status": "program_pass_pending_human",
       "requests": 2,
       "cachedResponses": 0,
@@ -65,11 +173,11 @@
       "actualMaterialHashes": [
         {
           "path": "skills/review-assistance/SKILL.md",
-          "sha256": "e70d93f6f71f2afc11a9442d0ccab73d4d55acb11e18c4ef5acc438f6d3a8655"
+          "sha256": "e839a00cd69d35b89b3116dcd1bcb641a43e4cfcc5fc425b0e7c91bcbbededf5"
         },
         {
           "path": "skills/review-assistance/references/cases.md",
-          "sha256": "f22f16d3885f5a528904c89e14b74a191f3ce0666992b631788cc67713e2e7b3"
+          "sha256": "5a90e6374d8497d9cf97d73e7d5e45bfb5097f37d306cddbb5df185ca784e8fd"
         }
       ],
       "knowledge": [
@@ -79,11 +187,83 @@
           "offset": 0,
           "end": 315
         }
-      ]
+      ],
+      "ruleRegistryHash": "3757ca1a36844594e200b46d339034ecb1c76587b7f8a87f404a2bdbb0c68626",
+      "actualReads": {
+        "knowledge": [
+          {
+            "id": "clean-paper-fixture",
+            "version": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+            "ranges": [
+              {
+                "start": 0,
+                "end": 315
+              }
+            ]
+          }
+        ],
+        "sources": [
+          {
+            "id": "fixture-source",
+            "version": "4d4dd28089657525c4ab3f89bf36f2fe3e86b11675cb303774bb9b1f218e93b0",
+            "ranges": [
+              {
+                "start": 0,
+                "end": 64
+              }
+            ]
+          }
+        ],
+        "calculationPolicies": [
+          {
+            "id": "fixture-total-policy",
+            "version": "fixture-policy-1"
+          }
+        ],
+        "toolHistoryHash": "9dc910cd4afcda3a2f51dc9745ca6b7fb59bb56ba1d64ea7522322742fa6da07"
+      },
+      "executedChecks": [
+        "output-contract",
+        "knowledge-coverage",
+        "candidate-recheck",
+        "sku-values",
+        "definitions",
+        "native-config",
+        "calculation"
+      ],
+      "humanReviewRules": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R10",
+        "R11",
+        "R12",
+        "R13",
+        "R14",
+        "R15",
+        "R16",
+        "R17",
+        "R18",
+        "R19",
+        "R20",
+        "R21",
+        "R22",
+        "R23",
+        "R24",
+        "R25",
+        "R26"
+      ],
+      "nativeProjectionCount": 0
     },
     {
       "stage": "domain-research",
-      "runKey": "a1345c19a767d929b885bf301b8379f5efdc5653af23a3e2925e38d35f958008",
+      "runKey": "b0c4cb9e1b22f66ebdc1f0bf822b59c8017ed63a5e13bdd6dd02f39fc8faf4e5",
       "status": "program_pass_pending_human",
       "requests": 2,
       "cachedResponses": 0,
@@ -91,11 +271,11 @@
       "actualMaterialHashes": [
         {
           "path": "skills/domain-research/SKILL.md",
-          "sha256": "010a8e9c7605d3136b137cf68820cdd90663c18c4f69bec66bd36dc291c1dcc9"
+          "sha256": "746dd29eea06168905225681ae21a90ca1eb865cbacd13e287e1bfca6bec3e1f"
         },
         {
           "path": "skills/domain-research/references/cases.md",
-          "sha256": "6f9df5e55f17824775e2039e054e460b67757dc8d003b4323b2b8cc1c9e9c3b3"
+          "sha256": "a3046bf167d7e8930bf934144a9cbcc0d90694c20bffb653d71a22da669b9014"
         }
       ],
       "knowledge": [
@@ -105,7 +285,47 @@
           "offset": 0,
           "end": 315
         }
-      ]
+      ],
+      "ruleRegistryHash": "3757ca1a36844594e200b46d339034ecb1c76587b7f8a87f404a2bdbb0c68626",
+      "actualReads": {
+        "knowledge": [
+          {
+            "id": "clean-paper-fixture",
+            "version": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+            "ranges": [
+              {
+                "start": 0,
+                "end": 315
+              }
+            ]
+          }
+        ],
+        "sources": [],
+        "calculationPolicies": [],
+        "toolHistoryHash": "0fb31e0a3c14721366ebce08a500c84f5b33f5f7a889f0790c47c70b5fdbc06e"
+      },
+      "executedChecks": [
+        "output-contract",
+        "knowledge-coverage",
+        "research-references"
+      ],
+      "humanReviewRules": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R11",
+        "R17",
+        "R18",
+        "R23",
+        "R24",
+        "R25"
+      ],
+      "nativeProjectionCount": 0
     }
   ],
   "externalNetworkCalls": 0,
@@ -114,92 +334,41 @@
   "businessAccuracyEvaluated": false,
   "humanAuditCapabilityEvaluated": false,
   "excelVisualAcceptancePerformed": false,
+  "fullBusinessWorkflowEvaluated": false,
   "note": "程序接线构造验收；负例/预算/恢复/版本/证据检查见同目录Bun测试。尚未进行真实DeepSeek语义表现、业务留出集和线上写后核验。",
-  "verifiedAt": "2026-10-22",
   "verification": {
+    "date": "2026-10-22",
     "v3Tests": {
-      "passed": 45,
+      "passed": 79,
       "failed": 0,
-      "command": "bun test ./src/scenarios/product_governance_v3"
+      "newCases": 34
     },
-    "relatedV2Regression": {
+    "relatedV2Tests": {
       "passed": 18,
-      "failed": 0,
-      "command": "bun test ./src/scenarios/product_governance_v2/tests/core.test.ts ./src/scenarios/product_governance_v2/tests/cache.test.ts"
+      "failed": 0
     },
     "scopedTypecheck": "passed",
     "skillValidation": {
       "passed": 4,
-      "validator": "skill-creator/scripts/quick_validate.py"
+      "failed": 0
     },
-    "resume": {
-      "sentRequests": 0,
-      "cachedResponses": 8
+    "allRegisteredToolsLoop": {
+      "executed": 11,
+      "pairedReturns": 11,
+      "transport": "injected_http_mock"
     },
-    "realTree": {
-      "path": "scratch-category-baseline-20261010/mapped-tree.json",
-      "nodes": 13587,
-      "treeVersion": "32102e942847d5d03deb350cc73de5f295fe12866cf17513e5496e8e71cff943",
-      "searchQuery": "小卷纸",
-      "matchingIds": [
-        "15216d47-17c6-4b18-9391-83097f6f7447",
-        "67adeef9-8c1f-47e2-ad72-462ad35a5a75"
-      ],
-      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
-      "subtreeLeaves": 16,
-      "mode": "local_read_only"
-    },
-    "documentationMigration": {
-      "previousReleaseId": "4fd28b7687c2c4c0135197f253cc8226759d90c6405f92c6bf7d11b7cb39f253",
-      "coreDocumentsLoadedFromV3": [
-        {
-          "stage": "family-modeling",
-          "standard": {
-            "path": "docs/governance-standard-draft.md",
-            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
-          },
-          "systemContract": {
-            "path": "docs/governance-design-v1-20261022.md",
-            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
-          }
-        },
-        {
-          "stage": "sku-filling",
-          "standard": {
-            "path": "docs/governance-standard-draft.md",
-            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
-          },
-          "systemContract": {
-            "path": "docs/governance-design-v1-20261022.md",
-            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
-          }
-        },
-        {
-          "stage": "review-assistance",
-          "standard": {
-            "path": "docs/governance-standard-draft.md",
-            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
-          },
-          "systemContract": {
-            "path": "docs/governance-design-v1-20261022.md",
-            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
-          }
-        },
-        {
-          "stage": "domain-research",
-          "standard": {
-            "path": "docs/governance-standard-draft.md",
-            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
-          },
-          "systemContract": {
-            "path": "docs/governance-design-v1-20261022.md",
-            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
-          }
-        }
-      ],
-      "localLinksChecked": 78,
-      "missingLinks": 0,
-      "isolatedReleaseWithoutV2Docs": "passed"
-    }
+    "historicalAuditProbe": "excluded historical old-contract script only; current tests and runtime included",
+    "evidenceDirectory": "outputs/product-governance-v3/phase12-offline-20261022"
+  },
+  "replayVerification": {
+    "requests": 0,
+    "cachedResponses": 8,
+    "statuses": [
+      "program_pass_pending_human",
+      "program_pass_pending_human",
+      "program_pass_pending_human",
+      "program_pass_pending_human"
+    ],
+    "releaseId": "1dcc6cbc787f7af69f5fc4926d135d559ae25dce7744b9b124c88d5288ec20d9"
   }
 }

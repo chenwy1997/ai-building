@@ -1,1 +1,5 @@
-{ "extends": "../../../tsconfig.json", "include": ["./**/*.ts"], "exclude": [] }
+{
+  "extends": "../../../tsconfig.json",
+  "include": ["./**/*.ts"],
+  "exclude": ["./docs/audit/implementation-probes-20261022.ts"]
+}

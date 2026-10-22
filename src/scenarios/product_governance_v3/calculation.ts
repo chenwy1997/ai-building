@@ -7,9 +7,11 @@ import {
 } from "./core.ts";
 import type { Derivation } from "./contracts.ts";
 import type { DataSnapshot } from "./snapshot.ts";
+import { valueConstraintErrors } from "./native-contract.ts";
 
 export interface EvidenceReads {
   has(sourceId: string, quote: string): boolean;
+  hasPolicy(id: string, version: string): boolean;
 }
 export function resolveFact(
   snapshot: DataSnapshot,
@@ -23,6 +25,11 @@ export function resolveFact(
     throw new Blocked(
       "unread_fact",
       "factor must reference a frozen fact in actually read source text",
+    );
+  if (source.factPreparation.status !== "reviewed")
+    throw new Blocked(
+      "unreviewed_fact",
+      "candidate facts cannot authorize a known value/calculation; prepare and review facts first",
     );
   return fact;
 }
@@ -46,12 +53,18 @@ export function calculate(
   const policy = snapshot.data.derivationPolicies.find(
     (p) =>
       p.operator === derivation.operator &&
+      p.id === derivation.policyId &&
+      p.version === derivation.policyVersion &&
       p.targetConceptKey === attribute.conceptKey &&
       p.targetUnit === derivation.targetUnit &&
       canonical(p.inputConceptKeys) ===
         canonical(facts.map((f) => f.conceptKey)),
   );
-  if (!policy || attribute.unit !== derivation.targetUnit)
+  if (
+    !policy ||
+    !reads.hasPolicy(policy.id, policy.version) ||
+    attribute.unit !== derivation.targetUnit
+  )
     throw new Blocked(
       "calculation_policy",
       "no frozen semantic factor policy for target",
@@ -69,6 +82,39 @@ export function calculate(
       "numeric factors must share the target measurement scope",
     );
   const values = facts.map((f) => f.value as number);
+  for (const [i, f] of facts.entries()) {
+    const constraint = policy.factors[i]!;
+    const n = values[i]!;
+    if (
+      f.unit !== constraint.unit ||
+      (constraint.kind === "count" && (!Number.isInteger(n) || n < 0)) ||
+      n < (constraint.min ?? -Infinity) ||
+      n > (constraint.max ?? Infinity)
+    )
+      throw new Blocked(
+        "factor_range",
+        "factor violates frozen unit/count/range policy",
+      );
+    for (const s of snapshot.data.sources.filter(
+      (s) =>
+        s.productId === task.productId &&
+        s.salesUnitId === snapshot.product(task.productId!).salesUnitId,
+    ))
+      if (
+        s.facts.some(
+          (other) =>
+            other.conceptKey === f.conceptKey &&
+            other.scope === f.scope &&
+            other.unit === f.unit &&
+            other.value !== null &&
+            canonical(other.value) !== canonical(f.value),
+        )
+      )
+        throw new Blocked(
+          "factor_conflict",
+          "applicable facts disagree on a calculation factor",
+        );
+  }
   let value: number;
   if (derivation.operator === "convert") {
     if (facts.length !== 1)
@@ -85,17 +131,37 @@ export function calculate(
         "quantity calculation needs two factors",
       );
     const product = snapshot.product(task.productId!);
-    const assumption = (conceptKey: string, expected: string) =>
-      product.assumptionSourceIds.some((id) => {
+    const assumption = (conceptKey: string, expected: string) => {
+      const applicable = product.sourceIds.flatMap((id) =>
+        snapshot
+          .source(id, task)
+          .facts.filter(
+            (f) =>
+              f.conceptKey === conceptKey &&
+              f.scope === attribute.scope &&
+              f.unit === null,
+          ),
+      );
+      if (applicable.some((f) => f.value !== expected))
+        throw new Blocked(
+          "assumption_conflict",
+          "applicable sales assumptions conflict or remain unknown",
+        );
+      return product.assumptionSourceIds.some((id) => {
         const source = snapshot.source(id, task);
-        return source.facts.some(
-          (f) =>
-            f.conceptKey === conceptKey &&
-            f.value === expected &&
-            f.scope === attribute.scope &&
-            reads.has(id, f.quote),
+        return (
+          source.factPreparation.status === "reviewed" &&
+          source.facts.some(
+            (f) =>
+              f.conceptKey === conceptKey &&
+              f.value === expected &&
+              f.scope === attribute.scope &&
+              f.unit === null &&
+              reads.has(id, f.quote),
+          )
         );
       });
+    };
     if (
       product.composition !== "homogeneous" ||
       product.giftState !== "none" ||
@@ -130,19 +196,20 @@ export function calculate(
         "unit_mismatch",
         "calculation does not produce target unit",
       );
-    if (!Number.isInteger(value) || value < 0)
-      throw new Blocked(
-        "invalid_count",
-        "count must be a non-negative integer",
-      );
   }
+  if (policy.resultKind === "count" && (!Number.isInteger(value) || value < 0))
+    throw new Blocked("invalid_count", "count must be a non-negative integer");
   if (!Number.isFinite(value))
     throw new Blocked("invalid_calculation", "non-finite result");
+  const constraints = valueConstraintErrors(attribute, value);
+  if (constraints.length)
+    throw new Blocked("calculation_range", constraints.join("; "));
   return {
     value,
     unit: attribute.unit,
     scope: attribute.scope,
     policyId: policy.id,
+    policyVersion: policy.version,
     factors: derivation.inputs,
     sourceSnapshot: snapshot.version,
   };

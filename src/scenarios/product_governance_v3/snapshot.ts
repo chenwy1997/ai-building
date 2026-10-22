@@ -5,15 +5,19 @@ import {
   list,
   nullable,
   numeric,
+  STAGES,
   freeze,
   jsonClone,
   hash,
+  factPreparationHash,
+  REQUIRED_SYSTEM_OWNERS,
+  normalized,
   Blocked,
   type Snapshot,
   type Task,
   type Family,
 } from "./core.ts";
-import { attributeSchema, valueSchema } from "./contracts.ts";
+import { attributeSchema, bindingSchema, valueSchema } from "./contracts.ts";
 import { CategoryIndex } from "./catalog.ts";
 
 const strings = list(text()),
@@ -34,8 +38,15 @@ const strings = list(text()),
         kind: text("direct"),
       }),
     ),
+    factPreparation: object({
+      status: text("candidate", "reviewed"),
+      kind: text("fixture", "human"),
+      recordId: text(),
+      contentHash: text(),
+    }),
   });
 const snapshotSchema = object({
+  format: { type: "integer", enum: [2] },
   version: text(),
   kind: text("fixture", "local"),
   tree: object(
@@ -49,6 +60,13 @@ const snapshotSchema = object({
   systemFields: list(
     object({ key: text(), names: strings, conceptKeys: strings }),
   ),
+  systemFieldCoverage: object({
+    version: text(),
+    source: text(),
+    sourceHash: text(),
+    status: text("complete", "partial"),
+    coveredKeys: strings,
+  }),
   families: list(
     object({
       id: text(),
@@ -57,6 +75,7 @@ const snapshotSchema = object({
       status: text("confirmed", "candidate", "in_progress", "failed"),
       runId: nullable(text()),
       attributes: list(attributeSchema),
+      bindings: list(bindingSchema),
     }),
   ),
   attributes: list(attributeSchema),
@@ -73,13 +92,35 @@ const snapshotSchema = object({
     }),
   ),
   knowledgeIds: strings,
+  knowledgeRequirements: list(
+    object({
+      id: text(),
+      categoryIds: list(text(), 1),
+      stages: list(text(...STAGES), 1),
+      knowledgeIds: list(text(), 1),
+      reason: text(),
+    }),
+  ),
   derivationPolicies: list(
     object({
       id: text(),
+      version: text(),
+      rationale: text(),
       operator: text("multiply", "divide", "convert"),
       targetConceptKey: text(),
       inputConceptKeys: strings,
       targetUnit: text(),
+      factors: list(
+        object({
+          conceptKey: text(),
+          unit: text(),
+          kind: text("count", "measurement"),
+          min: nullable(numeric),
+          max: nullable(numeric),
+        }),
+        1,
+      ),
+      resultKind: text("count", "measurement"),
     }),
   ),
 });
@@ -100,9 +141,88 @@ export class DataSnapshot {
     ids(data.sources, "sources");
     ids(data.products, "products");
     ids(data.derivationPolicies, "derivation policies");
+    ids(data.knowledgeRequirements, "knowledge requirements");
+    if (
+      new Set(data.systemFields.map((f) => f.key)).size !==
+      data.systemFields.length
+    )
+      throw Error("duplicate system field keys");
+    const coverage = data.systemFieldCoverage;
+    const requiredOwners = REQUIRED_SYSTEM_OWNERS;
+    if (
+      coverage.status !== "complete" ||
+      data.systemFields.length === 0 ||
+      requiredOwners.some(
+        (owner) =>
+          !coverage.coveredKeys.includes(owner.key) ||
+          !data.systemFields.some(
+            (f) =>
+              f.key === owner.key &&
+              owner.names.every((n) =>
+                f.names.some((v) => normalized(v) === normalized(n)),
+              ) &&
+              owner.conceptKeys.every((k) =>
+                f.conceptKeys.some((v) => normalized(v) === normalized(k)),
+              ),
+          ),
+      ) ||
+      data.systemFields.some(
+        (f) =>
+          !f.names.length ||
+          !f.conceptKeys.length ||
+          !coverage.coveredKeys.includes(f.key),
+      ) ||
+      coverage.coveredKeys.some(
+        (key) => !data.systemFields.some((f) => f.key === key),
+      )
+    )
+      throw new Blocked(
+        "system_field_coverage",
+        "complete, versioned system field responsibilities are required, including brandId/supplierId/salesUnit/specName",
+      );
+    if (coverage.sourceHash !== hash(data.systemFields))
+      throw new Blocked(
+        "system_field_coverage",
+        "system field coverage hash does not match responsibilities",
+      );
+    for (const r of data.knowledgeRequirements)
+      r.categoryIds.forEach((id) => this.tree.get(id));
+    for (const p of data.derivationPolicies) {
+      if (
+        p.factors.length !== p.inputConceptKeys.length ||
+        p.factors.some(
+          (f, i) =>
+            f.conceptKey !== p.inputConceptKeys[i] ||
+            (f.min !== null && f.max !== null && f.min > f.max),
+        ) ||
+        p.factors.length !== (p.operator === "convert" ? 1 : 2)
+      )
+        throw Error("invalid derivation policy factors");
+    }
     for (const f of data.families) {
       f.members.forEach((id) => this.tree.get(id));
       ids(f.attributes, "family attributes");
+      const bindingKeys = f.bindings.map(
+        (b) => `${b.attributeId}|${b.categoryId ?? "*"}`,
+      );
+      if (
+        new Set(bindingKeys).size !== bindingKeys.length ||
+        f.bindings.some(
+          (b) =>
+            !f.attributes.some((a) => a.id === b.attributeId) ||
+            (b.categoryId !== null && !f.members.includes(b.categoryId)),
+        )
+      )
+        throw Error("invalid/duplicate family binding");
+      if (
+        f.attributes.some(
+          (a) =>
+            !f.bindings.some(
+              (b) => b.attributeId === a.id && b.categoryId === null,
+            ),
+        )
+      )
+        throw Error("family definition needs a template binding");
       if (f.status === "candidate" && !f.runId)
         throw Error("candidate needs runId");
     }
@@ -120,6 +240,16 @@ export class DataSnapshot {
           throw Error("invalid product source binding");
     }
     for (const s of data.sources) {
+      if (s.factPreparation.contentHash !== factPreparationHash(s))
+        throw new Blocked(
+          "fact_preparation_drift",
+          "facts changed after preparation record or source context drifted",
+        );
+      if (data.kind === "local" && s.factPreparation.kind === "fixture")
+        throw new Blocked(
+          "fixture_facts",
+          "fixture facts cannot enter local business data",
+        );
       if (
         !data.products.some(
           (p) =>
@@ -198,7 +328,32 @@ export class DataSnapshot {
         "missing_contract",
         "SKU filling/calculation requires an applicable fixed family contract; the global pool is not a contract",
       );
-    return baseline.attributes;
+    return baseline.attributes.map((a) => ({
+      ...a,
+      binding: {
+        ...(baseline.bindings.find(
+          (b) => b.attributeId === a.id && b.categoryId === task.categoryId,
+        ) ??
+          baseline.bindings.find(
+            (b) => b.attributeId === a.id && b.categoryId === null,
+          )!),
+        categoryId: task.categoryId,
+      },
+    }));
+  }
+  knowledgeRequirements(task: Task) {
+    const stages = [task.stage];
+    const candidateStage = (task.candidate as { stage?: string } | null)?.stage;
+    if (
+      task.stage === "review-assistance" &&
+      ["family-modeling", "sku-filling"].includes(candidateStage ?? "")
+    )
+      stages.push(candidateStage as Task["stage"]);
+    return this.data.knowledgeRequirements.filter(
+      (r) =>
+        r.categoryIds.includes(task.categoryId) &&
+        r.stages.some((s) => stages.includes(s)),
+    );
   }
   assertTask(task: Task) {
     if (!task.runId || !task.question)

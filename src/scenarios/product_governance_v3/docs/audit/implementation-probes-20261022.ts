@@ -1,3 +1,5 @@
+// HISTORICAL: requires contracts at commit 3ad6fa3041; observations are frozen.
+// Current fixes are asserted in ../../contracts-regression.test.ts. Do not run this old schema against format 2.
 // Read-only implementation audit. Observations are diagnostics, not regression tests
 // asserting that current defects should be retained. No paid transport is used.
 import { mkdir, readFile, writeFile } from "node:fs/promises";

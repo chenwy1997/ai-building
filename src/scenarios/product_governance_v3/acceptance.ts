@@ -29,6 +29,7 @@ export async function offlineAcceptance(outDir: string) {
     });
     if (
       artifact.checks.status !== "program_pass_pending_human" ||
+      artifact.checks.knowledgeGaps.length !== 0 ||
       client.calls + client.cacheHits !== 2 ||
       artifact.toolCount !== 1
     )
@@ -45,10 +46,17 @@ export async function offlineAcceptance(outDir: string) {
       modelToolCalls: artifact.toolCount,
       actualMaterialHashes: artifact.manifest.skill,
       knowledge: artifact.manifest.knowledge,
+      ruleRegistryHash: artifact.manifest.ruleRegistryHash,
+      actualReads: artifact.actualReads,
+      executedChecks: artifact.checks.executedChecks,
+      humanReviewRules: artifact.checks.humanReviewRules,
+      nativeProjectionCount: artifact.nativeProjections.length,
     });
   }
   const report = {
     kind: "constructed_offline_wiring_acceptance",
+    dataContractFormat: snapshot.data.format,
+    transport: "injected_http_mock",
     releaseId: release.id,
     snapshotVersion: snapshot.version,
     stages,
@@ -58,6 +66,7 @@ export async function offlineAcceptance(outDir: string) {
     businessAccuracyEvaluated: false,
     humanAuditCapabilityEvaluated: false,
     excelVisualAcceptancePerformed: false,
+    fullBusinessWorkflowEvaluated: false,
     note: "程序接线构造验收；负例/预算/恢复/版本/证据检查见同目录Bun测试。尚未进行真实DeepSeek语义表现、业务留出集和线上写后核验。",
   };
   await save(join(outDir, "acceptance.json"), report);

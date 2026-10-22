@@ -1,6 +1,11 @@
 import { canonical, hash, type Task, Blocked } from "./core.ts";
 import { outputSchemas } from "./contracts.ts";
-import { instructionsFor, STAGE_RULES, type Release } from "./release.ts";
+import {
+  instructionsFor,
+  STAGE_RULES,
+  RULE_REGISTRY,
+  type Release,
+} from "./release.ts";
 import { ToolRegistry } from "./tools.ts";
 import type { DataSnapshot } from "./snapshot.ts";
 import { checkResult } from "./checks.ts";
@@ -48,10 +53,24 @@ export async function assemble(
   // A bounded pool search supplements the full applicable family baseline.
   prefetched.attributePool = await tools.call(
     "search_attribute_pool",
-    { query: snapshot.tree.get(task.categoryId).name, limit: 20, cursor: null },
+    { query: null, categoryId: task.categoryId, limit: 20, cursor: null },
     "prefetch",
   );
+  prefetched.knowledgeInventory = await allPages("knowledge_list", {
+    query: null,
+  });
+  if (
+    task.stage === "sku-filling" ||
+    (task.stage === "review-assistance" &&
+      (task.candidate as any)?.stage === "sku-filling")
+  )
+    prefetched.calculationPolicies = await allPages("calculation_policies", {
+      attributeId: null,
+    });
   const knowledge = [];
+  const requiredKnowledge = new Set(
+    snapshot.knowledgeRequirements(task).flatMap((r) => r.knowledgeIds),
+  );
   for (const id of snapshot.data.knowledgeIds) {
     const k = release.knowledge[id];
     if (!k)
@@ -62,6 +81,7 @@ export async function assemble(
         "fixture knowledge cannot enter a local business snapshot",
       );
     if (
+      !requiredKnowledge.has(id) &&
       !k.hints.some((h) => snapshot.tree.get(task.categoryId).path.includes(h))
     )
       continue;
@@ -123,11 +143,17 @@ export async function assemble(
       snapshotVersion: snapshot.version,
       snapshotKind: snapshot.data.kind,
       systemFields: snapshot.data.systemFields,
+      systemFieldCoverage: snapshot.data.systemFieldCoverage,
+      ruleResponsibilities: RULE_REGISTRY.filter((r) =>
+        r.stages.includes(task.stage),
+      ),
       ...prefetched,
       knowledge,
-      knowledgeCoverage: knowledge.length
-        ? "registered_material_only"
-        : "gap_requires_research_or_human",
+      knowledgeRequirements: snapshot.knowledgeRequirements(task),
+      knowledgeGaps: tools.knowledgeGaps(),
+      knowledgeCoverage: tools.knowledgeGaps().length
+        ? "gap_requires_research_or_human"
+        : "registered_material_only",
       baselineStatus:
         snapshot.baseline(task)?.status ?? "missing_candidate_only",
     },
@@ -148,7 +174,9 @@ export async function assemble(
   const manifest = {
     releaseId: release.id,
     stage: task.stage,
+    dataContractFormat: snapshot.data.format,
     ruleIds: STAGE_RULES[task.stage],
+    ruleRegistryHash: hash(RULE_REGISTRY),
     snapshotVersion: snapshot.version,
     treeVersion: snapshot.tree.version,
     standard: { path: release.standard.path, sha256: release.standard.sha256 },

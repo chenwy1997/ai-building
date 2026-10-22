@@ -5,11 +5,18 @@ import {
   nullable,
   numeric,
   bool,
+  integer,
   type Schema,
   type Stage,
 } from "./core.ts";
 
 const strings = list(text());
+export const modelReferenceSchema = object({
+  kind: text("knowledge", "sku-source"),
+  id: text(),
+  version: text(),
+  quote: text(),
+});
 export const valueSchema: Schema = {
   anyOf: [{ type: "string" }, numeric, bool, { type: "null" }, list(text())],
 };
@@ -23,19 +30,53 @@ export const attributeSchema = object({
   unit: nullable(text()),
   enumValues: strings,
   multi: bool,
-  requiredness: text("required", "optional"),
   valueLevel: text("SKU"),
+  numberConfig: nullable(
+    object({
+      isInt: bool,
+      precision: nullable({ ...integer, minimum: 0, maximum: 15 }),
+      min: nullable(numeric),
+      max: nullable(numeric),
+    }),
+  ),
+  textConfig: nullable(
+    object({
+      format: nullable(text()),
+      minLength: nullable({ ...integer, minimum: 0 }),
+      maxLength: nullable({ ...integer, minimum: 0 }),
+      displayMethod: nullable(text()),
+      trim: bool,
+    }),
+  ),
+  optionConfig: nullable(
+    object({
+      minCount: nullable({ ...integer, minimum: 0 }),
+      maxCount: nullable({ ...integer, minimum: 0 }),
+    }),
+  ),
+  defaultValue: { type: "null" },
+  rationale: text(),
+  references: list(modelReferenceSchema),
+});
+export const bindingSchema = object({
+  attributeId: text(),
+  categoryId: nullable(text()),
+  requiredness: text("required", "optional"),
+  requirednessReason: text(),
   isKeySpec: bool,
   isPublic: bool,
   searchable: bool,
+  displayInTitle: bool,
+  displayInList: bool,
+  sortIndex: integer,
   uses: list(text("selection", "comparison", "search", "display"), 1),
-  rationale: text(),
   baselineAttributeId: nullable(text()),
   differenceReason: nullable(text()),
-  sourceIds: strings,
 });
 export const factRefSchema = object({ sourceId: text(), factId: text() });
 export const derivationSchema = object({
+  policyId: text(),
+  policyVersion: text(),
   operator: text("multiply", "divide", "convert"),
   inputs: list(factRefSchema, 1),
   targetUnit: text(),
@@ -58,6 +99,7 @@ export const outputSchemas: Record<Stage, Schema> = {
     categoryId: text(),
     baselineVersion: nullable(text()),
     attributes: list(attributeSchema, 1),
+    bindings: list(bindingSchema, 1),
     unresolved: strings,
   }),
   "sku-filling": object({
@@ -74,7 +116,7 @@ export const outputSchemas: Record<Stage, Schema> = {
         objectId: text(),
         severity: text("high", "medium", "low"),
         issue: text(),
-        sourceIds: strings,
+        references: list(modelReferenceSchema),
       }),
     ),
     unresolved: strings,
@@ -86,7 +128,7 @@ export const outputSchemas: Record<Stage, Schema> = {
       object({
         topic: text(),
         impact: text(),
-        sourceIds: strings,
+        references: list(modelReferenceSchema),
         needsProfessionalReview: bool,
       }),
     ),
@@ -95,6 +137,8 @@ export const outputSchemas: Record<Stage, Schema> = {
   }),
 };
 export interface Derivation {
+  policyId: string;
+  policyVersion: string;
   operator: "multiply" | "divide" | "convert";
   inputs: { sourceId: string; factId: string }[];
   targetUnit: string;

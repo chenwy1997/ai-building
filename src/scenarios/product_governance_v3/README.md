@@ -2,7 +2,7 @@
 
 v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”的离线链路。命令不提供付费跑批、自动采用或生产写入。
 
-2026-10-22[全面审计](docs/implementation-audit-20261022.md)进一步限定：四阶段目前是各自的离线接线，尚未串成本批基线与SKU资料连续流；真实知识和人审交付仍待实施。审计也发现计算前提冲突、负因子、跨片引文等程序缺口，既有测试通过不表示这些边界已验收。下一步按审计中的契约/检查修补顺序推进。
+2026-10-22已完成[审计第1、2步的实施与回归](docs/implementation-phase12-20261022.md)：定义/绑定分离、原生配置投影、规则职责登记、知识/策略发现及已知漏检和误拦修复。当前79项v3测试和18项相关v2回归通过。四阶段仍是各自的离线阶段；真实知识、原文到事实准备、本批基线流转、人工交付和生产承接尚未闭环，继续禁止据此直接跑批。[原审计](docs/implementation-audit-20261022.md)保留发现问题时的证据。
 
 业务规则由本目录的[已确认规范](docs/governance-standard-draft.md)维护，后台承接引用[整体设计第5节](docs/governance-design-v1-20261022.md)。本轮新规范、整体稿、讨论记录、工具方案、5份ADR及[词汇表](GLOSSARY.md)已迁入v3，统一入口见[文档导航](docs/README.md)。每份正文只维护一处；v2保留其历史架构、运行手册和效率审计。v3不加载v2旧standards、旧品牌强制项或conditional合同。代码复用v2仅限`runtime/store.ts`的原子文件、锁、序列化及hash函数，这个依赖同样被版本锁定。
 
@@ -54,16 +54,16 @@ flowchart LR
 
 | 层 | 实现及边界 |
 | --- | --- |
-| 固定规则 | `release.ts`按阶段提取规范原文，必带SKU维度、字段职责、证据状态和人审边界；加载后台真实对象、类型、搜索能力及默认值缺口 |
+| 固定规则 | `rules.ts`登记R01—R26的来源章节、阶段、程序入口、开发回归证据、人工问题、未实施项及正反例；`release.ts`按登记加载规范及后台合同，包含原先漏接的采用/结束/核验/回退/成本规则 |
 | 阶段skill | `skills/`中建模、SKU取值、审核辅助、领域研究各一包；正文及必需判例直接进入instructions，文件路径索引不算加载 |
-| 动态知识 | 从已发布清单及snapshot白名单按类目路径线索选择，正文前置；记录范围/版本，未覆盖明确标gap；按需工具补读 |
-| 同族与属性池 | 固定快照中区分confirmed、同批候选、其他批候选、在途、失败；有芯/无芯共享定义，差异写值；同批引用仍待审 |
+| 动态知识 | `knowledgeRequirements`固定当前范围必读项，优先于名称路由；`knowledge_list`发现全部白名单资料，`knowledge_read`补读。缺必读知识在请求前阻断依赖阶段，研究阶段保留具体问题 |
+| 同族与属性池 | 固定快照区分confirmed、同批/他批候选、在途、失败；按类目及相关族预取定义，模型可再按概念查询；共用定义保持一致，类目绑定差异有理由且仍待审 |
 | 工具循环 | 真实`tools`声明、严格参数验证、调用分发、`call_id`配对及完整历史回传；服务端不替我们管循环上限 |
 | 程序检查 | 直接检查最终输出并决定是否阻断；不能靠模型自报“检查通过”；程序通过仍待人工 |
 
 必要的节点/祖先、跨分支候选、同族基线、字段职责、属性池命中、适用知识及SKU资料由程序预取，不依赖模型主动想起去查。分页和切片明确total、truncated、nextCursor/nextOffset；必需预取超过上下文预算就阻断，不静默删资料。
 
-工具包括`categories_search`、`categories_get`、`categories_children`、`find_related_categories`、`get_family_context`、`search_attribute_pool`、`knowledge_read`、`sources_read`及仅取值阶段可用的`calculate_value`。无任意文件、URL、SQL或写入工具。同族搜索结合已登记成员和跨父节点词形候选，**尚未实现语义归族自动判定或共享基线原子发布协调器**；名称相似只产生线索。
+共11个工具：`categories_search`、`categories_get`、`categories_children`、`find_related_categories`、`get_family_context`、`search_attribute_pool`、`knowledge_list`、`knowledge_read`、`sources_read`、`calculation_policies`及`calculate_value`。策略发现限SKU填写/辅助审核，计算只限SKU填写；策略ID、版本及因子约束实际前置并进入工具回传。没有任意文件、URL、SQL或写入工具。同族搜索结合已登记成员和跨父节点词形候选，**尚未实现语义归族自动判定或共享基线原子发布协调器**；名称相似只产生线索。
 
 DeepSeek适配使用[官方Responses合同](https://api-docs.deepseek.com/zh-cn/api/create-response/)：`instructions`、结构化输出、function调用及结果；无状态多轮需回传完整历史。`ResponsesClient`的离线模式必须注入mock HTTP，构造fixture禁止使用network模式。库中的联网适配需显式授权配置、传入密钥及费用预留上限；本次未调用，CLI没有联网开关，不自动读取环境密钥。
 
@@ -71,11 +71,15 @@ DeepSeek适配使用[官方Responses合同](https://api-docs.deepseek.com/zh-cn/
 
 `Snapshot`定义见[core.ts](core.ts)，严格装载及引用检查见[snapshot.ts](snapshot.ts)，可运行构造样例见[fixtures.ts](fixtures.ts)。`attributes`是可检索池，**不自动成为某类目SKU的填写合同**；取值必须有适用的固定同族合同。新族先建模和确认范围，再制作下一份快照。
 
-快照包含完整树或明确范围树、系统字段职责、同族状态/版本、属性定义、SKU/销售单位、源文与可定位事实、允许的语义计算策略和知识ID。`kind=fixture`仅供测试；`local`也不表示已经业务确认。资料hash按实际内容生成，标签没变而内容变了仍会产生新版本。冻结事实是经过资料准备的输入，不代表程序独立证明了其语义正确；人审继续负责范围、因子含义和专业真实性。
+快照现在强制`format=2`，旧平铺合同明确拒绝，不静默迁移。共同`attributes`保存名称/概念/类型/单位/口径、数值/文本/选项约束及建模references；`families[].bindings`保存族模板（categoryId=null）及末级覆盖。建模输出将定义存于`attributes`数组，当前末级配置存于`bindings`数组；必填、用途及关键规格/公开/搜索/标题/列表/排序属于绑定。有理由的绑定差异允许待审，共同定义改变仍需另提共享修订。
 
-数量计算只接受`sourceId+factId`引用：实际读到原文、同SKU/销售单位、同口径、已冻结目标与因子概念策略、单位抵消、均一/赠品证据均满足后再计算。支持已登记的乘除和mm/cm/m、g/kg换算；抽/张不自动换算。默认值、模型自报因子和调用者布尔断言不能替代证据。
+`systemFieldCoverage`必须提供来源、版本、完整覆盖声明与职责表内容hash，至少保有已知品牌/供应商/销售单位/规格名称职责；这不等于真实系统全字段清单已经采集。`factPreparation`记录候选/已准备状态、构造/人工来源、记录ID及原文/SKU/组合/版本/事实的内容hash；候选事实不能授权known或计算，内容漂移必须重新准备。`fixture`事实和知识不能混入`local`。这些字段记录准备边界，不能证明引文含义正确或代替事实核实流程。
 
-知识包目前只有**两个明确标记的构造路由样例**，不是纸品或五金专业标准。新专业包需要内容来源、适用对象、计量口径、缺口及人工裁定；在`KNOWLEDGE`登记后，由业务snapshot白名单选择。未准备好专业知识时保留待研究，不把跑通接线当作知识完备。
+建模`references`区分knowledge与sku-source，带工具实际返回版本及已读quote；SKU值继续使用evidence中的sourceId/factId。类型配置进入检查及留存的`nativeProjections`：真实原生字段名、SKU开关、数值精度/范围、文本预设/长度、多选计数和展示开关均有离线投影，默认值均为null。投影尚无原生ID与有效实例映射，不能直接发送后台；原生绑定设置实际位于PropertyInstance，同定义不同末级配置还要确定实例/版本承接。
+
+数量计算只接受带`policyId/policyVersion`及`sourceId+factId`的链：实际读取策略和事实，同SKU/组合/口径、单位、均一/赠品依据及因子约束均满足才算；同范围冲突不能只挑支持材料，负数/分数计数因子不能用正结果掩盖。计数量与有符号测量量分开。支持登记乘除和mm/cm/m、g/kg换算；抽/张不自动换算。相邻已读片段会合并，跨边界事实在完整覆盖后连同完整quote回传；未读间隙不会被当成已读。
+
+知识包目前仍只有**两个明确标记的构造路由样例**，不是纸品或五金专业标准。新专业包需要内容来源、适用对象、计量口径、缺口及人工裁定；在`KNOWLEDGE`登记后，由业务snapshot白名单及必读范围选择。能发现/引用不等于适用性已确认，未准备好专业知识应先研究。
 
 每次运行固定`release.lock.json`中的规范、后台合同、skill正文/判例、知识和执行代码hash，并记录实际装配、树/资料、工具合同、输入和运行环境。修改后先审阅变更，再显式更新锁：
 
@@ -88,7 +92,7 @@ freeze只是生成内容指纹，不是新的业务批准。不要通过自动fr
 
 ## 阻断、恢复与验收口径
 
-`program_blocked/not_eligible`表示存在程序错误；`program_pass_pending_human/pending_human`只表示已列程序检查通过。任何输出都不是已采用结果，没有AI自动批准字段。
+`program_blocked/not_eligible`表示存在程序错误；`program_pass_pending_human/pending_human`只表示executedChecks所列检查通过，humanReviewRules仍待人工。ruleResponsibilities明确partial和deferred，任何输出都不是已采用结果。actualReads保留包括模型后续补读在内的知识/来源/策略版本、范围及工具历史hash。
 
 请求/响应按实际请求、材料和资料版本生成键。相同请求并发只发送一次；恢复重放持久响应并重建工具读取记录。结果未知保留回执与费用预留，阻止自动重发；材料或资料变更后旧响应不能直接沿用。HTTP尝试每请求一次，自动业务返修为0；轮数、工具数、输入/返回字节和输出token均有限。后续批处理须在同一批目录中共享`Budget`，返修/恢复不重置；预留是保守配置额度，实际账单仍需对账，禁止默认提额。
 
@@ -99,4 +103,4 @@ freeze只是生成内容指纹，不是新的业务批准。不要通过自动fr
 | R23—R25的接线部分：材料指纹、累计预留、断点、循环/工具上限、离线命令边界 | 完整批处理依赖失效、人工意见闭环、生产执行及版本原子保护 |
 | R10—R22、R26中未自动实现部分已进入相关阶段指令，并在报告保留humanReviewRules | 图片解析、重挂/迁移、留出集评估、Excel新布局及小屏验收、意见回收、生产apply/readback/rollback |
 
-测试中的接线成功率不能转换成真实属性准确率或AI审核能力。验收记录见[离线验收说明](docs/offline-acceptance.md)。
+测试中的接线成功率不能转换成真实属性准确率或AI审核能力。验收及剩余缺口见[首两步实施报告](docs/implementation-phase12-20261022.md)和[离线验收说明](docs/offline-acceptance.md)。历史审计脚本固定于旧合同提交，当前回归用`contracts-regression.test.ts`；类型检查仅排除该历史探针，未排除当前测试或运行代码。

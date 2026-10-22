@@ -29,6 +29,7 @@ export type Schema = {
   items?: Schema;
   enum?: unknown[];
   minLength?: number;
+  maxLength?: number;
   minItems?: number;
   maxItems?: number;
   minimum?: number;
@@ -57,6 +58,7 @@ export const object = (
   additionalProperties: false,
 });
 export const numeric: Schema = { type: "number" };
+export const integer: Schema = { type: "integer" };
 export const bool: Schema = { type: "boolean" };
 
 export function validate(schema: Schema, value: unknown, path = "$"): string[] {
@@ -92,7 +94,11 @@ export function validate(schema: Schema, value: unknown, path = "$"): string[] {
         errors.push(...validate(schema.items, v, `${path}[${i}]`));
     });
   } else {
-    if (typeof value !== schema.type)
+    if (
+      schema.type === "integer"
+        ? !Number.isInteger(value)
+        : typeof value !== schema.type
+    )
       return [`${path}: ${schema.type} required`];
     if (
       typeof value === "number" &&
@@ -103,6 +109,17 @@ export function validate(schema: Schema, value: unknown, path = "$"): string[] {
       errors.push(`${path}: invalid number`);
     if (typeof value === "string" && value.length < (schema.minLength ?? 0))
       errors.push(`${path}: string too short`);
+    if (
+      typeof value === "string" &&
+      (schema.minLength ?? 0) > 0 &&
+      !value.trim()
+    )
+      errors.push(`${path}: blank string`);
+    if (
+      typeof value === "string" &&
+      value.length > (schema.maxLength ?? Infinity)
+    )
+      errors.push(`${path}: string too long`);
   }
   if (
     schema.enum &&
@@ -143,7 +160,13 @@ export class Blocked extends Error {
   }
 }
 
-export interface Attribute {
+export interface ModelReference {
+  kind: "knowledge" | "sku-source";
+  id: string;
+  version: string;
+  quote: string;
+}
+export interface AttributeDefinition {
   id: string;
   name: string;
   conceptKey: string;
@@ -153,17 +176,43 @@ export interface Attribute {
   unit: string | null;
   enumValues: string[];
   multi: boolean;
-  requiredness: "required" | "optional";
   valueLevel: "SKU";
+  numberConfig: {
+    isInt: boolean;
+    precision: number | null;
+    min: number | null;
+    max: number | null;
+  } | null;
+  textConfig: {
+    format: string | null;
+    minLength: number | null;
+    maxLength: number | null;
+    displayMethod: string | null;
+    trim: boolean;
+  } | null;
+  optionConfig: { minCount: number | null; maxCount: number | null } | null;
+  defaultValue: null;
+  rationale: string;
+  references: ModelReference[];
+}
+export interface AttributeBinding {
+  attributeId: string;
+  // null is the family template; a leaf override has a concrete categoryId.
+  categoryId: string | null;
+  requiredness: "required" | "optional";
+  requirednessReason: string;
   isKeySpec: boolean;
   isPublic: boolean;
   searchable: boolean;
+  displayInTitle: boolean;
+  displayInList: boolean;
+  sortIndex: number;
   uses: string[];
-  rationale: string;
   baselineAttributeId: string | null;
   differenceReason: string | null;
-  sourceIds: string[];
 }
+// Resolved runtime view. Authoritative storage/output keeps definitions and bindings separate.
+export type Attribute = AttributeDefinition & { binding: AttributeBinding };
 export interface Fact {
   id: string;
   conceptKey: string;
@@ -180,6 +229,22 @@ export interface Source {
   version: string;
   text: string;
   facts: Fact[];
+  factPreparation: {
+    status: "candidate" | "reviewed";
+    kind: "fixture" | "human";
+    recordId: string;
+    contentHash: string;
+  };
+}
+export function factPreparationHash(s: Source) {
+  return hash({
+    id: s.id,
+    productId: s.productId,
+    salesUnitId: s.salesUnitId,
+    version: s.version,
+    text: s.text,
+    facts: s.facts,
+  });
 }
 export interface Product {
   id: string;
@@ -196,25 +261,60 @@ export interface Family {
   members: string[];
   status: "confirmed" | "candidate" | "in_progress" | "failed";
   runId: string | null;
-  attributes: Attribute[];
+  attributes: AttributeDefinition[];
+  bindings: AttributeBinding[];
 }
+// Minimum known responsibilities, established by the approved supply-chain contract.
+// This is not a complete production field inventory; snapshots must supply and review the rest.
+export const REQUIRED_SYSTEM_OWNERS = freeze([
+  { key: "brandId", names: ["品牌"], conceptKeys: ["common.brand"] },
+  { key: "supplierId", names: ["供应商"], conceptKeys: ["common.supplier"] },
+  { key: "salesUnit", names: ["销售单位"], conceptKeys: ["sales.unit"] },
+  { key: "specName", names: ["规格名称"], conceptKeys: ["sales.spec"] },
+]);
 export interface Snapshot {
+  format: 2;
   version: string;
   kind: "fixture" | "local";
   tree: { nodes: unknown[]; rootId?: string; externalParentIds?: string[] };
   systemFields: { key: string; names: string[]; conceptKeys: string[] }[];
+  systemFieldCoverage: {
+    version: string;
+    source: string;
+    sourceHash: string;
+    status: "complete" | "partial";
+    coveredKeys: string[];
+  };
   families: Family[];
-  attributes: Attribute[];
+  attributes: AttributeDefinition[];
   sources: Source[];
   products: Product[];
   knowledgeIds: string[];
-  derivationPolicies: {
+  knowledgeRequirements: {
     id: string;
-    operator: "multiply" | "divide" | "convert";
-    targetConceptKey: string;
-    inputConceptKeys: string[];
-    targetUnit: string;
+    categoryIds: string[];
+    stages: Stage[];
+    knowledgeIds: string[];
+    reason: string;
   }[];
+  derivationPolicies: DerivationPolicy[];
+}
+export interface DerivationPolicy {
+  id: string;
+  version: string;
+  rationale: string;
+  operator: "multiply" | "divide" | "convert";
+  targetConceptKey: string;
+  inputConceptKeys: string[];
+  targetUnit: string;
+  factors: {
+    conceptKey: string;
+    unit: string;
+    kind: "count" | "measurement";
+    min: number | null;
+    max: number | null;
+  }[];
+  resultKind: "count" | "measurement";
 }
 export interface Task {
   runId: string;
@@ -233,4 +333,6 @@ export interface CheckReport {
   status: "program_pass_pending_human" | "program_blocked";
   errors: Finding[];
   humanReviewRules: string[];
+  executedChecks: string[];
+  knowledgeGaps: string[];
 }
