@@ -12,11 +12,13 @@ export type Stage =
   | "family-modeling"
   | "sku-filling"
   | "review-assistance"
+  | "fact-extraction"
   | "domain-research";
 export const STAGES: Stage[] = [
   "family-modeling",
   "sku-filling",
   "review-assistance",
+  "fact-extraction",
   "domain-research",
 ];
 export type Scalar = string | number | boolean | null;
@@ -229,9 +231,28 @@ export interface Source {
   version: string;
   text: string;
   facts: Fact[];
+  origin?: {
+    sourceId: string;
+    productId: string;
+    productInstanceId: string;
+    governanceCategoryId: string;
+    standardCategoryId: string;
+    categoryInstanceId: string | null;
+    stableMountedCategoryId: string | null;
+    propertyId: string;
+    propertyInstanceId: string;
+    propertyValueInstanceId: string;
+    jsonPointer: string;
+    capturePath: string;
+    captureHash: string;
+    rawValueHash: string;
+    capturedAt: string;
+    sourceKind: string;
+    derivedText: boolean;
+  };
   factPreparation: {
     status: "candidate" | "reviewed";
-    kind: "fixture" | "human";
+    kind: "fixture" | "human" | "agent";
     recordId: string;
     contentHash: string;
   };
@@ -244,6 +265,7 @@ export function factPreparationHash(s: Source) {
     version: s.version,
     text: s.text,
     facts: s.facts,
+    ...(s.origin ? { origin: s.origin } : {}),
   });
 }
 export interface Product {

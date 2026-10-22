@@ -399,6 +399,7 @@ export class ToolRegistry {
           productId: source.productId,
           salesUnitId: source.salesUnitId,
           factPreparation: source.factPreparation,
+          origin: source.origin ?? null,
           ...part,
           // A fact crossing a read boundary appears once its entire quote is covered.
           // Its full quote is included in this result, not merely marked read on the host.

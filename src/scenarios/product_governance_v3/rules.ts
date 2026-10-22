@@ -21,7 +21,11 @@ const modeling: Stage[] = [
   "review-assistance",
   "domain-research",
 ];
-const filling: Stage[] = ["sku-filling", "review-assistance"];
+const filling: Stage[] = [
+  "sku-filling",
+  "fact-extraction",
+  "review-assistance",
+];
 const check = (
   checkId: string,
   entry: string,
@@ -73,7 +77,10 @@ export const RULE_REGISTRY: Rule[] = [
       ),
     ],
     ["职责表是否覆盖实际入口的所有基础字段？同义概念是否已有业务承载？"],
-    ["真实系统职责清单采集与完整性人审", "执行时基础字段保护"],
+    [
+      "生产全局自定义映射与部署同版核实、职责完整性业务人审",
+      "执行时基础字段保护",
+    ],
     ["systemFieldCoverage", "definitions", "bindings"],
     "品牌由品牌库负责，适配器型号可作独立参数",
     "空表让品牌变成新属性",
@@ -231,10 +238,24 @@ export const RULE_REGISTRY: Rule[] = [
         "snapshot.ts:DataSnapshot",
         "contracts-regression.test.ts:fact preparation",
       ),
+      check(
+        "fact-extraction-provenance",
+        "fact-preparation.ts:extractionErrors",
+        "preparation.test.ts:exact extraction returns candidate bundle",
+      ),
     ],
     ["引文是否真正支持此值？不适用是否有依据？"],
-    ["原文到事实提取/核实流程", "后台未知值无损承接"],
-    ["values.status", "values.evidence", "factPreparation"],
+    [
+      "真实DeepSeek提取能力及独立验收集",
+      "已有准备事实的修订合并",
+      "后台未知值无损承接",
+    ],
+    [
+      "values.status",
+      "values.evidence",
+      "factPreparation",
+      "fact extraction bundle / human review receipt",
+    ],
     "缺证值null，明确否保留false",
     "原文否却把预设true当成已核实",
   ),
@@ -274,7 +295,7 @@ export const RULE_REGISTRY: Rule[] = [
       ),
     ],
     ["业务必要性是否独立于商品样本？依据是否真的适用并支持该结论？"],
-    ["真实知识内容准备和专业审核"],
+    ["真实专业包的专家采用、标准全文及其他领域知识准备"],
     ["references", "knowledgeRequirements", "values.evidence"],
     "已读知识可作建模依据，SKU值另取证",
     "样本没写参数就删掉必要定义",
@@ -434,8 +455,8 @@ export const RULE_REGISTRY: Rule[] = [
     ["review-assistance"],
     [],
     ["目标小屏能否看清关键判断信息、审核入口并访问全文？"],
-    ["v3导出与Mac/Windows实际任务验收"],
-    ["review workbook (deferred)"],
+    ["通用v3交付器及Windows150%完整任务验收"],
+    ["pilot review workbook; generic delivery deferred"],
     "短业务定位冻结、ID后置",
     "缩字让整表挤进屏幕即过关",
   ),
@@ -444,10 +465,23 @@ export const RULE_REGISTRY: Rule[] = [
     "意见与内容版本",
     ["### 10.2 意见保持与结论复用"],
     ["review-assistance"],
-    [],
+    [
+      check(
+        "fact-review-version",
+        "fact-preparation.ts:importFactReview",
+        "preparation.test.ts:defer/reject do not become reviewed facts",
+      ),
+      check(
+        "worksheet-opinions",
+        "scripts/export-roll-review-json.mjs:collectOpinions",
+        "scripts/review-export.test.mjs:stable candidate ID survives row reordering",
+      ),
+    ],
     ["意见是否对应稳定对象和审定内容？实质变化是否失效？"],
-    ["意见导出回收/依赖失效"],
-    ["review revision (deferred)"],
+    ["属性方案采用、跨SKU合并、依赖图完整失效与返修"],
+    [
+      "initial fact review / worksheet opinion export; wider revisions deferred",
+    ],
     "排序后意见仍跟对象",
     "按行号认领审核意见",
   ),

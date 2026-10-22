@@ -1,0 +1,87 @@
+{
+  "format": 1,
+  "date": "2026-10-22",
+  "kind": "real_input_offline_pilot_acceptance",
+  "releaseId": "b0c246ec81e3b45156ba7c23b6ee7a5b1c63a0ce93e3d3c7e42e883fb6f52170",
+  "sourceCommitBeforeWork": "3a566aff47",
+  "businessScope": "有芯小卷纸/无芯小卷纸，接口最新各3件，非随机准确率样本",
+  "inputs": {
+    "successfulPilotReadCalls": 3,
+    "skuCount": 6,
+    "sourceCount": 18,
+    "localSchemaFields": 233,
+    "localSourceFiles": 12,
+    "nativePropertyInstances": 74,
+    "fieldRoleStatus": "source_verified_pending_business_review",
+    "professionalKnowledgeStatus": "research_pending_professional_review",
+    "standardFullTextRead": false,
+    "imagesUsedForFacts": false
+  },
+  "replay": {
+    "proposalOrigin": "Codex; current-session proposal, not DeepSeek output and not human verified",
+    "stageRuns": 8,
+    "familyModels": 2,
+    "extractions": 6,
+    "recordedMockRequests": 16,
+    "modelToolCalls": 8,
+    "programBlocked": 0,
+    "requiredKnowledgeIds": [
+      "small-roll-paper-research-20261022",
+      "scm-field-responsibilities-20261022"
+    ],
+    "allRunsActuallyReadBothKnowledgePackages": true,
+    "factCandidates": 28,
+    "unknownContractItems": 28,
+    "liveDeepSeekCalls": 0,
+    "humanAdoptions": 0,
+    "productionWrites": 0
+  },
+  "regression": {
+    "v3Tests": 117,
+    "v2Tests": 18,
+    "total": 135,
+    "typecheck": "pass",
+    "skillsValidated": 5,
+    "withoutBundledSpreadsheetDependencyLink": "117 tests pass"
+  },
+  "constructedWiring": {
+    "stages": 5,
+    "firstMockRequests": 10,
+    "repeatNewMockRequests": 0,
+    "repeatCachedResponses": 10
+  },
+  "reviewWorkbook": {
+    "sheets": 5,
+    "reviewRows": 56,
+    "candidateRows": 28,
+    "unknownRows": 28,
+    "nativeInternalLinks": 28,
+    "nativeFullTextLinks": 18,
+    "cachedSpreadsheetErrors": 0,
+    "emptyOpinionExportDecisions": 0,
+    "allHumanFieldsInitiallyBlank": true,
+    "macWps": {
+      "environment": "用户当前13寸MacBook Air，WPS 100%，截图2940x1732",
+      "performed": [
+        "首屏业务信息/意见入口实看",
+        "SKU菜单列出6件/56行",
+        "无芯1实际筛选出10行",
+        "候选跳到对应原文字段",
+        "全文相对链接经单文件访问许可在文本编辑打开",
+        "临时筛选不保存"
+      ],
+      "windows150Percent": false,
+      "fullOperationalWorkflowAccepted": false
+    }
+  },
+  "businessAccuracyEvaluated": false,
+  "remaining": [
+    "生产部署同版及全局自定义字段映射核实",
+    "业务/专业人审及标准全文",
+    "真实DeepSeek语义表现及独立留出集",
+    "同族发布/连续阶段流/已有事实修订及跨SKU合并",
+    "通用采用和Windows150%验收",
+    "线上变更计划/写入/回读/回退"
+  ],
+  "privateArtifactsRoot": "outputs/product-governance-v3/roll-real-pilot-20261022"
+}

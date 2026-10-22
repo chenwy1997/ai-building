@@ -1,0 +1,2760 @@
+{
+  "format": 1,
+  "version": "20261022",
+  "scope": "本地供应链代码的Product/ProductInstance/StdProduct/CategoryKeyConfig全部字段及所列创建入口；非生产全库盘点",
+  "sourceRoot": "/Users/sanheng/Project/sanheng/uece-base",
+  "sources": [
+    {
+      "path": "prisma/schema.prisma",
+      "sha256": "9810106dcbee64c3779a3868d2f611e3995cd183fa3a23ac8d503785f4a0b38f"
+    },
+    {
+      "path": "app/api/external/routes.ts",
+      "sha256": "0a5b7d88aa0c37a42cee3b41b43b323cb38dc6e9ccb866b726991840c8254018"
+    },
+    {
+      "path": "app/manage/product/product-hub/detail/service.ts",
+      "sha256": "002654754b10c9f920aa9f0a2c34930c570c73d647ce3d94544efbe2d4f8bca5"
+    },
+    {
+      "path": "tools/server/productTools/detail/index.ts",
+      "sha256": "399f2d6a62de09d189fc48501667427c9f0368556508293981fafa784dfd6c74"
+    },
+    {
+      "path": "tools/server/productTools/detail/const.ts",
+      "sha256": "77069de4440f5061d0dbb2eb8ebe66cd5947b7c0134f722ec8e46b0052258424"
+    },
+    {
+      "path": "app/manage/product/(list)/components/SpuDetail.tsx",
+      "sha256": "838c8f98225417c79d98a7e184af744659b11f560aa332751dbe34c7863cb81c"
+    },
+    {
+      "path": "app/manage/product/(list)/components/SkuDetail.tsx",
+      "sha256": "a83059a4c9ebd0a561628421fd54e7fd19da9d7afcc810ca18153e8a79fa8b45"
+    },
+    {
+      "path": "app/manage/product/product-hub/detail/(components)/ProductForm/BaseInfo.tsx",
+      "sha256": "7b19d4fc1d411472cb3c0b7aabcc7b45957408c5307d2b662daf3908ac8dc266"
+    },
+    {
+      "path": "app/manage/product/product-hub/detail/(components)/ProductForm/SkuInfo.tsx",
+      "sha256": "581258feabe7d15d565b515527e1948f975a205a5a4df223a0e079986d1170b2"
+    },
+    {
+      "path": "app/manage/product/product-hub/detail/(components)/ProductForm/DetailInfo.tsx",
+      "sha256": "a4b66c3d30fca214908d50ec82966981a09b8094be8fab03b8bff90fcc998c82"
+    },
+    {
+      "path": "app/manage/product/product-hub/detail/(components)/ProductForm/DeliveryInfo.tsx",
+      "sha256": "352b188d32c7d014909a3d656fae43deadb322afe8e644f1bb77f6cdb7857dee"
+    },
+    {
+      "path": "app/manage/product/product-hub/detail/(components)/ProductForm/OtherInfo.tsx",
+      "sha256": "79b76cd7dde081d363873180af4e7ea812652c96c6af5bf158d314b05bf1f6d8"
+    }
+  ],
+  "fields": [
+    {
+      "model": "Product",
+      "key": "id",
+      "type": "String",
+      "line": 556,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "Product",
+      "key": "createdAt",
+      "type": "DateTime",
+      "line": 557,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "Product",
+      "key": "updatedAt",
+      "type": "DateTime?",
+      "line": 558,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "Product",
+      "key": "deleted",
+      "type": "Boolean",
+      "line": 559,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "Product",
+      "key": "creatorId",
+      "type": "String?",
+      "line": 561,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "Product",
+      "key": "creator",
+      "type": "User?",
+      "line": 562,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "upstreamId",
+      "type": "String?",
+      "line": 564,
+      "comment": "上游ID，用于数据接入、订单推送",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "upstream",
+      "type": "Upstream?",
+      "line": 565,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "isAllowUpstreamPush",
+      "type": "Boolean",
+      "line": 567,
+      "comment": "是否接收上游数据",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "upstreamSpu",
+      "type": "String?",
+      "line": 569,
+      "comment": "上游SPU，用于数据接入、订单推送",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "upstreamSku",
+      "type": "String?",
+      "line": 570,
+      "comment": "上游SKU，用于数据接入、订单推送",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "vendorSpuId",
+      "type": "String?",
+      "line": 572,
+      "comment": "供应商spuId 用于商品映射",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "vendorSkuId",
+      "type": "String?",
+      "line": 573,
+      "comment": "供应商skuId 用于商品映射",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "spuSaleStatus",
+      "type": "SpuSaleStatus",
+      "line": 576,
+      "comment": "",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "skuSaleStatus",
+      "type": "SkuSaleStatus",
+      "line": 577,
+      "comment": "",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "isSpuEnable",
+      "type": "Boolean",
+      "line": 579,
+      "comment": "同步实例的最新状态（子规格此项无效）",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "isSkuEnable",
+      "type": "Boolean",
+      "line": 580,
+      "comment": "同步实例的最新状态",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "supplyRelevanceRule",
+      "type": "ProductSupplyRelevanceRule?",
+      "line": 583,
+      "comment": "如果没有规则，则不会自动解析货源商品",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "productInstances",
+      "type": "ProductInstance[]",
+      "line": 585,
+      "comment": "作为规格的梳理",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "childProductInstances",
+      "type": "ProductInstance[]",
+      "line": 586,
+      "comment": "作为原型的所有下属规格的实例",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "ProductInstance_spuProduct",
+      "type": "ProductInstance[]",
+      "line": 588,
+      "comment": "作为SPU的所有下属规格的实例",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "StoreShoppingListItem",
+      "type": "StoreCustomerShoppingListItem[]",
+      "line": 590,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "StoreListing",
+      "type": "StoreListing[]",
+      "line": 591,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "StoreListing_productSpec",
+      "type": "StoreListing[]",
+      "line": 592,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "StoreOrderItem",
+      "type": "StoreOrderItem[]",
+      "line": 593,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "StoreOrderItemRealTime",
+      "type": "StoreOrderItemRealTime[]",
+      "line": 594,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "StoreStock",
+      "type": "StoreProductStock[]",
+      "line": 596,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "StoreCategoryProduct",
+      "type": "StoreCategoryProduct[]",
+      "line": 597,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "ProductPoolProduct",
+      "type": "ProductOnProductPool[]",
+      "line": 598,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "ProductStock",
+      "type": "ProductStock[]",
+      "line": 599,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "ProductRelevance_targetProduct",
+      "type": "ProductRelevance[]",
+      "line": 601,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "ProductRelevance_relevanceProduct",
+      "type": "ProductRelevance[]",
+      "line": 602,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "VenderProductApproval",
+      "type": "VenderProductApproval[]",
+      "line": 604,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "VenderProductApproval2Source",
+      "type": "VenderProductApproval[]",
+      "line": 605,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "StoreCommissionRecord",
+      "type": "StoreCommissionRecord[]",
+      "line": 606,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "StoreProductFavorite",
+      "type": "StoreProductFavorite[]",
+      "line": 607,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "StoreProductViewRecord",
+      "type": "StoreProductViewRecord[]",
+      "line": 608,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "Vendor",
+      "type": "Vendor?",
+      "line": 609,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "vendorId",
+      "type": "String?",
+      "line": 610,
+      "comment": "",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "VendorProductAudit",
+      "type": "VendorProductAudit[]",
+      "line": 611,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "VendorOrderItem",
+      "type": "VendorOrderItem[]",
+      "line": 612,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "MaterialItemProductLinks",
+      "type": "MaterialItemProductLink[]",
+      "line": 615,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "stdCategoryId",
+      "type": "String?",
+      "line": 617,
+      "comment": "标准类目ID",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "relationGroupMembers",
+      "type": "ProductRelationGroupMember[]",
+      "line": 618,
+      "comment": "相关商品",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "ProductEdit",
+      "type": "ProductEdit[]",
+      "line": 619,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "ProductSelectionPlanPoolEntryRecord",
+      "type": "ProductSelectionPlanPoolEntryRecord[]",
+      "line": 620,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "ProductInspectionPlanPoolRemovalRecord",
+      "type": "ProductInspectionPlanPoolRemovalRecord[]",
+      "line": 622,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "Product",
+      "key": "targetCustomerIds",
+      "type": "String[]",
+      "line": 624,
+      "comment": "定向客户ID列表",
+      "role": "base_business"
+    },
+    {
+      "model": "Product",
+      "key": "isTargetedProduct",
+      "type": "Boolean?",
+      "line": 625,
+      "comment": "是否为定向商品（用于筛选优化）",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "id",
+      "type": "String",
+      "line": 672,
+      "comment": "商品是不可变实例, 每次修改都会生成一个新的版本",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "createdAt",
+      "type": "DateTime",
+      "line": 673,
+      "comment": "商品是不可变数据",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "updatedAt",
+      "type": "DateTime?",
+      "line": 674,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "isHead",
+      "type": "Boolean",
+      "line": 675,
+      "comment": "是否是最新实例版本",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "creatorId",
+      "type": "String?",
+      "line": 677,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "creator",
+      "type": "User?",
+      "line": 678,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "productId",
+      "type": "String",
+      "line": 680,
+      "comment": "商品的业务编号, 活跃的档案不允许重复 (此即是 skuProductId)",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "product",
+      "type": "Product",
+      "line": 681,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "isSpuEnable",
+      "type": "Boolean",
+      "line": 683,
+      "comment": "表示该商品是否有效（子规格此项无效）",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "isSkuEnable",
+      "type": "Boolean",
+      "line": 684,
+      "comment": "表示该规格是否有效",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "spuSaleStatus",
+      "type": "SpuSaleStatus",
+      "line": 687,
+      "comment": "",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "skuSaleStatus",
+      "type": "SkuSaleStatus",
+      "line": 688,
+      "comment": "",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "prototypeId",
+      "type": "String?",
+      "line": 690,
+      "comment": "商品的原型实例 ProductInstance",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "prototype",
+      "type": "ProductInstance?",
+      "line": 691,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "children",
+      "type": "ProductInstance[]",
+      "line": 692,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "prototypeProductId",
+      "type": "String?",
+      "line": 694,
+      "comment": "商品的原型 Product",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "prototypeProduct",
+      "type": "Product?",
+      "line": 695,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "spuProductId",
+      "type": "String",
+      "line": 697,
+      "comment": "主商品为他本身的的 productId, 规格商品为主商品的 productId。此字段便于实现某些查询。",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "spuProduct",
+      "type": "Product",
+      "line": 698,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "sortInPrototype",
+      "type": "Int?",
+      "line": 700,
+      "comment": "在原型中的排序",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "costPrice",
+      "type": "Float?",
+      "line": 702,
+      "comment": "成本价",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "retailPrice",
+      "type": "Float?",
+      "line": 703,
+      "comment": "零售价",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "earningsRate",
+      "type": "Float?",
+      "line": 704,
+      "comment": "利润率 (计算方法: (RETAIL_PRICE-COST_PRICE)/RETAIL_PRICE )",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "freightTemplateId",
+      "type": "String?",
+      "line": 706,
+      "comment": "运费模板",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "freightTemplate",
+      "type": "FreightTemplate?",
+      "line": 707,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "vendorFreightTemplateId",
+      "type": "String?",
+      "line": 709,
+      "comment": "运费模板",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "vendorFreightTemplate",
+      "type": "FreightTemplate?",
+      "line": 710,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "brandId",
+      "type": "String?",
+      "line": 712,
+      "comment": "",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "brand",
+      "type": "Brand?",
+      "line": 713,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "categoryInstanceId",
+      "type": "String?",
+      "line": 715,
+      "comment": "如果没有原型, 则必须指定分类；如果有原型，则会覆盖原型的分类",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "categoryInstance",
+      "type": "CategoryInstance?",
+      "line": 716,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "categoryIds",
+      "type": "String[]",
+      "line": 718,
+      "comment": "强化搜索字段，用于通过类目快速搜索",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "afterSaleTypes",
+      "type": "StoreAfterSaleRequestType[]",
+      "line": 720,
+      "comment": "",
+      "role": "base_business"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "searchText",
+      "type": "String?",
+      "line": 723,
+      "comment": "搜索原始字段，用于全文搜索，把可搜索属性的值拼接起来",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "searchWords",
+      "type": "String[]",
+      "line": 734,
+      "comment": "搜索关键词，包括属性。从 searchText 中分词出来，用于搜索引擎的关键词匹配，该字段进行索引。",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "spuSearchWords",
+      "type": "String[]",
+      "line": 736,
+      "comment": "仅在 SPU 时有效，包含其下所有 SKU 的搜索关键词（去重），方便按 SPU 搜索",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "searchWeight",
+      "type": "Int",
+      "line": 738,
+      "comment": "搜索权重，用于排序，越大越靠前",
+      "role": "technical"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "StoreOrderItem",
+      "type": "StoreOrderItem[]",
+      "line": 740,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "StoreOrderItemRealTime",
+      "type": "StoreOrderItemRealTime[]",
+      "line": 741,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "VendorOrderItem",
+      "type": "VendorOrderItem[]",
+      "line": 742,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "propertyValueInstanceOnProductInstances",
+      "type": "PropertyValueInstanceOnProductInstance[]",
+      "line": 743,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "VenderProductApproval",
+      "type": "VenderProductApproval[]",
+      "line": 744,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "ProductInstance",
+      "key": "StoreCommissionRecord",
+      "type": "StoreCommissionRecord[]",
+      "line": 745,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "StdProduct",
+      "key": "id",
+      "type": "String",
+      "line": 8236,
+      "comment": "系统商品id",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "createdAt",
+      "type": "DateTime",
+      "line": 8237,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "updatedAt",
+      "type": "DateTime",
+      "line": 8238,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "sku",
+      "type": "String",
+      "line": 8241,
+      "comment": "业务端使用的商品ID，由具体的业务端觉得生成规则，默认为10位数字，10开头(系统不考虑存储10亿以上的商品)",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "spu",
+      "type": "String",
+      "line": 8242,
+      "comment": "业务端使用的商品SPU ID，如果为skuId，则 spuId = skuId，否则就是以某个 sku 作为SPU。（按系统逻辑，SPU级别的字段，SKU每个商品都在逻辑上同步，节省计算，提高可索引性）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "sortInSpu",
+      "type": "Int",
+      "line": 8243,
+      "comment": "在SPU内的排序，从1开始，不能重复",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "rawProductId",
+      "type": "String?",
+      "line": 8245,
+      "comment": "原始商品ID,按需使用(兼容关联字段)",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "rawProductInstanceId",
+      "type": "String?",
+      "line": 8246,
+      "comment": "原始商品实例ID,按需使用(兼容关联字段)",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "isDisabled",
+      "type": "Boolean",
+      "line": 8248,
+      "comment": "[已废弃，保留兼容] 商品是否停用，等价于 !isSpuEnable，保存时自动同步",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "isSpuEnable",
+      "type": "Boolean",
+      "line": 8249,
+      "comment": "SPU档案状态（true=启用，false=停用）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "isSkuEnable",
+      "type": "Boolean",
+      "line": 8250,
+      "comment": "SKU档案状态（true=启用，false=停用）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "skuSaleStatus",
+      "type": "SkuSaleStatus",
+      "line": 8251,
+      "comment": "SKU销售状态（影响前端可售状态）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "spuSaleStatus",
+      "type": "SpuSaleStatus",
+      "line": 8252,
+      "comment": "SPU销售状态（影响前端可售状态）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "brandId",
+      "type": "String?",
+      "line": 8254,
+      "comment": "品牌ID（沿用原有的品牌实体，供应商推送的平台较难统一）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "brand",
+      "type": "Brand?",
+      "line": 8255,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "StdProduct",
+      "key": "stdCategoryId",
+      "type": "String?",
+      "line": 8257,
+      "comment": "标准类目ID",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "stdCategory",
+      "type": "StdCategory?",
+      "line": 8258,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "StdProduct",
+      "key": "stdCategoryIdPath",
+      "type": "String[]",
+      "line": 8260,
+      "comment": "标准类目全路径（包含本级），为了快速索引",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "vendorId",
+      "type": "String?",
+      "line": 8262,
+      "comment": "供应商ID（高兼容考虑，有可能供应商主数据不在本系统，不做直接联表）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "vendorName",
+      "type": "String?",
+      "line": 8263,
+      "comment": "供应商名称(同样高兼容考虑)",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "vendorSkuId",
+      "type": "String?",
+      "line": 8264,
+      "comment": "供应商SKU ID(供应商货号)",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "vendorSpuId",
+      "type": "String?",
+      "line": 8265,
+      "comment": "供应商SPU ID",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "vendorSkuCode",
+      "type": "String?",
+      "line": 8266,
+      "comment": "供应商编码(供应商填写)",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "vendorSpuCode",
+      "type": "String?",
+      "line": 8267,
+      "comment": "供应商编码(供应商填写)",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "vendorIsOnSale",
+      "type": "Boolean?",
+      "line": 8268,
+      "comment": "供应商商品是否在售",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "vendorRelevantSkus",
+      "type": "String[]",
+      "line": 8269,
+      "comment": "供应商相关SKU列表（同一SPU下的其他SKU）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "sourceLinks",
+      "type": "String[]",
+      "line": 8270,
+      "comment": "货源链接（平台从域名可知）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "upstreamId",
+      "type": "String?",
+      "line": 8271,
+      "comment": "上游ID，用于数据接入、订单推送",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "upstream",
+      "type": "Upstream?",
+      "line": 8272,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "StdProduct",
+      "key": "upstreamSkuId",
+      "type": "String?",
+      "line": 8273,
+      "comment": "上游SKU ID",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "upstreamSpuId",
+      "type": "String?",
+      "line": 8274,
+      "comment": "上游SPU ID",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "title",
+      "type": "String",
+      "line": 8276,
+      "comment": "商品标题",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "subTitle",
+      "type": "String?",
+      "line": 8277,
+      "comment": "商品副标题（卖点、特色等，放在主标题下面）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "saleSpec",
+      "type": "String?",
+      "line": 8279,
+      "comment": "商品合并销售规格名",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "saleSpecRaw",
+      "type": "String?",
+      "line": 8280,
+      "comment": "原始销售属性，JSON，按需使用[{fieldKey: 'color', fieldName: '颜色', value: '红色'}, {fieldKey: 'size', fieldName: '尺码', value: 'XL'}] 等",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "taxCode",
+      "type": "String?",
+      "line": 8282,
+      "comment": "税收分类编码",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "taxRate",
+      "type": "Float?",
+      "line": 8283,
+      "comment": "税率",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "purchaserId",
+      "type": "String?",
+      "line": 8285,
+      "comment": "责任采购员",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "purchaser",
+      "type": "User?",
+      "line": 8286,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "StdProduct",
+      "key": "creatorId",
+      "type": "String?",
+      "line": 8288,
+      "comment": "创建人ID（负责商品的采购、销售等）",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "creator",
+      "type": "User?",
+      "line": 8289,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "StdProduct",
+      "key": "updaterId",
+      "type": "String?",
+      "line": 8291,
+      "comment": "修改人ID（最近一次修改商品的人）",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "updater",
+      "type": "User?",
+      "line": 8292,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "StdProduct",
+      "key": "mainImages",
+      "type": "String[]",
+      "line": 8294,
+      "comment": "商品主图列表",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "specImage",
+      "type": "String?",
+      "line": 8295,
+      "comment": "商品销售属性图片（若无，则取主图的第一张）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "detailImages",
+      "type": "String[]",
+      "line": 8296,
+      "comment": "商品详情图片列表（图片与HTML二选一显示）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "detailHtml",
+      "type": "String?",
+      "line": 8297,
+      "comment": "商品详情HTML（图片与HTML二选一，HTML偏向于存储原始信息）",
+      "role": "evidence_container"
+    },
+    {
+      "model": "StdProduct",
+      "key": "detailText",
+      "type": "String?",
+      "line": 8298,
+      "comment": "商品详情文本(附加前置显示的)",
+      "role": "evidence_container"
+    },
+    {
+      "model": "StdProduct",
+      "key": "saleUnit",
+      "type": "String?",
+      "line": 8300,
+      "comment": "销售单位，逻辑必填，如件、盒等(必填，默认件)",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "weight",
+      "type": "Float?",
+      "line": 8301,
+      "comment": "商品重量，单位kg",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "height",
+      "type": "Float?",
+      "line": 8302,
+      "comment": "商品高度，单位cm",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "width",
+      "type": "Float?",
+      "line": 8303,
+      "comment": "商品宽度，单位cm",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "length",
+      "type": "Float?",
+      "line": 8304,
+      "comment": "商品长度，单位cm",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "upc",
+      "type": "String?",
+      "line": 8305,
+      "comment": "国际条码",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "originPlace",
+      "type": "String?",
+      "line": 8307,
+      "comment": "产地",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "packingList",
+      "type": "String?",
+      "line": 8308,
+      "comment": "包装清单",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "warranty",
+      "type": "String?",
+      "line": 8309,
+      "comment": "保质期或保修期",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "detailParams",
+      "type": "String?",
+      "line": 8311,
+      "comment": "详细参数，标准格式：[[<key>, <value>],...]，即定义特殊key\"---\"表示分组，不做逻辑支持也不影响显示",
+      "role": "evidence_container"
+    },
+    {
+      "model": "StdProduct",
+      "key": "priceCost",
+      "type": "Float?",
+      "line": 8313,
+      "comment": "成本价（供应商供给本级的价格）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "priceBareCost",
+      "type": "Float?",
+      "line": 8314,
+      "comment": "裸成本价（不含运费）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "priceRetail",
+      "type": "Float?",
+      "line": 8315,
+      "comment": "零售价",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "priceFactory",
+      "type": "Float?",
+      "line": 8316,
+      "comment": "出厂价",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "priceJd",
+      "type": "Float?",
+      "line": 8317,
+      "comment": "京东价(太特殊，单独存储)",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "priceMarket",
+      "type": "Float?",
+      "line": 8318,
+      "comment": "市场价(划线价，避免使用)",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "profitRate",
+      "type": "Float?",
+      "line": 8319,
+      "comment": "毛利率，百分比（零售价-成本价)/零售价*100",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "supplierShippingTemplateId",
+      "type": "String?",
+      "line": 8321,
+      "comment": "供应商发货模版ID（供应商供给本级的发货模版ID）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "platformShippingTemplateId",
+      "type": "String?",
+      "line": 8322,
+      "comment": "平台发货模版ID（平台侧的发货模版ID）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "supportedShippingMethods",
+      "type": "String[]",
+      "line": 8323,
+      "comment": "支持的配送方式，默认是快递物流（快递物流、同城配送等）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "shippingTimeNote",
+      "type": "String?",
+      "line": 8325,
+      "comment": "货期，供应商“发货”时效描述",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "shippingFrom",
+      "type": "String?",
+      "line": 8326,
+      "comment": "发货地，供应商发货地（城市等）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "quantityMin",
+      "type": "Int?",
+      "line": 8328,
+      "comment": "最小起订量",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "quantityMax",
+      "type": "Int?",
+      "line": 8329,
+      "comment": "最大购买量",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "quantityStep",
+      "type": "Int?",
+      "line": 8330,
+      "comment": "购买步长",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "tagIds",
+      "type": "String[]",
+      "line": 8332,
+      "comment": "商品标签id值(此处不强外键约束，默认为 stdTagValue.id)",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "specialManagementCategoryCode",
+      "type": "String?",
+      "line": 8334,
+      "comment": "特殊经营类别, 可用代码（优先）或文本。1：危化品、2：消防器材、3：特种设备、4：医疗器械类、5：食品类",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "supportedAfterSalesServiceTypes",
+      "type": "StoreAfterSaleRequestType[]",
+      "line": 8335,
+      "comment": "支持的售后服务类型 （业务上控制选子集合法值）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "afterSalesServiceInformation",
+      "type": "String?",
+      "line": 8336,
+      "comment": "售后服务信息说明",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "returnPolicies",
+      "type": "String[]",
+      "line": 8337,
+      "comment": "业务上控制，可用代码（优先）或文本。 1：7天无理由退换，2: 定制品不支持退货、3: 非质量问题不支持退换 （上游商品建议直接写文本）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "isCustomProduct",
+      "type": "Boolean",
+      "line": 8338,
+      "comment": "是否为定制商品",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "includesInstallationService",
+      "type": "Boolean",
+      "line": 8339,
+      "comment": "是否包含安装服务",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "isExclusiveCustomerProduct",
+      "type": "Boolean",
+      "line": 8340,
+      "comment": "是否为专属客户商品",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "targetCustomerIds",
+      "type": "String[]",
+      "line": 8341,
+      "comment": "定向客户ID列表",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "isTargetedProduct",
+      "type": "Boolean?",
+      "line": 8342,
+      "comment": "是否为定向商品（用于筛选优化）",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "categoryAttributeVersion",
+      "type": "Int?",
+      "line": 8344,
+      "comment": "商品保存属性时，当前类目模板的版本号（冗余）",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "remark",
+      "type": "String?",
+      "line": 8346,
+      "comment": "备注",
+      "role": "base_business"
+    },
+    {
+      "model": "StdProduct",
+      "key": "searchWords",
+      "type": "String[]",
+      "line": 8347,
+      "comment": "搜索关键词，包含标题切词，类目、标签、品牌、SKU、SPU；",
+      "role": "technical"
+    },
+    {
+      "model": "StdProduct",
+      "key": "attributes",
+      "type": "StdProductAttribute[]",
+      "line": 8349,
+      "comment": "",
+      "role": "relation"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "id",
+      "type": "String",
+      "line": 8415,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "createdAt",
+      "type": "DateTime",
+      "line": 8416,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "updatedAt",
+      "type": "DateTime",
+      "line": 8417,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "deleted",
+      "type": "Boolean",
+      "line": 8418,
+      "comment": "",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "titleKey",
+      "type": "String",
+      "line": 8421,
+      "comment": "商品名称",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "mainImagesKey",
+      "type": "String",
+      "line": 8422,
+      "comment": "主图",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "detailImagesKey",
+      "type": "String",
+      "line": 8423,
+      "comment": "详情图",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "detailHtmlKey",
+      "type": "String",
+      "line": 8424,
+      "comment": "详情HTML",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "priceCostKey",
+      "type": "String",
+      "line": 8425,
+      "comment": "成本价",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "priceBareCostKey",
+      "type": "String",
+      "line": 8426,
+      "comment": "成本价-不含运费",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "purchaseIdKey",
+      "type": "String",
+      "line": 8427,
+      "comment": "所属采购",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "exclusiveCustomerProductKey",
+      "type": "String",
+      "line": 8428,
+      "comment": "专属客户商品",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "subTitleKey",
+      "type": "String",
+      "line": 8429,
+      "comment": "商品卖点",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "priceFactoryKey",
+      "type": "String",
+      "line": 8430,
+      "comment": "出厂价",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "vendorSpuIdKey",
+      "type": "String",
+      "line": 8431,
+      "comment": "供应商SPU编码",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "priceRetailKey",
+      "type": "String",
+      "line": 8432,
+      "comment": "零售价",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "vendorSkuIdKey",
+      "type": "String",
+      "line": 8433,
+      "comment": "供应商SKU编码",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "priceMarketKey",
+      "type": "String",
+      "line": 8434,
+      "comment": "市场价",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "supplierFreKey",
+      "type": "String",
+      "line": 8435,
+      "comment": "供应商运费政策",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "sourceLinksKey",
+      "type": "String",
+      "line": 8436,
+      "comment": "货源链接",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "deliveryTimeNoteKey",
+      "type": "String",
+      "line": 8437,
+      "comment": "货期",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "specImageKey",
+      "type": "String",
+      "line": 8438,
+      "comment": "规格图",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "packingListKey",
+      "type": "String",
+      "line": 8439,
+      "comment": "包装清单",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "weightKey",
+      "type": "String",
+      "line": 8440,
+      "comment": "重量",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "lengthKey",
+      "type": "String",
+      "line": 8441,
+      "comment": "长",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "widthKey",
+      "type": "String",
+      "line": 8442,
+      "comment": "宽",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "heightKey",
+      "type": "String",
+      "line": 8443,
+      "comment": "高",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "saleUnitKey",
+      "type": "String",
+      "line": 8444,
+      "comment": "销售单位",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "originPlaceKey",
+      "type": "String",
+      "line": 8445,
+      "comment": "产地",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "warrantyKey",
+      "type": "String",
+      "line": 8446,
+      "comment": "质保期",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "tagsKey",
+      "type": "String",
+      "line": 8447,
+      "comment": "商品标签",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "sceneTagsKey",
+      "type": "String",
+      "line": 8448,
+      "comment": "场景标签",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "industryTagsKey",
+      "type": "String",
+      "line": 8449,
+      "comment": "行业标签",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "parameterKey",
+      "type": "String",
+      "line": 8450,
+      "comment": "规格参数",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "unitMinKey",
+      "type": "String",
+      "line": 8451,
+      "comment": "最小计量单位",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "unitMinQuaKey",
+      "type": "String",
+      "line": 8452,
+      "comment": "销售单位中含最小计量单位数量",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "remarkKey",
+      "type": "String",
+      "line": 8453,
+      "comment": "内部备注",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "specialManagementCategoryCodeKey",
+      "type": "String",
+      "line": 8454,
+      "comment": "特殊经营品类",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "returnPoliciesKey",
+      "type": "String",
+      "line": 8455,
+      "comment": "退货政策",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "isCustomProductKey",
+      "type": "String",
+      "line": 8456,
+      "comment": "是否定制品",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "deliveryTypeKey",
+      "type": "String",
+      "line": 8457,
+      "comment": "配送类型",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "detailTextKey",
+      "type": "String",
+      "line": 8458,
+      "comment": "详情描述",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "saleSpecKey",
+      "type": "String",
+      "line": 8459,
+      "comment": "规格名称",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "supportedShippingMethodsKey",
+      "type": "String",
+      "line": 8460,
+      "comment": "支持的发货方式",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "afterSalesServiceInformationKey",
+      "type": "String",
+      "line": 8461,
+      "comment": "售后服务信息",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "includesInstallationServiceKey",
+      "type": "String",
+      "line": 8462,
+      "comment": "是否包含安装服务",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "taxCodeKey",
+      "type": "String",
+      "line": 8463,
+      "comment": "税收分类编码",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "taxRateKey",
+      "type": "String",
+      "line": 8464,
+      "comment": "税率",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "productAttachmentsKey",
+      "type": "String",
+      "line": 8465,
+      "comment": "商品附件",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "quantityMinKey",
+      "type": "String",
+      "line": 8466,
+      "comment": "起订数量",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "quantityStepKey",
+      "type": "String",
+      "line": 8467,
+      "comment": "最小递加数量",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "quantityMaxKey",
+      "type": "String",
+      "line": 8468,
+      "comment": "限购数量",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "priceJdKey",
+      "type": "String",
+      "line": 8469,
+      "comment": "京东价",
+      "role": "technical"
+    },
+    {
+      "model": "CategoryKeyConfig",
+      "key": "upcKey",
+      "type": "String",
+      "line": 8470,
+      "comment": "UPC条形码",
+      "role": "technical"
+    }
+  ],
+  "unknown": [],
+  "status": "source_verified_pending_business_review",
+  "limits": [
+    "本地代码版本不能证明与生产部署完全一致",
+    "CategoryKeyConfig生产自定义映射未由独立接口完整导出；样本原生字段另核对",
+    "动态属性容器内容可含真实参数，不整体排除",
+    "StdProduct.weight是商品重量，不能排除单卷标称质量；长度宽度同样按对象区分"
+  ],
+  "systemFields": [
+    {
+      "key": "brandId",
+      "names": [
+        "品牌",
+        "brandId",
+        "品牌ID"
+      ],
+      "conceptKeys": [
+        "common.brand"
+      ]
+    },
+    {
+      "key": "supplierId",
+      "names": [
+        "供应商"
+      ],
+      "conceptKeys": [
+        "common.supplier"
+      ]
+    },
+    {
+      "key": "salesUnit",
+      "names": [
+        "销售单位"
+      ],
+      "conceptKeys": [
+        "sales.unit"
+      ]
+    },
+    {
+      "key": "specName",
+      "names": [
+        "规格名称"
+      ],
+      "conceptKeys": [
+        "sales.spec"
+      ]
+    },
+    {
+      "key": "title",
+      "names": [
+        "商品名称",
+        "主标题",
+        "商品标题"
+      ],
+      "conceptKeys": [
+        "product.title"
+      ]
+    },
+    {
+      "key": "priceCost",
+      "names": [
+        "成本价",
+        "成本价-不含运费",
+        "零售价",
+        "市场价",
+        "出厂价",
+        "京东价"
+      ],
+      "conceptKeys": [
+        "product.price"
+      ]
+    },
+    {
+      "key": "unitMin",
+      "names": [
+        "最小计量单位",
+        "销售单位中含最小计量单位数量",
+        "销售总卷数",
+        "销售总数量"
+      ],
+      "conceptKeys": [
+        "sales.min_unit",
+        "sales.total_quantity",
+        "paper.total_rolls"
+      ]
+    },
+    {
+      "key": "weight",
+      "names": [
+        "商品重量",
+        "物流重量"
+      ],
+      "conceptKeys": [
+        "product.shipping_weight"
+      ]
+    },
+    {
+      "key": "packageSize",
+      "names": [
+        "包装长度",
+        "包装宽度",
+        "包装高度"
+      ],
+      "conceptKeys": [
+        "product.shipping_size"
+      ]
+    },
+    {
+      "key": "quantityMin",
+      "names": [
+        "起订数量",
+        "最小追加数量",
+        "限购数量",
+        "最小起订量"
+      ],
+      "conceptKeys": [
+        "sales.order_quantity"
+      ]
+    },
+    {
+      "key": "upc",
+      "names": [
+        "条形码",
+        "UPC码",
+        "UPC条形码",
+        "国际条码"
+      ],
+      "conceptKeys": [
+        "product.upc"
+      ]
+    },
+    {
+      "key": "vendorSkuId",
+      "names": [
+        "供应商SKU编码",
+        "供应商SPU编码",
+        "上游SKU",
+        "上游SPU",
+        "供应商skuId 用于商品映射",
+        "供应商SKU ID"
+      ],
+      "conceptKeys": [
+        "product.upstream_identity"
+      ]
+    },
+    {
+      "key": "originPlace",
+      "names": [
+        "产地"
+      ],
+      "conceptKeys": [
+        "product.origin"
+      ]
+    },
+    {
+      "key": "warranty",
+      "names": [
+        "质保期",
+        "质保说明",
+        "保质期或保修期"
+      ],
+      "conceptKeys": [
+        "product.warranty"
+      ]
+    },
+    {
+      "key": "deliveryType",
+      "names": [
+        "配送类型",
+        "货期",
+        "支持的发货方式",
+        "售后服务信息"
+      ],
+      "conceptKeys": [
+        "product.fulfillment"
+      ]
+    },
+    {
+      "key": "mainImages",
+      "names": [
+        "主图",
+        "详情图",
+        "规格图",
+        "商品附件",
+        "商品主图列表"
+      ],
+      "conceptKeys": [
+        "product.media"
+      ]
+    },
+    {
+      "key": "status",
+      "names": [
+        "SPU档案状态",
+        "SKU档案状态",
+        "SPU销售状态",
+        "SKU销售状态"
+      ],
+      "conceptKeys": [
+        "product.lifecycle"
+      ]
+    },
+    {
+      "key": "taxCode",
+      "names": [
+        "税收分类编码",
+        "税率"
+      ],
+      "conceptKeys": [
+        "product.tax"
+      ]
+    },
+    {
+      "key": "isCustomProduct",
+      "names": [
+        "是否定制品",
+        "是否包含安装服务",
+        "专属客户商品",
+        "是否为定制商品"
+      ],
+      "conceptKeys": [
+        "product.service"
+      ]
+    },
+    {
+      "key": "tags",
+      "names": [
+        "商品标签",
+        "场景标签",
+        "行业标签"
+      ],
+      "conceptKeys": [
+        "product.tags"
+      ]
+    },
+    {
+      "key": "upstreamId",
+      "names": [
+        "上游ID"
+      ],
+      "conceptKeys": [
+        "system.field.upstreamId"
+      ]
+    },
+    {
+      "key": "isAllowUpstreamPush",
+      "names": [
+        "是否接收上游数据"
+      ],
+      "conceptKeys": [
+        "system.field.isAllowUpstreamPush"
+      ]
+    },
+    {
+      "key": "upstreamSpu",
+      "names": [
+        "上游SPU"
+      ],
+      "conceptKeys": [
+        "system.field.upstreamSpu"
+      ]
+    },
+    {
+      "key": "upstreamSku",
+      "names": [
+        "上游SKU"
+      ],
+      "conceptKeys": [
+        "system.field.upstreamSku"
+      ]
+    },
+    {
+      "key": "vendorSpuId",
+      "names": [
+        "供应商spuId 用于商品映射",
+        "供应商SPU ID"
+      ],
+      "conceptKeys": [
+        "system.field.vendorSpuId"
+      ]
+    },
+    {
+      "key": "spuSaleStatus",
+      "names": [
+        "spuSaleStatus",
+        "SPU销售状态"
+      ],
+      "conceptKeys": [
+        "system.field.spuSaleStatus"
+      ]
+    },
+    {
+      "key": "skuSaleStatus",
+      "names": [
+        "skuSaleStatus",
+        "SKU销售状态"
+      ],
+      "conceptKeys": [
+        "system.field.skuSaleStatus"
+      ]
+    },
+    {
+      "key": "isSpuEnable",
+      "names": [
+        "同步实例的最新状态",
+        "表示该商品是否有效",
+        "SPU档案状态"
+      ],
+      "conceptKeys": [
+        "system.field.isSpuEnable"
+      ]
+    },
+    {
+      "key": "isSkuEnable",
+      "names": [
+        "同步实例的最新状态",
+        "表示该规格是否有效",
+        "SKU档案状态"
+      ],
+      "conceptKeys": [
+        "system.field.isSkuEnable"
+      ]
+    },
+    {
+      "key": "supplyRelevanceRule",
+      "names": [
+        "如果没有规则"
+      ],
+      "conceptKeys": [
+        "system.field.supplyRelevanceRule"
+      ]
+    },
+    {
+      "key": "vendorId",
+      "names": [
+        "vendorId",
+        "供应商ID"
+      ],
+      "conceptKeys": [
+        "system.field.vendorId"
+      ]
+    },
+    {
+      "key": "stdCategoryId",
+      "names": [
+        "标准类目ID"
+      ],
+      "conceptKeys": [
+        "system.field.stdCategoryId"
+      ]
+    },
+    {
+      "key": "targetCustomerIds",
+      "names": [
+        "定向客户ID列表"
+      ],
+      "conceptKeys": [
+        "system.field.targetCustomerIds"
+      ]
+    },
+    {
+      "key": "isTargetedProduct",
+      "names": [
+        "是否为定向商品"
+      ],
+      "conceptKeys": [
+        "system.field.isTargetedProduct"
+      ]
+    },
+    {
+      "key": "costPrice",
+      "names": [
+        "成本价"
+      ],
+      "conceptKeys": [
+        "system.field.costPrice"
+      ]
+    },
+    {
+      "key": "retailPrice",
+      "names": [
+        "零售价"
+      ],
+      "conceptKeys": [
+        "system.field.retailPrice"
+      ]
+    },
+    {
+      "key": "earningsRate",
+      "names": [
+        "利润率"
+      ],
+      "conceptKeys": [
+        "system.field.earningsRate"
+      ]
+    },
+    {
+      "key": "freightTemplateId",
+      "names": [
+        "运费模板"
+      ],
+      "conceptKeys": [
+        "system.field.freightTemplateId"
+      ]
+    },
+    {
+      "key": "vendorFreightTemplateId",
+      "names": [
+        "运费模板"
+      ],
+      "conceptKeys": [
+        "system.field.vendorFreightTemplateId"
+      ]
+    },
+    {
+      "key": "categoryInstanceId",
+      "names": [
+        "如果没有原型, 则必须指定分类"
+      ],
+      "conceptKeys": [
+        "system.field.categoryInstanceId"
+      ]
+    },
+    {
+      "key": "categoryIds",
+      "names": [
+        "强化搜索字段"
+      ],
+      "conceptKeys": [
+        "system.field.categoryIds"
+      ]
+    },
+    {
+      "key": "afterSaleTypes",
+      "names": [
+        "afterSaleTypes"
+      ],
+      "conceptKeys": [
+        "system.field.afterSaleTypes"
+      ]
+    },
+    {
+      "key": "sku",
+      "names": [
+        "业务端使用的商品ID"
+      ],
+      "conceptKeys": [
+        "system.field.sku"
+      ]
+    },
+    {
+      "key": "spu",
+      "names": [
+        "业务端使用的商品SPU ID"
+      ],
+      "conceptKeys": [
+        "system.field.spu"
+      ]
+    },
+    {
+      "key": "isDisabled",
+      "names": [
+        "[已废弃"
+      ],
+      "conceptKeys": [
+        "system.field.isDisabled"
+      ]
+    },
+    {
+      "key": "stdCategoryIdPath",
+      "names": [
+        "标准类目全路径"
+      ],
+      "conceptKeys": [
+        "system.field.stdCategoryIdPath"
+      ]
+    },
+    {
+      "key": "vendorName",
+      "names": [
+        "供应商名称"
+      ],
+      "conceptKeys": [
+        "system.field.vendorName"
+      ]
+    },
+    {
+      "key": "vendorSkuCode",
+      "names": [
+        "供应商编码"
+      ],
+      "conceptKeys": [
+        "system.field.vendorSkuCode"
+      ]
+    },
+    {
+      "key": "vendorSpuCode",
+      "names": [
+        "供应商编码"
+      ],
+      "conceptKeys": [
+        "system.field.vendorSpuCode"
+      ]
+    },
+    {
+      "key": "vendorIsOnSale",
+      "names": [
+        "供应商商品是否在售"
+      ],
+      "conceptKeys": [
+        "system.field.vendorIsOnSale"
+      ]
+    },
+    {
+      "key": "vendorRelevantSkus",
+      "names": [
+        "供应商相关SKU列表"
+      ],
+      "conceptKeys": [
+        "system.field.vendorRelevantSkus"
+      ]
+    },
+    {
+      "key": "sourceLinks",
+      "names": [
+        "货源链接"
+      ],
+      "conceptKeys": [
+        "system.field.sourceLinks"
+      ]
+    },
+    {
+      "key": "upstreamSkuId",
+      "names": [
+        "上游SKU ID"
+      ],
+      "conceptKeys": [
+        "system.field.upstreamSkuId"
+      ]
+    },
+    {
+      "key": "upstreamSpuId",
+      "names": [
+        "上游SPU ID"
+      ],
+      "conceptKeys": [
+        "system.field.upstreamSpuId"
+      ]
+    },
+    {
+      "key": "subTitle",
+      "names": [
+        "商品副标题"
+      ],
+      "conceptKeys": [
+        "system.field.subTitle"
+      ]
+    },
+    {
+      "key": "saleSpec",
+      "names": [
+        "商品合并销售规格名"
+      ],
+      "conceptKeys": [
+        "system.field.saleSpec"
+      ]
+    },
+    {
+      "key": "saleSpecRaw",
+      "names": [
+        "原始销售属性"
+      ],
+      "conceptKeys": [
+        "system.field.saleSpecRaw"
+      ]
+    },
+    {
+      "key": "taxRate",
+      "names": [
+        "税率"
+      ],
+      "conceptKeys": [
+        "system.field.taxRate"
+      ]
+    },
+    {
+      "key": "specImage",
+      "names": [
+        "商品销售属性图片"
+      ],
+      "conceptKeys": [
+        "system.field.specImage"
+      ]
+    },
+    {
+      "key": "detailImages",
+      "names": [
+        "商品详情图片列表"
+      ],
+      "conceptKeys": [
+        "system.field.detailImages"
+      ]
+    },
+    {
+      "key": "saleUnit",
+      "names": [
+        "销售单位"
+      ],
+      "conceptKeys": [
+        "system.field.saleUnit"
+      ]
+    },
+    {
+      "key": "height",
+      "names": [
+        "商品高度"
+      ],
+      "conceptKeys": [
+        "system.field.height"
+      ]
+    },
+    {
+      "key": "width",
+      "names": [
+        "商品宽度"
+      ],
+      "conceptKeys": [
+        "system.field.width"
+      ]
+    },
+    {
+      "key": "length",
+      "names": [
+        "商品长度"
+      ],
+      "conceptKeys": [
+        "system.field.length"
+      ]
+    },
+    {
+      "key": "packingList",
+      "names": [
+        "包装清单"
+      ],
+      "conceptKeys": [
+        "system.field.packingList"
+      ]
+    },
+    {
+      "key": "priceBareCost",
+      "names": [
+        "裸成本价"
+      ],
+      "conceptKeys": [
+        "system.field.priceBareCost"
+      ]
+    },
+    {
+      "key": "priceRetail",
+      "names": [
+        "零售价"
+      ],
+      "conceptKeys": [
+        "system.field.priceRetail"
+      ]
+    },
+    {
+      "key": "priceFactory",
+      "names": [
+        "出厂价"
+      ],
+      "conceptKeys": [
+        "system.field.priceFactory"
+      ]
+    },
+    {
+      "key": "priceJd",
+      "names": [
+        "京东价"
+      ],
+      "conceptKeys": [
+        "system.field.priceJd"
+      ]
+    },
+    {
+      "key": "priceMarket",
+      "names": [
+        "市场价"
+      ],
+      "conceptKeys": [
+        "system.field.priceMarket"
+      ]
+    },
+    {
+      "key": "profitRate",
+      "names": [
+        "毛利率"
+      ],
+      "conceptKeys": [
+        "system.field.profitRate"
+      ]
+    },
+    {
+      "key": "supplierShippingTemplateId",
+      "names": [
+        "供应商发货模版ID"
+      ],
+      "conceptKeys": [
+        "system.field.supplierShippingTemplateId"
+      ]
+    },
+    {
+      "key": "platformShippingTemplateId",
+      "names": [
+        "平台发货模版ID"
+      ],
+      "conceptKeys": [
+        "system.field.platformShippingTemplateId"
+      ]
+    },
+    {
+      "key": "supportedShippingMethods",
+      "names": [
+        "支持的配送方式"
+      ],
+      "conceptKeys": [
+        "system.field.supportedShippingMethods"
+      ]
+    },
+    {
+      "key": "shippingTimeNote",
+      "names": [
+        "货期"
+      ],
+      "conceptKeys": [
+        "system.field.shippingTimeNote"
+      ]
+    },
+    {
+      "key": "shippingFrom",
+      "names": [
+        "发货地"
+      ],
+      "conceptKeys": [
+        "system.field.shippingFrom"
+      ]
+    },
+    {
+      "key": "quantityMax",
+      "names": [
+        "最大购买量"
+      ],
+      "conceptKeys": [
+        "system.field.quantityMax"
+      ]
+    },
+    {
+      "key": "quantityStep",
+      "names": [
+        "购买步长"
+      ],
+      "conceptKeys": [
+        "system.field.quantityStep"
+      ]
+    },
+    {
+      "key": "tagIds",
+      "names": [
+        "商品标签id值"
+      ],
+      "conceptKeys": [
+        "system.field.tagIds"
+      ]
+    },
+    {
+      "key": "specialManagementCategoryCode",
+      "names": [
+        "特殊经营类别, 可用代码"
+      ],
+      "conceptKeys": [
+        "system.field.specialManagementCategoryCode"
+      ]
+    },
+    {
+      "key": "supportedAfterSalesServiceTypes",
+      "names": [
+        "支持的售后服务类型"
+      ],
+      "conceptKeys": [
+        "system.field.supportedAfterSalesServiceTypes"
+      ]
+    },
+    {
+      "key": "afterSalesServiceInformation",
+      "names": [
+        "售后服务信息说明"
+      ],
+      "conceptKeys": [
+        "system.field.afterSalesServiceInformation"
+      ]
+    },
+    {
+      "key": "returnPolicies",
+      "names": [
+        "业务上控制"
+      ],
+      "conceptKeys": [
+        "system.field.returnPolicies"
+      ]
+    },
+    {
+      "key": "includesInstallationService",
+      "names": [
+        "是否包含安装服务"
+      ],
+      "conceptKeys": [
+        "system.field.includesInstallationService"
+      ]
+    },
+    {
+      "key": "isExclusiveCustomerProduct",
+      "names": [
+        "是否为专属客户商品"
+      ],
+      "conceptKeys": [
+        "system.field.isExclusiveCustomerProduct"
+      ]
+    },
+    {
+      "key": "remark",
+      "names": [
+        "备注"
+      ],
+      "conceptKeys": [
+        "system.field.remark"
+      ]
+    }
+  ]
+}

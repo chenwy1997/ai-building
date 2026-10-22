@@ -321,7 +321,9 @@ export function fixtureTask(stage: Stage): Task {
     stage,
     categoryId: "fixture-cored-category",
     productId:
-      stage === "sku-filling" || stage === "review-assistance"
+      stage === "sku-filling" ||
+      stage === "review-assistance" ||
+      stage === "fact-extraction"
         ? "fixture-sku"
         : null,
     question: "构造接线验收，保留待人工状态",
@@ -378,6 +380,30 @@ export function fixtureValues(): FilledValue[] {
 }
 export function fixtureOutput(stage: Stage): any {
   const categoryId = "fixture-cored-category";
+  if (stage === "fact-extraction") {
+    const s = fixtureSnapshot().sources[0]!,
+      quote = "层数3层",
+      start = s.text.indexOf(quote);
+    return {
+      categoryId,
+      productId: "fixture-sku",
+      candidates: [
+        {
+          id: "fixture-extracted-layer",
+          attributeId: "fixture-layers",
+          sourceId: s.id,
+          sourceVersion: s.version,
+          start,
+          end: start + quote.length,
+          quote,
+          value: 3,
+          normalization: "identity",
+          rationale: "构造原文定位",
+        },
+      ],
+      unresolved: ["构造提取仅验证接线，仍需人工核实"],
+    };
+  }
   if (stage === "family-modeling")
     return {
       categoryId,

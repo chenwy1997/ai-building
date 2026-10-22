@@ -5,6 +5,7 @@ import {
   list,
   nullable,
   numeric,
+  bool,
   STAGES,
   freeze,
   jsonClone,
@@ -21,30 +22,60 @@ import { attributeSchema, bindingSchema, valueSchema } from "./contracts.ts";
 import { CategoryIndex } from "./catalog.ts";
 
 const strings = list(text()),
-  sourceSchema = object({
-    id: text(),
-    productId: text(),
-    salesUnitId: text(),
-    version: text(),
-    text: text(),
-    facts: list(
-      object({
-        id: text(),
-        conceptKey: text(),
-        value: valueSchema,
-        unit: nullable(text()),
-        scope: text(),
-        quote: text(),
-        kind: text("direct"),
+  sourceSchema = object(
+    {
+      id: text(),
+      productId: text(),
+      salesUnitId: text(),
+      version: text(),
+      text: text(),
+      facts: list(
+        object({
+          id: text(),
+          conceptKey: text(),
+          value: valueSchema,
+          unit: nullable(text()),
+          scope: text(),
+          quote: text(),
+          kind: text("direct"),
+        }),
+      ),
+      origin: object({
+        sourceId: text(),
+        productId: text(),
+        productInstanceId: text(),
+        governanceCategoryId: text(),
+        standardCategoryId: text(),
+        categoryInstanceId: nullable(text()),
+        stableMountedCategoryId: nullable(text()),
+        propertyId: text(),
+        propertyInstanceId: text(),
+        propertyValueInstanceId: text(),
+        jsonPointer: text(),
+        capturePath: text(),
+        captureHash: text(),
+        rawValueHash: text(),
+        capturedAt: text(),
+        sourceKind: text(),
+        derivedText: bool,
       }),
-    ),
-    factPreparation: object({
-      status: text("candidate", "reviewed"),
-      kind: text("fixture", "human"),
-      recordId: text(),
-      contentHash: text(),
-    }),
-  });
+      factPreparation: object({
+        status: text("candidate", "reviewed"),
+        kind: text("fixture", "human", "agent"),
+        recordId: text(),
+        contentHash: text(),
+      }),
+    },
+    [
+      "id",
+      "productId",
+      "salesUnitId",
+      "version",
+      "text",
+      "facts",
+      "factPreparation",
+    ],
+  );
 const snapshotSchema = object({
   format: { type: "integer", enum: [2] },
   version: text(),
@@ -240,6 +271,44 @@ export class DataSnapshot {
           throw Error("invalid product source binding");
     }
     for (const s of data.sources) {
+      if (s.origin) {
+        const marker = "\n原文：",
+          start = s.text.indexOf(marker),
+          p = data.products.find((p) => p.id === s.productId),
+          node = data.tree.nodes.find(
+            (n: any) => n.id === s.origin!.governanceCategoryId,
+          ) as any;
+        if (
+          s.origin.derivedText ||
+          start < 0 ||
+          hash(s.text.slice(start + marker.length)) !== s.origin.rawValueHash ||
+          s.origin.governanceCategoryId !== p?.categoryId ||
+          (node?.standardCategoryId &&
+            node.standardCategoryId !== s.origin.standardCategoryId)
+        )
+          throw new Blocked(
+            "source_origin_content",
+            "native source body/category differs from its captured raw value; transformed sources need a separate verified adapter",
+          );
+      }
+      if (
+        s.origin &&
+        (s.origin.sourceId !== s.id ||
+          s.origin.productId !== s.productId ||
+          s.version !== hash(s.origin))
+      )
+        throw new Blocked(
+          "source_origin_drift",
+          "source identity/provenance differs from its frozen version",
+        );
+      if (
+        s.factPreparation.status === "reviewed" &&
+        s.factPreparation.kind === "agent"
+      )
+        throw new Blocked(
+          "unreviewed_agent_facts",
+          "agent preparation cannot authorize reviewed facts",
+        );
       if (s.factPreparation.contentHash !== factPreparationHash(s))
         throw new Blocked(
           "fact_preparation_drift",
@@ -369,7 +438,10 @@ export class DataSnapshot {
       this.product(task.productId).categoryId !== task.categoryId
     )
       throw new Blocked("product_category", "SKU category does not match task");
-    if (task.stage === "sku-filling" && !task.productId)
+    if (
+      ["sku-filling", "fact-extraction"].includes(task.stage) &&
+      !task.productId
+    )
       throw new Blocked("product_required", "sku-filling needs productId");
   }
 }

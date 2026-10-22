@@ -12,6 +12,7 @@ import { outputSchemas, type FilledValue } from "./contracts.ts";
 import { RULES, STAGE_RULES } from "./release.ts";
 import type { ToolRegistry } from "./tools.ts";
 import { calculate, resolveFact } from "./calculation.ts";
+import { extractionErrors } from "./fact-preparation.ts";
 import {
   definitionConfigErrors,
   valueConstraintErrors,
@@ -203,6 +204,14 @@ export function checkResult(
           "leaf binding change needs a business difference reason; shared definition stays unchanged",
         );
     }
+  } else if (task.stage === "fact-extraction") {
+    executed.add("fact-extraction-provenance");
+    const attrs = snapshot.attributes(task);
+    checkDefinitions(
+      attrs,
+      attrs.map((a) => a.binding),
+    );
+    errors.push(...extractionErrors(task, value, tools));
   } else if (task.stage === "sku-filling") {
     executed.add("sku-values");
     if (value.productId !== task.productId)

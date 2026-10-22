@@ -143,7 +143,7 @@ describe("rule registry: real stage responsibilities and loaded material", () =>
       for (const heading of r.sections)
         expect(release.standard.body).toContain(heading);
       for (const p of r.program) {
-        expect(p.evidence).toMatch(/\.test\.ts:/);
+        expect(p.evidence).toMatch(/\.test\.(?:ts|mjs):/);
         const [testFile, testCase] = p.evidence.split(":");
         expect(await readFile(join(ROOT, testFile!), "utf8")).toContain(
           testCase!,

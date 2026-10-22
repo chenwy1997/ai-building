@@ -1,6 +1,6 @@
-# v3离线接线验收
+# v3离线接线验收（第1、2步留档）
 
-日期：2026-10-22。范围是当前接线，实现入口和命令见[README](../README.md)。不涉及收费模型运行、生产变更或原Excel修改。
+日期：2026-10-22。本页及acceptance.json保留第1、2步完成时的验收记录；第3步后的当前结果见[真实样板实施记录](implementation-phase3-20261022.md)及[phase3-acceptance.json](phase3-acceptance.json)。实现入口和命令见[README](../README.md)。不涉及收费模型运行、生产变更或原Excel修改。
 
 [全面审计](implementation-audit-20261022.md)先发现原45项测试未覆盖的漏接和程序边界；现已完成[第1、2步修复与回归](implementation-phase12-20261022.md)。原20项观测保留历史，当前行为由新回归断言验证，不把原观测改写成通过。
 

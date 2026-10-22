@@ -159,8 +159,9 @@ export async function assemble(
     },
     task,
     candidateProgramChecks,
-    contractAttributes:
-      task.stage === "sku-filling" ? snapshot.attributes(task) : null,
+    contractAttributes: ["sku-filling", "fact-extraction"].includes(task.stage)
+      ? snapshot.attributes(task)
+      : null,
     product: task.productId ? snapshot.product(task.productId) : null,
     evidence: sources,
     dataBoundary:

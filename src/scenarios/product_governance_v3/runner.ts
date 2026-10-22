@@ -14,6 +14,7 @@ import type { DataSnapshot } from "./snapshot.ts";
 import type { ResponsesClient, InputItem } from "./responses.ts";
 import { checkResult } from "./checks.ts";
 import { projectNative } from "./native-contract.ts";
+import { preparationBundle, type FactExtraction } from "./fact-preparation.ts";
 
 export interface Limits {
   maxRounds: number;
@@ -189,6 +190,10 @@ export async function runStage(options: {
         toolCount,
         result,
         checks,
+        factPreparation:
+          task.stage === "fact-extraction" && !checks.errors.length
+            ? preparationBundle(task, result as FactExtraction, plan.tools)
+            : null,
         nativeProjections,
         toolEvents: plan.tools.events,
         actualReads: {

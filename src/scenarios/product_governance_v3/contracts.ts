@@ -95,6 +95,25 @@ export const filledValueSchema = object({
   reason: text(),
 });
 export const outputSchemas: Record<Stage, Schema> = {
+  "fact-extraction": object({
+    categoryId: text(),
+    productId: text(),
+    candidates: list(
+      object({
+        id: text(),
+        attributeId: text(),
+        sourceId: text(),
+        sourceVersion: text(),
+        start: { ...integer, minimum: 0 },
+        end: { ...integer, minimum: 1 },
+        quote: text(),
+        value: valueSchema,
+        normalization: text("identity", "kg-to-g", "cm-to-mm", "m-to-mm"),
+        rationale: text(),
+      }),
+    ),
+    unresolved: strings,
+  }),
   "family-modeling": object({
     categoryId: text(),
     baselineVersion: nullable(text()),
