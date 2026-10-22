@@ -11,10 +11,8 @@ import {
 } from "./core.ts";
 
 export const ROOT = import.meta.dir;
-export const STANDARD =
-  "../product_governance_v2/docs/governance-standard-draft.md";
-export const SYSTEM_CONTRACT =
-  "../product_governance_v2/docs/governance-design-v1-20261022.md";
+export const STANDARD = "docs/governance-standard-draft.md";
+export const SYSTEM_CONTRACT = "docs/governance-design-v1-20261022.md";
 // Point to the approved source, rather than maintaining a competing copy of the rules.
 export const RULES = [
   ["R01", "## 1. 用途和落地边界", "mixed"],

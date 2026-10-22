@@ -993,15 +993,20 @@ describe("shared budget, durable recovery, and material versions", () => {
   test("material/code drift in an isolated copied release prevents loading", async () => {
     const root = join(next(), "src/scenarios/product_governance_v3");
     await cp(ROOT, root, { recursive: true });
-    for (const file of [
-      STANDARD,
-      SYSTEM_CONTRACT,
-      "../product_governance_v2/runtime/store.ts",
-    ]) {
+    for (const file of ["../product_governance_v2/runtime/store.ts"]) {
       const path = join(root, file);
       await mkdir(dirname(path), { recursive: true });
       await writeFile(path, await readFile(join(ROOT, file), "utf8"));
     }
+    // No v2 docs are present: the copied release must load the v3-owned rules.
+    expect(
+      await Bun.file(
+        join(
+          root,
+          "../product_governance_v2/docs/governance-standard-draft.md",
+        ),
+      ).exists(),
+    ).toBe(false);
     expect((await loadRelease(root)).id).toBe(release.id);
     await writeFile(
       join(root, "skills/family-modeling/SKILL.md"),

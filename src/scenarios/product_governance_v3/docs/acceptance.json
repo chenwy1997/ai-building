@@ -1,11 +1,11 @@
 {
   "kind": "constructed_offline_wiring_acceptance",
-  "releaseId": "4fd28b7687c2c4c0135197f253cc8226759d90c6405f92c6bf7d11b7cb39f253",
+  "releaseId": "3aa75ab3a0e468a7c2d9229bd9b6449490ce398816a05d27436a0700dd2774a5",
   "snapshotVersion": "dd42295afd032b56f1c868cb4154e57547b1aca955bc8d7dcb8f2e9425a6aa80",
   "stages": [
     {
       "stage": "family-modeling",
-      "runKey": "0e63ef3bfdc2f554e99394e951e5618f4678f99ad00e03cc8d44404e11bedafc",
+      "runKey": "845e9da6c33fb46b9272f4744100aa3e6a4f1cb0a303445ed72b486f01b333c8",
       "status": "program_pass_pending_human",
       "requests": 2,
       "cachedResponses": 0,
@@ -31,7 +31,7 @@
     },
     {
       "stage": "sku-filling",
-      "runKey": "5af8f6b1fe78253bea8e93b6bbd668c6a0b09604205bb26a20683ca7d115236c",
+      "runKey": "e44efa390fd013578e790e130e5fb2b85bfd14fb7564c3271edb1cf325e6b52c",
       "status": "program_pass_pending_human",
       "requests": 2,
       "cachedResponses": 0,
@@ -57,7 +57,7 @@
     },
     {
       "stage": "review-assistance",
-      "runKey": "e10b5de1d607f6b8d3cdb8ea62808c675f467de6253b215c9b552530653b19ef",
+      "runKey": "78896140db0bfcbc69da4223bf2f7838186d849b0e6fa9ad62bc0da9be4eaafd",
       "status": "program_pass_pending_human",
       "requests": 2,
       "cachedResponses": 0,
@@ -83,7 +83,7 @@
     },
     {
       "stage": "domain-research",
-      "runKey": "32e2cc55cd6d3e99d0e18cf3163c8093c0b893c62992228e35a054ce50877860",
+      "runKey": "a1345c19a767d929b885bf301b8379f5efdc5653af23a3e2925e38d35f958008",
       "status": "program_pass_pending_human",
       "requests": 2,
       "cachedResponses": 0,
@@ -148,6 +148,58 @@
       "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
       "subtreeLeaves": 16,
       "mode": "local_read_only"
+    },
+    "documentationMigration": {
+      "previousReleaseId": "4fd28b7687c2c4c0135197f253cc8226759d90c6405f92c6bf7d11b7cb39f253",
+      "coreDocumentsLoadedFromV3": [
+        {
+          "stage": "family-modeling",
+          "standard": {
+            "path": "docs/governance-standard-draft.md",
+            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
+          },
+          "systemContract": {
+            "path": "docs/governance-design-v1-20261022.md",
+            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
+          }
+        },
+        {
+          "stage": "sku-filling",
+          "standard": {
+            "path": "docs/governance-standard-draft.md",
+            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
+          },
+          "systemContract": {
+            "path": "docs/governance-design-v1-20261022.md",
+            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
+          }
+        },
+        {
+          "stage": "review-assistance",
+          "standard": {
+            "path": "docs/governance-standard-draft.md",
+            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
+          },
+          "systemContract": {
+            "path": "docs/governance-design-v1-20261022.md",
+            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
+          }
+        },
+        {
+          "stage": "domain-research",
+          "standard": {
+            "path": "docs/governance-standard-draft.md",
+            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
+          },
+          "systemContract": {
+            "path": "docs/governance-design-v1-20261022.md",
+            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
+          }
+        }
+      ],
+      "localLinksChecked": 78,
+      "missingLinks": 0,
+      "isolatedReleaseWithoutV2Docs": "passed"
     }
   }
 }
