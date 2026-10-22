@@ -1,0 +1,729 @@
+{
+  "kind": "implementation_audit_observations_not_business_acceptance",
+  "auditedReleaseId": "3aa75ab3a0e468a7c2d9229bd9b6449490ce398816a05d27436a0700dd2774a5",
+  "snapshotKind": "constructed_only",
+  "networkAttempts": 0,
+  "paidModelCalls": 0,
+  "productionWrites": 0,
+  "observations": [
+    {
+      "id": "P01",
+      "subject": "Actual rules, skill bodies/references, schemas and tool lists",
+      "observed": [
+        {
+          "stage": "family-modeling",
+          "ruleIds": [
+            "R01",
+            "R02",
+            "R03",
+            "R04",
+            "R05",
+            "R06",
+            "R07",
+            "R08",
+            "R11",
+            "R17",
+            "R18",
+            "R23",
+            "R24",
+            "R25"
+          ],
+          "standard": {
+            "path": "docs/governance-standard-draft.md",
+            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
+          },
+          "systemContract": {
+            "path": "docs/governance-design-v1-20261022.md",
+            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
+          },
+          "skillBodyPresent": true,
+          "allDeclaredReferencesPresent": true,
+          "tools": [
+            "categories_search",
+            "categories_get",
+            "categories_children",
+            "find_related_categories",
+            "get_family_context",
+            "search_attribute_pool",
+            "knowledge_read",
+            "sources_read"
+          ],
+          "knowledge": [
+            {
+              "id": "clean-paper-fixture",
+              "sha256": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+              "offset": 0,
+              "end": 315
+            }
+          ]
+        },
+        {
+          "stage": "sku-filling",
+          "ruleIds": [
+            "R01",
+            "R02",
+            "R03",
+            "R05",
+            "R06",
+            "R08",
+            "R09",
+            "R10",
+            "R11",
+            "R12",
+            "R13",
+            "R14",
+            "R15",
+            "R16",
+            "R17",
+            "R18",
+            "R23",
+            "R24",
+            "R25"
+          ],
+          "standard": {
+            "path": "docs/governance-standard-draft.md",
+            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
+          },
+          "systemContract": {
+            "path": "docs/governance-design-v1-20261022.md",
+            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
+          },
+          "skillBodyPresent": true,
+          "allDeclaredReferencesPresent": true,
+          "tools": [
+            "categories_search",
+            "categories_get",
+            "categories_children",
+            "find_related_categories",
+            "get_family_context",
+            "search_attribute_pool",
+            "knowledge_read",
+            "sources_read",
+            "calculate_value"
+          ],
+          "knowledge": [
+            {
+              "id": "clean-paper-fixture",
+              "sha256": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+              "offset": 0,
+              "end": 315
+            }
+          ]
+        },
+        {
+          "stage": "review-assistance",
+          "ruleIds": [
+            "R01",
+            "R02",
+            "R03",
+            "R04",
+            "R05",
+            "R06",
+            "R07",
+            "R08",
+            "R09",
+            "R10",
+            "R11",
+            "R12",
+            "R13",
+            "R14",
+            "R15",
+            "R16",
+            "R17",
+            "R18",
+            "R19",
+            "R20",
+            "R21",
+            "R22",
+            "R23",
+            "R24",
+            "R25",
+            "R26"
+          ],
+          "standard": {
+            "path": "docs/governance-standard-draft.md",
+            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
+          },
+          "systemContract": {
+            "path": "docs/governance-design-v1-20261022.md",
+            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
+          },
+          "skillBodyPresent": true,
+          "allDeclaredReferencesPresent": true,
+          "tools": [
+            "categories_search",
+            "categories_get",
+            "categories_children",
+            "find_related_categories",
+            "get_family_context",
+            "search_attribute_pool",
+            "knowledge_read",
+            "sources_read"
+          ],
+          "knowledge": [
+            {
+              "id": "clean-paper-fixture",
+              "sha256": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+              "offset": 0,
+              "end": 315
+            }
+          ]
+        },
+        {
+          "stage": "domain-research",
+          "ruleIds": [
+            "R01",
+            "R03",
+            "R04",
+            "R05",
+            "R06",
+            "R07",
+            "R08",
+            "R11",
+            "R13",
+            "R15",
+            "R17",
+            "R18",
+            "R23",
+            "R24",
+            "R25"
+          ],
+          "standard": {
+            "path": "docs/governance-standard-draft.md",
+            "sha256": "69c0e7f413d4122db9d9ae15ead0a1dcb0517c9a2647f1f5ee6ff9cc41fea6d9"
+          },
+          "systemContract": {
+            "path": "docs/governance-design-v1-20261022.md",
+            "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7"
+          },
+          "skillBodyPresent": true,
+          "allDeclaredReferencesPresent": true,
+          "tools": [
+            "categories_search",
+            "categories_get",
+            "categories_children",
+            "find_related_categories",
+            "get_family_context",
+            "search_attribute_pool",
+            "knowledge_read",
+            "sources_read"
+          ],
+          "knowledge": [
+            {
+              "id": "clean-paper-fixture",
+              "sha256": "6de2d4d81ac3dbd59998911242846b8bb21a7bf548605e15f77055d04d8257c3",
+              "offset": 0,
+              "end": 315
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P02",
+      "subject": "Approved sections missing from all stage instructions",
+      "observed": [
+        {
+          "heading": "### 9.2 问题分级与结果采用",
+          "loadedBy": []
+        },
+        {
+          "heading": "### 9.5 本批交付的结束条件",
+          "loadedBy": []
+        },
+        {
+          "heading": "### 11.4 写后核验与生效状态",
+          "loadedBy": []
+        },
+        {
+          "heading": "### 11.5 部分成功与回退",
+          "loadedBy": []
+        },
+        {
+          "heading": "### 11.6 成本与迭代上限",
+          "loadedBy": []
+        }
+      ]
+    },
+    {
+      "id": "P03",
+      "subject": "Calculation policies exist only on host, without context/tool discovery",
+      "observed": {
+        "policiesInSnapshot": [
+          {
+            "id": "fixture-total-policy",
+            "operator": "multiply",
+            "targetConceptKey": "paper.total_rolls",
+            "inputConceptKeys": [
+              "paper.rolls_per_bundle",
+              "paper.bundles_per_sale"
+            ],
+            "targetUnit": "卷/销售单位"
+          }
+        ],
+        "policyIdVisibleInInput": false,
+        "policyObjectVisibleInInput": false,
+        "policyReadTool": false
+      }
+    },
+    {
+      "id": "P04",
+      "subject": "Mandatory pool query uses leaf name rather than target concepts",
+      "observed": {
+        "prefetch": {
+          "name": "search_attribute_pool",
+          "arguments": {
+            "query": "有芯小卷纸",
+            "limit": 20,
+            "cursor": null
+          },
+          "result": {
+            "treeVersion": "4e04f989c813284e8487fec66f9a1d3dc62267e065c192f19561cf66b5d9593b",
+            "total": 0,
+            "items": [],
+            "truncated": false,
+            "nextCursor": null
+          },
+          "resultHash": "54a0d828d722575d9d5c106f47407f0eaa0fa98d331aee389f95a1d12e52bf47",
+          "origin": "prefetch"
+        },
+        "conceptQueryHits": 1
+      }
+    },
+    {
+      "id": "P05",
+      "subject": "Missing professional knowledge is a marker, not a required stop/research state",
+      "observed": {
+        "coverage": "gap_requires_research_or_human",
+        "unresolved": [],
+        "checks": {
+          "status": "program_pass_pending_human",
+          "errors": [],
+          "humanReviewRules": [
+            "R01",
+            "R03",
+            "R04",
+            "R05",
+            "R06",
+            "R07",
+            "R08",
+            "R11",
+            "R17",
+            "R18"
+          ]
+        }
+      }
+    },
+    {
+      "id": "P06",
+      "subject": "Modeling cannot structurally cite a loaded knowledge document as sourceId",
+      "observed": {
+        "status": "program_blocked",
+        "errors": [
+          {
+            "ruleId": "R11",
+            "objectId": "fixture-coreless",
+            "message": "unread/out-of-scope source clean-paper-fixture"
+          }
+        ],
+        "humanReviewRules": [
+          "R01",
+          "R03",
+          "R04",
+          "R05",
+          "R06",
+          "R07",
+          "R08",
+          "R11",
+          "R17",
+          "R18"
+        ]
+      }
+    },
+    {
+      "id": "P07",
+      "subject": "Raw source text has no extraction-to-frozen-fact bridge",
+      "observed": {
+        "status": "program_blocked",
+        "errors": [
+          {
+            "ruleId": "R09",
+            "objectId": "fixture-coreless",
+            "message": "known value must match a read frozen fact with same concept, scope, unit and value; otherwise propose unknown"
+          },
+          {
+            "ruleId": "R09",
+            "objectId": "fixture-layers",
+            "message": "known value must match a read frozen fact with same concept, scope, unit and value; otherwise propose unknown"
+          },
+          {
+            "ruleId": "R14",
+            "objectId": "fixture-total",
+            "message": "Blocked: factor must reference a frozen fact in actually read source text"
+          }
+        ],
+        "humanReviewRules": [
+          "R01",
+          "R03",
+          "R05",
+          "R06",
+          "R08",
+          "R09",
+          "R10",
+          "R11",
+          "R12",
+          "R13",
+          "R14",
+          "R15",
+          "R16",
+          "R17",
+          "R18"
+        ]
+      }
+    },
+    {
+      "id": "P08",
+      "subject": "Missing system field ownership can let a brand attribute pass",
+      "observed": {
+        "status": "program_pass_pending_human",
+        "errors": [],
+        "humanReviewRules": [
+          "R01",
+          "R03",
+          "R04",
+          "R05",
+          "R06",
+          "R07",
+          "R08",
+          "R11",
+          "R17",
+          "R18"
+        ]
+      }
+    },
+    {
+      "id": "P09",
+      "subject": "Conflicting assumptions do not block quantity arithmetic",
+      "observed": {
+        "checks": {
+          "status": "program_pass_pending_human",
+          "errors": [],
+          "humanReviewRules": [
+            "R01",
+            "R03",
+            "R05",
+            "R06",
+            "R08",
+            "R09",
+            "R10",
+            "R11",
+            "R12",
+            "R13",
+            "R14",
+            "R15",
+            "R16",
+            "R17",
+            "R18"
+          ]
+        },
+        "calculation": {
+          "value": 40,
+          "unit": "卷/销售单位",
+          "scope": "sales-unit",
+          "policyId": "fixture-total-policy",
+          "factors": [
+            {
+              "sourceId": "fixture-source",
+              "factId": "per-bundle"
+            },
+            {
+              "sourceId": "fixture-source",
+              "factId": "bundles"
+            }
+          ],
+          "sourceSnapshot": "8657df70c4ebd2ab7e4cb999570a31c2997943288c47914735928a79be5312a5"
+        }
+      }
+    },
+    {
+      "id": "P10",
+      "subject": "Two negative count factors produce a positive result accepted by the checker",
+      "observed": {
+        "status": "program_pass_pending_human",
+        "errors": [],
+        "humanReviewRules": [
+          "R01",
+          "R03",
+          "R05",
+          "R06",
+          "R08",
+          "R09",
+          "R10",
+          "R11",
+          "R12",
+          "R13",
+          "R14",
+          "R15",
+          "R16",
+          "R17",
+          "R18"
+        ]
+      }
+    },
+    {
+      "id": "P11",
+      "subject": "Leaf binding requiredness cannot differ from baseline even with a reason",
+      "observed": {
+        "status": "program_blocked",
+        "errors": [
+          {
+            "ruleId": "R03",
+            "objectId": "fixture-coreless",
+            "message": "shared definition changed; propose a baseline revision separately"
+          }
+        ],
+        "humanReviewRules": [
+          "R01",
+          "R03",
+          "R04",
+          "R05",
+          "R06",
+          "R07",
+          "R08",
+          "R11",
+          "R17",
+          "R18"
+        ]
+      }
+    },
+    {
+      "id": "P12",
+      "subject": "A quote crossing adjacent source chunks is treated as unread",
+      "observed": {
+        "reads": [
+          {
+            "start": 0,
+            "end": 8000
+          },
+          {
+            "start": 8000,
+            "end": 8061
+          }
+        ],
+        "quoteRead": false,
+        "checks": {
+          "status": "program_blocked",
+          "errors": [
+            {
+              "ruleId": "R09",
+              "objectId": "fixture-coreless",
+              "message": "Error: quote not in actually read source range"
+            },
+            {
+              "ruleId": "R09",
+              "objectId": "fixture-coreless",
+              "message": "known value must match a read frozen fact with same concept, scope, unit and value; otherwise propose unknown"
+            }
+          ],
+          "humanReviewRules": [
+            "R01",
+            "R03",
+            "R05",
+            "R06",
+            "R08",
+            "R09",
+            "R10",
+            "R11",
+            "R12",
+            "R13",
+            "R14",
+            "R15",
+            "R16",
+            "R17",
+            "R18"
+          ]
+        }
+      }
+    },
+    {
+      "id": "P13",
+      "subject": "Needed numeric/title configuration cannot enter the generation contract",
+      "observed": {
+        "status": "program_blocked",
+        "errors": [
+          {
+            "ruleId": "CONTRACT",
+            "objectId": "fixture-cored-category",
+            "message": "$.attributes[1].metaNumberPrecision: unexpected"
+          },
+          {
+            "ruleId": "CONTRACT",
+            "objectId": "fixture-cored-category",
+            "message": "$.attributes[1].displayInTitle: unexpected"
+          }
+        ],
+        "humanReviewRules": [
+          "R01",
+          "R03",
+          "R04",
+          "R05",
+          "R06",
+          "R07",
+          "R08",
+          "R11",
+          "R17",
+          "R18"
+        ]
+      }
+    },
+    {
+      "id": "P14",
+      "subject": "Successful modeling output is not consumed as a downstream SKU contract",
+      "observed": {
+        "modelingChecks": {
+          "status": "program_pass_pending_human",
+          "errors": [],
+          "humanReviewRules": [
+            "R01",
+            "R03",
+            "R04",
+            "R05",
+            "R06",
+            "R07",
+            "R08",
+            "R11",
+            "R17",
+            "R18"
+          ]
+        },
+        "subsequentSkuAssemblyError": "Blocked: SKU filling/calculation requires an applicable fixed family contract; the global pool is not a contract"
+      }
+    },
+    {
+      "id": "P15",
+      "subject": "All nine registered tools actually dispatch and return through the Responses loop",
+      "observed": {
+        "status": "program_pass_pending_human",
+        "mockRequests": 2,
+        "cachedResponses": 0,
+        "modelCalls": [
+          "categories_search",
+          "categories_get",
+          "categories_children",
+          "find_related_categories",
+          "get_family_context",
+          "search_attribute_pool",
+          "knowledge_read",
+          "sources_read",
+          "calculate_value"
+        ],
+        "returnedCalls": 9
+      }
+    },
+    {
+      "id": "P16",
+      "subject": "Quote existence does not validate the semantic correctness of curated facts",
+      "observed": {
+        "status": "program_pass_pending_human",
+        "errors": [],
+        "humanReviewRules": [
+          "R01",
+          "R03",
+          "R05",
+          "R06",
+          "R08",
+          "R09",
+          "R10",
+          "R11",
+          "R12",
+          "R13",
+          "R14",
+          "R15",
+          "R16",
+          "R17",
+          "R18"
+        ]
+      }
+    },
+    {
+      "id": "P17",
+      "subject": "Research output cannot represent a genuinely new family proposal",
+      "observed": {
+        "status": "program_blocked",
+        "errors": [
+          {
+            "ruleId": "R04",
+            "objectId": "audit-proposed-new-family",
+            "message": "family ID not found in task context"
+          }
+        ],
+        "humanReviewRules": [
+          "R01",
+          "R03",
+          "R04",
+          "R05",
+          "R06",
+          "R07",
+          "R08",
+          "R11",
+          "R13",
+          "R15",
+          "R17",
+          "R18"
+        ]
+      }
+    },
+    {
+      "id": "P18",
+      "subject": "Budget cap is directory-local; runId has no enforced shared ledger identity",
+      "observed": {
+        "eachLimit": 0.6,
+        "committedA": 0.6,
+        "committedB": 0.6,
+        "actualMoneySpent": 0
+      }
+    },
+    {
+      "id": "P19",
+      "subject": "Calendar-invalid ISO-shaped dates are accepted",
+      "observed": {
+        "status": "program_pass_pending_human",
+        "errors": [],
+        "humanReviewRules": [
+          "R01",
+          "R03",
+          "R05",
+          "R06",
+          "R08",
+          "R09",
+          "R10",
+          "R11",
+          "R12",
+          "R13",
+          "R14",
+          "R15",
+          "R16",
+          "R17",
+          "R18"
+        ]
+      }
+    },
+    {
+      "id": "P20",
+      "subject": "Canonical JSON sorts SKU evidence before the purported shared family prefix",
+      "observed": {
+        "inputKeyOrder": [
+          "candidateProgramChecks",
+          "contractAttributes",
+          "dataBoundary",
+          "evidence",
+          "product",
+          "sharedContext",
+          "task"
+        ],
+        "instructionsHash": "c1850abef4331fdec44c234abc1105b06aa1b607b2de52488150169ea050e827",
+        "sharedContextIncludesCurrentCategory": true
+      }
+    }
+  ]
+}
