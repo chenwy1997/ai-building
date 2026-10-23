@@ -18,7 +18,7 @@ import { Budget } from "./budget.ts";
 import { exportBatchReview, validateBatchExport } from "./batch-export.ts";
 import { inventorySource } from "./scm-field-inventory.ts";
 import { recheckBatch, correctBatchLeaf } from "./batch-recovery.ts";
-import { prepareRerun } from "./batch-rerun.ts";
+import { prepareRerun, parseReasoningEffort } from "./batch-rerun.ts";
 import { logFormat, progressLogger } from "./progress.ts";
 import {
   importFactReview,
@@ -33,6 +33,7 @@ const USAGE = `商品治理v3：类目属性提案；默认离线，batch、batc
   bun src/scenarios/product_governance_v3/cli.ts batch-recover --out /original-batch-dir
   bun src/scenarios/product_governance_v3/cli.ts batch-recover --out /original-batch-dir --category-id FAILED_LEAF_ID --execute
   bun src/scenarios/product_governance_v3/cli.ts batch-rerun --out /original-batch-dir --round rules-20261023 --concurrency 32
+  bun src/scenarios/product_governance_v3/cli.ts batch-rerun --out /original-batch-dir --round pilot-low --category-ids LEAF_ID_1,LEAF_ID_2 --reasoning-effort low --concurrency 3
   bun src/scenarios/product_governance_v3/cli.ts offline-acceptance --out outputs/product-governance-v3/offline
   bun src/scenarios/product_governance_v3/cli.ts plan --snapshot /abs/snapshot.json --category-id ID --stage family-modeling --run-id BATCH --out /abs/plan.json
   bun src/scenarios/product_governance_v3/cli.ts tree-search --tree scratch-category-baseline-20261010/mapped-tree.json --query 小卷纸 --limit 10
@@ -46,6 +47,7 @@ const USAGE = `商品治理v3：类目属性提案；默认离线，batch、batc
 sku-filling/fact-extraction另需--product-id；SKU审核需--product-id，审核另需--candidate文件。分页可传--cursor，树检索可传--scope-id。
 batch支持--tree或--snapshot、--budget-cny（默认200保守预留额度，不是预计账单）、--out、--run-id；并发1..128，默认8。batch、batch-rerun或batch-recover的--execute才读取DEEPSEEK_API_KEY（Bun可从.env自动载入）。batch-rerun显式按当前规则新建一轮，必须指定--round名称；--out仍为原批次根目录，--category-id可选且不得越出原范围；同名重复执行只恢复该轮，可调并发，不能改预算或输入。旧方案不复用，已审阅输入基线仍保留，费用沿用原台账。原批次普通重跑只恢复相同请求；修复宿主后请用batch-recover，默认只离线复核，不请求模型。需要纠正时显式指定一个失败末级ID并加--execute；只补该类及必要的同族基线，沿用原累计费用台账。结果未知的请求绝不自动重发。--log-format human|json|quiet默认human，正常进度stdout，阻断stderr；quiet只输出最后汇总。输出属性方案/扩展候选/全部类目问题和审阅Excel；不试填SKU值。
 默认知识覆盖清洁纸品，其他类目需--snapshot提供已准备的字段职责、知识要求及同族。capture-roll-pilot仅两类各最多3件，无自动重试；仅此命令读取供应链密钥。replay使用录制候选，不发送DeepSeek请求。
+batch-rerun另支持--category-ids逗号分隔末级ID列表（与--category-id互斥，不展开上级）、--reasoning-effort none|low|high|max（none关闭思考，省略沿用原档位）。范围和思考档位随轮次冻结；A/B须用不同固定轮次名，仍共用原累计预算。详见docs/small-scope-reasoning-pilot-20261023.md。
 freeze-release仅更新本地材料/代码指纹，不能替代规范内容的人类评审。`;
 export async function main(argv: string[]) {
   const { positionals, values } = parseArgs({
@@ -56,6 +58,8 @@ export async function main(argv: string[]) {
       out: { type: "string" },
       snapshot: { type: "string" },
       "category-id": { type: "string" },
+      "category-ids": { type: "string" },
+      "reasoning-effort": { type: "string" },
       stage: { type: "string" },
       "run-id": { type: "string" },
       "product-id": { type: "string" },
@@ -90,6 +94,8 @@ export async function main(argv: string[]) {
   if (values.help || !positionals.length) return { help: USAGE };
   if (positionals.length !== 1) throw Error("one command required");
   if (values.round && positionals[0] !== "batch-rerun") throw Error("--round仅用于batch-rerun");
+  if ((values["category-ids"] !== undefined || values["reasoning-effort"] !== undefined) && positionals[0] !== "batch-rerun")
+    throw Error("--category-ids和--reasoning-effort当前仅用于batch-rerun");
   switch (positionals[0]) {
     case "batch-export":
       return exportBatchReview(resolve(required("out")), layoutArgs(values));
@@ -99,7 +105,8 @@ export async function main(argv: string[]) {
       await validateBatchExport(layoutArgs(values));
       const format = logFormat(values["log-format"]), directory = resolve(required("out")), release = await loadRelease();
       const { plan, execution, preview } = await prepareRerun({ directory, roundName: required("round"),
-        categoryId: values["category-id"], concurrency: Number(values.concurrency ?? "8") }, release);
+        categoryId: values["category-id"], categoryIds: values["category-ids"]?.split(",").map((id) => id.trim()),
+        reasoningEffort: parseReasoningEffort(values["reasoning-effort"]), concurrency: Number(values.concurrency ?? "8") }, release);
       if (!values.execute) {
         if (plan.preflight.length) process.exitCode = 2;
         return preview;
@@ -116,7 +123,7 @@ export async function main(argv: string[]) {
       if (!values["no-excel"]) try { excel = await exportBatchReview(plan.outDir, layoutArgs(values)); }
       catch (error) { exportError = String(error); }
       if (result.blocked || exportError) process.exitCode = 2;
-      return { outDir: plan.outDir, originalDirectory: directory, roundName: values.round, passed: result.passed,
+      return { outDir: plan.outDir, originalDirectory: directory, roundName: values.round, model: plan.model, passed: result.passed,
         proposalsPendingHuman: result.proposalsPendingHuman, noAdmittedAttributes: result.noAdmittedAttributes,
         blocked: result.blocked, total: result.total, requests: result.networkCallsThisExecution,
         cacheHits: result.cacheHitsThisExecution, cumulativeReservedCny: Number(result.budget.committedUpperBoundCny.toFixed(2)),

@@ -2,6 +2,8 @@
 
 2026-10-23，用户明确选择清洁纸品全量重跑。本次新增`batch-rerun`，开发阶段仅离线验收；实际DeepSeek由用户手动执行。机器验收见[验收记录](full-rerun-acceptance-20261023.json)。
 
+后续更新：此全量轮次已完成，代码已有修复，下面旧轮次命令仅保留历史用法，不能以新release继续旧轮次。当前按[洗脸巾与抽纸同族小范围验证](small-scope-reasoning-pilot-20261023.md)执行，沿用原预算。
+
 ## 直接执行
 
 在项目根目录运行，先预览，不读取模型密钥：
@@ -34,6 +36,8 @@ bun src/scenarios/product_governance_v3/cli.ts batch-rerun \
 | `--out` | 原批次根目录，始终保持一致，不传review或corrections目录 |
 | `--round` | 必填的轮次名，1—64位字母、数字、下划线、连字符；同一轮始终使用同名 |
 | `--category-id` | 可选，默认整个原批次；可以缩小范围，但不能越出原批次末级范围，范围随轮次名固定 |
+| `--category-ids` | 逗号分隔的明确末级列表，与`--category-id`互斥；不自动展开上级，拒绝重复/空/越界ID |
+| `--reasoning-effort` | `none/low/high/max`，省略沿用原批档位；none关闭思考，其余开启。随轮次名冻结；对照组另命名但共享原预算 |
 | `--concurrency` | 1—128，默认8；重复执行可修改并发，仍先同族共同方案、后末级 |
 | `--execute` | 显式付费请求；省略只预览 |
 | `--no-excel`、样式和冻结参数 | 继续复用原导出入口和紧凑默认样式 |

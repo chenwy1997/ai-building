@@ -10,9 +10,12 @@ import { ResponsesClient, type FetchLike } from "./responses.ts";
 import { Budget } from "./budget.ts";
 import { attribute, binding, finalMessage, functionCall } from "./fixtures.ts";
 import { main } from "./cli.ts";
+import { progressLogger } from "./progress.ts";
 
 let temp: string, release: Release, count = 0;
 const LEAF = "f4bb18c7-b736-4fe6-91d1-60c4d05fcee6", ROLL = "67adeef9-8c1f-47e2-ad72-462ad35a5a75";
+const WASH = "7a1ea510-8777-46ba-bfa0-955b472a0d61", BOXED = "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+  SOFT = "ce3a9f67-613c-4707-bf3a-95193edb8a2d", PILOT = [WASH, BOXED, SOFT];
 beforeAll(async () => { temp = await mkdtemp(join(tmpdir(), "pgv3-rerun-")); release = await loadRelease(); });
 afterAll(async () => { await rm(temp, { recursive: true, force: true }); });
 function earlierRelease() {
@@ -139,6 +142,80 @@ test("same round freezes release and selected scope but permits concurrency chan
   await expect(prepare(r.plan.outDir)).rejects.toThrow();
 });
 
+test("explicit leaves run exactly the wash and tissue pilot, with one shared seed and the selected reasoning mode", async () => {
+  const { dir, p } = await original(CLEAN_PAPER_ID), r = await prepare(dir, { categoryIds: PILOT, reasoningEffort: "high", concurrency: 3 }),
+    m = mock({ tool: true });
+  expect(r.preview.categories.map((c) => c.name).sort()).toEqual(["洗脸巾", "盒装抽纸", "软包抽纸"].sort());
+  expect(r.preview.familySeeds).toEqual(["facial-tissue"]);
+  expect(r.plan.maximumStageTasks).toBe(4); expect(r.plan.maximumRequests).toBe(24);
+  expect(r.plan.limits).toEqual(p.limits); expect(r.plan.model.model).toBe(p.model.model);
+  const reordered = await prepare(dir, { categoryIds: [...PILOT].reverse(), reasoningEffort: "high", concurrency: 32 });
+  expect(reordered.plan.id).toBe(r.plan.id);
+  await expect(prepare(dir, { categoryIds: PILOT, reasoningEffort: "low" })).rejects.toThrow("already has different frozen");
+  const logs: string[] = [], result = await executeBatch(r.plan, release, client(dir, m.fetch), progressLogger("human", (line) => logs.push(line)));
+  expect(result.total).toBe(3); expect(result.passed).toBe(3); expect(result.familySeeds).toHaveLength(1);
+  expect(logs.filter((line) => line.includes("deepseek-flash / 思考=high"))).toHaveLength(8);
+  expect(m.requests).toHaveLength(8);
+  for (const body of m.requests) {
+    const task = JSON.parse(body.input[0].content).task;
+    expect(PILOT).toContain(task.categoryId);
+    expect(body.reasoning).toEqual({ effort: "high" });
+    expect(body.max_output_tokens).toBe(p.limits.maxOutputTokens);
+  }
+  expect(m.requests.filter((b) => b.input.length === 1 && JSON.parse(b.input[0].content).task.candidate.phase === "family-seed")).toHaveLength(1);
+  const replay = await executeBatch(reordered.plan, release, client(dir, async () => { throw Error("do not rebuy pilot"); }));
+  expect(replay.mockCallsThisExecution).toBe(0); expect(replay.cacheHitsThisExecution).toBe(8);
+});
+
+test("explicit leaf lists reject ambiguity, duplicates, parents and IDs outside the original scope", async () => {
+  const { dir } = await original(CLEAN_PAPER_ID);
+  for (const categoryIds of [[], [WASH, WASH], [WASH, ""], [CLEAN_PAPER_ID], ["unknown-category"]])
+    await expect(prepare(dir, { categoryIds })).rejects.toThrow("--category-ids");
+  await expect(prepare(dir, { categoryIds: PILOT, categoryId: CLEAN_PAPER_ID })).rejects.toThrow("互斥");
+  const limited = await original(WASH);
+  await expect(prepare(limited.dir, { categoryIds: [BOXED] })).rejects.toThrow("原批次范围");
+  await expect(prepare(dir, { reasoningEffort: "medium" as any })).rejects.toThrow("--reasoning-effort");
+  expect((await read(join(dir, "budget.json"))).entries).toHaveLength(23);
+  expect(await Bun.file(join(dir, "reruns", "rules-20261023", "rerun.identity.json")).exists()).toBe(false);
+});
+
+test("reasoning defaults inherit the source; none, low, high and max reach the actual Responses request", async () => {
+  const { dir, p } = await original(WASH);
+  expect((await prepare(dir)).plan.model).toEqual(p.model);
+  for (const reasoningEffort of ["none", "low", "high", "max"] as const) {
+    const r = await prepare(dir, { roundName: "effort-" + reasoningEffort, categoryIds: [WASH], reasoningEffort }), m = mock();
+    const result = await executeBatch(r.plan, release, client(dir, m.fetch));
+    expect(result.passed).toBe(1); expect(m.requests).toHaveLength(1);
+    expect(m.requests[0].reasoning.effort).toBe(reasoningEffort);
+  }
+});
+
+test("A/B arms regenerate their own family seed and share one cumulative reservation cap", async () => {
+  class Metered extends Budget { override reserve(id: string, _amount: number) { return super.reserve(id, 1.3); } }
+  const budget = (dir: string) => new Metered(dir, 40.5, "offline-metered-ab");
+  const { dir } = await original(CLEAN_PAPER_ID, budget), sourceBefore = hash(await read(join(dir, "batch.identity.json")));
+  const a = await prepare(dir, { roundName: "ab-low", categoryIds: PILOT, reasoningEffort: "low" });
+  const low = mock(), first = await executeBatch(a.plan, release, client(dir, low.fetch, budget(dir)));
+  const b = await prepare(dir, { roundName: "ab-high", categoryIds: PILOT, reasoningEffort: "high" });
+  const high = mock(), second = await executeBatch(b.plan, release, client(dir, high.fetch, budget(dir)));
+  expect(first.passed).toBe(3); expect(second.passed).toBe(3);
+  expect(low.requests).toHaveLength(4); expect(high.requests).toHaveLength(4);
+  expect(a.plan.releaseId).toBe(b.plan.releaseId); expect(a.plan.categoryIds).toEqual(b.plan.categoryIds);
+  expect(a.plan.limits).toEqual(b.plan.limits); expect(a.plan.groups).toEqual(b.plan.groups);
+  expect(a.plan.model.model).toBe(b.plan.model.model);
+  expect(a.plan.accounting!.directory).toBe(b.plan.accounting!.directory);
+  expect(b.plan.snapshot.families.some((f) => f.id === "facial-tissue")).toBe(false);
+  expect(b.preview.sourceProposalsReused).toBe(0); expect(b.preview.cumulativeReservedCny).toBe(35.1);
+  expect(second.budget.committedUpperBoundCny).toBeCloseTo(40.3);
+  expect(second.budget.limitCny).toBe(40.5); expect(second.budget.entries).toHaveLength(31);
+  expect(hash(await read(join(dir, "batch.identity.json")))).toBe(sourceBefore);
+  const c = await prepare(dir, { roundName: "ab-none", categoryIds: PILOT, reasoningEffort: "none" }), none = mock();
+  const capped = await executeBatch(c.plan, release, client(dir, none.fetch, budget(dir)));
+  expect(none.requests).toHaveLength(0); expect(capped.blocked).toBe(3);
+  expect(capped.budget.entries).toHaveLength(31);
+  expect(await Bun.file(join(b.plan.outDir, "budget.json")).exists()).toBe(false);
+});
+
 test("an explicitly different round still shares the original accumulated ledger", async () => {
   const { dir } = await original(), first = await prepare(dir);
   await executeBatch(first.plan, release, client(dir, mock().fetch));
@@ -213,4 +290,20 @@ test("CLI preview requires no credentials, accepts category/concurrency and reje
   for (const args of [["--budget-cny", "999"], ["--tree", "new-tree.json"], ["--stage", "sku-filling"]])
     await expect(main(["batch-rerun", "--out", dir, "--round", "new", ...args])).rejects.toThrow("沿用原批次资料和累计预算");
   await expect(main(["batch-rerun", "--out", dir, "--round", "preview-only", "--category-id", LEAF, "--execute"])).rejects.toThrow("构造离线批次");
+});
+
+test("CLI exposes exact leaf selection and reasoning in its no-network preview and rejects ignored or malformed flags", async () => {
+  const { dir } = await original(CLEAN_PAPER_ID);
+  const args = ["batch-rerun", "--out", dir, "--round", "cli-pilot", "--category-ids", PILOT.join(", "), "--reasoning-effort", "low", "--concurrency", "3"];
+  const result: any = await main(args);
+  expect(result.leafCount).toBe(3); expect(result.familySeeds).toEqual(["facial-tissue"]);
+  expect(result.model).toEqual({ model: "deepseek-flash", reasoningEffort: "low" });
+  expect(result.networkCalls).toBe(0); expect(result.productionWrites).toBe(0);
+  await expect(main([...args, "--category-id", WASH])).rejects.toThrow("互斥");
+  for (const categoryIds of ["", WASH + ",", WASH + ", " + WASH])
+    await expect(main(["batch-rerun", "--out", dir, "--round", "invalid", "--category-ids", categoryIds])).rejects.toThrow("--category-ids");
+  await expect(main(["batch-rerun", "--out", dir, "--round", "invalid", "--reasoning-effort", "off"])).rejects.toThrow("--reasoning-effort");
+  for (const cmd of ["batch", "batch-recover", "batch-export"])
+    for (const flag of [["--category-ids", WASH], ["--reasoning-effort", "high"]])
+      await expect(main([cmd, "--out", dir, ...flag])).rejects.toThrow("仅用于batch-rerun");
 });

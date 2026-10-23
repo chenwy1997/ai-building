@@ -17,6 +17,7 @@ export function progressLogger(format: LogFormat,
         ? "零属性，建模缺口待审" : "已有方案，待人工审阅";
     const line = format === "json" ? JSON.stringify(event) :
       `[${label}] ${phase} · ${name}${event.code ? " · " + event.code : ""}`;
-    (failed ? err : out)(line + (format === "human" && event.round ? " · 第" + event.round + "轮" : ""));
+    (failed ? err : out)(line + (format === "human" && event.round ? " · 第" + event.round + "轮" : "") +
+      (format === "human" && event.model ? " · " + event.model + " / 思考=" + event.reasoningEffort : ""));
   };
 }

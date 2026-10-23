@@ -5,12 +5,22 @@ import type { Release } from "./release.ts";
 import { DataSnapshot } from "./snapshot.ts";
 import { assemble } from "./context.ts";
 import { batchTask, validateBatchOptions, type BatchPlan } from "./batch.ts";
+import type { ModelOptions } from "./runner.ts";
 
 export interface RerunOptions {
   directory: string;
   roundName: string;
   categoryId?: string;
+  categoryIds?: string[];
+  reasoningEffort?: ModelOptions["reasoningEffort"];
   concurrency: number;
+}
+
+export function parseReasoningEffort(value?: string): ModelOptions["reasoningEffort"] | undefined {
+  if (value === undefined) return undefined;
+  if (!["none", "low", "high", "max"].includes(value))
+    throw Error("--reasoning-effort须为none、low、high或max；none关闭思考，省略沿用原批次档位");
+  return value as ModelOptions["reasoningEffort"];
 }
 
 async function frozen(path: string, value: unknown) {
@@ -27,6 +37,13 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
   const directory = resolve(options.directory);
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(options.roundName))
     throw Error("--round须为1—64位字母、数字、下划线或连字符，首位须为字母或数字；重复执行保持同名");
+  const reasoningEffort = parseReasoningEffort(options.reasoningEffort);
+  if (options.categoryIds !== undefined && options.categoryId !== undefined)
+    throw Error("--category-ids与--category-id互斥；前者只选择列出的末级，后者展开子树");
+  if (options.categoryIds !== undefined && (!Array.isArray(options.categoryIds) || !options.categoryIds.length ||
+      options.categoryIds.some((id) => typeof id !== "string" || !id.trim()) ||
+      new Set(options.categoryIds).size !== options.categoryIds.length))
+    throw new Blocked("rerun_scope", "--category-ids须为非空、无重复的末级ID列表");
   return lock(join(directory, "execution.lock"), async () => {
     for (const name of ["batch.identity.json", "execution.identity.json", "budget.json"])
       if (!await exists(join(directory, name))) throw new Blocked("rerun_root", "--out请指定已执行批次的原始根目录，不能传review、corrections或新目录：" + directory);
@@ -52,8 +69,13 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
           receipt.key !== key || receipt.status !== "completed" || receipt.responseHash !== response.sha256)
         throw new Blocked("cache_corrupt", "historical response/receipt integrity mismatch");
     }
-    const originalSnapshot = new DataSnapshot(source.snapshot), categoryId = options.categoryId ?? source.root.id,
-      categoryIds = originalSnapshot.tree.descendants(categoryId, true).map((n) => n.id);
+    const originalSnapshot = new DataSnapshot(source.snapshot), categoryId = options.categoryId ?? source.root.id;
+    if (options.categoryIds?.some((id) => !source.categoryIds.includes(id) || !originalSnapshot.tree.get(id).isLeaf))
+      throw new Blocked("rerun_scope", "--category-ids只能包含原批次范围内的真实末级ID，不展开上级类目");
+    // Source order makes equivalent explicit lists share an identity and seed selection.
+    const categoryIds: string[] = options.categoryIds
+      ? source.categoryIds.filter((id: string) => options.categoryIds!.includes(id))
+      : originalSnapshot.tree.descendants(categoryId, true).map((n) => n.id);
     if (!categoryIds.length || categoryIds.some((id) => !source.categoryIds.includes(id)))
       throw new Blocked("rerun_scope", "new round must stay within the original batch leaf scope");
     validateBatchOptions({ categoryId, outDir: directory, runId: source.runId, concurrency: options.concurrency });
@@ -64,14 +86,15 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
     for (const family of data.families) if (family.status === "candidate" && family.runId === source.runId) family.runId = runId;
     data.families = data.families.filter((f: any) => !groups.some((g) => g.id === f.id && g.needsSeed));
     const snapshot = new DataSnapshot(data), node = snapshot.tree.get(categoryId), outDir = join(directory, "reruns", options.roundName);
+    const model: ModelOptions = { ...source.model, reasoningEffort: reasoningEffort ?? source.model.reasoningEffort };
     const roundIdentity = { format: 1, roundName: options.roundName, sourceBatchId: sourceId, sourceReleaseId: source.releaseId,
       sourceInputVersion: source.inputVersion, releaseId: release.id, snapshotVersion: snapshot.version, categoryIds,
-      model: source.model, limits: source.limits, budgetLimitCny: execution.budgetCny, pricingId: execution.pricingId,
+      model, limits: source.limits, budgetLimitCny: execution.budgetCny, pricingId: execution.pricingId,
       reserveCny: source.reserveCny, transportId: execution.transportId, mode: execution.mode };
     const roundId = hash(roundIdentity);
     const plan: BatchPlan = {
       ...source, id: "", releaseId: release.id, runId, snapshot: snapshot.data, inputVersion: snapshot.version,
-      root: { id: node.id, name: node.name, path: node.path }, categoryIds, groups,
+      root: { id: node.id, name: node.name, path: node.path }, categoryIds, groups, model,
       budgetCny: execution.budgetCny, pricingId: execution.pricingId, outDir, concurrency: options.concurrency, preflight: [],
       accounting: { directory, originalBatchId: sourceId, roundName: options.roundName, roundId },
       maximumStageTasks: categoryIds.length + groups.filter((g) => g.needsSeed).length,
@@ -95,7 +118,9 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
       remaining = Number((ledger.limitCny - reserved).toFixed(2));
     const preview = { mode: "new_round_preview", ready: !plan.preflight.length, originalDirectory: directory, outDir,
       roundName: options.roundName, roundId, releaseId: release.id, originalReleaseId: source.releaseId,
-      categoryId, leafCount: categoryIds.length, familySeeds: groups.filter((g) => g.needsSeed).map((g) => g.id),
+      categoryId: options.categoryIds ? null : categoryId, categoryIds,
+      categories: categoryIds.map((id) => ({ id, name: snapshot.tree.get(id).name })), model: plan.model,
+      leafCount: categoryIds.length, familySeeds: groups.filter((g) => g.needsSeed).map((g) => g.id),
       concurrency: plan.concurrency, preflight: plan.preflight, sourceProposalsReused: 0,
       preservedReviewedBaselineFamilies: groups.filter((g) => !g.needsSeed).map((g) => g.id),
       originalRequestCount: keys.length, cumulativeReservedCny: reserved, budgetLimitCny: ledger.limitCny,

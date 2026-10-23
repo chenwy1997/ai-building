@@ -137,7 +137,7 @@ export async function runStage(options: {
           "request/history exceeds byte budget",
         );
       options.onProgress?.({ event: "model-request", round: round + 1, maxRounds: limits.maxRounds,
-        toolCallsRemaining: limits.maxToolCalls - toolCount, finalOnly });
+        toolCallsRemaining: limits.maxToolCalls - toolCount, finalOnly, model: model.model, reasoningEffort: model.reasoningEffort });
       const { key, response, cached } = await client.request(body, {
         releaseId: release.id,
         snapshotVersion: snapshot.version,

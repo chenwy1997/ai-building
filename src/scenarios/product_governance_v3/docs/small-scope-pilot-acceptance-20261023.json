@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-23",
+  "releaseId": "ad677dda6503ee7cb94469c38531f2ef064685331bcc5989805cece06dc6ed3b",
+  "tests": {
+    "command": "bun test ./src/scenarios/product_governance_v3",
+    "passed": 215,
+    "failed": 0,
+    "typecheck": "passed",
+    "transport": "injected mock HTTP only"
+  },
+  "localPreview": {
+    "roundName": "pilot-wash-tissue-low-20261023",
+    "ready": true,
+    "categories": ["洗脸巾", "盒装抽纸", "软包抽纸"],
+    "familySeeds": ["facial-tissue"],
+    "model": { "model": "deepseek-flash", "reasoningEffort": "low" },
+    "concurrency": 3,
+    "cumulativeRequests": 113,
+    "budgetLimitCny": 200,
+    "cumulativeReservedCny": 146.9,
+    "remainingReservationCny": 53.1,
+    "maximumAdditionalRequests": 24,
+    "maximumAdditionalReservationCny": 31.2,
+    "originalBudgetInputResultsUnchanged": true,
+    "networkCalls": 0,
+    "productionWrites": 0
+  },
+  "limitations": [
+    "预留数额不是实际收费；实时余额以原账本为准",
+    "真实DeepSeek小范围执行由用户触发，尚未完成质量或思考档位效果评估",
+    "本轮是A组low；B组high待A组结果及剩余预算检查后决定",
+    "人工审阅及采用尚未完成"
+  ]
+}
