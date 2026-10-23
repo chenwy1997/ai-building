@@ -1,0 +1,193 @@
+{
+  "format": 1,
+  "date": "2026-10-23",
+  "releaseId": "f8f1fae334dcf556b4d71e8568911e340e36b7aaf00217664ec61d86f84797cb",
+  "validation": {
+    "testsPassed": 185,
+    "testsFailed": 0,
+    "newRegressionCases": 15,
+    "typecheck": "passed",
+    "skillValidation": [
+      "family-modeling",
+      "review-assistance"
+    ],
+    "newDeepSeekRequests": 0,
+    "productionWrites": 0
+  },
+  "historicalResponseAudit": {
+    "format": 1,
+    "date": "2026-10-23",
+    "checkerRelease": "f8f1fae334dcf556b4d71e8568911e340e36b7aaf00217664ec61d86f84797cb",
+    "sourceDirectory": "outputs/product-governance-v3/clean-paper-batch-20261023/corrections/bf67d34bdd3d644dd07b",
+    "sourceRelease": "9ace6daa903b2ea5ff16f2e3125ff408cf592305ecf4d76f38ac24a560808b43",
+    "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+    "sourceRequestKeys": [
+      "e53b2605b64653d6712f36d0f86100a2ee08366c9740c2a124eb43424d3ee1f9"
+    ],
+    "sourceResponseSha256": "8085b3f84768b6a787628c8e0bdd9a8c9cc1fb04ca4ffd80f72de2cb961fd724",
+    "requestIntegrity": "passed",
+    "schemaUnchanged": true,
+    "rawResultHash": "23d6fe4974b7400720748f16e8067014aab25d634088d1826b5c26c3d1a7ff0a",
+    "originalReadEventsReplayed": 15,
+    "checks": {
+      "status": "program_blocked",
+      "errors": [
+        {
+          "ruleId": "R08",
+          "objectId": "roll.declared_mass",
+          "message": "configuration explanation contradicts numberConfig.precision: actual=3, claimed=null; 层数与单卷重量的精度/上限等专业阈值未获已读资料支持，均留 null，待专业查证后另提共享基线修订"
+        }
+      ],
+      "humanReviewRules": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R11",
+        "R17",
+        "R18",
+        "R23",
+        "R24",
+        "R25"
+      ],
+      "executedChecks": [
+        "output-contract",
+        "knowledge-coverage",
+        "family-contract",
+        "definitions",
+        "native-config",
+        "configuration-explanations",
+        "extension-separation"
+      ],
+      "knowledgeGaps": []
+    },
+    "interpretation": "原始付费提案在新增说明一致性检查下阻断；不修原文或配置，不发布为可执行合同",
+    "originalFilesVerified": 332,
+    "originalFilesChanged": 0,
+    "durableRequests": 54,
+    "cumulativeReservedCny": 70.2,
+    "automaticHistoricalRecovery": "recovery_contract_drift",
+    "newModelRequests": 0,
+    "businessRepairs": 0,
+    "productionWrites": 0
+  },
+  "workbook": {
+    "xlsx": "outputs/product-governance-v3/clean-paper-batch-20261023/corrections/bf67d34bdd3d644dd07b/review/清洁纸品_类目属性方案_05e69d0ba3f1.xlsx",
+    "revision": "05e69d0ba3f1",
+    "layouts": [
+      {
+        "name": "属性方案",
+        "bodyFontPt": 10,
+        "bodyRowHeightPx": 22,
+        "rowHeightMode": "fixed",
+        "freezeLeftColumns": 1,
+        "freezeThrough": null,
+        "notesAdded": 64
+      },
+      {
+        "name": "扩展候选",
+        "bodyFontPt": 10,
+        "bodyRowHeightPx": 22,
+        "rowHeightMode": "fixed",
+        "freezeLeftColumns": 1,
+        "freezeThrough": null,
+        "notesAdded": 65
+      },
+      {
+        "name": "进度与问题",
+        "bodyFontPt": 10,
+        "bodyRowHeightPx": 22,
+        "rowHeightMode": "fixed",
+        "freezeLeftColumns": 1,
+        "freezeThrough": null,
+        "notesAdded": 32
+      },
+      {
+        "name": "说明核对",
+        "bodyFontPt": 10,
+        "bodyRowHeightPx": 22,
+        "rowHeightMode": "fixed",
+        "freezeLeftColumns": 1,
+        "freezeThrough": null,
+        "notesAdded": 24
+      }
+    ],
+    "attributeRows": 11,
+    "extensionRows": 18,
+    "categories": 21,
+    "explanationConflicts": 1,
+    "historicalConfigurationAudit": true,
+    "newModelRequests": 0,
+    "savedValues": [
+      {
+        "sheet": "属性方案",
+        "rows": 11,
+        "matchesPersistedRows": true
+      },
+      {
+        "sheet": "扩展候选",
+        "rows": 18,
+        "matchesPersistedRows": true
+      },
+      {
+        "sheet": "进度与问题",
+        "rows": 21,
+        "matchesPersistedRows": true
+      },
+      {
+        "sheet": "说明核对",
+        "rows": 11,
+        "matchesPersistedRows": true
+      }
+    ],
+    "errorCells": 0,
+    "layout": [
+      {
+        "name": "属性方案",
+        "rows": 11,
+        "bodyFontPt": 10,
+        "bodyHeightPt": 16.5,
+        "freezeLeftColumns": 1,
+        "freezeTopRows": 6
+      },
+      {
+        "name": "扩展候选",
+        "rows": 18,
+        "bodyFontPt": 10,
+        "bodyHeightPt": 16.5,
+        "freezeLeftColumns": 1,
+        "freezeTopRows": 6
+      },
+      {
+        "name": "进度与问题",
+        "rows": 21,
+        "bodyFontPt": 10,
+        "bodyHeightPt": 16.5,
+        "freezeLeftColumns": 1,
+        "freezeTopRows": 6
+      },
+      {
+        "name": "说明核对",
+        "rows": 11,
+        "bodyFontPt": 10,
+        "bodyHeightPt": 16.5,
+        "freezeLeftColumns": 1,
+        "freezeTopRows": 6
+      }
+    ],
+    "fullTextNotes": 185,
+    "visualVerification": "Four rendered sheets inspected; WPS 100% compact view and final precision-conflict row checked. Fixed-height long-text rendering has a known preview overflow; native WPS display checked.",
+    "originalUserWorkbookPreserved": true,
+    "oldXlsxOnlyOpinionsAutomaticallyImported": false
+  },
+  "remaining": [
+    "Verify professional basis for the frozen three-decimal precision; shared revision required before changing it",
+    "Natural-language assertions are only partially recognized; human semantic review remains required",
+    "Historical paid batch contract upgrade requires explicit migration before continuation; automatic drift protection remains active",
+    "Professional knowledge, count-unit semantics, human adoption and production execution remain pending"
+  ]
+}

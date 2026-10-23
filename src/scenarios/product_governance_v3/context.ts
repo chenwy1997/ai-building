@@ -9,6 +9,7 @@ import {
 import { ToolRegistry } from "./tools.ts";
 import type { DataSnapshot } from "./snapshot.ts";
 import { checkResult } from "./checks.ts";
+import { CONFIGURATION_REVIEW_VERSION, configurationFacts, configurationSummary, configurationBasisNotes } from "./scripts/configuration-review.mjs";
 
 export async function assemble(
   release: Release,
@@ -156,6 +157,19 @@ export async function assemble(
         : "registered_material_only",
       baselineStatus:
         snapshot.baseline(task)?.status ?? "missing_candidate_only",
+      // Derived from the same frozen baseline; configured values are not claims of professional verification.
+      currentBaselineConfiguration: {
+        version: CONFIGURATION_REVIEW_VERSION,
+        source: "frozen_contract_host_projection",
+        professionalBasis: "属性引用不自动证明每个精度或范围；未逐字段登记的依据仍需核实",
+        items: (snapshot.baseline(task)?.attributes ?? []).map((a) => {
+          const bindings = snapshot.baseline(task)!.bindings,
+            b = bindings.find((b) => b.attributeId === a.id && b.categoryId === task.categoryId) ??
+              bindings.find((b) => b.attributeId === a.id && b.categoryId === null) ?? null;
+          return { attributeId: a.id, name: a.name, facts: configurationFacts(a, b),
+            summary: configurationSummary(a, b), basisNotes: configurationBasisNotes(a) };
+        }),
+      },
     },
     task,
     candidateProgramChecks,

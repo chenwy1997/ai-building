@@ -2,14 +2,14 @@
 
 v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认离线，`batch --execute`或指定失败末级的`batch-recover --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
 
-已有2026-10-23批次的用户，**先恢复原响应，勿换目录整批重跑**：
+2026-10-23新增[配置说明一致性修复](docs/configuration-explanations-20261023.md)：当前设置由程序从冻结合同生成，接入DeepSeek上下文、R08检查和审阅导出。新规范/skill/检查器已升级，**历史付费批次的跨版本续跑仍阻断，勿换目录整批重跑**。查看原纠正结果的新版专项复审表，只需离线重导出：
 
 ```sh
-bun src/scenarios/product_governance_v3/cli.ts batch-recover \
-  --out outputs/product-governance-v3/clean-paper-batch-20261023
+bun src/scenarios/product_governance_v3/cli.ts batch-export \
+  --out outputs/product-governance-v3/clean-paper-batch-20261023/corrections/bf67d34bdd3d644dd07b
 ```
 
-默认不读取模型密钥，不请求模型，只验证原始响应、重放只读结果并重新检查合同，新增审阅表保存在原目录的`recoveries/`。需要模型纠正时先指定一个失败末级预览，再明确加`--execute`；同族基线优先，原费用台账持续累计。详见[恢复与单类验证](docs/batch-runbook.md#宿主修复后的恢复与单类验证)及[真实失败复盘](docs/batch-recovery-20261023.md)。
+该命令不读取模型密钥或请求模型，保留原表，新增“说明核对”及程序设置说明；专项复核不重新认定整份合同通过。同业务合同下的宿主修复仍可用`batch-recover`零请求复核；业务材料/检查器已变则需先做显式规则迁移，不能直接继续付费。详见[恢复与单类验证](docs/batch-runbook.md#宿主修复后的恢复与单类验证)及[真实失败复盘](docs/batch-recovery-20261023.md)。
 
 ## 批处理入口
 

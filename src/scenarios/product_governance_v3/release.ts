@@ -97,6 +97,7 @@ async function collect(root = ROOT) {
     "profiles/clean-paper-tree.json",
     "scripts/export-batch-review.mjs",
     "scripts/batch-review-layout.mjs",
+    "scripts/configuration-review.mjs",
     "scripts/review-workbook-layout.mjs",
     "scripts/review-layout.defaults.json",
     "../product_governance_v2/runtime/store.ts",

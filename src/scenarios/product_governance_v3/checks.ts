@@ -19,6 +19,7 @@ import {
   definitionConfigErrors,
   valueConstraintErrors,
 } from "./native-contract.ts";
+import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
 
 // These checks establish structural consistency and provenance, not the truth of domain judgments.
 export function checkResult(
@@ -114,6 +115,10 @@ export function checkResult(
     if (value.baselineVersion !== (baseline?.version ?? null))
       add("R05", task.categoryId, "wrong/absent baseline version");
     checkDefinitions(attributes, bindings);
+    executed.add("configuration-explanations");
+    for (const conflict of modelConfigurationReview(value).conflicts)
+      add("R08", conflict.attributeId,
+        `configuration explanation contradicts ${conflict.field}: actual=${JSON.stringify(conflict.actual)}, claimed=${JSON.stringify(conflict.claimed)}; ${conflict.text}`);
     executed.add("extension-separation");
     if (!attributes.length && !extensions.length && !value.unresolved.length)
       add("R07", task.categoryId, "empty proposal needs an explicit reason in unresolved or deferred extension candidates");

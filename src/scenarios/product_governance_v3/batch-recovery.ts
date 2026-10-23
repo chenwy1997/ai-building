@@ -11,6 +11,7 @@ import { parseResultJson, responseText } from "./result-json.ts";
 import { batchTask, buildBatchReview, pendingFamily, type BatchPlan, type BatchJob } from "./batch.ts";
 import { runStage, BATCH_CORRECTIONS } from "./runner.ts";
 import type { ResponsesClient } from "./responses.ts";
+import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
 
 // A historical response may be checked under a newer host only if the actual business
 // materials, schema, validator and read tools are unchanged. This is not a release-ID bypass.
@@ -132,6 +133,7 @@ async function recheckUnlocked(dir: string, release: Release) {
         runKey: hash({ historicalRunKey: run.runKey, responseHash: last.responseHash, checkerRelease: release.id }),
         mode: execution.mode, snapshotKind: snapshot.data.kind, releaseId: original.releaseId,
         manifest, requestKeys: run.requestKeys, toolCount: run.toolCount, result, checks,
+        configurationReview: checks.executedChecks.includes("configuration-explanations") ? modelConfigurationReview(result) : null,
         outputParsing: parsing, feedback: [], factPreparation: null,
         nativeProjections: checks.errors.length ? [] : modeled.attributes.map((a: any) =>
           projectNative(a, modeled.bindings.find((b: any) => b.attributeId === a.id))),

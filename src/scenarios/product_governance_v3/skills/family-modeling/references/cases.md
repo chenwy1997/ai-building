@@ -8,6 +8,8 @@
 
 合同回归：共同层数定义保持不变，某末级绑定因关键选型需要从optional改required，写明requirednessReason和differenceReason，可成为待人工候选；不能把该差异一律误拦。即使提供differenceReason，共同定义改单位或精度仍需另立共享修订。未确定的精度或上下限用null，不凭经验填阈值。
 
+说明回归：冻结合同中单卷重量precision=3、max=null，依据是否充分待查。正确问题是“需核实单卷重量3位精度的依据，必要时另提共享修订”，不是“精度/上限均留null”。前者不改当前值；后者与precision=3矛盾，应阻断返修。其他类目的精度、范围、必填性及开关同样处理；“是否应将精度改为null？”是问题，不能误判为当前值为null。null不代表专业无限制，搜索开关false和数值下限0不能显示为空。
+
 引用回归：引用knowledge_read返回的id、version和quote可作为建模依据；不能把知识ID填到SKU evidence.sourceId，也不能把“已读到这段”说成“专业适用性已确认”。
 
 准入正例：技术页列有若干工艺和尺寸，先说明本业务使用场景；用途未明的写extensionCandidates及启用条件，不建立binding。已明确需要尺寸适配的其他类目仍应建对应参数，不能把小卷纸的暂缓名单当通用黑名单。

@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { createHash } from "node:crypto";
 import { parseLayoutArgs, loadReviewLayout, applyReviewLayout, validateSheetTargets } from "./review-workbook-layout.mjs";
 import { BATCH_REVIEW_SHEETS } from "./batch-review-layout.mjs";
+import { projectConfigurationReview } from "./configuration-review.mjs";
 
 // Use the bundled artifact runtime; do not install packages or change dependency directories.
 const modules = process.env.PGV3_NODE_MODULES ?? join(homedir(), ".cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules");
@@ -14,12 +15,14 @@ const { Workbook, SpreadsheetFile } = await import(pathToFileURL(requireBundled.
 const options = parseLayoutArgs(process.argv.slice(2));
 if (options.positionals.length !== 1 || options.restyle) throw Error("expected one batch output directory");
 const dir = resolve(options.positionals[0]), config = await loadReviewLayout(options);
-const body = await fs.readFile(join(dir, "batch.review.json"), "utf8"), data = JSON.parse(body);
-if (data.format !== 1 || data.adoption !== "pending_human" || data.productionWrites !== 0 ||
-    data.issues.length !== data.categoryCount) throw Error("invalid/incomplete batch review input");
+const body = await fs.readFile(join(dir, "batch.review.json"), "utf8"), source = JSON.parse(body);
+if (source.format !== 1 || source.adoption !== "pending_human" || source.productionWrites !== 0 ||
+    source.issues.length !== source.categoryCount) throw Error("invalid/incomplete batch review input");
+const data = projectConfigurationReview(source),
+  ruleSha256 = createHash("sha256").update(await fs.readFile(new URL("configuration-review.mjs", import.meta.url))).digest("hex");
 const definitions = BATCH_REVIEW_SHEETS.map((d) => ({ ...d, rows: data[d.key] }));
 validateSheetTargets(config, options, definitions.map((d) => d.name));
-const revision = createHash("sha256").update(body + JSON.stringify(config) + JSON.stringify(BATCH_REVIEW_SHEETS) + JSON.stringify(options.freezeThrough) + options.freezeLeft).digest("hex").slice(0, 12);
+const revision = createHash("sha256").update(body + ruleSha256 + JSON.stringify(config) + JSON.stringify(BATCH_REVIEW_SHEETS) + JSON.stringify(options.freezeThrough) + options.freezeLeft).digest("hex").slice(0, 12);
 const outDir = join(dir, "review"), target = join(outDir, data.root.name.replace(/[\\/:*?"<>|]/g, "_") + "_类目属性方案_" + revision + ".xlsx");
 try {
   await fs.access(target);
@@ -32,9 +35,11 @@ const safeValue = (v) => typeof v === "string" && /^[=+@-]/.test(v) ? "'" + v : 
 for (const d of definitions) {
   const sheet = wb.worksheets.add(d.name), count = d.headers.length;
   const rows = d.rows.length ? d.rows : [Array.from({ length: count }, (_, i) => i === 0 ? "本批无可纳入记录，见进度与问题" : null)];
-  sheet.getRange("A2").values = [[data.root.name + "：" + d.name + (data.mode === "offline" ? "（模拟验收）" : "")]];
+  sheet.getRange("A2").values = [[data.root.name + "：" + d.name + (data.configurationAudit.historical ? "（历史提案专项复审）" : data.mode === "offline" ? "（模拟验收）" : "")]];
   sheet.getRange("A3").values = [[d.note]];
-  sheet.getRange("A4").values = [[data.recovery?.kind === "offline_recheck"
+  sheet.getRange("A4").values = [[data.configurationAudit.historical
+    ? "仅离线核对已有提案的配置说明，未重新认定整份合同通过。发现冲突" + data.configurationAudit.conflictCount + "项；原始配置、响应及人工意见文件保留。"
+    : data.recovery?.kind === "offline_recheck"
     ? "已保存响应的离线复核，本次新增模型请求0。未通过类目及空方案见进度与问题。"
     : data.recovery?.kind === "targeted_model_correction"
       ? "仅纠正指定失败类目及必要同族基线，合并已通过结果。其余缺口见进度与问题。"
@@ -55,9 +60,14 @@ for (const d of definitions) {
 wb.recalculate();
 const errors = await wb.inspect({ kind: "match", searchTerm: "#REF!|#DIV/0!|#VALUE!|#NAME\\?|#NUM!", options: { useRegex: true, maxResults: 20 }, maxChars: 1500 });
 await fs.writeFile(join(outDir, "verification-" + revision + ".json"), JSON.stringify({ revision, layouts, errors: errors.ndjson, batchId: data.batchId }, null, 2));
+await fs.writeFile(join(outDir, "configuration-audit-" + revision + ".json"), JSON.stringify({
+  ...data.configurationAudit, sourcePath: join(dir, "batch.review.json"),
+  sourceSha256: createHash("sha256").update(body).digest("hex"), ruleSha256,
+}, null, 2));
 for (const { name, preview } of definitions) {
   const picture = await wb.render({ sheetName: name, range: preview, scale: 1, format: "png" });
   await fs.writeFile(join(outDir, name + "-" + revision + ".png"), new Uint8Array(await picture.arrayBuffer()));
 }
 await (await SpreadsheetFile.exportXlsx(wb)).save(target);
-console.log(JSON.stringify({ xlsx: target, revision, layouts, attributeRows: data.attributes.length, extensionRows: data.extensions.length, categories: data.categoryCount }));
+console.log(JSON.stringify({ xlsx: target, revision, layouts, attributeRows: data.attributes.length, extensionRows: data.extensions.length, categories: data.categoryCount,
+  explanationConflicts: data.configurationAudit.conflictCount, historicalConfigurationAudit: data.configurationAudit.historical, newModelRequests: 0 }));

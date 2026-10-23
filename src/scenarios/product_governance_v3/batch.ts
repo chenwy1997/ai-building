@@ -12,6 +12,7 @@ import { runStage, DEFAULT_LIMITS, BATCH_CORRECTIONS, type ModelOptions } from "
 import { ResponsesClient } from "./responses.ts";
 import { systemFieldsFromInventory } from "./scm-field-inventory.ts";
 import { rollDefinitions, rollBindings, rollExtensionCandidates } from "./roll-pilot.ts";
+import { CONFIGURATION_REVIEW_VERSION } from "./scripts/configuration-review.mjs";
 
 export const CLEAN_PAPER_ID = "77e31cf2-8331-4c73-ab10-823d2d1d7ab0";
 export const DEFAULT_TREE = resolve(ROOT, "../../../outputs/category-id-refresh-20261021/mapped-tree.updated.json");
@@ -410,5 +411,6 @@ export function buildBatchReview(plan: BatchPlan, jobs: BatchJob[], snapshot: Da
   return { format: 1, batchId: plan.id, root: plan.root, releaseId: plan.releaseId,
     mode,
     adoption: "pending_human", productionWrites: 0, categoryCount: jobs.length,
+    configurationReview: { version: CONFIGURATION_REVIEW_VERSION, source: "host_checker" },
     attributes, extensions, issues };
 }

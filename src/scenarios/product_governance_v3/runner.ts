@@ -16,6 +16,7 @@ import { checkResult } from "./checks.ts";
 import { projectNative } from "./native-contract.ts";
 import { preparationBundle, type FactExtraction } from "./fact-preparation.ts";
 import { parseResultJson, responseText } from "./result-json.ts";
+import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
 
 export interface Limits {
   maxRounds: number;
@@ -252,6 +253,7 @@ export async function runStage(options: {
         toolCount,
         result,
         checks,
+        configurationReview: checks.executedChecks.includes("configuration-explanations") ? modelConfigurationReview(result) : null,
         outputParsing,
         feedback,
         factPreparation:
