@@ -1,6 +1,15 @@
 # 商品治理v3：类目属性提案与审阅
 
-v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认预检，`batch --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
+v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认离线，`batch --execute`或指定失败末级的`batch-recover --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
+
+已有2026-10-23批次的用户，**先恢复原响应，勿换目录整批重跑**：
+
+```sh
+bun src/scenarios/product_governance_v3/cli.ts batch-recover \
+  --out outputs/product-governance-v3/clean-paper-batch-20261023
+```
+
+默认不读取模型密钥，不请求模型，只验证原始响应、重放只读结果并重新检查合同，新增审阅表保存在原目录的`recoveries/`。需要模型纠正时先指定一个失败末级预览，再明确加`--execute`；同族基线优先，原费用台账持续累计。详见[恢复与单类验证](docs/batch-runbook.md#宿主修复后的恢复与单类验证)及[真实失败复盘](docs/batch-recovery-20261023.md)。
 
 ## 批处理入口
 
@@ -46,7 +55,7 @@ bun src/scenarios/product_governance_v3/cli.ts plan --snapshot /绝对路径/sna
 
 `sku-filling`、`fact-extraction`另需`--product-id`；`review-assistance`另需`--candidate` JSON文件，包含`stage`（family-modeling或sku-filling）和`result`（候选结果）。审核SKU取值时需带对应`--product-id`读取证据。候选程序错误直接进入审核上下文，并继续阻断结果，模型不能靠空意见列表把错误抹掉。参数严格校验，错命令/未知参数报错。`batch`调用相同`runStage`，共享全批预算和冻结依赖，不接受商品试填阶段；没有`apply`入口。
 
-小卷纸的只读采集、准备、录制回放、工作簿与初次事实意见导入，见[样板运行说明](docs/roll-pilot-runbook.md)。只有显式`capture-roll-pilot`联网读取供应链及其密钥；固定两类各最多3件，不自动翻页/重试。模型密钥只由`batch --execute`读取，其余入口维持离线。
+小卷纸的只读采集、准备、录制回放、工作簿与初次事实意见导入，见[样板运行说明](docs/roll-pilot-runbook.md)。只有显式`capture-roll-pilot`联网读取供应链及其密钥；固定两类各最多3件，不自动翻页/重试。模型密钥仅由`batch --execute`和指定失败末级的`batch-recover --execute`读取。
 
 ## 资料怎样真正进入DeepSeek
 
@@ -79,7 +88,7 @@ flowchart LR
 
 共11个工具：`categories_search`、`categories_get`、`categories_children`、`find_related_categories`、`get_family_context`、`search_attribute_pool`、`knowledge_list`、`knowledge_read`、`sources_read`、`calculation_policies`及`calculate_value`。策略发现限SKU填写/辅助审核，计算只限SKU填写；策略ID、版本及因子约束实际前置并进入工具回传。没有任意文件、URL、SQL或写入工具。同族搜索结合已登记成员和跨父节点词形候选，**尚未实现语义归族自动判定或共享基线原子发布协调器**；名称相似只产生线索。
 
-DeepSeek适配使用[官方Responses合同](https://api-docs.deepseek.com/zh-cn/api/create-response/)：`instructions`、结构化输出、function调用及结果；无状态多轮需回传完整历史。`ResponsesClient`的离线模式必须注入mock HTTP，fixture禁止使用network模式。联网适配须显式授权、密钥及共享费用预留；CLI只有`batch --execute`进入该路径，本次开发未真实调用。供应链只读另有上述固定小样本入口。
+DeepSeek适配使用[官方Responses合同](https://api-docs.deepseek.com/zh-cn/api/create-response/)：`instructions`、结构化输出、function调用及结果；无状态多轮需回传完整历史。`ResponsesClient`的离线模式必须注入mock HTTP，fixture禁止使用network模式。联网适配须显式授权、密钥及共享费用预留；CLI仅上述两个显式执行入口进入该路径。开发不读取真实密钥；用户已执行的真实响应只做离线复核。供应链只读另有上述固定小样本入口。
 
 ## 数据与版本合同
 

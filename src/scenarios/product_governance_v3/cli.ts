@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { resolve } from "node:path";
+import { resolve, join as joinPath } from "node:path";
 import { read, save, STAGES, type Stage, type Task } from "./core.ts";
 import { freezeRelease, loadRelease } from "./release.ts";
 import { DataSnapshot } from "./snapshot.ts";
@@ -17,16 +17,20 @@ import { ResponsesClient } from "./responses.ts";
 import { Budget } from "./budget.ts";
 import { exportBatchReview, validateBatchExport } from "./batch-export.ts";
 import { inventorySource } from "./scm-field-inventory.ts";
+import { recheckBatch, correctBatchLeaf } from "./batch-recovery.ts";
+import { logFormat, progressLogger } from "./progress.ts";
 import {
   importFactReview,
   type PreparationBundle,
   type FactReview,
 } from "./fact-preparation.ts";
 
-const USAGE = `商品治理v3：类目属性提案；默认预检，batch --execute才请求付费DeepSeek；无生产写入。
+const USAGE = `商品治理v3：类目属性提案；默认离线，batch或单类batch-recover显式--execute才请求付费DeepSeek；无生产写入。
   bun src/scenarios/product_governance_v3/cli.ts batch --category-id ${CLEAN_PAPER_ID} --concurrency 32
   bun src/scenarios/product_governance_v3/cli.ts batch --category-id ${CLEAN_PAPER_ID} --concurrency 32 --out outputs/product-governance-v3/clean-paper-batch --execute
   bun src/scenarios/product_governance_v3/cli.ts batch-export --out /batch-dir --freeze-through 属性方案=属性
+  bun src/scenarios/product_governance_v3/cli.ts batch-recover --out /original-batch-dir
+  bun src/scenarios/product_governance_v3/cli.ts batch-recover --out /original-batch-dir --category-id FAILED_LEAF_ID --execute
   bun src/scenarios/product_governance_v3/cli.ts offline-acceptance --out outputs/product-governance-v3/offline
   bun src/scenarios/product_governance_v3/cli.ts plan --snapshot /abs/snapshot.json --category-id ID --stage family-modeling --run-id BATCH --out /abs/plan.json
   bun src/scenarios/product_governance_v3/cli.ts tree-search --tree scratch-category-baseline-20261010/mapped-tree.json --query 小卷纸 --limit 10
@@ -38,7 +42,7 @@ const USAGE = `商品治理v3：类目属性提案；默认预检，batch --exec
   bun src/scenarios/product_governance_v3/cli.ts import-fact-review --snapshot /prepared-dir/snapshot.raw.json --bundle /bundle.json --review /human.review.json --out /new/reviewed-snapshot-dir
   bun test ./src/scenarios/product_governance_v3
 sku-filling/fact-extraction另需--product-id；SKU审核需--product-id，审核另需--candidate文件。分页可传--cursor，树检索可传--scope-id。
-batch支持--tree或--snapshot、--budget-cny（默认200保守预留额度，不是预计账单）、--out、--run-id；并发1..128，默认8。仅batch --execute读取DEEPSEEK_API_KEY（Bun可从.env自动载入），同目录重跑恢复成功响应，不自动重发结果未知的请求。输出属性方案/扩展候选/全部类目问题和审阅Excel；不试填SKU值。
+batch支持--tree或--snapshot、--budget-cny（默认200保守预留额度，不是预计账单）、--out、--run-id；并发1..128，默认8。batch或batch-recover的--execute才读取DEEPSEEK_API_KEY（Bun可从.env自动载入）。原批次重跑只恢复相同请求；修复宿主后请用batch-recover，默认只离线复核，不请求模型。需要纠正时显式指定一个失败末级ID并加--execute；只补该类及必要的同族基线，沿用原累计费用台账。结果未知的请求绝不自动重发。--log-format human|json|quiet默认human，正常进度stdout，阻断stderr；quiet只输出最后汇总。输出属性方案/扩展候选/全部类目问题和审阅Excel；不试填SKU值。
 默认知识覆盖清洁纸品，其他类目需--snapshot提供已准备的字段职责、知识要求及同族。capture-roll-pilot仅两类各最多3件，无自动重试；仅此命令读取供应链密钥。replay使用录制候选，不发送DeepSeek请求。
 freeze-release仅更新本地材料/代码指纹，不能替代规范内容的人类评审。`;
 export async function main(argv: string[]) {
@@ -72,6 +76,7 @@ export async function main(argv: string[]) {
       layout: { type: "string" },
       "freeze-left": { type: "string" },
       "freeze-through": { type: "string", multiple: true },
+      "log-format": { type: "string" },
     },
   });
   const required = (key: keyof typeof values) => {
@@ -84,10 +89,57 @@ export async function main(argv: string[]) {
   switch (positionals[0]) {
     case "batch-export":
       return exportBatchReview(resolve(required("out")), layoutArgs(values));
+    case "batch-recover": {
+      if (values.tree || values.snapshot || values.stage || values["product-id"] || values.candidate ||
+          values["budget-cny"] || values["run-id"] || values.concurrency)
+        throw Error("恢复沿用原批次输入和累计预算；当前只支持指定一个失败末级类目及必要同族基线，不接受重设输入或并发参数");
+      const dir = resolve(required("out")), format = logFormat(values["log-format"]), release = await loadRelease();
+      await validateBatchExport(layoutArgs(values));
+      const recheck = await recheckBatch(dir, release);
+      const selected = values["category-id"] ? recheck.jobs.find((j) => j.categoryId === values["category-id"]) : null;
+      if (values["category-id"] && !selected)
+        throw Error("--category-id须为原批次中的一个末级类目，不能传整个大类");
+      const selectedGroup = selected ? recheck.original.groups.find((g: { members: string[] }) => g.members.includes(selected.categoryId)) : null;
+      const needsSeed = selectedGroup?.needsSeed && recheck.seeds.find((j) => j.familyId === selectedGroup.id)?.status !== "program_pass_pending_human";
+      const stages = !selected || selected.status === "program_pass_pending_human" ? 0 : needsSeed ? 2 : 1;
+      const selectedPlan = selected ? { categoryId: selected.categoryId, currentStatus: selected.status,
+        prerequisiteFamilySeed: needsSeed ? selectedGroup.id : null,
+        maximumNewRequests: stages * recheck.original.limits.maxRounds,
+        maximumAdditionalReservationCny: Number((stages * recheck.original.limits.maxRounds * recheck.original.reserveCny).toFixed(2)),
+        accounting: "保守预留上限，不是实际收费；沿用原累计预算", executeRequested: !!values.execute } : null;
+      let result: any = recheck.report;
+      if (values.execute) {
+        const categoryId = required("category-id");
+        if (!recheck.jobs.some((j) => j.categoryId === categoryId))
+          throw Error("--category-id须为原批次中的一个末级类目，不能传整个大类");
+        // Already eligible historical results must not require a key or make another paid call.
+        if (recheck.jobs.find((j) => j.categoryId === categoryId)!.status === "program_pass_pending_human")
+          result = { ...recheck.report, skipped: "already_program_pass_pending_human" };
+        else {
+          const key = process.env.DEEPSEEK_API_KEY?.trim();
+          if (!key) throw Error("缺少DEEPSEEK_API_KEY；离线复核已保存，未新增模型请求");
+          const budget = new Budget(dir, recheck.execution.budgetCny, recheck.execution.pricingId),
+            client = new ResponsesClient({ mode: "network", allowNetwork: true, apiKey: key,
+              transportId: recheck.execution.transportId, perRequestUpperBoundCny: recheck.original.reserveCny,
+              timeoutMs: 240000 }, dir, budget);
+          result = await correctBatchLeaf(dir, release, categoryId, client, progressLogger(format));
+        }
+      }
+      let excel: unknown = null, exportError: string | null = null;
+      if (!values["no-excel"]) {
+        try { excel = await exportBatchReview(result.outDir, layoutArgs(values)); }
+        catch (error) { exportError = String(error); }
+      }
+      if ((values.execute && !result.skipped && result.blocked) || exportError) process.exitCode = 2;
+      const { traces, pending, ...summary } = result;
+      return { ...summary, pendingFile: joinPath(result.outDir, values.execute && !result.skipped ? "correction.results.json" : "pending-corrections.json"),
+        selectedPlan, excel, exportError, next: values.execute ? "先检查所选类目结果，再决定是否逐类继续" : "查看离线结果和待纠正清单；如需付费纠正，指定一个失败末级ID并加--execute，勿换目录整批重跑" };
+    }
     case "batch": {
       if (values["product-id"] || values.candidate || (values.stage && values.stage !== "family-modeling"))
         throw Error("batch只产出类目属性方案，不接受商品试填、候选审核或其他stage参数");
       await validateBatchExport(layoutArgs(values));
+      const format = logFormat(values["log-format"]);
       const categoryId = required("category-id"),
         outDir = resolve(values.out ?? `outputs/product-governance-v3/attributes-${categoryId}`),
         release = await loadRelease(),
@@ -109,7 +161,7 @@ export async function main(argv: string[]) {
         client = new ResponsesClient({ mode: "network", allowNetwork: true, apiKey: key,
           transportId: "deepseek-official-responses-v1", perRequestUpperBoundCny: plan.reserveCny, timeoutMs: 240000 }, outDir, budget),
         result = await executeBatch(plan, release, client,
-          (event) => console.error(JSON.stringify(event)));
+          progressLogger(format));
       let excel: unknown = null, exportError: string | null = null;
       if (!values["no-excel"]) {
         try { excel = await exportBatchReview(outDir, layoutArgs(values)); }
@@ -118,7 +170,7 @@ export async function main(argv: string[]) {
       if (result.blocked || exportError) process.exitCode = 2;
       return { outDir, passed: result.passed, blocked: result.blocked, total: result.total,
         requests: result.networkCallsThisExecution, cacheHits: result.cacheHitsThisExecution,
-        reservedCny: result.budget.committedUpperBoundCny, excel, exportError,
+        reservedCny: Number(result.budget.committedUpperBoundCny.toFixed(2)), excel, exportError,
         adoption: "pending_human", productionWrites: 0 };
     }
     case "inventory-scm-fields": {

@@ -34,7 +34,11 @@ for (const d of definitions) {
   const rows = d.rows.length ? d.rows : [Array.from({ length: count }, (_, i) => i === 0 ? "本批无可纳入记录，见进度与问题" : null)];
   sheet.getRange("A2").values = [[data.root.name + "：" + d.name + (data.mode === "offline" ? "（模拟验收）" : "")]];
   sheet.getRange("A3").values = [[d.note]];
-  sheet.getRange("A4").values = [["程序检查通过仍待人工采用；专业缺口见进度与问题。长文保留原单元格及全文备注。"]];
+  sheet.getRange("A4").values = [[data.recovery?.kind === "offline_recheck"
+    ? "已保存响应的离线复核，本次新增模型请求0。未通过类目及空方案见进度与问题。"
+    : data.recovery?.kind === "targeted_model_correction"
+      ? "仅纠正指定失败类目及必要同族基线，合并已通过结果。其余缺口见进度与问题。"
+      : "程序检查通过仍待人工采用；专业缺口见进度与问题。长文保留原单元格及全文备注。"]];
   sheet.getRange("A5").values = [["批次 " + data.batchId.slice(0, 12) + "；类目 " + data.categoryCount + "；所有治理属性按SKU；没有线上写入。"]];
   sheet.getRangeByIndexes(5, 0, 1, count).values = [d.headers];
   sheet.getRangeByIndexes(6, 0, rows.length, count).values = rows.map((r) => r.map(safeValue));

@@ -8,7 +8,7 @@ import { ROOT, type Release } from "./release.ts";
 import { CategoryIndex } from "./catalog.ts";
 import { DataSnapshot } from "./snapshot.ts";
 import { assemble } from "./context.ts";
-import { runStage, DEFAULT_LIMITS, type ModelOptions } from "./runner.ts";
+import { runStage, DEFAULT_LIMITS, BATCH_CORRECTIONS, type ModelOptions } from "./runner.ts";
 import { ResponsesClient } from "./responses.ts";
 import { systemFieldsFromInventory } from "./scm-field-inventory.ts";
 import { rollDefinitions, rollBindings, rollExtensionCandidates } from "./roll-pilot.ts";
@@ -103,7 +103,7 @@ async function freezeFile(path: string, value: unknown) {
   await lock(path + ".lock", async () => {
     if (await exists(path)) {
       if (hash(await read(path)) !== hash(value))
-        throw new Blocked("batch_identity_drift", "frozen batch inputs/configuration changed; use a new --out directory: " + path);
+        throw new Blocked("batch_identity_drift", "frozen batch inputs/configuration changed; keep the original directory and use batch-recover for host-only fixes. Business/input changes require an explicit new task, never a directory change to bypass cumulative costs: " + path);
     } else await save(path, value);
   });
 }
@@ -269,7 +269,7 @@ export async function mapConcurrent<T, R>(items: T[], concurrency: number, work:
   if (failed) throw failure;
   return results;
 }
-function pendingFamily(group: Group, artifact: StageArtifact, runId: string): Family {
+export function pendingFamily(group: Group, artifact: StageArtifact, runId: string): Family {
   const result = artifact.result as {
     attributes: AttributeDefinition[]; bindings: AttributeBinding[]; extensionCandidates: ExtensionCandidate[];
   };
@@ -311,7 +311,8 @@ export async function executeBatch(
         if (stop) throw new Blocked("batch_stopped", stop);
         progress({ event: "started", phase, categoryId, category: snapshot.tree.get(categoryId).name });
         job.artifact = await runStage({ release, snapshot, task: batchTask(plan, categoryId, phase),
-          client, outDir: plan.outDir, model: plan.model, limits: plan.limits });
+          client, outDir: plan.outDir, model: plan.model, limits: plan.limits, corrections: BATCH_CORRECTIONS,
+          onProgress: (event) => progress({ ...event, phase, categoryId, category: snapshot.tree.get(categoryId).name }) });
         job.status = job.artifact.checks.status;
         if (job.status === "program_blocked") {
           job.code = "program_checks";
@@ -325,7 +326,7 @@ export async function executeBatch(
       await save(join(plan.outDir, "jobs", phase + "-" + hash(categoryId).slice(0, 20) + ".json"), {
         batchId: plan.id, ...job, artifactHash: job.artifact ? hash(job.artifact) : null,
       });
-      progress({ event: "finished", phase, categoryId, status: job.status, code: job.code });
+      progress({ event: "finished", phase, categoryId, category: snapshot.tree.get(categoryId).name, status: job.status, code: job.code });
       return job;
     };
     const input = new DataSnapshot(plan.snapshot), seeds = plan.groups.filter((g) => g.needsSeed);
@@ -355,7 +356,7 @@ export async function executeBatch(
       const blocked: BatchJob = { phase: "leaf", categoryId, familyId: group!.id,
         status: "program_blocked", code: "family_dependency", error: reason, artifact: null };
       await save(join(plan.outDir, "jobs", "leaf-" + hash(categoryId).slice(0, 20) + ".json"), { batchId: plan.id, ...blocked, artifactHash: null });
-      progress({ event: "finished", phase: "leaf", categoryId, status: blocked.status, code: blocked.code });
+      progress({ event: "finished", phase: "leaf", categoryId, category: snapshot.tree.get(categoryId).name, status: blocked.status, code: blocked.code });
       return blocked;
     });
     const result = {

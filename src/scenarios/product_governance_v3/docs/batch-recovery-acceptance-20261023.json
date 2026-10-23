@@ -1,0 +1,93 @@
+{
+  "format": 1,
+  "date": "2026-10-23",
+  "releaseId": "9ace6daa903b2ea5ff16f2e3125ff408cf592305ecf4d76f38ac24a560808b43",
+  "originalReleaseId": "826ed2544800ecdf01ceb96ce3c6cdbacffef6e57670bf5f2a1e8b6f99b6eaab",
+  "originalBatchId": "e9d4161405ba72ce191a45d1d27cdc23f31e3a7378854a01d0f463c40fff9083",
+  "validation": {
+    "testsPassed": 170,
+    "testsFailed": 0,
+    "typecheck": "passed",
+    "actualDeepSeekRequestsDuringDevelopment": 0,
+    "productionWrites": 0
+  },
+  "historicalResponseRecheck": {
+    "originalRequests": 53,
+    "httpStatuses": {
+      "200": 53
+    },
+    "originallyPassed": 2,
+    "passed": 3,
+    "blocked": 18,
+    "additionalPassed": [
+      {
+        "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+        "category": "洗脸巾"
+      }
+    ],
+    "emptyProposals": [
+      {
+        "categoryId": "135495fc-f11a-4322-9ab2-1901925bd417",
+        "category": "枕巾",
+        "note": "程序通过但无已建模属性，须人工决定是否需补研究"
+      }
+    ],
+    "businessRepairs": 0,
+    "originalFilesVerified": 287,
+    "originalFilesChanged": 0,
+    "cumulativeReservedCny": 68.9,
+    "budgetLimitCny": 200,
+    "accounting": "保守累计预留，不是实际账单"
+  },
+  "workbook": {
+    "path": "outputs/product-governance-v3/clean-paper-batch-20261023/recoveries/6d17bf46b28508ef0337/review/清洁纸品_类目属性方案_f24a3a7d4221.xlsx",
+    "attributes": 4,
+    "extensions": 12,
+    "categories": 21,
+    "sheets": [
+      {
+        "name": "属性方案",
+        "bodyFontPt": 10,
+        "bodyRowHeightPx": 22,
+        "rowHeightMode": "fixed",
+        "freezeLeftColumns": 1,
+        "freezeThrough": null,
+        "notesAdded": 24
+      },
+      {
+        "name": "扩展候选",
+        "bodyFontPt": 10,
+        "bodyRowHeightPx": 22,
+        "rowHeightMode": "fixed",
+        "freezeLeftColumns": 1,
+        "freezeThrough": null,
+        "notesAdded": 49
+      },
+      {
+        "name": "进度与问题",
+        "bodyFontPt": 10,
+        "bodyRowHeightPx": 22,
+        "rowHeightMode": "fixed",
+        "freezeLeftColumns": 1,
+        "freezeThrough": null,
+        "notesAdded": 12
+      }
+    ],
+    "artifactToolSavedFileInspection": "3 sheets",
+    "visualVerification": "all 3 rendered sheets reviewed; final render bytes match reviewed views"
+  },
+  "targetedPreview": {
+    "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+    "currentStatus": "program_blocked",
+    "prerequisiteFamilySeed": null,
+    "maximumNewRequests": 6,
+    "maximumAdditionalReservationCny": 7.8,
+    "accounting": "保守预留上限，不是实际收费；沿用原累计预算",
+    "executeRequested": false
+  },
+  "remaining": [
+    "No new real-model correction has been executed; validate one failed leaf before expanding",
+    "Frozen definitions still echoed in full; reference-only inheritance output contract remains future work",
+    "Professional knowledge, count-unit semantics, human adoption and production flow remain pending"
+  ]
+}

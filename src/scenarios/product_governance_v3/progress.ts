@@ -1,0 +1,21 @@
+export type LogFormat = "human" | "json" | "quiet";
+export function logFormat(value = "human"): LogFormat {
+  if (!["human", "json", "quiet"].includes(value)) throw Error("--log-format must be human, json or quiet");
+  return value as LogFormat;
+}
+export function progressLogger(format: LogFormat,
+  out: (line: string) => void = console.log,
+  err: (line: string) => void = console.error) {
+  return (event: Record<string, unknown>) => {
+    if (format === "quiet") return;
+    const failed = event.status === "program_blocked";
+    const phase = event.phase === "family-seed" ? "同族基线" : "类目方案";
+    const name = String(event.category ?? event.categoryId ?? "");
+    const label = event.event === "started" ? "开始" : event.event === "model-request"
+      ? "模型请求" : event.event === "model-response" ? event.cached ? "读取缓存" : "模型响应"
+      : failed ? "阻断" : "完成，待人工审阅";
+    const line = format === "json" ? JSON.stringify(event) :
+      `[${label}] ${phase} · ${name}${event.code ? " · " + event.code : ""}`;
+    (failed ? err : out)(line + (format === "human" && event.round ? " · 第" + event.round + "轮" : ""));
+  };
+}

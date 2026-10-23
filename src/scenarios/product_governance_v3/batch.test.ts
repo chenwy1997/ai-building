@@ -49,9 +49,10 @@ function mock(options: {
     if (body.input.length === 1) {
       return Response.json({ status: "completed", output: [functionCall("categories_get", { id: task.categoryId }, "category-read")] });
     }
-    expect(body.input.at(-1).type).toBe("function_call_output");
-    expect(body.input.at(-1).call_id).toBe("category-read");
-    expect(JSON.parse(body.input.at(-1).output).node.id).toBe(task.categoryId);
+    if (body.input.at(-1).type === "function_call_output") {
+      expect(body.input.at(-1).call_id).toBe("category-read");
+      expect(JSON.parse(body.input.at(-1).output).node.id).toBe(task.categoryId);
+    } else expect(JSON.parse(body.input.at(-1).content).kind).toBe("host_contract_feedback");
     const baseline = input.sharedContext.family.flatMap((p: any) => p.items).find((f: any) => f.usable);
     const attrs = baseline ? jsonClone(baseline.attributes) : [attribute({
       id: "mock." + (scope.family?.id ?? task.categoryId), name: "模拟验收参数", conceptKey: "mock." + (scope.family?.id ?? task.categoryId),
@@ -285,11 +286,11 @@ test("actual CLI execute branch reaches Responses, tool loop, checks and exit co
   `);
   const child = Bun.spawn([process.execPath, "--preload", preload, join(ROOT, "cli.ts"), "batch",
     "--category-id", "f4bb18c7-b736-4fe6-91d1-60c4d05fcee6", "--tree", treePath,
-    "--out", out, "--concurrency", "32", "--no-excel", "--execute"], {
+    "--out", out, "--concurrency", "32", "--no-excel", "--log-format", "quiet", "--execute"], {
     stdout: "pipe", stderr: "pipe", env: { DEEPSEEK_API_KEY: "offline-synthetic-credential" },
   });
   const [exit, stdout, stderr] = await Promise.all([child.exited, new Response(child.stdout).text(), new Response(child.stderr).text()]);
-  expect(stderr).toContain('"event":"finished"');
+  expect(stderr).toBe("");
   expect(exit).toBe(0);
   const result = JSON.parse(stdout);
   expect(result.passed).toBe(1); expect(result.requests).toBe(2); expect(result.productionWrites).toBe(0);
@@ -301,7 +302,7 @@ test("actual CLI execute branch reaches Responses, tool loop, checks and exit co
   for (const file of receipts) expect(await readFile(join(out, "requests", file), "utf8")).not.toContain("offline-synthetic-credential");
   const failedOut = join(dir, "failed-batch"), failed = Bun.spawn([process.execPath, "--preload", preload, join(ROOT, "cli.ts"), "batch",
     "--category-id", "f4bb18c7-b736-4fe6-91d1-60c4d05fcee6", "--tree", treePath,
-    "--out", failedOut, "--no-excel", "--execute"], {
+    "--out", failedOut, "--no-excel", "--log-format", "quiet", "--execute"], {
     stdout: "pipe", stderr: "pipe", env: { DEEPSEEK_API_KEY: "offline-synthetic-credential", PGV3_SYNTHETIC_FAILURE: "401" },
   });
   const [failedCode, failedStdout] = await Promise.all([failed.exited, new Response(failed.stdout).text(), new Response(failed.stderr).text()]);
