@@ -332,12 +332,13 @@ test("declared inventory covers every scalar responsibility and native aliases w
   expect(inv.sources.length).toBe(12);
   for (const f of inv.fields.filter((f: any) => f.role === "base_business"))
     expect(fields.some((x) => x.key === f.key)).toBe(true);
-  expect(fields.some((f) => f.names.includes("单卷标称质量"))).toBe(false);
+  expect(fields.some((f) => f.names.includes("单卷重量"))).toBe(false);
   expect(fields.some((f) => f.names.includes("售卖单位"))).toBe(true);
 });
 test("two real family leaves share all proposed definitions and optional bindings, with registered professional references", async () => {
   const attrs = await rollDefinitions();
-  expect(attrs).toHaveLength(9);
+  expect(attrs).toHaveLength(7);
+  expect(attrs.some((a) => ["roll.printed", "roll.embossed"].includes(a.id))).toBe(false);
   expect(attrs.some((a) => a.name === "是否无芯")).toBe(true);
   expect(rollBindings(attrs).every((b) => b.requiredness === "optional")).toBe(
     true,

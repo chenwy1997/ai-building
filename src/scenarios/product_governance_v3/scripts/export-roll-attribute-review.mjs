@@ -109,7 +109,7 @@ if (layoutOptions.restyle) {
 }
 
 // A separate review object from export-roll-pilot.mjs: definitions/bindings,
-// never SKU facts. New coverage proposals remain outside the frozen contract.
+// never SKU facts. Extensions come from the same frozen family as the runtime.
 const pilot = resolve(
   layoutOptions.positionals[0] ||
     "outputs/product-governance-v3/roll-real-pilot-20261022",
@@ -177,8 +177,8 @@ const notes = {
   ],
   "roll.declared_mass": [
     "保留并核实口径",
-    "比较每卷明确标称的质量，单位g。",
-    "标称质量不自动等于去芯净纸重。需专业核实是否含芯/包装及比较口径，不能把旧卡的净重和标称重量直接视为同义词。",
+    "比较每卷重量，单位g；含芯等口径须一致。",
+    "名称简化，原计量边界不变。来源明示的每卷重量不自动等于去芯净纸重或实测重量；含芯/包装口径需核实。",
   ],
   "roll.raw_material": [
     "建议保留",
@@ -191,24 +191,14 @@ const notes = {
     "与卷外径、卷宽、包装尺寸区分。只有长宽各有独立用途时才拆分；轴向不明时不猜。",
   ],
   "roll.perforation": [
-    "保留并核实口径",
-    "比较每卷分节规格，数量与单位合并。",
-    "文本示意为260张/卷。张、节、格不可直接等价；统一计数口径后才讨论数值化。这里审核属性表达，不审核某SKU是否真的为260。",
-  ],
-  "roll.printed": [
-    "建议选填保留",
-    "说明纸张是否印花，供外观选择与展示。",
-    "与压花是不同概念。若业务确认没有独立选型或展示用途，再删减；不设为必填，也不自动开启关键规格。",
-  ],
-  "roll.embossed": [
-    "建议选填保留",
-    "说明纸张是否压花，供工艺比较与展示。",
-    "不因有印花而推定压花。缺少描述不等于否；可与印花同屏展示，但不混成一个真假值。",
+    "暂名，计数口径待核实",
+    "保留每卷数量及原单位，暂不跨单位比较。",
+    "张/节/格的关系未裁定，暂不统一叫每卷张数。舒洁0562-10搜索摘要同标题并列200格与200张/卷，仅是该型号的线索；本批0097/0316技术书未取得。260张与60张冲突不消失，不按层数倍乘，核实后再定名及数值化。",
   ],
   "roll.fragrance": [
     "建议选填保留",
-    "按香型描述供选择与检索，暂用文本。",
-    "尚无经核实的完整香型词表。未说明不默认无香；后续稳定词表才能改成选项。",
+    "按香型选择与检索，统一文本表达。",
+    "同一字段保留无香味、具体香型或仅有香味的原词，不另造是否有香味。未说明留未知。具体香型未知写治理备注，不拼接到源文值；同义归一需后续核实词表。",
   ],
 };
 if (
@@ -257,59 +247,21 @@ const items = family.attributes.map((a) => {
     references: "专业研究包；已确认规范2—6节",
   };
 });
-// Coverage review is based on business use, not whether the six SKUs have values.
-for (const [key, name, purpose, definition, applicability, issue] of [
-  [
-    "roll_diameter",
-    "卷外径",
-    "核对纸架容纳空间。",
-    "成品纸卷最外侧直径，区别于芯内径和包装尺寸。",
-    ["待确认", "待确认"],
-    "需核实本类采购是否有按纸架尺寸选型的需求，不能直接套用商用大卷纸技术页。",
-  ],
-  [
-    "roll_width",
-    "卷宽",
-    "核对纸架轴向容纳空间。",
-    "纸卷沿卷轴方向的宽度，不能由未标轴向的纸张尺寸猜出。",
-    ["待确认", "待确认"],
-    "先核实与纸张尺寸是否表达同一参数。相同则复用，不重复新增。",
-  ],
-  [
-    "core_diameter",
-    "纸芯内径",
-    "核对有芯纸卷与轴杆适配。",
-    "有芯纸卷中心纸芯的内部直径。",
-    ["待确认", "不适用候选"],
-    "这是可能有理由的局部差异。无芯类不填0。先核实适配用途和无芯产品结构定义，再建立绑定。",
-  ],
-  [
-    "roll_length",
-    "单卷长度",
-    "比较单卷可用长度。",
-    "一卷连续纸张展开后的总长度，区别于单节长度。",
-    ["待确认", "待确认"],
-    "与分节规格是否有独立比较价值需核实。不能缺证反推，也不能因现有样本没有就删除。",
-  ],
-])
-  items.push({
-    id: "coverage." + key,
-    name,
-    definition,
-    applicability,
-    requirements: ["选填提议", "选填提议"],
-    typeUnit: "数值 / " + (key === "roll_length" ? "m" : "mm") + "（提议）",
-    purpose,
-    recommendation: "先核实选型必要性",
-    issue,
-    implementation: "补充研究候选，未接合同",
-    status: "coverage_proposal",
-    references: "专业研究包Tork来源；仅建模线索，适用性未确认",
-  });
-items.forEach((a) => {
+const extensions = (family.extensionCandidates ?? []).map((c) => ({
+  ...c,
+  definition: "尚未建立属性定义。潜在用途：" + c.potentialUse,
+  issue: c.deferReason + "。启用条件：" + c.activationCriteria,
+  implementation: "扩展候选，未接SKU合同",
+  status: "extension_candidate",
+  references: c.references.map((r) => r.id + "；" + r.quote).join("\n"),
+}));
+[...items, ...extensions].forEach((a) => {
   a.contentHash = hash(a);
 });
 const boundaries = [
+  ...extensions.map((c) => [c.name, "扩展候选，暂不建属性", c.deferReason,
+    "潜在用途：" + c.potentialUse + "。启用条件：" + c.activationCriteria,
+    c.references]),
   [
     "品牌",
     "排除重复属性",
@@ -369,7 +321,7 @@ const boundaries = [
   [
     "去芯净纸重",
     "先核实比较口径",
-    "与单卷标称质量不自动相同。",
+    "与来源明示的单卷重量不自动相同。",
     "先确定业务想比较哪种质量和测量边界，再决定复用、修订或确有必要另设。",
     "专业研究包质量口径",
   ],
@@ -432,7 +384,7 @@ table(
   "有芯与无芯小卷纸：类目属性方案",
   [
     "审属性是否该设、定义和同族差异。黄色列填意见，空白表示未审。",
-    "9项已建模待审 + 4项补充研究候选。均未采用；当前方案并不代表属性全集。",
+    `${items.length}项共用选填定义；每卷数量口径待核实。${extensions.length}项扩展候选见“补充与排除”，不属待填属性。`,
     "商品试填另行审核。所有治理属性按SKU；具体设置和依据见“定义与设置”。",
   ],
   [
@@ -481,8 +433,8 @@ table(
   sheets[1],
   "补充、合并和排除的判断",
   [
-    "请同时检查是否遗漏必要属性。这里列出职责边界和需要继续研究的维度。",
-    "当前SKU没有值不构成删除理由；生产字段配置和专业适用性仍有待核实项。",
+    "前6项为扩展候选，尚未进入SKU合同；核实具体业务用途后再评估启用。",
+    "后续为职责、合并与补充判断。样本缺证不构成删除理由，技术参数存在也不直接准入。",
     "黄色列填写对建议的意见。所有意见仅用于方案修订，不会自动发布或写入线上。",
   ],
   ["候选概念", "建议处理", "理由", "需要确认的边界", "审阅意见", "依据"],
@@ -492,7 +444,7 @@ table(
 sheets[1].getRange(`E7:E${boundaries.length + 6}`).format.fill =
   layoutConfig.editableFill;
 function configText(a) {
-  if (!a) return "尚未建立原生配置。类型和单位仅为研究提议。";
+  if (!a) return "未建立类型配置或SKU绑定；用途和启用条件见待核实点。";
   const empty = (v) => (v === null ? "未设" : String(v));
   const config = [
     "SKU；" + (a.multi ? "多值" : "单值") + "；默认值=" + empty(a.defaultValue),
@@ -535,7 +487,8 @@ function configText(a) {
   if (a.enumValues.length) config.push("选项=" + a.enumValues.join("、"));
   return config.join("\n");
 }
-const detailRows = items.map((a) => [
+const detailItems = [...items, ...extensions];
+const detailRows = detailItems.map((a) => [
   a.name,
   a.definition,
   a.issue,
@@ -579,9 +532,9 @@ table(
   sheets[2],
   "属性定义、配置及待核实点",
   [
-    "配置逐项来自冻结样板合同；补充候选清楚标记未接合同。",
+    "前7项配置来自冻结样板合同；后6项为扩展候选，无类型配置和末级绑定。",
     "关键词检索仅表示当前源码支持的配置，不证明线上搜索或筛选已生效。",
-    "专业包为Codex研究候选，未经过纸品专业人审；9项均未成为正式类目标准。",
+    "专业包为Codex研究候选，未经过纸品专业人审；计数口径未裁定，方案待人工采用。",
   ],
   [
     "属性",
@@ -598,8 +551,8 @@ table(
   [145, 300, 360, 380, 480, 300, 210, 250, 480],
 );
 // Keep actual source attributions together beside this supporting input area.
-const sourceRow = items.length + 9;
-sheets[2].getRange(`A${sourceRow}:C${sourceRow + 4}`).values = [
+const sourceRow = detailItems.length + 9;
+const sourceRows = [
   ["已读资料", "使用范围", "来源"],
   [
     "GB/T 20810-2018元数据",
@@ -621,7 +574,12 @@ sheets[2].getRange(`A${sourceRow}:C${sourceRow + 4}`).values = [
     "参考选型维度，旧标准号不作为现行依据",
     "https://www.ccgp.gov.cn/specialtopic/zfcgxqbz/xgzn/202001/t20200103_13698397.htm",
   ],
+  ["维达VD4169厂家参数", "已读正文；节距/卷高及标签和值需分别核实", "https://professional.vinda.com/product/VD4169.html"],
+  ["Tork 100200厂家参数", "已读正文；区分印花/压花和不同长度对象", "https://www.torkglobal.com/gb/en/product/refill/toilet-paper/conventional-roll/100200"],
+  ["舒洁0562-10厂家页", "仅搜索摘要，正文超时；张/格同型号线索，未裁定通用等价", "https://www.kcprofessional.com.cn/zh-cn/products/restroom-and-hygiene/hair-and-body-wash/pop-up-box/s059865512/s059865512"],
+  ["山东航空采购公告5216", "仅搜索摘要，正文超时；工艺/尺寸用途线索，非本批准入结论", "https://sda.cn/foreign/tenderNotice/purchase/5216.html"],
 ];
+sheets[2].getRange(`A${sourceRow}:C${sourceRow + sourceRows.length - 1}`).values = sourceRows;
 const appliedLayouts = {};
 for (const s of sheets)
   appliedLayouts[s.name] = await applyReviewLayout(
@@ -684,12 +642,13 @@ await fs.writeFile(
       layout: appliedLayouts,
       layoutOptions,
       layoutMaterials,
-      modeledCandidates: 9,
-      coverageProposals: 4,
+      modeledCandidates: items.length,
+      extensionCandidates: extensions.length,
       attributeOpinionColumns: ["H", "I"],
       autoAdoption: false,
       opinionImporter: "not_implemented_for_attribute_schema",
       items,
+      extensions,
       boundaries,
     },
     null,
@@ -700,8 +659,8 @@ console.log(
   JSON.stringify({
     xlsx,
     reviewObject: "category_attribute_schema",
-    modeledCandidates: 9,
-    coverageProposals: 4,
+    modeledCandidates: items.length,
+    extensionCandidates: extensions.length,
     productionWrites: 0,
   }),
 );

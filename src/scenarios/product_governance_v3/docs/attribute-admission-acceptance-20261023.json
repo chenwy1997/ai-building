@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-23",
+  "kind": "offline_attribute_admission_refinement",
+  "status": "program_pass_pending_human",
+  "releaseId": "c98c8b629e90bbf4f16348dc1da7c0200fc011c8a3bb8004c67daf622852b114",
+  "tests": {
+    "passed": 131,
+    "failed": 0,
+    "newTests": 10,
+    "typeCheck": "pass",
+    "skillValidation": {
+      "passed": 5,
+      "failed": 0
+    }
+  },
+  "realInputReplay": {
+    "skuCount": 6,
+    "familyModels": 2,
+    "extractionCandidates": 23,
+    "programBlocked": 0,
+    "liveDeepSeekCalls": 0,
+    "productionWrites": 0,
+    "author": "Codex: explicit offline scope revision 2026-10-23",
+    "source": "existing bounded readonly capture; no new SCM request"
+  },
+  "legacyNegative": {
+    "skuBlocked": 3,
+    "contractExcludedCandidates": 5,
+    "releaseIds": [
+      "c98c8b629e90bbf4f16348dc1da7c0200fc011c8a3bb8004c67daf622852b114"
+    ],
+    "disposition": "retained as unreviewed research observations, not SKU facts"
+  },
+  "constructedValidation": {
+    "stages": [
+      {
+        "stage": "family-modeling",
+        "status": "program_pass_pending_human",
+        "modelToolCalls": 1
+      },
+      {
+        "stage": "sku-filling",
+        "status": "program_pass_pending_human",
+        "modelToolCalls": 1
+      },
+      {
+        "stage": "review-assistance",
+        "status": "program_pass_pending_human",
+        "modelToolCalls": 1
+      },
+      {
+        "stage": "fact-extraction",
+        "status": "program_pass_pending_human",
+        "modelToolCalls": 1
+      },
+      {
+        "stage": "domain-research",
+        "status": "program_pass_pending_human",
+        "modelToolCalls": 1
+      }
+    ],
+    "externalNetworkCalls": 0,
+    "paidModelCalls": 0,
+    "productionWrites": 0
+  },
+  "workbook": {
+    "workbook": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/roll-attribute-refinement-20261023/final/review/有芯与无芯小卷纸_类目属性方案主审_20261023.xlsx",
+    "releaseId": "c98c8b629e90bbf4f16348dc1da7c0200fc011c8a3bb8004c67daf622852b114",
+    "sheets": [
+      {
+        "name": "属性方案",
+        "reviewRows": 7,
+        "fontPt": 10,
+        "rowHeightPt": 16.5,
+        "frozenLeftColumns": 1,
+        "nativeFullTextNotes": 0
+      },
+      {
+        "name": "补充与排除",
+        "reviewRows": 18,
+        "fontPt": 10,
+        "rowHeightPt": 16.5,
+        "frozenLeftColumns": 1,
+        "nativeFullTextNotes": 25
+      },
+      {
+        "name": "定义与设置",
+        "reviewRows": 13,
+        "fontPt": 10,
+        "rowHeightPt": 16.5,
+        "frozenLeftColumns": 1,
+        "nativeFullTextNotes": 50
+      }
+    ],
+    "status": "saved_xlsx_checks_pass",
+    "sha256": "811dee6af8d3eb9e79cdec369edef6d62d208d7dd78a4a072181d09679e7fb5f",
+    "formulaErrors": 0,
+    "emptyHumanOpinions": true,
+    "nativeWpsInteractionVerified": false
+  },
+  "professionalStatus": "research_pending_professional_review",
+  "businessAccuracyEvaluated": false,
+  "humanAdoptions": 0,
+  "remaining": [
+    "target-model count terminology and weight boundaries",
+    "extension business-use adjudication",
+    "native WPS small-screen and Windows150% interaction",
+    "attribute-review opinion import/adoption",
+    "live DeepSeek semantic and held-out validation"
+  ],
+  "evidenceDirectory": "outputs/product-governance-v3/roll-attribute-refinement-20261023/final"
+}

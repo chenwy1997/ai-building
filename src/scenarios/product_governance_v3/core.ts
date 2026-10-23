@@ -213,6 +213,28 @@ export interface AttributeBinding {
   baselineAttributeId: string | null;
   differenceReason: string | null;
 }
+// Research ideas have no value type or binding: they are not SKU contracts.
+export interface ExtensionCandidate {
+  id: string;
+  name: string;
+  conceptKey: string;
+  scope: string;
+  potentialUse: string;
+  deferReason: string;
+  activationCriteria: string;
+  references: ModelReference[];
+}
+export function sameParameter(
+  a: Pick<ExtensionCandidate, "id" | "name" | "conceptKey" | "scope">,
+  b: Pick<ExtensionCandidate, "id" | "name" | "conceptKey" | "scope">,
+) {
+  return (
+    a.id === b.id ||
+    (normalized(a.scope) === normalized(b.scope) &&
+      (normalized(a.conceptKey) === normalized(b.conceptKey) ||
+        normalized(a.name) === normalized(b.name)))
+  );
+}
 // Resolved runtime view. Authoritative storage/output keeps definitions and bindings separate.
 export type Attribute = AttributeDefinition & { binding: AttributeBinding };
 export interface Fact {
@@ -285,6 +307,8 @@ export interface Family {
   runId: string | null;
   attributes: AttributeDefinition[];
   bindings: AttributeBinding[];
+  // Optional for reading previously frozen format=2 snapshots.
+  extensionCandidates?: ExtensionCandidate[];
 }
 // Minimum known responsibilities, established by the approved supply-chain contract.
 // This is not a complete production field inventory; snapshots must supply and review the rest.

@@ -2,8 +2,10 @@ import {
   canonical,
   validate,
   normalized,
+  sameParameter,
   type AttributeDefinition,
   type AttributeBinding,
+  type ExtensionCandidate,
   type CheckReport,
   type Task,
   type Finding,
@@ -48,6 +50,11 @@ export function checkResult(
   if (schemaErrors.length) return report();
   const value = result as any,
     snapshot = tools.snapshot;
+  const systemOwner = (a: Pick<AttributeDefinition, "conceptKey" | "name">) =>
+    snapshot.data.systemFields.find((f) =>
+      f.conceptKeys.some((k) => normalized(k) === normalized(a.conceptKey)) ||
+      f.names.some((n) => normalized(n) === normalized(a.name)),
+    );
   executed.add("knowledge-coverage");
   const gaps = tools.knowledgeGaps();
   if (gaps.length) {
@@ -102,10 +109,31 @@ export function checkResult(
     executed.add("family-contract");
     const baseline = snapshot.baseline(task),
       attributes = value.attributes as AttributeDefinition[],
-      bindings = value.bindings as AttributeBinding[];
+      bindings = value.bindings as AttributeBinding[],
+      extensions = value.extensionCandidates as ExtensionCandidate[];
     if (value.baselineVersion !== (baseline?.version ?? null))
       add("R05", task.categoryId, "wrong/absent baseline version");
     checkDefinitions(attributes, bindings);
+    executed.add("extension-separation");
+    if (!attributes.length && !extensions.length && !value.unresolved.length)
+      add("R07", task.categoryId, "empty proposal needs an explicit reason in unresolved or deferred extension candidates");
+    for (const [i, c] of extensions.entries()) {
+      const owner = systemOwner(c);
+      if (owner) add("R01", c.id, "extension concept already owned by system field " + owner.key);
+      if (attributes.some((a) => sameParameter(a, c)) ||
+        extensions.slice(0, i).some((other) => sameParameter(other, c)))
+        add("R07", c.id, "extension candidate overlaps a governed definition or another extension");
+      for (const ref of c.references) {
+        const error = tools.referenceError(ref);
+        if (error) add("R11", c.id, error);
+      }
+    }
+    for (const c of baseline?.extensionCandidates ?? []) {
+      if (attributes.some((a) => sameParameter(a, c)))
+        add("R07", c.id, "frozen extension cannot enter the SKU contract; revise the shared baseline separately");
+      if (!extensions.some((other) => canonical(other) === canonical(c)))
+        add("R03", c.id, "frozen extension disposition changed or omitted; propose a shared revision separately");
+    }
     if (
       bindings.length !== attributes.length ||
       new Set(bindings.map((b) => b.attributeId)).size !== bindings.length ||
@@ -412,12 +440,7 @@ export function checkResult(
       ids.add(a.id);
       concepts.add(concept);
       names.add(name);
-      const owner = snapshot.data.systemFields.find(
-        (f) =>
-          f.conceptKeys.some(
-            (k) => normalized(k) === normalized(a.conceptKey),
-          ) || f.names.some((n) => normalized(n) === normalized(a.name)),
-      );
+      const owner = systemOwner(a);
       if (owner)
         add("R01", a.id, "concept already owned by system field " + owner.key);
       if (a.fieldType === "number" && !a.unit)

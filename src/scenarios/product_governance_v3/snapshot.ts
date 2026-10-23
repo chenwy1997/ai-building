@@ -13,12 +13,18 @@ import {
   factPreparationHash,
   REQUIRED_SYSTEM_OWNERS,
   normalized,
+  sameParameter,
   Blocked,
   type Snapshot,
   type Task,
   type Family,
 } from "./core.ts";
-import { attributeSchema, bindingSchema, valueSchema } from "./contracts.ts";
+import {
+  attributeSchema,
+  bindingSchema,
+  extensionCandidateSchema,
+  valueSchema,
+} from "./contracts.ts";
 import { CategoryIndex } from "./catalog.ts";
 
 const strings = list(text()),
@@ -99,15 +105,19 @@ const snapshotSchema = object({
     coveredKeys: strings,
   }),
   families: list(
-    object({
-      id: text(),
-      version: text(),
-      members: strings,
-      status: text("confirmed", "candidate", "in_progress", "failed"),
-      runId: nullable(text()),
-      attributes: list(attributeSchema),
-      bindings: list(bindingSchema),
-    }),
+    object(
+      {
+        id: text(),
+        version: text(),
+        members: strings,
+        status: text("confirmed", "candidate", "in_progress", "failed"),
+        runId: nullable(text()),
+        attributes: list(attributeSchema),
+        bindings: list(bindingSchema),
+        extensionCandidates: list(extensionCandidateSchema),
+      },
+      ["id", "version", "members", "status", "runId", "attributes", "bindings"],
+    ),
   ),
   attributes: list(attributeSchema),
   sources: list(sourceSchema),
@@ -233,6 +243,16 @@ export class DataSnapshot {
     for (const f of data.families) {
       f.members.forEach((id) => this.tree.get(id));
       ids(f.attributes, "family attributes");
+      const extensions = f.extensionCandidates ?? [];
+      ids(extensions, "family extension candidates");
+      for (const [i, c] of extensions.entries())
+        if (
+          f.attributes.some((a) => sameParameter(a, c)) ||
+          extensions.slice(0, i).some((other) => sameParameter(other, c))
+        )
+          throw Error(
+            "extension candidate overlaps the fixed family contract or another extension",
+          );
       const bindingKeys = f.bindings.map(
         (b) => `${b.attributeId}|${b.categoryId ?? "*"}`,
       );

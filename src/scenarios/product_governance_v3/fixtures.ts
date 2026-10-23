@@ -59,7 +59,7 @@ export function binding(
     attributeId,
     categoryId: null,
     requiredness: "optional",
-    requirednessReason: "构造样例：必要性尚未核实，先选填",
+    requirednessReason: "构造样例：强制填写必要性尚未核实，先选填",
     isKeySpec: false,
     isPublic: true,
     searchable: false,
@@ -414,6 +414,7 @@ export function fixtureOutput(stage: Stage): any {
         categoryId,
         baselineAttributeId: b.attributeId,
       })),
+      extensionCandidates: fixtureSnapshot().families[0]!.extensionCandidates ?? [],
       unresolved: ["构造样例，需人工判定必要性"],
     };
   if (stage === "sku-filling")

@@ -2,9 +2,9 @@
 
 v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”的离线链路。命令不提供付费跑批、自动采用或生产写入。
 
-2026-10-22已完成[第1、2步合同/接线修复](docs/implementation-phase12-20261022.md)，并继续完成[第3步小卷纸真实样板](docs/implementation-phase3-20261022.md)：两类各3件真实SKU、完整声明范围的字段盘点、专业研究包、原文提取和初次人工核实入口。当前117项v3和18项相关v2回归通过。真实输入使用本次Codex整理候选进行离线回放，没有真实DeepSeek请求或人工采用；同族发布、连续流、通用采用和生产承接仍未闭环，不开放跑批。[原审计](docs/implementation-audit-20261022.md)保留当时证据。
+2026-10-22已完成[第1、2步合同/接线修复](docs/implementation-phase12-20261022.md)，并继续完成[第3步小卷纸真实样板](docs/implementation-phase3-20261022.md)：两类各3件真实SKU、完整声明范围的字段盘点、专业研究包、原文提取和初次人工核实入口。当时117项v3和18项相关v2回归通过。真实输入使用本次Codex整理候选进行离线回放，没有真实DeepSeek请求或人工采用；同族发布、连续流、通用采用和生产承接仍未闭环，不开放跑批。[原审计](docs/implementation-audit-20261022.md)保留当时证据。
 
-2026-10-23[纠正审阅对象](docs/review-object-correction-20261023.md)：当前首先审核**类目属性方案**，新增独立方案工作簿，逐项检查属性必要性、同族一致性、定义/类型/单位及基础职责。旧工作簿主要用于SKU事实核实，作为后续辅助材料。9项已建模候选和4项尚未接入合同的研究候选明确分开；方案意见尚无自动采用入口，不能使用事实导入器承接。
+2026-10-23[纠正审阅对象](docs/review-object-correction-20261023.md)：当前首先审核**类目属性方案**，旧事实工作簿留作后续辅助材料。随后根据人工反馈完成[业务准入与简明命名修订](docs/attribute-admission-refinement-20261023.md)：当前为7项共用选填定义、6项独立扩展候选，替代最初9项+4项试排。名称和定义同步修订；每卷数量的张/节/格口径仍待核实。方案意见尚无自动采用入口，不能使用事实导入器承接。
 
 业务规则由本目录的[已确认规范](docs/governance-standard-draft.md)维护，后台承接引用[整体设计第5节](docs/governance-design-v1-20261022.md)。本轮新规范、整体稿、讨论记录、工具方案、5份ADR及[词汇表](GLOSSARY.md)已迁入v3，统一入口见[文档导航](docs/README.md)。每份正文只维护一处；v2保留其历史架构、运行手册和效率审计。v3不加载v2旧standards、旧品牌强制项或conditional合同。代码复用v2仅限`runtime/store.ts`的原子文件、锁、序列化及hash函数，这个依赖同样被版本锁定。
 
@@ -76,6 +76,8 @@ DeepSeek适配使用[官方Responses合同](https://api-docs.deepseek.com/zh-cn/
 `Snapshot`定义见[core.ts](core.ts)，严格装载及引用检查见[snapshot.ts](snapshot.ts)，可运行构造样例见[fixtures.ts](fixtures.ts)。`attributes`是可检索池，**不自动成为某类目SKU的填写合同**；取值必须有适用的固定同族合同。新族先建模和确认范围，再制作下一份快照。
 
 快照现在强制`format=2`，旧平铺合同明确拒绝，不静默迁移。共同`attributes`保存名称/概念/类型/单位/口径、数值/文本/选项约束及建模references；`families[].bindings`保存族模板（categoryId=null）及末级覆盖。建模输出将定义存于`attributes`数组，当前末级配置存于`bindings`数组；必填、用途及关键规格/公开/搜索/标题/列表/排序属于绑定。有理由的绑定差异允许待审，共同定义改变仍需另提共享修订。
+
+建模输出另有必带的`extensionCandidates`数组，包含`id/name/conceptKey/scope/potentialUse/deferReason/activationCriteria/references`，无原生类型或绑定。冻结族通过`get_family_context`和必需预取提供该数组，属性池及SKU合同只消费`attributes`。程序拒绝重复、同时进入两种状态、在叶类直接启用冻结扩展候选及候选引用错误。新族可没有准入属性，但必须说明暂缓原因；有既有基线时不能借此省略共同定义。此前format=2快照可省略族的扩展数组，按无扩展读取，不静默制造候选；旧输出须按同版schema重做，不冒充恢复成功。
 
 `systemFieldCoverage`提供来源、版本、声明范围与职责表内容hash，至少保有品牌/供应商/销售单位/规格名称职责。本次盘点4个本地模型233个字段及样本74个原生属性实例，生产部署同版/全局映射和业务完整性仍待核实。`factPreparation`区分fixture/human/agent及candidate/reviewed；agent不能自标reviewed。原生`origin`保留实际标识、JSON定位、原文内容hash；提取候选另带精确引文范围。初次人工导入必须核对稳定候选、来源、合同、release及四项语义确认，仍仅写新的本地快照。`fixture`事实和知识不能混入`local`，程序定位/token检查不证明引文语义。
 

@@ -12,7 +12,9 @@ bun src/scenarios/product_governance_v3/cli.ts prepare-roll-pilot --capture outp
 bun src/scenarios/product_governance_v3/cli.ts replay-roll-pilot --snapshot outputs/product-governance-v3/roll-real-pilot-20261022/prepared/snapshot.raw.json --proposals outputs/product-governance-v3/roll-real-pilot-20261022/recorded-agent-proposals.json --out outputs/product-governance-v3/roll-real-pilot-20261022/replay
 ```
 
-录制文件的`kind`必须为`recorded_agent_proposals`，明确author，每个已选SKU有一个提取结果。合同字段见`contracts.ts`的fact-extraction；精确定位和候选内容由runner检查，不是改个文件名就算合法。新商品或源内容变化后必须重新提取，不套用本次录制。当前9项定义为本样板Codex研究提案，不能当全品类生成器。
+录制文件的`kind`必须为`recorded_agent_proposals`，明确author，每个已选SKU有一个提取结果。合同字段见`contracts.ts`的fact-extraction；精确定位和候选内容由runner检查，不是改个文件名就算合法。新商品或源内容变化后必须重新提取，不套用本次录制。当前7项定义为本样板Codex研究提案，另有6项扩展候选，不能当全品类生成器。
+
+上面命令保留初次样板的路径。2026-10-23准入修订采用新目录`outputs/product-governance-v3/roll-attribute-refinement-20261023`，重新准备/验证当前合同；原始采集仍读取初次capture，不访问生产。旧录制中5条印花/压花提取在3件SKU上被当前合同拒绝，保留为`replay-legacy-negative`；新版`recorded-agent-proposals.revised.json`明确记录源hash，只把这5条移为`deferred-extension-observations.json`研究线索，其余23条原候选不改值、不改引文，仍经过当前runner检查。最终同版材料位于该目录的`final/`，其中`prepared/replay/review/offline-acceptance`为本版结果，录制修订文件在父目录。不能用初次录制直接冒充同版通过。具体证据见[修订记录](attribute-admission-refinement-20261023.md)。
 
 ## 如需重新读取或盘点本地代码
 
@@ -47,7 +49,7 @@ ln -s "$PGV3_MODULES" src/scenarios/product_governance_v3/scripts/node_modules
 "$PGV3_NODE" src/scenarios/product_governance_v3/scripts/export-roll-pilot.mjs outputs/product-governance-v3/roll-real-pilot-20261022
 ```
 
-属性方案导出器拒绝覆盖已有工作簿，生成`reviewObject=category_attribute_schema`索引，意见列为“属性方案”H/I及“补充与排除”E。它只产生本地待审投影，4项补充研究候选未写入冻结合同；目前没有自动回收和采用属性意见的入口。后续`export-roll-review-json`与`import-fact-review`仅适用于事实工作簿。
+属性方案导出器拒绝覆盖已有工作簿，生成`reviewObject=category_attribute_schema`索引，意见列为“属性方案”H/I及“补充与排除”E。主表只含7项合同属性，6项扩展候选从同一冻结族的extensionCandidates生成，位于补充与排除的前6行；无绑定、类型配置或待填值。计数口径待核实点在主表及定义页保留。目前没有自动回收和采用属性意见的入口。后续`export-roll-review-json`与`import-fact-review`仅适用于事实工作簿。
 
 只需收紧已有表格的字体/行高时，使用`"$PGV3_NODE" src/scenarios/product_governance_v3/scripts/export-roll-attribute-review.mjs --restyle /已保存的审阅表.xlsx /新的紧凑版.xlsx`，不会重新生成或清空已保存的业务内容和意见。输出目标必须不存在，原文件保留。
 

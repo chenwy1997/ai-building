@@ -183,7 +183,7 @@ export const RULE_REGISTRY: Rule[] = [
   ),
   rule(
     "R07",
-    "拆分服务独立用途",
+    "业务准入、命名与粒度",
     ["## 6. 属性粒度与类型"],
     STAGES,
     [
@@ -192,12 +192,21 @@ export const RULE_REGISTRY: Rule[] = [
         "checks.ts:checkDefinitions",
         "wiring.test.ts:unit-only fields",
       ),
+      check(
+        "extension-separation",
+        "checks.ts:checkResult",
+        "attribute-admission.test.ts:extensions travel through actual context and function return",
+      ),
     ],
-    ["每一拆分项是否具有独立选型、适配或计算用途？理由是否成立？"],
-    ["跨定义的语义交叉识别"],
-    ["attributes.rationale", "bindings.uses"],
-    "长宽分别服务适配",
-    "只为细分添加原文属性或重复属性",
+    [
+      "属性具体改变哪个业务判断，收益是否值得填写维护？仅因有技术字段就准入了吗？",
+      "名称是否简明且保留必要语义？外部标签和值是否一致，计数词和工艺关系是否核实？",
+      "每一拆分项是否具有独立选型、适配或计算用途？扩展候选与待填属性是否分离？",
+    ],
+    ["跨定义的语义交叉识别", "业务准入/专业语义与简明命名的人工判定"],
+    ["attributes.rationale", "bindings.uses", "extensionCandidates"],
+    "有独立适配用途才拆长宽；未确认用途保留扩展候选",
+    "技术页有参数就列为选填；把印花/压花硬做互斥枚举",
   ),
   rule(
     "R08",

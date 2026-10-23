@@ -8,6 +8,7 @@ import {
   type Source,
   type AttributeDefinition,
   type AttributeBinding,
+  type ExtensionCandidate,
 } from "./core.ts";
 import { DataSnapshot } from "./snapshot.ts";
 import { ROLL_CATEGORIES, type ReadCapture } from "./scm-readonly.ts";
@@ -46,21 +47,21 @@ export async function rollDefinitions(): Promise<AttributeDefinition[]> {
     ],
     [
       "declared_mass",
-      "单卷标称质量",
+      "单卷重量",
       "number",
       "g",
       "single-roll-declared-mass",
-      "来源明确按一卷标称的质量；不宣称去芯净纸重或实测",
-      "单卷标称质量表示来源明确按一卷标称的质量。",
+      "来源明确标出的每卷重量，单位g；是否含芯/包装需核实，不等于去芯净纸重或实测重量",
+      "单卷重量记录来源明确标出的每卷重量",
     ],
     [
       "raw_material",
-      "原料描述",
+      "原料",
       "text",
       null,
       "finished-paper-material",
       "商家对原料的原文描述，不能由品牌推定",
-      "原料描述保留商家确切措辞",
+      "原料保留商家确切措辞",
     ],
     [
       "sheet_size",
@@ -73,50 +74,30 @@ export async function rollDefinitions(): Promise<AttributeDefinition[]> {
     ],
     [
       "perforation",
-      "单卷分节规格",
+      "每卷数量",
       "text",
       null,
       "single-roll-perforation",
-      "来源明示的每卷节/格/张数量与单位合并文本；不偷做等价转换",
-      "单卷分节数量可按已明示的“260张/卷”“280格/卷”保留规范文本",
-    ],
-    [
-      "printed",
-      "是否印花",
-      "boolean",
-      null,
-      "finished-paper-print",
-      "纸张是否印花；与压花分别核实",
-      "印花和压花是不同工艺",
-    ],
-    [
-      "embossed",
-      "是否压花",
-      "boolean",
-      null,
-      "finished-paper-emboss",
-      "纸张是否压花；未说明不是否",
-      "印花和压花是不同工艺",
+      "暂名；保留来源明确的每卷数量及原计数单位文本，不统一张/节/格，不按层数倍乘。口径核实后再确定正式名称与数值化，不作为已统一的张数比较",
+      "每卷数量暂保留原文数量及计数单位",
     ],
     [
       "fragrance",
-      "香型描述",
+      "香型",
       "text",
       null,
       "finished-paper-fragrance",
-      "保留原文香型，未说明不补无香",
-      "无相关文字不等于否",
+      "单个文本字段保留明确的无香、具体香型或仅有香味的原文；仅知有香不编香型，未说明留未知；归一化需另有已核实词表",
+      "香型统一使用一个文本字段",
     ],
   ] as const;
   const rationales: Record<string, string> = {
-    coreless: "区分纸芯结构，便于纸架选型及同族对照；必要性待核实",
+    coreless: "区分纸芯结构，支持有芯/无芯选型及同族对照；强制填写尚未确认",
     layers: "对照成品纸张叠层；不以层数推定质量",
-    declared_mass: "按明确的单卷标称量比较，避免与商品物流重量混用",
+    declared_mass: "按明确的每卷重量及相同含芯/包装口径比较，避免与商品物流重量混用",
     raw_material: "按原料声明检索；保留厂商措辞，不推断检测结论",
     sheet_size: "比较单张纸尺寸，避免误用包装尺寸",
-    perforation: "按每卷分节规格比较；保留原计数口径",
-    printed: "展示印花工艺，与压花分别说明",
-    embossed: "比较压花工艺，不把印花当作压花",
+    perforation: "拟比较每卷可用纸张数量；目前只保留原计数口径候选，未确认张/节/格可比性",
     fragrance: "按原文香型供选择与搜索；缺失不默认无香",
   };
   return rows.map(([key, name, fieldType, unit, scope, definition, quote]) => ({
@@ -157,12 +138,43 @@ export async function rollDefinitions(): Promise<AttributeDefinition[]> {
     ],
   }));
 }
+export async function rollExtensionCandidates(): Promise<ExtensionCandidate[]> {
+  const release = await loadRelease(),
+    k = release.knowledge[PAPER_KNOWLEDGE]!;
+  const rows = [
+    ["roll.printed", "是否印花", "paper.printed", "finished-paper-print",
+      "采购方明确要求纸张印刷图案时供选型或展示",
+      "当前小卷纸业务尚未确认独立选型价值；不因电商有字段就默认建立",
+      "确认具体采购用途、维护收益和印花定义后，另提同族基线修订；不得把压花当印花的下位枚举"],
+    ["roll.embossed", "是否压花", "paper.embossed", "finished-paper-emboss",
+      "有明确纸面纹理工艺要求时供采购比对",
+      "工艺存在不等于值得设字段；本轮暂不进入SKU合同",
+      "确认本类业务要求及工艺边界；不以压花推断印花、柔软度或质量，另提共享修订"],
+    ["coverage.roll_diameter", "卷外径", "paper.roll_diameter", "finished-paper-roll-diameter",
+      "指定纸架容纳空间的适配判断", "当前普通小卷纸尚未确认纸架空间选型需求",
+      "确认适用纸架场景、测量对象及独立用途后再定类型/单位和绑定"],
+    ["coverage.roll_width", "卷宽", "paper.roll_width", "finished-paper-roll-width",
+      "指定纸架轴向空间的适配判断", "需先核实是否已由纸张尺寸表达，避免重复",
+      "确认轴向含义、与纸张尺寸的关系及独立适配用途，再提共享修订"],
+    ["coverage.core_diameter", "纸芯内径", "paper.core_diameter", "finished-paper-core-inner-diameter",
+      "有芯纸卷与指定轴杆的适配判断", "本类是否存在此适配需求及无芯类适用性尚待确认",
+      "明确有芯/无芯适用边界与业务用途；无芯不自动填0或不适用，再另建绑定"],
+    ["coverage.roll_length", "单卷长度", "paper.roll_length", "finished-paper-unwound-length",
+      "按整卷展开总长度比较可用纸量", "尚未确认相对每卷数量的独立比较价值；外部同名可能实际为单节尺寸",
+      "核实整卷展开长度与单节长度、卷宽的区别及采购用途，不能按字段名或数值大小猜测映射"],
+  ] as const;
+  return rows.map(([id, name, conceptKey, scope, potentialUse, deferReason, activationCriteria]) => ({
+    id, name, conceptKey, scope, potentialUse,
+    deferReason, activationCriteria,
+    references: [{kind: "knowledge", id: PAPER_KNOWLEDGE, version: k.sha256, quote: "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"}],
+  }));
+}
 export function rollBindings(attrs: AttributeDefinition[]): AttributeBinding[] {
   return attrs.map((a, i) => ({
     attributeId: a.id,
     categoryId: null,
     requiredness: "optional",
-    requirednessReason: "业务必要性尚未核实，先选填；不按样本覆盖率设必填",
+    requirednessReason: "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填",
     isKeySpec: false,
     isPublic: true,
     searchable: a.fieldType === "text",
@@ -240,6 +252,7 @@ export async function prepareRollPilot(
   )
     throw Error("invalid bounded real capture");
   const attrs = await rollDefinitions(),
+    extensionCandidates = await rollExtensionCandidates(),
     sources: Source[] = [],
     products: Snapshot["products"] = [],
     origins: any[] = [],
@@ -473,12 +486,13 @@ export async function prepareRollPilot(
     families: [
       {
         id: "candidate-small-roll-family",
-        version: hash(attrs),
+        version: hash({ attributes: attrs, extensionCandidates }),
         members: ROLL_CATEGORIES.map((c) => c.id),
         status: "candidate",
         runId: PILOT_RUN,
         attributes: attrs,
         bindings: rollBindings(attrs),
+        extensionCandidates,
       },
     ],
     attributes: attrs,
@@ -593,13 +607,14 @@ export async function replayRollExtraction(
                           categoryId: c.id,
                           baselineVersion: family.version,
                           attributes: family.attributes,
+                          extensionCandidates: family.extensionCandidates ?? [],
                           bindings: family.bindings.map((b) => ({
                             ...b,
                             categoryId: c.id,
                             baselineAttributeId: b.attributeId,
                           })),
                           unresolved: [
-                            "Codex研究提案，两类9项共用定义均选填，必要性和专业适用性待人工采用；未发布为业务标准",
+                            "Codex研究提案，两类共用7项选填定义及6项扩展候选；每卷数量的张/节/格口径仍待核实，未发布为业务标准",
                           ],
                         }),
                       },

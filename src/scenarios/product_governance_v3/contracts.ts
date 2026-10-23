@@ -73,6 +73,16 @@ export const bindingSchema = object({
   baselineAttributeId: nullable(text()),
   differenceReason: nullable(text()),
 });
+export const extensionCandidateSchema = object({
+  id: text(),
+  name: text(),
+  conceptKey: text(),
+  scope: text(),
+  potentialUse: text(),
+  deferReason: text(),
+  activationCriteria: text(),
+  references: list(modelReferenceSchema),
+});
 export const factRefSchema = object({ sourceId: text(), factId: text() });
 export const derivationSchema = object({
   policyId: text(),
@@ -117,8 +127,9 @@ export const outputSchemas: Record<Stage, Schema> = {
   "family-modeling": object({
     categoryId: text(),
     baselineVersion: nullable(text()),
-    attributes: list(attributeSchema, 1),
-    bindings: list(bindingSchema, 1),
+    attributes: list(attributeSchema),
+    bindings: list(bindingSchema),
+    extensionCandidates: list(extensionCandidateSchema),
     unresolved: strings,
   }),
   "sku-filling": object({
