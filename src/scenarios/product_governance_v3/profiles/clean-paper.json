@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "id": "clean-paper-20261023",
+  "scopeId": "77e31cf2-8331-4c73-ab10-823d2d1d7ab0",
+  "scopeName": "清洁纸品",
+  "status": "configured_candidate_families_pending_human",
+  "knowledgeIds": ["scm-field-responsibilities-20261022", "clean-paper-admission-20261023"],
+  "groups": [
+    {
+      "id": "small-toilet-roll",
+      "members": [
+        {"id": "15216d47-17c6-4b18-9391-83097f6f7447", "name": "有芯小卷纸"},
+        {"id": "67adeef9-8c1f-47e2-ad72-462ad35a5a75", "name": "无芯小卷纸"}
+      ],
+      "reason": "已审阅的小卷卫生纸方案；纸芯结构是差异维度，其余共同定义复用，SKU值不由类目名推定",
+      "seed": "reviewed-roll-proposal",
+      "knowledgeIds": ["small-roll-paper-research-20261022"]
+    },
+    {
+      "id": "jumbo-toilet-roll",
+      "members": [
+        {"id": "e30ca09a-3e86-4223-b618-d6581ad1489e", "name": "大卷纸"},
+        {"id": "3360395b-3790-41f3-8e8c-6c682c53e8da", "name": "中心抽大卷纸"}
+      ],
+      "reason": "暂按公用卷筒卫生纸共同对象建基线；出纸方式及分配器适配要核实差异，不照搬普通小卷的尺寸准入取舍",
+      "seed": "deepseek-common-proposal",
+      "knowledgeIds": []
+    },
+    {
+      "id": "facial-tissue",
+      "members": [
+        {"id": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7", "name": "盒装抽纸"},
+        {"id": "ce3a9f67-613c-4707-bf3a-95193edb8a2d", "name": "软包抽纸"}
+      ],
+      "reason": "暂按抽取式面巾纸共同对象建模；包装形态分为末级，不据此任意改变共同参数名称和计数口径",
+      "seed": "deepseek-common-proposal",
+      "knowledgeIds": []
+    }
+  ]
+}

@@ -17,6 +17,12 @@ export { RULES, STAGE_RULES, RULE_REGISTRY } from "./rules.ts";
 import { STAGE_RULES, RULE_REGISTRY } from "./rules.ts";
 export const KNOWLEDGE = [
   {
+    id: "clean-paper-admission-20261023",
+    file: "knowledge/clean-paper-admission-20261023.md",
+    hints: ["清洁纸品"],
+    kind: "research_pending_professional_review",
+  },
+  {
     id: "scm-field-responsibilities-20261022",
     file: "scm-field-responsibilities.json",
     hints: ["小卷纸"],
@@ -87,6 +93,12 @@ async function collect(root = ROOT) {
     "scripts/export-roll-pilot.mjs",
     "scripts/export-roll-review-json.mjs",
     "scripts/native-hyperlinks.py",
+    "profiles/clean-paper.json",
+    "profiles/clean-paper-tree.json",
+    "scripts/export-batch-review.mjs",
+    "scripts/batch-review-layout.mjs",
+    "scripts/review-workbook-layout.mjs",
+    "scripts/review-layout.defaults.json",
     "../product_governance_v2/runtime/store.ts",
     ...STAGES.flatMap((s) => [
       `skills/${s}/SKILL.md`,

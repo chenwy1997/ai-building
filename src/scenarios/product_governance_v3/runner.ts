@@ -30,6 +30,14 @@ export const DEFAULT_LIMITS: Limits = {
   maxToolBytes: 160000,
   maxOutputTokens: 12000,
 };
+export interface ModelOptions {
+  model: "deepseek-flash" | "deepseek-v4-pro";
+  reasoningEffort: "none" | "low" | "high" | "max";
+}
+export const DEFAULT_MODEL: ModelOptions = {
+  model: "deepseek-flash",
+  reasoningEffort: "none",
+};
 export async function runStage(options: {
   release: Release;
   snapshot: DataSnapshot;
@@ -37,9 +45,14 @@ export async function runStage(options: {
   client: ResponsesClient;
   outDir: string;
   limits?: Partial<Limits>;
+  model?: ModelOptions;
 }) {
   const { release, snapshot, task, client, outDir } = options,
-    limits = { ...DEFAULT_LIMITS, ...options.limits };
+    limits = { ...DEFAULT_LIMITS, ...options.limits },
+    model = options.model ?? DEFAULT_MODEL;
+  if (!["deepseek-flash", "deepseek-v4-pro"].includes(model.model) ||
+      !["none", "low", "high", "max"].includes(model.reasoningEffort))
+    throw Error("invalid model/reasoning configuration");
   for (const [key, value] of Object.entries(limits))
     if (!Number.isInteger(value) || value < 1)
       throw Error("invalid limit " + key);
@@ -51,6 +64,7 @@ export async function runStage(options: {
       task,
       transportId: client.transportId,
       limits,
+      model,
     }),
     runPath = join(outDir, "runs", runKey);
   const history: InputItem[] = [
@@ -65,6 +79,7 @@ export async function runStage(options: {
     ...plan.manifest,
     runKey,
     limits,
+    model,
     mode: client.mode,
   });
   try {
@@ -77,11 +92,11 @@ export async function runStage(options: {
       );
     for (let round = 0; round < limits.maxRounds; round++) {
       const body = {
-        model: "deepseek-flash",
+        model: model.model,
         instructions: plan.instructions,
         input: history,
         tools: plan.tools.definitions,
-        reasoning: { effort: "none" },
+        reasoning: { effort: model.reasoningEffort },
         max_output_tokens: limits.maxOutputTokens,
         text: {
           format: {

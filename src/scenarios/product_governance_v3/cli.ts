@@ -12,6 +12,10 @@ import {
   localReadKey,
 } from "./scm-readonly.ts";
 import { prepareRollPilot, replayRollExtraction } from "./roll-pilot.ts";
+import { prepareBatch, planSummary, executeBatch, CLEAN_PAPER_ID } from "./batch.ts";
+import { ResponsesClient } from "./responses.ts";
+import { Budget } from "./budget.ts";
+import { exportBatchReview, validateBatchExport } from "./batch-export.ts";
 import { inventorySource } from "./scm-field-inventory.ts";
 import {
   importFactReview,
@@ -19,7 +23,10 @@ import {
   type FactReview,
 } from "./fact-preparation.ts";
 
-const USAGE = `商品治理v3：离线准备/验收及固定小样本只读采集；不提供付费跑批或生产写入。
+const USAGE = `商品治理v3：类目属性提案；默认预检，batch --execute才请求付费DeepSeek；无生产写入。
+  bun src/scenarios/product_governance_v3/cli.ts batch --category-id ${CLEAN_PAPER_ID} --concurrency 32
+  bun src/scenarios/product_governance_v3/cli.ts batch --category-id ${CLEAN_PAPER_ID} --concurrency 32 --out outputs/product-governance-v3/clean-paper-batch --execute
+  bun src/scenarios/product_governance_v3/cli.ts batch-export --out /batch-dir --freeze-through 属性方案=属性
   bun src/scenarios/product_governance_v3/cli.ts offline-acceptance --out outputs/product-governance-v3/offline
   bun src/scenarios/product_governance_v3/cli.ts plan --snapshot /abs/snapshot.json --category-id ID --stage family-modeling --run-id BATCH --out /abs/plan.json
   bun src/scenarios/product_governance_v3/cli.ts tree-search --tree scratch-category-baseline-20261010/mapped-tree.json --query 小卷纸 --limit 10
@@ -31,7 +38,8 @@ const USAGE = `商品治理v3：离线准备/验收及固定小样本只读采�
   bun src/scenarios/product_governance_v3/cli.ts import-fact-review --snapshot /prepared-dir/snapshot.raw.json --bundle /bundle.json --review /human.review.json --out /new/reviewed-snapshot-dir
   bun test ./src/scenarios/product_governance_v3
 sku-filling/fact-extraction另需--product-id；SKU审核需--product-id，审核另需--candidate文件。分页可传--cursor，树检索可传--scope-id。
-capture-roll-pilot是唯一联网读取入口：仅两类各最多3件，无自动重试；仅此命令读取本地供应链密钥。replay使用录制候选，不发送DeepSeek请求。
+batch支持--tree或--snapshot、--budget-cny（默认200保守预留额度，不是预计账单）、--out、--run-id；并发1..128，默认8。仅batch --execute读取DEEPSEEK_API_KEY（Bun可从.env自动载入），同目录重跑恢复成功响应，不自动重发结果未知的请求。输出属性方案/扩展候选/全部类目问题和审阅Excel；不试填SKU值。
+默认知识覆盖清洁纸品，其他类目需--snapshot提供已准备的字段职责、知识要求及同族。capture-roll-pilot仅两类各最多3件，无自动重试；仅此命令读取供应链密钥。replay使用录制候选，不发送DeepSeek请求。
 freeze-release仅更新本地材料/代码指纹，不能替代规范内容的人类评审。`;
 export async function main(argv: string[]) {
   const { positionals, values } = parseArgs({
@@ -57,6 +65,13 @@ export async function main(argv: string[]) {
       bundle: { type: "string" },
       review: { type: "string" },
       "source-root": { type: "string" },
+      concurrency: { type: "string" },
+      "budget-cny": { type: "string" },
+      execute: { type: "boolean" },
+      "no-excel": { type: "boolean" },
+      layout: { type: "string" },
+      "freeze-left": { type: "string" },
+      "freeze-through": { type: "string", multiple: true },
     },
   });
   const required = (key: keyof typeof values) => {
@@ -67,6 +82,45 @@ export async function main(argv: string[]) {
   if (values.help || !positionals.length) return { help: USAGE };
   if (positionals.length !== 1) throw Error("one command required");
   switch (positionals[0]) {
+    case "batch-export":
+      return exportBatchReview(resolve(required("out")), layoutArgs(values));
+    case "batch": {
+      if (values["product-id"] || values.candidate || (values.stage && values.stage !== "family-modeling"))
+        throw Error("batch只产出类目属性方案，不接受商品试填、候选审核或其他stage参数");
+      await validateBatchExport(layoutArgs(values));
+      const categoryId = required("category-id"),
+        outDir = resolve(values.out ?? `outputs/product-governance-v3/attributes-${categoryId}`),
+        release = await loadRelease(),
+        plan = await prepareBatch({
+          categoryId, outDir, runId: values["run-id"] ?? outDir,
+          concurrency: Number(values.concurrency ?? "8"),
+          ...(values.tree ? { treePath: values.tree } : {}),
+          ...(values.snapshot ? { snapshotPath: values.snapshot } : {}),
+          ...(values["budget-cny"] !== undefined ? { budgetCny: Number(values["budget-cny"]) } : {}),
+        }, release);
+      if (!values.execute) {
+        if (plan.preflight.length) process.exitCode = 2;
+        return planSummary(plan);
+      }
+      if (plan.preflight.length) throw Error("预检未通过，见 " + outDir + "/batch.plan.json；未请求DeepSeek");
+      const key = process.env.DEEPSEEK_API_KEY?.trim();
+      if (!key) throw Error("缺少DEEPSEEK_API_KEY；在本地.env设置后重跑，未请求DeepSeek。不要将密钥放在命令参数或提交到Git。");
+      const budget = new Budget(outDir, plan.budgetCny, plan.pricingId),
+        client = new ResponsesClient({ mode: "network", allowNetwork: true, apiKey: key,
+          transportId: "deepseek-official-responses-v1", perRequestUpperBoundCny: plan.reserveCny, timeoutMs: 240000 }, outDir, budget),
+        result = await executeBatch(plan, release, client,
+          (event) => console.error(JSON.stringify(event)));
+      let excel: unknown = null, exportError: string | null = null;
+      if (!values["no-excel"]) {
+        try { excel = await exportBatchReview(outDir, layoutArgs(values)); }
+        catch (error) { exportError = String(error); }
+      }
+      if (result.blocked || exportError) process.exitCode = 2;
+      return { outDir, passed: result.passed, blocked: result.blocked, total: result.total,
+        requests: result.networkCallsThisExecution, cacheHits: result.cacheHitsThisExecution,
+        reservedCny: result.budget.committedUpperBoundCny, excel, exportError,
+        adoption: "pending_human", productionWrites: 0 };
+    }
     case "inventory-scm-fields": {
       const inventory = await inventorySource(resolve(required("source-root")));
       await save(resolve(required("out")), inventory);
@@ -158,9 +212,16 @@ export async function main(argv: string[]) {
     }
     default:
       throw Error(
-        "unknown/offline-only command: " + positionals[0] + "\n" + USAGE,
+        "unknown command: " + positionals[0] + "\n" + USAGE,
       );
   }
+}
+function layoutArgs(values: { layout?: string; "freeze-left"?: string; "freeze-through"?: string[] }) {
+  return [
+    ...(values.layout ? ["--layout", resolve(values.layout)] : []),
+    ...(values["freeze-left"] !== undefined ? ["--freeze-left", values["freeze-left"]] : []),
+    ...(values["freeze-through"] ?? []).flatMap((v) => ["--freeze-through", v]),
+  ];
 }
 if (import.meta.main)
   main(Bun.argv.slice(2))

@@ -6,6 +6,7 @@ description: 为商品治理候选类目建立同族共同属性和有理由的�
 先理解商品对象、结构、用途和现有系统字段职责，再建立候选属性；不能把当前样本缺少某信息当作业务不需要。
 
 1. 阅读预取的节点、跨分支同族候选、基线状态和按类目范围预取的属性池。线索不足时用categories_search、find_related_categories、get_family_context补查；search_attribute_pool按概念、对象或参数名查询，不能只拿完整末级名搜一次就认定没有可复用定义。相似名称只产生候选，需要说明业务共同点。
+   批次candidate.kind=batch_modeling_scope时，family成员和归组理由是待人工核实的范围资料，不是已确认的专业结论。phase=family-seed先设计所有所列成员共同适用的定义，categoryId仅为schema锚点；锚点专有的参数不能变成全族共性，不能确定的共同性及差异写unresolved。程序仅将检查通过且非空的结果登记为同批候选模板，不自动发布。phase=leaf必须消费等待完成后的冻结基线，再提出有理由的末级绑定差异；不可忽略基线或把他批候选当作可用。
 2. attributes只描述共同定义；bindings逐项引用attributeId并绑定当前末级categoryId，承载requiredness、用途、关键规格、公开、搜索、标题/列表和排序。继承关系baselineAttributeId及differenceReason位于绑定。共同名称、概念、类型、单位、口径、枚举和约束不能在本叶静默修改；必填性等绑定确需不同，写清requirednessReason和differenceReason，仍待人工核实。是否无芯在有芯/无芯两类共同保留。
 3. 对照systemFields排除已由基础字段负责的概念；统一SKU。固定数量和计量单位合为一个定义，检查与已出属性的交叉；只有独立选择、适配、比较或计算用途才细分。
    每项rationale说明具体场景和改变的业务判断，并评估填写维护成本。设立价值未明确的放extensionCandidates，填写potentialUse、deferReason、activationCriteria和已读references，不建立binding或类型配置。新族无可准入属性时允许attributes/bindings为空，候选或unresolved写明原因，不凑造字段。复述冻结基线中的扩展候选，启用或改动先另提共享修订。不要因技术页或电商有字段就默认纳入，也不要因样本没值而删除必要参数。

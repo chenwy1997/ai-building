@@ -856,9 +856,10 @@ describe("tool permissions, request limits, and offline boundary", () => {
       }),
     ).rejects.toThrow("reused");
   });
-  test("CLI cannot run batch/apply or accept unrecognized flags", async () => {
-    for (const command of ["run", "batch", "apply"])
-      await expect(main([command])).rejects.toThrow("offline-only");
+  test("CLI rejects apply/unknown commands; batch requires an explicit category and execution flag", async () => {
+    for (const command of ["run", "apply"])
+      await expect(main([command])).rejects.toThrow("unknown command");
+    await expect(main(["batch"])).rejects.toThrow("category-id");
     await expect(
       main(["offline-acceptance", "--concurrency", "32"]),
     ).rejects.toThrow();

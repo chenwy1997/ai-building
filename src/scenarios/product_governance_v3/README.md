@@ -1,8 +1,18 @@
-# 商品治理v3：离线接线
+# 商品治理v3：类目属性提案与审阅
 
-v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”的离线链路。命令不提供付费跑批、自动采用或生产写入。
+v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认预检，`batch --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
 
-2026-10-22已完成[第1、2步合同/接线修复](docs/implementation-phase12-20261022.md)，并继续完成[第3步小卷纸真实样板](docs/implementation-phase3-20261022.md)：两类各3件真实SKU、完整声明范围的字段盘点、专业研究包、原文提取和初次人工核实入口。当时117项v3和18项相关v2回归通过。真实输入使用本次Codex整理候选进行离线回放，没有真实DeepSeek请求或人工采用；同族发布、连续流、通用采用和生产承接仍未闭环，不开放跑批。[原审计](docs/implementation-audit-20261022.md)保留当时证据。
+## 批处理入口
+
+清洁纸品21个末级，先预检，无模型请求：
+
+```sh
+bun src/scenarios/product_governance_v3/cli.ts batch --category-id 77e31cf2-8331-4c73-ab10-823d2d1d7ab0 --concurrency 32 --out outputs/product-governance-v3/clean-paper-batch-20261023
+```
+
+本地`.env`设置`DEEPSEEK_API_KEY`后，原命令加`--execute`正式生成。根类目ID和并发均为参数，同族共同方案先于末级并发，全批共享费用与恢复记录，完成自动导出属性审阅Excel。只设计属性，不填商品值。[批处理运行手册](docs/batch-runbook.md)列明参数、费用假设、恢复和知识边界。本次开发只有离线模拟验收，未替用户跑真实DeepSeek。
+
+2026-10-22已完成[第1、2步合同/接线修复](docs/implementation-phase12-20261022.md)，并继续完成[第3步小卷纸真实样板](docs/implementation-phase3-20261022.md)：两类各3件真实SKU、字段盘点、专业研究、原文提取和初次人工核实。当时117项v3和18项相关v2回归通过，使用Codex候选离线回放，无真实DeepSeek或人工采用，当时未开放跑批。2026-10-23用户授权新增上述手动批处理；同族正式发布、通用采用和生产承接仍未闭环。[原审计](docs/implementation-audit-20261022.md)保留当时证据。
 
 2026-10-23[纠正审阅对象](docs/review-object-correction-20261023.md)：当前首先审核**类目属性方案**，旧事实工作簿留作后续辅助材料。随后根据人工反馈完成[业务准入与简明命名修订](docs/attribute-admission-refinement-20261023.md)：当前为7项共用选填定义、6项独立扩展候选，替代最初9项+4项试排。名称和定义同步修订；每卷数量的张/节/格口径仍待核实。方案意见尚无自动采用入口，不能使用事实导入器承接。
 
@@ -34,9 +44,9 @@ bun src/scenarios/product_governance_v3/cli.ts tree-search --tree scratch-catego
 bun src/scenarios/product_governance_v3/cli.ts plan --snapshot /绝对路径/snapshot.json --category-id 真实末级ID --stage family-modeling --run-id 本批ID --out /绝对路径/plan.json
 ```
 
-`sku-filling`、`fact-extraction`另需`--product-id`；`review-assistance`另需`--candidate` JSON文件，包含`stage`（family-modeling或sku-filling）和`result`（候选结果）。审核SKU取值时需带对应`--product-id`读取证据。候选程序错误直接进入审核上下文，并继续阻断结果，模型不能靠空意见列表把错误抹掉。参数严格校验，错命令/未知参数报错。当前没有可用的`batch/apply/concurrency=32`入口；后续批处理应调用这里的`runStage`，共享同一批预算和已冻结依赖，不能绕开检查。
+`sku-filling`、`fact-extraction`另需`--product-id`；`review-assistance`另需`--candidate` JSON文件，包含`stage`（family-modeling或sku-filling）和`result`（候选结果）。审核SKU取值时需带对应`--product-id`读取证据。候选程序错误直接进入审核上下文，并继续阻断结果，模型不能靠空意见列表把错误抹掉。参数严格校验，错命令/未知参数报错。`batch`调用相同`runStage`，共享全批预算和冻结依赖，不接受商品试填阶段；没有`apply`入口。
 
-小卷纸的只读采集、准备、录制回放、工作簿与初次事实意见导入，见[样板运行说明](docs/roll-pilot-runbook.md)。只有显式`capture-roll-pilot`会联网读取供应链并读取本地供应链密钥；固定两类各最多3件，不自动翻页/重试。其余入口维持离线，模型入口不读取环境密钥。
+小卷纸的只读采集、准备、录制回放、工作簿与初次事实意见导入，见[样板运行说明](docs/roll-pilot-runbook.md)。只有显式`capture-roll-pilot`联网读取供应链及其密钥；固定两类各最多3件，不自动翻页/重试。模型密钥只由`batch --execute`读取，其余入口维持离线。
 
 ## 资料怎样真正进入DeepSeek
 
@@ -69,7 +79,7 @@ flowchart LR
 
 共11个工具：`categories_search`、`categories_get`、`categories_children`、`find_related_categories`、`get_family_context`、`search_attribute_pool`、`knowledge_list`、`knowledge_read`、`sources_read`、`calculation_policies`及`calculate_value`。策略发现限SKU填写/辅助审核，计算只限SKU填写；策略ID、版本及因子约束实际前置并进入工具回传。没有任意文件、URL、SQL或写入工具。同族搜索结合已登记成员和跨父节点词形候选，**尚未实现语义归族自动判定或共享基线原子发布协调器**；名称相似只产生线索。
 
-DeepSeek适配使用[官方Responses合同](https://api-docs.deepseek.com/zh-cn/api/create-response/)：`instructions`、结构化输出、function调用及结果；无状态多轮需回传完整历史。`ResponsesClient`的离线模式必须注入mock HTTP，构造fixture禁止使用network模式。库中的模型联网适配需显式授权配置、传入密钥及费用预留上限；本次未调用，CLI不提供DeepSeek联网开关，也不读取模型密钥。供应链只读采集另有上述固定范围入口。
+DeepSeek适配使用[官方Responses合同](https://api-docs.deepseek.com/zh-cn/api/create-response/)：`instructions`、结构化输出、function调用及结果；无状态多轮需回传完整历史。`ResponsesClient`的离线模式必须注入mock HTTP，fixture禁止使用network模式。联网适配须显式授权、密钥及共享费用预留；CLI只有`batch --execute`进入该路径，本次开发未真实调用。供应链只读另有上述固定小样本入口。
 
 ## 数据与版本合同
 
@@ -85,7 +95,7 @@ DeepSeek适配使用[官方Responses合同](https://api-docs.deepseek.com/zh-cn/
 
 数量计算只接受带`policyId/policyVersion`及`sourceId+factId`的链：实际读取策略和事实，同SKU/组合/口径、单位、均一/赠品依据及因子约束均满足才算；同范围冲突不能只挑支持材料，负数/分数计数因子不能用正结果掩盖。计数量与有符号测量量分开。支持登记乘除和mm/cm/m、g/kg换算；抽/张不自动换算。相邻已读片段会合并，跨边界事实在完整覆盖后连同完整quote回传；未读间隙不会被当成已读。
 
-当前知识登记包含两个构造路由样例，另有小卷纸专业研究包和供应链职责清单。真实样板只加载后两包，均标记待专业/业务人审；未取得标准全文，不是已发布专业标准。知识在`KNOWLEDGE`及业务snapshot白名单/必读范围登记，正文实际装配；能发现/引用不等于适用性已确认。
+知识登记包含两个构造路由样例、小卷纸专业研究包、供应链职责清单及清洁纸品准入/研究边界包。真实资料不加载fixture；按对象选择适用包。均待专业/业务人审，未取得完整标准全文，不是已发布行业标准。知识在`KNOWLEDGE`及snapshot白名单/必读范围登记并实际装配；能发现/引用不等于适用性已确认。
 
 每次运行固定`release.lock.json`中的规范、后台合同、skill正文/判例、知识和执行代码hash，并记录实际装配、树/资料、工具合同、输入和运行环境。修改后先审阅变更，再显式更新锁：
 
@@ -100,7 +110,7 @@ freeze只是生成内容指纹，不是新的业务批准。不要通过自动fr
 
 `program_blocked/not_eligible`表示存在程序错误；`program_pass_pending_human/pending_human`只表示executedChecks所列检查通过，humanReviewRules仍待人工。ruleResponsibilities明确partial和deferred，任何输出都不是已采用结果。actualReads保留包括模型后续补读在内的知识/来源/策略版本、范围及工具历史hash。
 
-请求/响应按实际请求、材料和资料版本生成键。相同请求并发只发送一次；恢复重放持久响应并重建工具读取记录。结果未知保留回执与费用预留，阻止自动重发；材料或资料变更后旧响应不能直接沿用。HTTP尝试每请求一次，自动业务返修为0；轮数、工具数、输入/返回字节和输出token均有限。后续批处理须在同一批目录中共享`Budget`，返修/恢复不重置；预留是保守配置额度，实际账单仍需对账，禁止默认提额。
+请求/响应按实际请求、材料和资料版本生成键。相同请求并发只发送一次；恢复重放持久响应并重建工具读取记录。结果未知保留回执与费用预留，阻止自动重发；资料变更后旧响应不能直接沿用。HTTP尝试每请求一次，自动业务返修为0；轮数、工具数、字节和输出token均有限。批处理共享同一目录的`Budget`，恢复不重置；预留不是账单，禁止默认提额。
 
 | 已进入程序检查 | 仍需人工/后续实施 |
 | --- | --- |

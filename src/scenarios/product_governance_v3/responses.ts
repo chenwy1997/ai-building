@@ -15,9 +15,10 @@ export type FetchLike = (
     headers: Record<string, string>;
     body: string;
     signal: AbortSignal;
+    redirect?: "error";
   },
 ) => Promise<Response>;
-type Config =
+type Config = { timeoutMs?: number } & (
   | { mode: "offline"; transportId: string; fetch: FetchLike }
   | {
       mode: "network";
@@ -25,7 +26,7 @@ type Config =
       apiKey: string;
       transportId: string;
       perRequestUpperBoundCny: number;
-    };
+    });
 
 export class ResponsesClient {
   readonly mode: "offline" | "network";
@@ -33,6 +34,7 @@ export class ResponsesClient {
   private fetcher: FetchLike;
   private apiKey: string;
   readonly reserveCny: number;
+  readonly timeoutMs: number;
   calls = 0;
   cacheHits = 0;
   constructor(
@@ -42,6 +44,9 @@ export class ResponsesClient {
   ) {
     this.mode = config.mode;
     this.transportId = config.transportId;
+    this.timeoutMs = config.timeoutMs ?? 30000;
+    if (!Number.isInteger(this.timeoutMs) || this.timeoutMs < 1000 || this.timeoutMs > 600000)
+      throw Error("timeoutMs must be 1000..600000");
     if (!config.transportId)
       throw Error("transportId required for cache separation");
     if (config.mode === "network") {
@@ -128,7 +133,8 @@ export class ResponsesClient {
               authorization: "Bearer " + this.apiKey,
             },
             body: canonical(body),
-            signal: AbortSignal.timeout(30000),
+            signal: AbortSignal.timeout(this.timeoutMs),
+            redirect: "error",
           },
         );
         const responseText = await response.text();

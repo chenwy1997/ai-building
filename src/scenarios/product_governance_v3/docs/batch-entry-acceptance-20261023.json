@@ -1,0 +1,77 @@
+{
+  "date": "2026-10-23",
+  "branch": "codex/product-governance-v3-standards-20261022",
+  "releaseId": "826ed2544800ecdf01ceb96ce3c6cdbacffef6e57670bf5f2a1e8b6f99b6eaab",
+  "purpose": "用户手动触发的DeepSeek类目属性提案入口；本次仅离线验收",
+  "liveDeepSeekRequests": 0,
+  "productionReads": 0,
+  "productionWrites": 0,
+  "automaticallyAdoptedProposals": 0,
+  "tests": {
+    "command": "bun test ./src/scenarios/product_governance_v3",
+    "passed": 152,
+    "failed": 0,
+    "newBatchTests": 21,
+    "typecheckPassed": true,
+    "modifiedSkillValidated": "family-modeling",
+    "coverage": [
+      "真实根ID展开21叶、末级只跑本叶但保留族成员上下文、动态并发上限",
+      "实际规范/合同/skill正文及判例/职责/知识装配，function调用执行与回传",
+      "2次共同候选准备先于21叶，完成后冻结相同快照与属性池",
+      "失败或空共同定义阻断关联叶，单叶错误隔离，全部类目仍在问题汇总",
+      "统一费用预留、超额停派、未知回执不自动重发、成功逐轮缓存恢复",
+      "冻结输入/模型/费用身份、离线与付费传输不能混目录",
+      "真实CLI --execute分支的子进程验收：全量替换HTTP，使用虚构凭据，覆盖成功及401，不访问外网",
+      "付费请求前校验Excel冻结/样式参数，意外工作线程失败等待在途并停止新派发"
+    ]
+  },
+  "scopePreview": {
+    "categoryId": "77e31cf2-8331-4c73-ab10-823d2d1d7ab0",
+    "path": "清洁用品>清洁纸品",
+    "leafCount": 21,
+    "concurrency": 32,
+    "ready": true,
+    "networkCalls": 0,
+    "newFamilyPreparations": ["jumbo-toilet-roll", "facial-tissue"],
+    "maximumStageTasks": 23,
+    "maximumRequests": 138,
+    "maximumReservationCny": 179.4,
+    "defaultBudgetCny": 200,
+    "accounting": "保守配置预留，不是预计账单或供应商扣费保证"
+  },
+  "mockIntegration": {
+    "artifactDirectory": "outputs/product-governance-v3/batch-entry-acceptance-20261023/release-acceptance",
+    "preparedFamilies": 2,
+    "leafJobs": 21,
+    "programPassed": 21,
+    "mockResponses": 46,
+    "modelToolCalls": 23,
+    "actualExternalRequests": 0,
+    "attributeReviewRows": 33,
+    "extensionReviewRows": 12,
+    "notice": "除小卷既有7项外，其余19叶各用1项虚构参数，仅证明流程；不用于业务审阅或准确率结论"
+  },
+  "workbookAcceptance": {
+    "artifact": "outputs/product-governance-v3/batch-entry-acceptance-20261023/release-acceptance/review/清洁纸品_类目属性方案_2a0eb854f2af.xlsx",
+    "sha256": "6293845fbcd4e6e7425fe3f358d41221874ca402decf9c250e2d79a2c74b5579",
+    "sheets": ["属性方案", "扩展候选", "进度与问题"],
+    "bodyFontPt": 10,
+    "bodyRowHeightPt": 16.5,
+    "frozenPrefix": 1,
+    "frozenRows": 6,
+    "fullTextNotes": 137,
+    "nativeXmlVerified": ["数据行数", "字号/行高", "冻结", "筛选表", "下拉选择", "人工意见空白", "全文备注与原单元格一致"],
+    "renderedSheets": 3,
+    "sameRevisionExportPreservedBytes": true,
+    "liveWpsOrWindows150PercentVerified": false
+  },
+  "remainingLimits": [
+    "真实DeepSeek结果和模型业务质量尚未测量；首次运行仍须人工逐类审阅",
+    "广域资料只是研究起点，标准全文及湿巾等专业功效/接触用途仍有缺口；不能称全部21类已对齐完整行业标准",
+    "同族为显式预配置候选；语义自动归族与跨批正式发布未实现",
+    "其他大类须提供适用本地快照和已登记专业知识，不能直接套用纸品包",
+    "无自动业务返修、未知请求强制重试或预算提额入口",
+    "无通用属性方案意见回导/自动采用或线上apply/readback/rollback",
+    "本次只渲染和校验保存文件，没有完成WPS小屏或Windows150%的原生界面验收"
+  ]
+}

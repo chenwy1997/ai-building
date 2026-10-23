@@ -6,6 +6,7 @@
 
 | 文档 | 用途与状态 | 如何进入执行 |
 | --- | --- | --- |
+| [类目属性批处理](batch-runbook.md) / [验收记录](batch-entry-acceptance-20261023.json) | 2026-10-23用户授权新增的手动DeepSeek提案入口、并发/类目参数、同族屏障、恢复及费用 | 152项回归通过；`batch`默认预检，`--execute`才请求付费模型；没有试填或线上写入 |
 | [规范基线](governance-standard-draft.md) | 已确认的业务规则；文件名中的draft保留以便追溯 | `release.ts`固定hash并按阶段提取正文，进入instructions |
 | [整体设计与供应链合同](governance-design-v1-20261022.md) | 目标、阶段、字段映射、验收及未实现事项 | 第5节后台合同进入instructions；其余作为实施与人审依据 |
 | [业务词汇表](../GLOSSARY.md) | 同族、属性池、证据、候选与确认状态等术语 | 供维护者理解统一含义；不将整份词表重复注入每个请求 |

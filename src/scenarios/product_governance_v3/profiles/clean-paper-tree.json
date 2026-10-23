@@ -1,0 +1,222 @@
+{
+  "nodes": [
+    {
+      "id": "8d67b123-c890-45e4-aafc-b138e296c722",
+      "parentId": "8199a5b0-2f3a-4316-b00c-ce59ce336edf",
+      "name": "清洁用品",
+      "path": "清洁用品",
+      "isLeaf": false,
+      "aliases": []
+    },
+    {
+      "id": "77e31cf2-8331-4c73-ab10-823d2d1d7ab0",
+      "parentId": "8d67b123-c890-45e4-aafc-b138e296c722",
+      "name": "清洁纸品",
+      "path": "清洁用品>清洁纸品",
+      "isLeaf": false,
+      "aliases": []
+    },
+    {
+      "id": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "parentId": "77e31cf2-8331-4c73-ab10-823d2d1d7ab0",
+      "name": "卫生纸",
+      "path": "清洁用品>清洁纸品>卫生纸",
+      "isLeaf": false,
+      "aliases": []
+    },
+    {
+      "id": "369d7486-73ed-4464-88b0-448b07431a9c",
+      "parentId": "77e31cf2-8331-4c73-ab10-823d2d1d7ab0",
+      "name": "擦手纸",
+      "path": "清洁用品>清洁纸品>擦手纸",
+      "isLeaf": false,
+      "aliases": []
+    },
+    {
+      "id": "2cddadee-39ff-4a45-9ac7-0f0df34c06f4",
+      "parentId": "77e31cf2-8331-4c73-ab10-823d2d1d7ab0",
+      "name": "纸品配件",
+      "path": "清洁用品>清洁纸品>纸品配件",
+      "isLeaf": false,
+      "aliases": []
+    },
+    {
+      "id": "74bb6e57-7174-4a23-a1f3-397aa5d63781",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "一次性日杂",
+      "path": "清洁用品>清洁纸品>卫生纸>一次性日杂",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "3360395b-3790-41f3-8e8c-6c682c53e8da",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "中心抽大卷纸",
+      "path": "清洁用品>清洁纸品>卫生纸>中心抽大卷纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "8db9ebc8-9bd2-4d72-b183-819a8451c8ff",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "厨房纸巾",
+      "path": "清洁用品>清洁纸品>卫生纸>厨房纸巾",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "f4bb18c7-b736-4fe6-91d1-60c4d05fcee6",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "坐垫纸",
+      "path": "清洁用品>清洁纸品>卫生纸>坐垫纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "e30ca09a-3e86-4223-b618-d6581ad1489e",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "大卷纸",
+      "path": "清洁用品>清洁纸品>卫生纸>大卷纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "836e7b4a-a753-4f21-8a7d-f2a895c478d8",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "平板卫生纸",
+      "path": "清洁用品>清洁纸品>卫生纸>平板卫生纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "b532a368-d0d3-4889-84bb-27e6aacdd5aa",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "手帕纸",
+      "path": "清洁用品>清洁纸品>卫生纸>手帕纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "无芯小卷纸",
+      "path": "清洁用品>清洁纸品>卫生纸>无芯小卷纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "15216d47-17c6-4b18-9391-83097f6f7447",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "有芯小卷纸",
+      "path": "清洁用品>清洁纸品>卫生纸>有芯小卷纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "135495fc-f11a-4322-9ab2-1901925bd417",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "枕巾",
+      "path": "清洁用品>清洁纸品>卫生纸>枕巾",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "洗脸巾",
+      "path": "清洁用品>清洁纸品>卫生纸>洗脸巾",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "86dd8e65-1a82-4d0c-a35e-a2ebe6c1f2c7",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "湿纸巾",
+      "path": "清洁用品>清洁纸品>卫生纸>湿纸巾",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "88071483-d24d-46e1-a9a2-32b380276fd8",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "生活用纸",
+      "path": "清洁用品>清洁纸品>卫生纸>生活用纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "盒装抽纸",
+      "path": "清洁用品>清洁纸品>卫生纸>盒装抽纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "软包抽纸",
+      "path": "清洁用品>清洁纸品>卫生纸>软包抽纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "68eb60f4-0f78-44bb-bb6a-4e0af938449d",
+      "parentId": "8228ecd1-c6ae-4000-8853-2344f16da9a4",
+      "name": "餐巾纸",
+      "path": "清洁用品>清洁纸品>卫生纸>餐巾纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "99279fb3-7d0e-45fa-9bb2-1ec401c68e2a",
+      "parentId": "369d7486-73ed-4464-88b0-448b07431a9c",
+      "name": "大卷擦手纸",
+      "path": "清洁用品>清洁纸品>擦手纸>大卷擦手纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "f75eeeb3-decf-4376-91a7-3ab44bb14345",
+      "parentId": "369d7486-73ed-4464-88b0-448b07431a9c",
+      "name": "抽式擦手纸",
+      "path": "清洁用品>清洁纸品>擦手纸>抽式擦手纸",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "ab796486-0d0d-466a-87c1-6a2115b3b079",
+      "parentId": "2cddadee-39ff-4a45-9ac7-0f0df34c06f4",
+      "name": "卷纸配件",
+      "path": "清洁用品>清洁纸品>纸品配件>卷纸配件",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "9bdbab21-78f8-407d-aa30-eebd889c205c",
+      "parentId": "2cddadee-39ff-4a45-9ac7-0f0df34c06f4",
+      "name": "擦手纸配件",
+      "path": "清洁用品>清洁纸品>纸品配件>擦手纸配件",
+      "isLeaf": true,
+      "aliases": []
+    },
+    {
+      "id": "f00be7ff-9f41-4ea2-b032-60c6d7bdcf4b",
+      "parentId": "2cddadee-39ff-4a45-9ac7-0f0df34c06f4",
+      "name": "纸巾盒",
+      "path": "清洁用品>清洁纸品>纸品配件>纸巾盒",
+      "isLeaf": true,
+      "aliases": []
+    }
+  ],
+  "externalParentIds": [
+    "8199a5b0-2f3a-4316-b00c-ce59ce336edf"
+  ],
+  "source": {
+    "path": "outputs/category-id-refresh-20261021/mapped-tree.updated.json",
+    "sha256": "bd244064cacdc54a4f8eefcd7afb4f9e126222a0921ae8aff31d8c5086910ebe",
+    "captured": "2026-10-21",
+    "scope": "清洁纸品21末级及祖先摘录；非全树",
+    "namespace": "current-governance-category-id"
+  }
+}
