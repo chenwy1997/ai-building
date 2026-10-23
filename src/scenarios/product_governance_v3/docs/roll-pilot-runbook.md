@@ -49,6 +49,8 @@ ln -s "$PGV3_MODULES" src/scenarios/product_governance_v3/scripts/node_modules
 
 属性方案导出器拒绝覆盖已有工作簿，生成`reviewObject=category_attribute_schema`索引，意见列为“属性方案”H/I及“补充与排除”E。它只产生本地待审投影，4项补充研究候选未写入冻结合同；目前没有自动回收和采用属性意见的入口。后续`export-roll-review-json`与`import-fact-review`仅适用于事实工作簿。
 
+只需收紧已有表格的字体/行高时，使用`"$PGV3_NODE" src/scenarios/product_governance_v3/scripts/export-roll-attribute-review.mjs --restyle /已保存的审阅表.xlsx /新的紧凑版.xlsx`，不会重新生成或清空已保存的业务内容和意见。输出目标必须不存在，原文件保留。
+
 事实导出器核对快照和当前release，生成同一份xlsx、原文文本、审阅包、索引及空意见模板。需要保留已填意见时，先复制整个review目录或使用新的交付目录；**不要重新生成覆盖已填写的工作簿**。全文使用相对链接，分享时保留xlsx与source-text的目录关系。生成库缺少原生超链接能力，局部OOXML补充仅增加超链接节点/关系，不改值和样式，并检查导出文件没有错误缓存单元格。
 
 在事实审阅页填写人工结论/理由，采用候选还需I—L四项均为“是”。在SKU与问题页B4填写审核人，D4填写有效UTC时间，例如`2026-10-22T12:00:00Z`。不改候选值、引文、ID或hash；需要修订候选时返还提取阶段。未知项可以留补资料意见，不能直接采用为空事实。

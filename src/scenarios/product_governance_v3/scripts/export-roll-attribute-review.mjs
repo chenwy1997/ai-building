@@ -1,7 +1,124 @@
 import fs from "node:fs/promises";
-import { resolve, join } from "node:path";
+import { resolve, join, dirname } from "node:path";
 import { createHash } from "node:crypto";
-import { Workbook, SpreadsheetFile } from "@oai/artifact-tool";
+import { FileBlob, Workbook, SpreadsheetFile } from "@oai/artifact-tool";
+
+const reviewWidths = {
+  属性方案: [145, 75, 95, 90, 130, 300, 150, 125, 250, 200, 135, 250, 480],
+  补充与排除: [170, 165, 270, 390, 250, 320],
+  定义与设置: [145, 300, 360, 380, 480, 300, 210, 250, 480],
+};
+function compactRows(sheet, rows, widths, firstRow = 7) {
+  rows.forEach((row, i) => {
+    const lines = Math.max(
+      1,
+      ...row.map((value, j) => {
+        const available = Math.max(30, widths[j] * 0.94 - 12);
+        return String(value ?? "")
+          .split("\n")
+          .reduce(
+            (n, line) =>
+              n +
+              Math.max(
+                1,
+                Math.ceil(
+                  [...line].reduce(
+                    (w, c) => w + (c.charCodeAt(0) > 255 ? 11.3 : 5.9),
+                    0,
+                  ) / available,
+                ),
+              ),
+            0,
+          );
+      }),
+    );
+    sheet.getRangeByIndexes(
+      firstRow + i - 1,
+      0,
+      1,
+      widths.length,
+    ).format.rowHeightPx = Math.max(22, lines * 17 + 3);
+  });
+}
+async function compactExisting(source, target) {
+  if (!source || !target || resolve(source) === resolve(target))
+    throw Error("--restyle requires separate source and target paths");
+  try {
+    await fs.access(target);
+    throw Error("target exists; preserve the reviewed file");
+  } catch (e) {
+    if (e.code !== "ENOENT") throw e;
+  }
+  const wb = await SpreadsheetFile.importXlsx(await FileBlob.load(source));
+  const before = [],
+    after = [],
+    heights = {};
+  for (const [name, widths] of Object.entries(reviewWidths)) {
+    const s = wb.worksheets.getItem(name),
+      used = s.getUsedRange();
+    before.push({ name, values: used.values, formulas: used.formulas });
+    used.format.font.size = 10;
+    s.getRange("A2").format.font.size = 14;
+    s.getRange("A3:H5").format.font.size = 9;
+    s.getRangeByIndexes(5, 0, 1, widths.length).format.rowHeightPx = 28;
+    const rows = used.values.slice(6).map((row) => row.slice(0, widths.length));
+    compactRows(s, rows, widths);
+    s.getRange("A1:H1").format.rowHeightPx = 5;
+    s.getRange("A2:H2").format.rowHeightPx = 24;
+    s.getRange("A3:H5").format.rowHeightPx = 17;
+    after.push({ name, values: used.values, formulas: used.formulas });
+    heights[name] = { bodyFont: 10, headerFont: 10, minimumRowHeightPx: 22 };
+  }
+  if (JSON.stringify(before) !== JSON.stringify(after))
+    throw Error("layout edit changed workbook content");
+  wb.recalculate();
+  const previewDir = join(dirname(target), "compact-previews");
+  await fs.mkdir(previewDir, { recursive: true });
+  for (const name of Object.keys(reviewWidths)) {
+    const picture = await wb.render({
+      sheetName: name,
+      range:
+        name === "属性方案"
+          ? "A1:I19"
+          : name === "补充与排除"
+            ? "A1:E12"
+            : "A1:E10",
+      scale: 1,
+      format: "png",
+    });
+    await fs.writeFile(
+      join(previewDir, name + ".png"),
+      new Uint8Array(await picture.arrayBuffer()),
+    );
+  }
+  await (await SpreadsheetFile.exportXlsx(wb)).save(target);
+  await fs.writeFile(
+    target + ".layout-edit.json",
+    JSON.stringify(
+      {
+        operation: "format_only",
+        source: resolve(source),
+        target: resolve(target),
+        contentUnchanged: true,
+        layout: heights,
+      },
+      null,
+      2,
+    ),
+  );
+  console.log(
+    JSON.stringify({
+      xlsx: resolve(target),
+      contentUnchanged: true,
+      bodyFont: 10,
+      minimumRowHeightPx: 22,
+    }),
+  );
+}
+if (process.argv[2] === "--restyle") {
+  await compactExisting(process.argv[3], process.argv[4]);
+  process.exit(0);
+}
 
 // A separate review object from export-roll-pilot.mjs: definitions/bindings,
 // never SKU facts. New coverage proposals remain outside the frozen contract.
@@ -306,14 +423,14 @@ function table(s, title, lines, headers, rows, widths) {
     last = rows.length + 6;
   s.showGridLines = false;
   s.getRange(`A1:${end}${last}`).format = {
-    font: { name: "Arial", size: 11, color: "#202B3B" },
+    font: { name: "Arial", size: 10, color: "#202B3B" },
     verticalAlignment: "center",
     wrapText: true,
   };
   s.getRange("A2").values = [[title]];
   s.getRange("A2").format.font = {
     name: "Arial",
-    size: 15,
+    size: 14,
     bold: true,
     color: "#263D5A",
   };
@@ -321,7 +438,7 @@ function table(s, title, lines, headers, rows, widths) {
     s.getRange(`A${i + 3}`).values = [[v]];
   });
   s.getRange("A2:H5").format.wrapText = false;
-  s.getRange("A3:H5").format.font.size = 10;
+  s.getRange("A3:H5").format.font.size = 9;
   s.getRange(`A6:${end}${last}`).values = [headers, ...rows].map((r) =>
     r.map(literal),
   );
@@ -332,47 +449,18 @@ function table(s, title, lines, headers, rows, widths) {
   ).showFilterButton = true;
   s.getRange(`A6:${end}6`).format = {
     fill: "#334B6D",
-    font: { name: "Arial", size: 11, bold: true, color: "#FFFFFF" },
+    font: { name: "Arial", size: 10, bold: true, color: "#FFFFFF" },
     horizontalAlignment: "center",
     wrapText: true,
-    rowHeightPx: 40,
+    rowHeightPx: 28,
   };
   widths.forEach((v, i) => {
     s.getRange(`${col(i)}1:${col(i)}${last}`).format.columnWidthPx = v;
   });
-  s.getRange(`A7:${end}${last}`).format.autofitRows();
-  // WPS uses a taller CJK line box than the renderer. Keep wrapped lines
-  // visible at 100% without asking the reviewer to resize every row.
-  rows.forEach((row, i) => {
-    const lines = Math.max(
-      ...row.map((value, j) => {
-        const available = Math.max(30, widths[j] * 0.9 - 16);
-        return String(value ?? "")
-          .split("\n")
-          .reduce(
-            (n, line) =>
-              n +
-              Math.max(
-                1,
-                Math.ceil(
-                  [...line].reduce(
-                    (w, c) => w + (c.charCodeAt(0) > 255 ? 12.8 : 6.7),
-                    0,
-                  ) / available,
-                ),
-              ),
-            0,
-          );
-      }),
-    );
-    s.getRange(`A${i + 7}:${end}${i + 7}`).format.rowHeightPx = Math.max(
-      31,
-      lines * 20 + 6,
-    );
-  });
-  s.getRange("A1:H1").format.rowHeightPx = 8;
-  s.getRange("A2:H2").format.rowHeightPx = 28;
-  s.getRange("A3:H5").format.rowHeightPx = 22;
+  compactRows(s, rows, widths);
+  s.getRange("A1:H1").format.rowHeightPx = 5;
+  s.getRange("A2:H2").format.rowHeightPx = 24;
+  s.getRange("A3:H5").format.rowHeightPx = 17;
   s.freezePanes.freezeRows(6);
   s.freezePanes.freezeColumns(1);
   return last;
