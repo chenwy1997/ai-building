@@ -51,6 +51,8 @@ ln -s "$PGV3_MODULES" src/scenarios/product_governance_v3/scripts/node_modules
 
 只需收紧已有表格的字体/行高时，使用`"$PGV3_NODE" src/scenarios/product_governance_v3/scripts/export-roll-attribute-review.mjs --restyle /已保存的审阅表.xlsx /新的紧凑版.xlsx`，不会重新生成或清空已保存的业务内容和意见。输出目标必须不存在，原文件保留。
 
+各sheet的默认样式、长文全文备注和可选冻结参数统一见[Excel样式配置](excel-review-layout.md)。`--freeze-left 1`固定左侧1列，`--freeze-left 0`取消左侧冻结；`--freeze-through '属性方案=无芯'`将此页冻结边界设为“无芯”列，含其左侧列。新建导出和`--restyle`使用相同选项，特殊样式才传`--layout /覆盖配置.json`。
+
 事实导出器核对快照和当前release，生成同一份xlsx、原文文本、审阅包、索引及空意见模板。需要保留已填意见时，先复制整个review目录或使用新的交付目录；**不要重新生成覆盖已填写的工作簿**。全文使用相对链接，分享时保留xlsx与source-text的目录关系。生成库缺少原生超链接能力，局部OOXML补充仅增加超链接节点/关系，不改值和样式，并检查导出文件没有错误缓存单元格。
 
 在事实审阅页填写人工结论/理由，采用候选还需I—L四项均为“是”。在SKU与问题页B4填写审核人，D4填写有效UTC时间，例如`2026-10-22T12:00:00Z`。不改候选值、引文、ID或hash；需要修订候选时返还提取阶段。未知项可以留补资料意见，不能直接采用为空事实。

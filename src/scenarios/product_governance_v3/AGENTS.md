@@ -6,3 +6,4 @@
 - 当前交付范围为离线接线与验收。CLI不提供付费跑批或生产写入，测试注入模拟HTTP，不读取真实密钥。
 - 普通业务属性仍由模型提案、人工采用；fixture仅为构造验收样例，不发布为真实类目标准。
 - 验收必须经过实际装配、function调用/回传、结果检查和记录保存；不能仅检查工具名称或提示词出现。
+- 新建审阅Excel默认复用scripts/review-layout.defaults.json和review-workbook-layout.mjs；除显式指定外不另造字号/行高/表头样式。左侧冻结通过参数配置，不能在新模板写死列数。具体边界及命令见docs/excel-review-layout.md。

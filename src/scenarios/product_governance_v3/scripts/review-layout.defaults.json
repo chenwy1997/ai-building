@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "fontFamily": "Arial",
+  "bodyFontPt": 10,
+  "titleFontPt": 14,
+  "noteFontPt": 9,
+  "bodyRowHeightPx": 22,
+  "headerRowHeightPx": 28,
+  "titleRowHeightPx": 24,
+  "noteRowHeightPx": 17,
+  "topGapPx": 5,
+  "headerFill": "#334B6D",
+  "headerTextColor": "#FFFFFF",
+  "bodyTextColor": "#202B3B",
+  "titleTextColor": "#263D5A",
+  "editableFill": "#FFF2CD",
+  "rowHeightMode": "fixed",
+  "longTextMode": "note",
+  "freezeLeftColumns": 1,
+  "sheets": {}
+}

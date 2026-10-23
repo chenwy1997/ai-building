@@ -2,44 +2,31 @@ import fs from "node:fs/promises";
 import { resolve, join, dirname } from "node:path";
 import { createHash } from "node:crypto";
 import { FileBlob, Workbook, SpreadsheetFile } from "@oai/artifact-tool";
+import {
+  parseLayoutArgs,
+  loadReviewLayout,
+  applyReviewLayout,
+  validateSheetTargets,
+} from "./review-workbook-layout.mjs";
+
+const layoutOptions = parseLayoutArgs(process.argv.slice(2));
+const layoutConfig = await loadReviewLayout(layoutOptions);
+const layoutMaterials = {};
+for (const file of [
+  "review-workbook-layout.mjs",
+  "review-layout.defaults.json",
+]) {
+  layoutMaterials[file] = createHash("sha256")
+    .update(await fs.readFile(new URL(file, import.meta.url)))
+    .digest("hex");
+}
 
 const reviewWidths = {
   属性方案: [145, 75, 95, 90, 130, 300, 150, 125, 250, 200, 135, 250, 480],
   补充与排除: [170, 165, 270, 390, 250, 320],
   定义与设置: [145, 300, 360, 380, 480, 300, 210, 250, 480],
 };
-function compactRows(sheet, rows, widths, firstRow = 7) {
-  rows.forEach((row, i) => {
-    const lines = Math.max(
-      1,
-      ...row.map((value, j) => {
-        const available = Math.max(30, widths[j] * 0.94 - 12);
-        return String(value ?? "")
-          .split("\n")
-          .reduce(
-            (n, line) =>
-              n +
-              Math.max(
-                1,
-                Math.ceil(
-                  [...line].reduce(
-                    (w, c) => w + (c.charCodeAt(0) > 255 ? 11.3 : 5.9),
-                    0,
-                  ) / available,
-                ),
-              ),
-            0,
-          );
-      }),
-    );
-    sheet.getRangeByIndexes(
-      firstRow + i - 1,
-      0,
-      1,
-      widths.length,
-    ).format.rowHeightPx = Math.max(22, lines * 17 + 3);
-  });
-}
+validateSheetTargets(layoutConfig, layoutOptions, Object.keys(reviewWidths));
 async function compactExisting(source, target) {
   if (!source || !target || resolve(source) === resolve(target))
     throw Error("--restyle requires separate source and target paths");
@@ -57,17 +44,14 @@ async function compactExisting(source, target) {
     const s = wb.worksheets.getItem(name),
       used = s.getUsedRange();
     before.push({ name, values: used.values, formulas: used.formulas });
-    used.format.font.size = 10;
-    s.getRange("A2").format.font.size = 14;
-    s.getRange("A3:H5").format.font.size = 9;
-    s.getRangeByIndexes(5, 0, 1, widths.length).format.rowHeightPx = 28;
-    const rows = used.values.slice(6).map((row) => row.slice(0, widths.length));
-    compactRows(s, rows, widths);
-    s.getRange("A1:H1").format.rowHeightPx = 5;
-    s.getRange("A2:H2").format.rowHeightPx = 24;
-    s.getRange("A3:H5").format.rowHeightPx = 17;
+    heights[name] = await applyReviewLayout(
+      wb,
+      s,
+      widths,
+      layoutConfig,
+      layoutOptions,
+    );
     after.push({ name, values: used.values, formulas: used.formulas });
-    heights[name] = { bodyFont: 10, headerFont: 10, minimumRowHeightPx: 22 };
   }
   if (JSON.stringify(before) !== JSON.stringify(after))
     throw Error("layout edit changed workbook content");
@@ -101,6 +85,9 @@ async function compactExisting(source, target) {
         target: resolve(target),
         contentUnchanged: true,
         layout: heights,
+        defaults: layoutConfig,
+        options: layoutOptions,
+        layoutMaterials,
       },
       null,
       2,
@@ -110,23 +97,25 @@ async function compactExisting(source, target) {
     JSON.stringify({
       xlsx: resolve(target),
       contentUnchanged: true,
-      bodyFont: 10,
-      minimumRowHeightPx: 22,
+      bodyFont: layoutConfig.bodyFontPt,
+      rowHeightPx: layoutConfig.bodyRowHeightPx,
+      layout: heights,
     }),
   );
 }
-if (process.argv[2] === "--restyle") {
-  await compactExisting(process.argv[3], process.argv[4]);
+if (layoutOptions.restyle) {
+  await compactExisting(...layoutOptions.positionals);
   process.exit(0);
 }
 
 // A separate review object from export-roll-pilot.mjs: definitions/bindings,
 // never SKU facts. New coverage proposals remain outside the frozen contract.
 const pilot = resolve(
-  process.argv[2] || "outputs/product-governance-v3/roll-real-pilot-20261022",
+  layoutOptions.positionals[0] ||
+    "outputs/product-governance-v3/roll-real-pilot-20261022",
 );
 const out = resolve(
-  process.argv[3] || join(pilot, "attribute-review-20261023"),
+  layoutOptions.positionals[1] || join(pilot, "attribute-review-20261023"),
 );
 const xlsx = join(out, "有芯与无芯小卷纸_类目属性方案主审_20261023.xlsx");
 const canonical = (v) =>
@@ -421,24 +410,10 @@ const literal = (v) =>
 function table(s, title, lines, headers, rows, widths) {
   const end = col(headers.length - 1),
     last = rows.length + 6;
-  s.showGridLines = false;
-  s.getRange(`A1:${end}${last}`).format = {
-    font: { name: "Arial", size: 10, color: "#202B3B" },
-    verticalAlignment: "center",
-    wrapText: true,
-  };
   s.getRange("A2").values = [[title]];
-  s.getRange("A2").format.font = {
-    name: "Arial",
-    size: 14,
-    bold: true,
-    color: "#263D5A",
-  };
   lines.forEach((v, i) => {
     s.getRange(`A${i + 3}`).values = [[v]];
   });
-  s.getRange("A2:H5").format.wrapText = false;
-  s.getRange("A3:H5").format.font.size = 9;
   s.getRange(`A6:${end}${last}`).values = [headers, ...rows].map((r) =>
     r.map(literal),
   );
@@ -447,22 +422,9 @@ function table(s, title, lines, headers, rows, widths) {
     true,
     "SchemaReview" + (sheets.indexOf(s) + 1),
   ).showFilterButton = true;
-  s.getRange(`A6:${end}6`).format = {
-    fill: "#334B6D",
-    font: { name: "Arial", size: 10, bold: true, color: "#FFFFFF" },
-    horizontalAlignment: "center",
-    wrapText: true,
-    rowHeightPx: 28,
-  };
   widths.forEach((v, i) => {
     s.getRange(`${col(i)}1:${col(i)}${last}`).format.columnWidthPx = v;
   });
-  compactRows(s, rows, widths);
-  s.getRange("A1:H1").format.rowHeightPx = 5;
-  s.getRange("A2:H2").format.rowHeightPx = 24;
-  s.getRange("A3:H5").format.rowHeightPx = 17;
-  s.freezePanes.freezeRows(6);
-  s.freezePanes.freezeColumns(1);
   return last;
 }
 table(
@@ -507,7 +469,8 @@ table(
   [145, 75, 95, 90, 130, 300, 150, 125, 250, 200, 135, 250, 480],
 );
 sheets[0].tabColor = "#334B6D";
-sheets[0].getRange(`H7:I${items.length + 6}`).format.fill = "#FFF2CD";
+sheets[0].getRange(`H7:I${items.length + 6}`).format.fill =
+  layoutConfig.editableFill;
 sheets[0].getRange(`H7:H${items.length + 6}`).dataValidation = {
   rule: {
     type: "list",
@@ -526,7 +489,8 @@ table(
   boundaries.map((r) => [r[0], r[1], r[2], r[3], null, r[4]]),
   [170, 165, 270, 390, 250, 320],
 );
-sheets[1].getRange(`E7:E${boundaries.length + 6}`).format.fill = "#FFF2CD";
+sheets[1].getRange(`E7:E${boundaries.length + 6}`).format.fill =
+  layoutConfig.editableFill;
 function configText(a) {
   if (!a) return "尚未建立原生配置。类型和单位仅为研究提议。";
   const empty = (v) => (v === null ? "未设" : String(v));
@@ -658,7 +622,15 @@ sheets[2].getRange(`A${sourceRow}:C${sourceRow + 4}`).values = [
     "https://www.ccgp.gov.cn/specialtopic/zfcgxqbz/xgzn/202001/t20200103_13698397.htm",
   ],
 ];
-sheets[2].getRange(`A${sourceRow}:C${sourceRow + 4}`).format.autofitRows();
+const appliedLayouts = {};
+for (const s of sheets)
+  appliedLayouts[s.name] = await applyReviewLayout(
+    wb,
+    s,
+    reviewWidths[s.name],
+    layoutConfig,
+    layoutOptions,
+  );
 wb.recalculate();
 await fs.mkdir(join(out, "previews"), { recursive: true });
 for (const [i, s] of sheets.entries()) {
@@ -708,6 +680,10 @@ await fs.writeFile(
       modelCalls: 0,
       productionWrites: 0,
       exporterHash: hash(await fs.readFile(new URL(import.meta.url), "utf8")),
+      layoutDefaults: layoutConfig,
+      layout: appliedLayouts,
+      layoutOptions,
+      layoutMaterials,
       modeledCandidates: 9,
       coverageProposals: 4,
       attributeOpinionColumns: ["H", "I"],
