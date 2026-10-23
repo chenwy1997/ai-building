@@ -154,9 +154,14 @@ export function projectConfigurationReview(data) {
     const conflictNotes = report.conflicts.map((c) => c.attributeName + "：" + fieldLabel(c.field) + "当前=" + claimValue(c.field, c.actual) + "，原说明=" + claimValue(c.field, c.claimed));
     const assertionsText = new Set(report.claims.map((c) => c.text));
     const questions = String(issue[2] ?? "").split("\n").filter((line) => ![...assertionsText].some((t) => line.includes(t)));
+    // Cross-category review evidence must not be parsed as this category's model
+    // assertions. Keep it separate until after the configuration check.
+    const reviewSignals = (data.modelingReview?.signals ?? []).filter(s => s.categoryIds.includes(issue[8])).map(s =>
+      `[待人工复核线索 ${s.ruleId}] ${s.question}\n` + s.evidence.map(e =>
+        `${e.category}·${e.name}（${e.scope}，${e.disposition}）：${e.text}`).join("\n"));
     const issueText = [...conflictNotes.map((s) => "说明冲突，待复审：" + s), ...basis,
       ...(report.unscoped.length ? ["有未能定位到具体属性的配置断言，需人工核对原文，未自动判定一致。"] : []),
-      ...questions.map((s) => s ? "原记录（业务疑点仍待核实）：" + s : "")].filter(Boolean).join("\n");
+      ...questions.map((s) => s ? "原记录（业务疑点仍待核实）：" + s : ""), ...reviewSignals].filter(Boolean).join("\n");
     const state = report.conflicts.length ? "说明冲突，待复审" : historical && (rows.length || String(issue[1]).startsWith("程序通过"))
       ? rows.length ? "原程序通过，待复审" : "原程序通过，空方案待复审" : issue[1];
     issues.push([issue[0], state, issueText, ...issue.slice(3), issue[2]]);

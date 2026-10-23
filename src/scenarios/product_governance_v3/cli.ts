@@ -117,6 +117,7 @@ export async function main(argv: string[]) {
       catch (error) { exportError = String(error); }
       if (result.blocked || exportError) process.exitCode = 2;
       return { outDir: plan.outDir, originalDirectory: directory, roundName: values.round, passed: result.passed,
+        proposalsPendingHuman: result.proposalsPendingHuman, noAdmittedAttributes: result.noAdmittedAttributes,
         blocked: result.blocked, total: result.total, requests: result.networkCallsThisExecution,
         cacheHits: result.cacheHitsThisExecution, cumulativeReservedCny: Number(result.budget.committedUpperBoundCny.toFixed(2)),
         budgetLimitCny: result.budget.limitCny, accounting: result.budget.accounting, excel, exportError,
@@ -202,6 +203,7 @@ export async function main(argv: string[]) {
       }
       if (result.blocked || exportError) process.exitCode = 2;
       return { outDir, passed: result.passed, blocked: result.blocked, total: result.total,
+        proposalsPendingHuman: result.proposalsPendingHuman, noAdmittedAttributes: result.noAdmittedAttributes,
         requests: result.networkCallsThisExecution, cacheHits: result.cacheHitsThisExecution,
         reservedCny: Number(result.budget.committedUpperBoundCny.toFixed(2)), excel, exportError,
         adoption: "pending_human", productionWrites: 0 };

@@ -1,0 +1,1840 @@
+{
+  "provenance": {
+    "round": "rules-20261023",
+    "releaseId": "d0d2263b0268db9e17b3dc9544484d5ef49ea8537b94c14e31927f1a9991e1d1",
+    "runId": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023/rerun/rules-20261023",
+    "purpose": "Recorded DeepSeek outputs for offline regressions only; not approved business standards. Provider reasoning and credentials excluded."
+  },
+  "invalidToolGroups": [
+    {
+      "requestKey": "cbc954dd948c4219b6a6f35a0d0792ad066b1716c3c27a1c43ffbf3c7f4f6317",
+      "recordedResponseHash": "51ef76f5bb757ed33b9bc3278a56135a0882e4d0aa5070bc58b33da5c29e69e7",
+      "output": [
+        {
+          "type": "function_call",
+          "id": "1458831f-3b70-4712-a77c-5b625c7fdf89",
+          "status": "completed",
+          "arguments": "{\"query\": \"洗脸巾\", \"scopeId\": null, \"limit\": 50, \"cursor\": null}",
+          "call_id": "call_00_jL4OdUua80dcnEPJoV4s0005",
+          "name": "categories_search"
+        },
+        {
+          "type": "function_call",
+          "id": "67b7af5e-eeb5-4c03-a1d1-26c20e8bc62f",
+          "status": "completed",
+          "arguments": "{\"query\": \"棉柔巾\", \"scopeId\": null, \"limit\": 50, \"cursor\": null}",
+          "call_id": "call_01_v1uiae6gyAfbMGh6Win86522",
+          "name": "categories_search"
+        },
+        {
+          "type": "function_call",
+          "id": "49fdf6c9-5e9e-4c43-8c02-a2c6d90a485f",
+          "status": "completed",
+          "arguments": "{\"query\": \"材质\", \"categoryId\": null, \"limit\": 50, \"cursor\": null}",
+          "call_id": "call_02_a4NiTTicCRfH9B7CBAGh5363",
+          "name": "search_attribute_pool"
+        },
+        {
+          "type": "function_call",
+          "id": "4db9ff7d-b617-474b-b3ef-4efb4c04c32e",
+          "status": "completed",
+          "arguments": "{\"query\": \"尺寸\", \"categoryId\": \"null\", \"limit\": 50, \"cursor\": null}",
+          "call_id": "call_03_Vp3TlQdeiljx97evxy8O7145",
+          "name": "search_attribute_pool"
+        }
+      ]
+    },
+    {
+      "requestKey": "0395082777c2a780f67c64f14c4ed66edc9a1a04ed41bc042557d4b7d535c339",
+      "recordedResponseHash": "2a4531c9e24eb5bca4753b6edade20baf5289f592c288af96b1939ddd827a525",
+      "output": [
+        {
+          "type": "function_call",
+          "id": "88010fe0-60b3-4405-92bf-1b0fc3fdff36",
+          "status": "completed",
+          "arguments": "{\"cursor\": null, \"limit\": 50, \"query\": \"每包数量 抽数 张数\", \"categoryId\": null}",
+          "call_id": "call_00_ZhHIcN8DlYbnhtckvZdT4842",
+          "name": "search_attribute_pool"
+        },
+        {
+          "type": "function_call",
+          "id": "41afb774-bbd5-439f-9231-089c915bb44b",
+          "status": "completed",
+          "arguments": "{\"cursor\": null, \"limit\": 50, \"query\": \"压花 印花\", \"categoryId\": null}",
+          "call_id": "call_01_yFrLgUt0cIVoNBIsZYJr2832",
+          "name": "search_attribute_pool"
+        },
+        {
+          "type": "function_call",
+          "id": "7efdf424-5e40-407d-bcf6-c840d15ca9eb",
+          "status": "completed",
+          "arguments": "{\"cursor\": null, \"limit\": 50, \"query\": \"湿强度 可湿水\", \"categoryId\": null}",
+          "call_id": "call_02_zJBaWzrAkS66NCICEEsX0118",
+          "name": "search_attribute_pool"
+        },
+        {
+          "type": "function_call",
+          "id": "cedfe3a4-8535-42e6-a0c2-d02c0ac47057",
+          "status": "completed",
+          "arguments": "{\"cursor\": null, \"limit\": 50, \"query\": \"原料 原生木浆 竹浆\", \"categoryId\": \"null\"}",
+          "call_id": "call_03_SnIQP7NputctpmXXziyW7209",
+          "name": "search_attribute_pool"
+        }
+      ]
+    }
+  ],
+  "center": {
+    "family": {
+      "id": "jumbo-toilet-roll",
+      "members": [
+        "e30ca09a-3e86-4223-b618-d6581ad1489e",
+        "3360395b-3790-41f3-8e8c-6c682c53e8da"
+      ],
+      "status": "candidate",
+      "runId": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023/rerun/rules-20261023",
+      "version": "d3b8da8475ae6bc963ec9d3fc08817216d1bb85e078588d1ad11440e741902ad",
+      "attributes": [
+        {
+          "id": "jumbo.paper.layers",
+          "name": "层数",
+          "conceptKey": "paper.layers",
+          "definition": "成品纸张的叠层数量，计量对象为单卷成品纸；不是包装层数、托盘层数或销售包装层数。",
+          "scope": "single-roll-finished-paper-ply",
+          "fieldType": "number",
+          "unit": "层",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": true,
+            "precision": null,
+            "min": 1,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "大卷纸与中心抽大卷纸采购比价时常把不同层数商品当作同规格，层数直接改变纸张厚实度、同价可用纸量与质量档次的判断；只填一个整数值，维护成本低。复用属性池既有定义，其在大卷族的专业适用性仍待领域确认。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "层数是成品纸张叠层；不能与托盘层数、包装层级混淆。"
+            }
+          ]
+        },
+        {
+          "id": "jumbo.paper.coreless",
+          "name": "是否无芯",
+          "conceptKey": "paper.coreless",
+          "definition": "纸卷是否没有纸芯；按SKU实值填写，不能由类目名、商品标题或图片推定。",
+          "scope": "single-roll-core-structure",
+          "fieldType": "boolean",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "纸芯结构决定纸卷与分配器、纸轴的匹配方式和更换操作，也影响单位成本；缺失会把有芯与无芯商品混为同规格。取值单一布尔，维护成本低。两类类目名不构成SKU取值证据，因此保留为共同区分维度。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "有芯和无芯小卷纸应先使用同一组共同定义。"
+            }
+          ]
+        },
+        {
+          "id": "jumbo.paper.raw_material",
+          "name": "原料",
+          "conceptKey": "paper.raw_material",
+          "definition": "商品声明的造纸原料原文措辞（如原生木浆、再生浆等）；保留厂家表述，不由品牌或系列名推定，也不作为检测结论。",
+          "scope": "finished-paper-raw-material",
+          "fieldType": "text",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": {
+            "format": "ANY",
+            "minLength": 1,
+            "maxLength": 300,
+            "displayMethod": null,
+            "trim": true
+          },
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "原料影响使用场景、柔软度与采购偏好，也是买家和采购的检索词；缺失时只能按品牌猜测浆种。文本保留原文可避免把宣传语改写成未经证实的原生浆，维护成本低。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "原料保留商家确切措辞"
+            }
+          ]
+        },
+        {
+          "id": "jumbo.paper.declared_mass",
+          "name": "单卷重量",
+          "conceptKey": "paper.declared_mass",
+          "definition": "来源明确标出的每卷重量，单位g；含芯或包装的口径以来源标注为准，不等于去芯净纸重、包/箱总重，也不等于商品物流重量。",
+          "scope": "single-roll-declared-mass",
+          "fieldType": "number",
+          "unit": "g",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": false,
+            "precision": null,
+            "min": null,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "商用大卷按每卷重量比较可用纸量和单位成本，是不同品牌、不同包装之间比价的直接依据；缺失时容易把物流重量或整箱重量当作单卷纸重。需保留含芯/包装口径，维护成本中等。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "单卷重量记录来源明确标出的每卷重量。"
+            },
+            {
+              "kind": "knowledge",
+              "id": "scm-field-responsibilities-20261022",
+              "version": "affcf4095798cbb58ba3e80b1431ed821e74e3b6e1bba640a72630c279185319",
+              "quote": "StdProduct.weight是商品重量，不能排除单卷标称质量；长度宽度同样按对象区分"
+            }
+          ]
+        },
+        {
+          "id": "jumbo.paper.roll_width",
+          "name": "卷宽",
+          "conceptKey": "paper.roll_width",
+          "definition": "单卷成品纸的纸幅宽度（展开后垂直于出纸方向的宽度），单位mm，用于核对分配器适配与纸张规格；不是包装宽度，也不是纸卷直径。",
+          "scope": "single-roll-paper-width",
+          "fieldType": "number",
+          "unit": "mm",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": false,
+            "precision": null,
+            "min": null,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "商用大卷必须与分配器出纸口、纸路匹配，卷宽不符会导致卡纸或无法安装，因此卷宽改变采购的适配判断；填一个毫米数值即可，成本低，并与卷径、包装宽度区分。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "clean-paper-admission-20261023",
+              "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+              "quote": "普通小卷的卷外径等暂缓不等于所有大卷及专用分配器场景都不需要尺寸。"
+            }
+          ]
+        },
+        {
+          "id": "jumbo.paper.roll_length",
+          "name": "每卷长度",
+          "conceptKey": "paper.roll_length",
+          "definition": "单卷展开后的纸张总长度，单位m；用于比较可用纸量与更换频次，不等同于节数或张数，不按层数换算，也不与包装长度混用。",
+          "scope": "single-roll-unrolled-length",
+          "fieldType": "number",
+          "unit": "m",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": false,
+            "precision": null,
+            "min": null,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "整卷展开长度直接决定可用纸量和补充更换频次，是不同价格、不同重量包装之间比较的核心参数；要求以米表达并禁止与节数互换，避免把不同计数口径混在一起比较，维护成本低。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "clean-paper-admission-20261023",
+              "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+              "quote": "补充装与出纸器配套、可用纸量比较"
+            }
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "attributeId": "jumbo.paper.layers",
+          "categoryId": null,
+          "requiredness": "optional",
+          "requirednessReason": "层数影响比价与质量判断，但大卷族SKU资料是否普遍可得及是否应强制填写未确认，先选填。",
+          "isKeySpec": true,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": true,
+          "displayInList": true,
+          "sortIndex": 10,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": null,
+          "differenceReason": null
+        },
+        {
+          "attributeId": "jumbo.paper.coreless",
+          "categoryId": null,
+          "requiredness": "optional",
+          "requirednessReason": "纸芯结构影响分配器适配与成本判断，但两类是否均能稳定取得纸芯信息未确认，先选填。",
+          "isKeySpec": true,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": true,
+          "sortIndex": 20,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": null,
+          "differenceReason": null
+        },
+        {
+          "attributeId": "jumbo.paper.raw_material",
+          "categoryId": null,
+          "requiredness": "optional",
+          "requirednessReason": "原料是选型与检索维度，但多数来源仅作宣传性描述、是否应强制填写未确认，先选填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": true,
+          "displayInTitle": false,
+          "displayInList": true,
+          "sortIndex": 30,
+          "uses": [
+            "selection",
+            "comparison",
+            "search",
+            "display"
+          ],
+          "baselineAttributeId": null,
+          "differenceReason": null
+        },
+        {
+          "attributeId": "jumbo.paper.declared_mass",
+          "categoryId": null,
+          "requiredness": "optional",
+          "requirednessReason": "单卷重量用于比价，但含芯/包装口径与资料可得性未确认，先选填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": true,
+          "sortIndex": 40,
+          "uses": [
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": null,
+          "differenceReason": null
+        },
+        {
+          "attributeId": "jumbo.paper.roll_width",
+          "categoryId": null,
+          "requiredness": "optional",
+          "requirednessReason": "卷宽影响分配器适配，但具体适配口径与是否应强制填写待业务确认，先选填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 50,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": null,
+          "differenceReason": null
+        },
+        {
+          "attributeId": "jumbo.paper.roll_length",
+          "categoryId": null,
+          "requiredness": "optional",
+          "requirednessReason": "每卷长度用于可用纸量比较，但来源是否以米标注及强制填写必要性未确认，先选填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 60,
+          "uses": [
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": null,
+          "differenceReason": null
+        }
+      ],
+      "extensionCandidates": [
+        {
+          "id": "ext.jumbo.roll_diameter",
+          "name": "卷外径",
+          "conceptKey": "paper.roll_diameter",
+          "scope": "single-roll-outer-diameter",
+          "potentialUse": "核对纸卷与分配器容纳空间、装卷方式及更换周期，服务器具适配判断。",
+          "deferReason": "现有资料只说明器具适配与器具本体参数需要区分，尚未证实大卷族两类均把卷径作为独立选型参数，且需与卷宽、卷长区分，暂缓准入。",
+          "activationCriteria": "取得大卷/中心抽大卷主流分配器适配资料，或业务确认卷径用于筛选与适配后，经共享基线修订启用。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "clean-paper-admission-20261023",
+              "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+              "quote": "普通小卷的卷外径等暂缓不等于所有大卷及专用分配器场景都不需要尺寸。"
+            }
+          ]
+        },
+        {
+          "id": "ext.jumbo.core_inner_diameter",
+          "name": "纸芯内径",
+          "conceptKey": "paper.core_inner_diameter",
+          "scope": "single-roll-core-inner-diameter",
+          "potentialUse": "纸卷配芯使用时核对纸轴、分配器轴径的适配关系。",
+          "deferReason": "是否无芯已承载纸芯结构，芯内径仅对带芯纸卷有意义；两类是否均需数值化适配参数尚无资料，暂缓。",
+          "activationCriteria": "业务确认存在带芯适配场景且需要数值化芯内径，并取得可核对的适配资料后，按共享流程评估启用。",
+          "references": []
+        },
+        {
+          "id": "ext.jumbo.dispensing_type",
+          "name": "出纸方式",
+          "conceptKey": "paper.dispensing_type",
+          "scope": "single-roll-dispensing-method",
+          "potentialUse": "匹配中心抽取或卷筒下拉式分配器，并支持脱离类目路径的检索与筛选。",
+          "deferReason": "当前两类类目名已区分出纸方式，SKU层是否需要独立字段及枚举边界未经业务裁定，暂缓准入。",
+          "activationCriteria": "业务确认需在SKU层独立表达出纸方式并可检索、筛选，且明确枚举值口径后，经共享基线修订启用。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "clean-paper-admission-20261023",
+              "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+              "quote": "出纸结构、适配系统及独立尺寸用途"
+            }
+          ]
+        },
+        {
+          "id": "ext.jumbo.perforation_count",
+          "name": "每卷节数",
+          "conceptKey": "paper.perforation_count",
+          "scope": "single-roll-counting-unit",
+          "potentialUse": "按节或张比较可用纸量与分节规格，补充按米表达之外的计数口径。",
+          "deferReason": "张、节、格的定义与同义关系未统一，现有计数资料来自小卷且明确不可外推大盘纸，且与每卷长度存在重复风险，暂缓。",
+          "activationCriteria": "取得大卷/中心抽大卷厂家计数定义、确认节与张的口径关系，并核实与每卷长度不重复后评估启用。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "当前不统一张、节、格，不按层数倍乘，不据此比较不同计数词的大小。"
+            }
+          ]
+        }
+      ]
+    },
+    "requestKey": "9ab50e6c249592385abfeb21c35519b74e0eed97c7de36237d8e594784a76208",
+    "recordedResponseHash": "980b1b8190f8739c87c812ad3090affde5a3b77e2efa70c1b48ff58540eb717e",
+    "result": {
+      "categoryId": "3360395b-3790-41f3-8e8c-6c682c53e8da",
+      "baselineVersion": "d3b8da8475ae6bc963ec9d3fc08817216d1bb85e078588d1ad11440e741902ad",
+      "attributes": [
+        {
+          "id": "jumbo.paper.layers",
+          "name": "层数",
+          "conceptKey": "paper.layers",
+          "definition": "成品纸张的叠层数量，计量对象为单卷成品纸；不是包装层数、托盘层数或销售包装层数。",
+          "scope": "single-roll-finished-paper-ply",
+          "fieldType": "number",
+          "unit": "层",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": true,
+            "precision": null,
+            "min": 1,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "大卷纸与中心抽大卷纸采购比价时常把不同层数商品当作同规格，层数改变纸张厚实度、同价可用纸量与质量档次的判断；只填一个整数值，维护成本低。定义、类型、单位与范围沿用同批冻结基线，本阶段未取得可引用的已读专业材料，其在本族的专业适用性待领域确认。",
+          "references": []
+        },
+        {
+          "id": "jumbo.paper.coreless",
+          "name": "是否无芯",
+          "conceptKey": "paper.coreless",
+          "definition": "纸卷是否没有纸芯；按SKU实值填写，不能由类目名、商品标题或图片推定。",
+          "scope": "single-roll-core-structure",
+          "fieldType": "boolean",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "纸芯结构决定纸卷与分配器、纸轴的匹配方式和更换操作，也影响单位成本；缺失会把有芯与无芯商品混为同规格。取值单一布尔，维护成本低。类目名不构成SKU取值证据，故保留为共同区分维度；定义沿用同批冻结基线，本阶段未取得针对中心抽大卷的已读适配材料，专业依据待确认。",
+          "references": []
+        },
+        {
+          "id": "jumbo.paper.raw_material",
+          "name": "原料",
+          "conceptKey": "paper.raw_material",
+          "definition": "商品声明的造纸原料原文措辞（如原生木浆、再生浆等）；保留厂家表述，不由品牌或系列名推定，也不作为检测结论。",
+          "scope": "finished-paper-raw-material",
+          "fieldType": "text",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": {
+            "format": "ANY",
+            "minLength": 1,
+            "maxLength": 300,
+            "displayMethod": null,
+            "trim": true
+          },
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "原料影响使用场景、柔软度与采购偏好，也是买家和采购的检索词；缺失时只能按品牌猜测浆种。文本保留原文可避免把宣传语改写成未经证实的原生浆，维护成本低。定义沿用同批冻结基线，本阶段无匹配的已读专业材料可引，专业适用性待确认。",
+          "references": []
+        },
+        {
+          "id": "jumbo.paper.declared_mass",
+          "name": "单卷重量",
+          "conceptKey": "paper.declared_mass",
+          "definition": "来源明确标出的每卷重量，单位g；含芯或包装的口径以来源标注为准，不等于去芯净纸重、包/箱总重，也不等于商品物流重量。",
+          "scope": "single-roll-declared-mass",
+          "fieldType": "number",
+          "unit": "g",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": false,
+            "precision": null,
+            "min": null,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "商用大卷按每卷重量比较可用纸量和单位成本，是不同品牌、不同包装之间比价的直接依据；缺失时容易把物流重量或整箱重量当作单卷纸重。需保留含芯/包装口径，维护成本中等。系统商品重量字段按对象区分，不能替代本参数。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "scm-field-responsibilities-20261022",
+              "version": "affcf4095798cbb58ba3e80b1431ed821e74e3b6e1bba640a72630c279185319",
+              "quote": "StdProduct.weight是商品重量，不能排除单卷标称质量；长度宽度同样按对象区分"
+            }
+          ]
+        },
+        {
+          "id": "jumbo.paper.roll_width",
+          "name": "卷宽",
+          "conceptKey": "paper.roll_width",
+          "definition": "单卷成品纸的纸幅宽度（展开后垂直于出纸方向的宽度），单位mm，用于核对分配器适配与纸张规格；不是包装宽度，也不是纸卷直径。",
+          "scope": "single-roll-paper-width",
+          "fieldType": "number",
+          "unit": "mm",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": false,
+            "precision": null,
+            "min": null,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "商用大卷必须与分配器出纸口、纸路匹配，卷宽不符会导致卡纸或无法安装，因此卷宽改变采购的适配判断；填一个毫米数值即可，成本低，并与卷径、包装宽度区分。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "clean-paper-admission-20261023",
+              "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+              "quote": "普通小卷的卷外径等暂缓不等于所有大卷及专用分配器场景都不需要尺寸。"
+            }
+          ]
+        },
+        {
+          "id": "jumbo.paper.roll_length",
+          "name": "每卷长度",
+          "conceptKey": "paper.roll_length",
+          "definition": "单卷展开后的纸张总长度，单位m；用于比较可用纸量与更换频次，不等同于节数或张数，不按层数换算，也不与包装长度混用。",
+          "scope": "single-roll-unrolled-length",
+          "fieldType": "number",
+          "unit": "m",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": false,
+            "precision": null,
+            "min": null,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "整卷展开长度直接决定可用纸量和补充更换频次，是不同价格、不同重量包装之间比较的核心参数；要求以米表达并禁止与节数互换，避免把不同计数口径混在一起比较，维护成本低。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "clean-paper-admission-20261023",
+              "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+              "quote": "补充装与出纸器配套、可用纸量比较"
+            }
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "attributeId": "jumbo.paper.layers",
+          "categoryId": "3360395b-3790-41f3-8e8c-6c682c53e8da",
+          "baselineAttributeId": "jumbo.paper.layers",
+          "differenceReason": null,
+          "requiredness": "optional",
+          "requirednessReason": "层数影响比价与质量判断，但大卷族SKU资料是否普遍可得及是否应强制填写未确认，先选填。",
+          "isKeySpec": true,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": true,
+          "displayInList": true,
+          "sortIndex": 10,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ]
+        },
+        {
+          "attributeId": "jumbo.paper.coreless",
+          "categoryId": "3360395b-3790-41f3-8e8c-6c682c53e8da",
+          "baselineAttributeId": "jumbo.paper.coreless",
+          "differenceReason": null,
+          "requiredness": "optional",
+          "requirednessReason": "纸芯结构影响分配器适配与成本判断，但两类是否均能稳定取得纸芯信息未确认，先选填。",
+          "isKeySpec": true,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": true,
+          "sortIndex": 20,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ]
+        },
+        {
+          "attributeId": "jumbo.paper.raw_material",
+          "categoryId": "3360395b-3790-41f3-8e8c-6c682c53e8da",
+          "baselineAttributeId": "jumbo.paper.raw_material",
+          "differenceReason": null,
+          "requiredness": "optional",
+          "requirednessReason": "原料是选型与检索维度，但多数来源仅作宣传性描述、是否应强制填写未确认，先选填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": true,
+          "displayInTitle": false,
+          "displayInList": true,
+          "sortIndex": 30,
+          "uses": [
+            "selection",
+            "comparison",
+            "search",
+            "display"
+          ]
+        },
+        {
+          "attributeId": "jumbo.paper.declared_mass",
+          "categoryId": "3360395b-3790-41f3-8e8c-6c682c53e8da",
+          "baselineAttributeId": "jumbo.paper.declared_mass",
+          "differenceReason": null,
+          "requiredness": "optional",
+          "requirednessReason": "单卷重量用于比价，但含芯/包装口径与资料可得性未确认，先选填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": true,
+          "sortIndex": 40,
+          "uses": [
+            "comparison",
+            "display"
+          ]
+        },
+        {
+          "attributeId": "jumbo.paper.roll_width",
+          "categoryId": "3360395b-3790-41f3-8e8c-6c682c53e8da",
+          "baselineAttributeId": "jumbo.paper.roll_width",
+          "differenceReason": "中心抽大卷纸是配套中心抽取式纸器使用的耗材，纸幅宽度是否与分配器纸路、出纸口匹配直接决定能否正常安装使用，故在本末级把卷宽作为买家选购规格并列入列表展示；共同定义、类型（mm 数值）与选填性保持基线不变，本差异待人工核实。",
+          "requiredness": "optional",
+          "requirednessReason": "卷宽影响中心抽取分配器适配，但具体适配口径与是否应强制填写待业务确认，先选填。",
+          "isKeySpec": true,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": true,
+          "sortIndex": 50,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ]
+        },
+        {
+          "attributeId": "jumbo.paper.roll_length",
+          "categoryId": "3360395b-3790-41f3-8e8c-6c682c53e8da",
+          "baselineAttributeId": "jumbo.paper.roll_length",
+          "differenceReason": "中心抽大卷纸整卷悬挂供多人连续抽取，单卷可用纸量直接决定补充更换频次与单次采购成本，故在本末级把每卷长度列入列表展示便于横向比较；共同定义、单位（m）与选填性保持基线不变，本差异待人工核实。",
+          "requiredness": "optional",
+          "requirednessReason": "每卷长度用于中心抽场景可用纸量比较，但来源是否以米标注及强制填写必要性未确认，先选填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": true,
+          "sortIndex": 60,
+          "uses": [
+            "comparison",
+            "display"
+          ]
+        }
+      ],
+      "extensionCandidates": [
+        {
+          "id": "ext.jumbo.roll_diameter",
+          "name": "卷外径",
+          "conceptKey": "paper.roll_diameter",
+          "scope": "single-roll-outer-diameter",
+          "potentialUse": "核对纸卷与分配器容纳空间、装卷方式及更换周期，服务器具适配判断。",
+          "deferReason": "现有资料只说明器具适配与器具本体参数需要区分，尚未证实大卷族两类均把卷径作为独立选型参数，且需与卷宽、卷长区分，暂缓准入。",
+          "activationCriteria": "取得大卷/中心抽大卷主流分配器适配资料，或业务确认卷径用于筛选与适配后，经共享基线修订启用。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "clean-paper-admission-20261023",
+              "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+              "quote": "普通小卷的卷外径等暂缓不等于所有大卷及专用分配器场景都不需要尺寸。"
+            }
+          ]
+        },
+        {
+          "id": "ext.jumbo.core_inner_diameter",
+          "name": "纸芯内径",
+          "conceptKey": "paper.core_inner_diameter",
+          "scope": "single-roll-core-inner-diameter",
+          "potentialUse": "纸卷配芯使用时核对纸轴、分配器轴径的适配关系。",
+          "deferReason": "是否无芯已承载纸芯结构，芯内径仅对带芯纸卷有意义；两类是否均需数值化适配参数尚无资料，暂缓。",
+          "activationCriteria": "业务确认存在带芯适配场景且需要数值化芯内径，并取得可核对的适配资料后，按共享流程评估启用。",
+          "references": []
+        },
+        {
+          "id": "ext.jumbo.dispensing_type",
+          "name": "出纸方式",
+          "conceptKey": "paper.dispensing_type",
+          "scope": "single-roll-dispensing-method",
+          "potentialUse": "匹配中心抽取或卷筒下拉式分配器，并支持脱离类目路径的检索与筛选。",
+          "deferReason": "当前两类类目名已区分出纸方式，SKU层是否需要独立字段及枚举边界未经业务裁定，暂缓准入。",
+          "activationCriteria": "业务确认需在SKU层独立表达出纸方式并可检索、筛选，且明确枚举值口径后，经共享基线修订启用。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "clean-paper-admission-20261023",
+              "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+              "quote": "出纸结构、适配系统及独立尺寸用途"
+            }
+          ]
+        },
+        {
+          "id": "ext.jumbo.perforation_count",
+          "name": "每卷节数",
+          "conceptKey": "paper.perforation_count",
+          "scope": "single-roll-counting-unit",
+          "potentialUse": "按节或张比较可用纸量与分节规格，补充按米表达之外的计数口径。",
+          "deferReason": "张、节、格的定义与同义关系未统一，现有计数资料来自小卷且明确不可外推大盘纸，且与每卷长度存在重复风险，暂缓。",
+          "activationCriteria": "取得大卷/中心抽大卷厂家计数定义、确认节与张的口径关系，并核实与每卷长度不重复后评估启用。",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "clean-paper-admission-20261023",
+              "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+              "quote": "不统一张、抽、节、格，不按层数换算张数。"
+            }
+          ]
+        }
+      ],
+      "unresolved": [
+        "本叶消费的同族基线 jumbo-toilet-roll 版本 d3b8da8475… 为同批待审候选（same_run_pending），本叶两条绑定差异（卷宽设为关键规格并列表展示、每卷长度列表展示）仍需人工核实，不构成业务确认。",
+        "层数、是否无芯、原料三项定义沿用同批冻结基线，但基线所引资料本阶段未读取，不能在本阶段复核引文；本次不附引用，其专业依据待领域人员确认。",
+        "每卷节数扩展候选的暂缓理由沿用冻结基线原文；其原引资料本阶段未读取，故改用本阶段已读的清洁纸建模资料中“不统一张、抽、节、格，不按层数换算张数”作支持，扩展候选取舍如需变更另提共享修订。",
+        "中心抽大卷纸与分配器适配所需独立尺寸（卷宽是否足够、是否需另有卷外径或容纳空间）缺专业依据，仅保留为扩展候选，待适配资料或业务裁定。",
+        "中心抽大卷纸在出纸结构上纸芯的实际形态（是否普遍无芯、是否配轴芯使用）未经核实，不能由类目名推定SKU取值；芯内径仍为扩展候选。",
+        "冻结基线中卷宽、每卷长度、单卷重量的小数精度与上下限均为未设置（null），缺逐字段专业依据；应记录依据缺口并按共享修订另提案核实，不在本叶改动。",
+        "每卷可用纸量的计数口径（米、节、张、格）未统一，本叶仅以每卷长度按米表达，节数类需求保持扩展候选；不得据此换算或比较不同计数词。"
+      ]
+    }
+  },
+  "coreless": {
+    "requestKey": "f7e2aaf84a5a2952aaf4113355f8a806839d948316ca74aec7c24c8b99b143be",
+    "recordedResponseHash": "e1107c28a32484c95b5eb1c0948a6a7d5225d81d8c4f82cd1adee14aaa808901",
+    "result": {
+      "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "baselineVersion": "9f672545509f6a99770a1b0b445e44f05496f459b2f151d2c3cb17d9aaad42e5",
+      "attributes": [
+        {
+          "id": "roll.coreless",
+          "name": "是否无芯",
+          "conceptKey": "paper.coreless",
+          "definition": "纸卷是否没有纸芯；两类共用，值不可由类目名代填",
+          "scope": "single-roll-core",
+          "fieldType": "boolean",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "区分纸芯结构，支持有芯/无芯选型及同族对照；强制填写尚未确认",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "有芯和无芯小卷纸应先使用同一组共同定义。"
+            }
+          ]
+        },
+        {
+          "id": "roll.layers",
+          "name": "层数",
+          "conceptKey": "paper.layers",
+          "definition": "成品纸张叠层数量，不是包装或托盘层数",
+          "scope": "finished-paper-ply",
+          "fieldType": "number",
+          "unit": "层",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": true,
+            "precision": null,
+            "min": 1,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "对照成品纸张叠层；不以层数推定质量",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "层数是成品纸张叠层；不能与托盘层数、包装层级混淆。"
+            }
+          ]
+        },
+        {
+          "id": "roll.declared_mass",
+          "name": "单卷重量",
+          "conceptKey": "paper.declared_mass",
+          "definition": "来源明确标出的每卷重量，单位g；是否含芯/包装需核实，不等于去芯净纸重或实测重量",
+          "scope": "single-roll-declared-mass",
+          "fieldType": "number",
+          "unit": "g",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": false,
+            "precision": 3,
+            "min": 0,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "按明确的每卷重量及相同含芯/包装口径比较，避免与商品物流重量混用",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "单卷重量记录来源明确标出的每卷重量"
+            }
+          ]
+        },
+        {
+          "id": "roll.raw_material",
+          "name": "原料",
+          "conceptKey": "paper.raw_material",
+          "definition": "商家对原料的原文描述，不能由品牌推定",
+          "scope": "finished-paper-material",
+          "fieldType": "text",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": {
+            "format": "ANY",
+            "minLength": 1,
+            "maxLength": 300,
+            "displayMethod": null,
+            "trim": true
+          },
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "按原料声明检索；保留厂商措辞，不推断检测结论",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "原料保留商家确切措辞"
+            }
+          ]
+        },
+        {
+          "id": "roll.sheet_size",
+          "name": "纸张尺寸",
+          "conceptKey": "paper.sheet_size",
+          "definition": "单张纸尺寸完整文本；不猜轴向或包装尺寸",
+          "scope": "finished-paper-sheet-size",
+          "fieldType": "text",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": {
+            "format": "ANY",
+            "minLength": 1,
+            "maxLength": 300,
+            "displayMethod": null,
+            "trim": true
+          },
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "比较单张纸尺寸，避免误用包装尺寸",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "纸张尺寸与纸卷尺寸、包装尺寸分开"
+            }
+          ]
+        },
+        {
+          "id": "roll.perforation",
+          "name": "每卷数量",
+          "conceptKey": "paper.perforation",
+          "definition": "暂名；保留来源明确的每卷数量及原计数单位文本，不统一张/节/格，不按层数倍乘。口径核实后再确定正式名称与数值化，不作为已统一的张数比较",
+          "scope": "single-roll-perforation",
+          "fieldType": "text",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": {
+            "format": "ANY",
+            "minLength": 1,
+            "maxLength": 300,
+            "displayMethod": null,
+            "trim": true
+          },
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "拟比较每卷可用纸张数量；目前只保留原计数口径候选，未确认张/节/格可比性",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "每卷数量暂保留原文数量及计数单位"
+            }
+          ]
+        },
+        {
+          "id": "roll.fragrance",
+          "name": "香型",
+          "conceptKey": "paper.fragrance",
+          "definition": "单个文本字段保留明确的无香、具体香型或仅有香味的原文；仅知有香不编香型，未说明留未知；归一化需另有已核实词表",
+          "scope": "finished-paper-fragrance",
+          "fieldType": "text",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": {
+            "format": "ANY",
+            "minLength": 1,
+            "maxLength": 300,
+            "displayMethod": null,
+            "trim": true
+          },
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "按原文香型供选择与搜索；缺失不默认无香",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "香型统一使用一个文本字段"
+            }
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "attributeId": "roll.coreless",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "同族共同保留是否无芯，类目名不代填SKU值；已说明独立用途但强制填写必要性未核实，先选填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 1,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": "roll.coreless",
+          "differenceReason": null
+        },
+        {
+          "attributeId": "roll.layers",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 2,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": "roll.layers",
+          "differenceReason": null
+        },
+        {
+          "attributeId": "roll.declared_mass",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 3,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": "roll.declared_mass",
+          "differenceReason": null
+        },
+        {
+          "attributeId": "roll.raw_material",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": true,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 4,
+          "uses": [
+            "selection",
+            "comparison",
+            "display",
+            "search"
+          ],
+          "baselineAttributeId": "roll.raw_material",
+          "differenceReason": null
+        },
+        {
+          "attributeId": "roll.sheet_size",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": true,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 5,
+          "uses": [
+            "selection",
+            "comparison",
+            "display",
+            "search"
+          ],
+          "baselineAttributeId": "roll.sheet_size",
+          "differenceReason": null
+        },
+        {
+          "attributeId": "roll.perforation",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": true,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 6,
+          "uses": [
+            "selection",
+            "comparison",
+            "display",
+            "search"
+          ],
+          "baselineAttributeId": "roll.perforation",
+          "differenceReason": null
+        },
+        {
+          "attributeId": "roll.fragrance",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": true,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 7,
+          "uses": [
+            "selection",
+            "comparison",
+            "display",
+            "search"
+          ],
+          "baselineAttributeId": "roll.fragrance",
+          "differenceReason": null
+        }
+      ],
+      "extensionCandidates": [
+        {
+          "id": "roll.printed",
+          "name": "是否印花",
+          "conceptKey": "paper.printed",
+          "scope": "finished-paper-print",
+          "potentialUse": "采购方明确要求纸张印刷图案时供选型或展示",
+          "deferReason": "当前小卷纸业务尚未确认独立选型价值；不因电商有字段就默认建立",
+          "activationCriteria": "确认具体采购用途、维护收益和印花定义后，另提同族基线修订；不得把压花当印花的下位枚举",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        },
+        {
+          "id": "roll.embossed",
+          "name": "是否压花",
+          "conceptKey": "paper.embossed",
+          "scope": "finished-paper-emboss",
+          "potentialUse": "有明确纸面纹理工艺要求时供采购比对",
+          "deferReason": "工艺存在不等于值得设字段；本轮暂不进入SKU合同",
+          "activationCriteria": "确认本类业务要求及工艺边界；不以压花推断印花、柔软度或质量，另提共享修订",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        },
+        {
+          "id": "coverage.roll_diameter",
+          "name": "卷外径",
+          "conceptKey": "paper.roll_diameter",
+          "scope": "finished-paper-roll-diameter",
+          "potentialUse": "指定纸架容纳空间的适配判断",
+          "deferReason": "当前普通小卷纸尚未确认纸架空间选型需求",
+          "activationCriteria": "确认适用纸架场景、测量对象及独立用途后再定类型/单位和绑定",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        },
+        {
+          "id": "coverage.roll_width",
+          "name": "卷宽",
+          "conceptKey": "paper.roll_width",
+          "scope": "finished-paper-roll-width",
+          "potentialUse": "指定纸架轴向空间的适配判断",
+          "deferReason": "需先核实是否已由纸张尺寸表达，避免重复",
+          "activationCriteria": "确认轴向含义、与纸张尺寸的关系及独立适配用途，再提共享修订",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        },
+        {
+          "id": "coverage.core_diameter",
+          "name": "纸芯内径",
+          "conceptKey": "paper.core_diameter",
+          "scope": "finished-paper-core-inner-diameter",
+          "potentialUse": "有芯纸卷与指定轴杆的适配判断",
+          "deferReason": "本类为无芯小卷纸，是否存在纸芯适配需求及与有芯类对照价值尚待确认；无芯不自动填0或不适用",
+          "activationCriteria": "明确有芯/无芯适用边界与业务用途；无芯不自动填0或不适用，再另建绑定",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        },
+        {
+          "id": "coverage.roll_length",
+          "name": "单卷长度",
+          "conceptKey": "paper.roll_length",
+          "scope": "finished-paper-unwound-length",
+          "potentialUse": "按整卷展开总长度比较可用纸量",
+          "deferReason": "尚未确认相对每卷数量的独立比较价值；外部同名可能实际为单节尺寸",
+          "activationCriteria": "核实整卷展开长度与单节长度、卷宽的区别及采购用途，不能按字段名或数值大小猜测映射",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        }
+      ],
+      "unresolved": [
+        "同族 small-toilet-roll 及有芯/无芯合并仍为同批待人工核实候选，本次末级方案依赖该候选基线，不能视为已发布标准。",
+        "每卷数量的张/节/格计数口径尚未取得厂家定义；当前仅以文本保留原文与计数单位，未确认不同计数词可比性，不按层数倍乘或换算。",
+        "单卷重量是否含芯/包装、是否实测尚未核实；当前按来源明确标出的每卷重量记录，不能当作去芯净纸重或物流重量。",
+        "单卷重量现有3位小数精度的专业依据未逐字段登记；保留冻结核对值，必要时另提共享修订评估，不在本叶直接改配置。",
+        "纸张尺寸在来源缺轴向语义时保留长×宽原文；单张、整卷与包装尺寸的边界及轴向含义仍待核实。",
+        "扩展候选（印花、压花、卷外径、卷宽、纸芯内径、单卷长度）启用前须修订共享基线并核实业务用途，当前不进入SKU属性合同或待填值列表。",
+        "本轮共同属性均先选填；是否应将是否无芯、层数或单卷重量设为必填、关键规格或标题/列表展示，待业务确认后再提绑定差异。"
+      ]
+    },
+    "finalResult": {
+      "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "baselineVersion": "9f672545509f6a99770a1b0b445e44f05496f459b2f151d2c3cb17d9aaad42e5",
+      "attributes": [
+        {
+          "id": "roll.coreless",
+          "name": "是否无芯",
+          "conceptKey": "paper.coreless",
+          "definition": "纸卷是否没有纸芯；两类共用，值不可由类目名代填",
+          "scope": "single-roll-core",
+          "fieldType": "boolean",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "区分纸芯结构，支持有芯/无芯选型及同族对照；强制填写尚未确认",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "有芯和无芯小卷纸应先使用同一组共同定义。"
+            }
+          ]
+        },
+        {
+          "id": "roll.layers",
+          "name": "层数",
+          "conceptKey": "paper.layers",
+          "definition": "成品纸张叠层数量，不是包装或托盘层数",
+          "scope": "finished-paper-ply",
+          "fieldType": "number",
+          "unit": "层",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": true,
+            "precision": null,
+            "min": 1,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "对照成品纸张叠层；不以层数推定质量",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "层数是成品纸张叠层；不能与托盘层数、包装层级混淆。"
+            }
+          ]
+        },
+        {
+          "id": "roll.declared_mass",
+          "name": "单卷重量",
+          "conceptKey": "paper.declared_mass",
+          "definition": "来源明确标出的每卷重量，单位g；是否含芯/包装需核实，不等于去芯净纸重或实测重量",
+          "scope": "single-roll-declared-mass",
+          "fieldType": "number",
+          "unit": "g",
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": {
+            "isInt": false,
+            "precision": 3,
+            "min": 0,
+            "max": null
+          },
+          "textConfig": null,
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "按明确的每卷重量及相同含芯/包装口径比较，避免与商品物流重量混用",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "单卷重量记录来源明确标出的每卷重量"
+            }
+          ]
+        },
+        {
+          "id": "roll.raw_material",
+          "name": "原料",
+          "conceptKey": "paper.raw_material",
+          "definition": "商家对原料的原文描述，不能由品牌推定",
+          "scope": "finished-paper-material",
+          "fieldType": "text",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": {
+            "format": "ANY",
+            "minLength": 1,
+            "maxLength": 300,
+            "displayMethod": null,
+            "trim": true
+          },
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "按原料声明检索；保留厂商措辞，不推断检测结论",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "原料保留商家确切措辞"
+            }
+          ]
+        },
+        {
+          "id": "roll.sheet_size",
+          "name": "纸张尺寸",
+          "conceptKey": "paper.sheet_size",
+          "definition": "单张纸尺寸完整文本；不猜轴向或包装尺寸",
+          "scope": "finished-paper-sheet-size",
+          "fieldType": "text",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": {
+            "format": "ANY",
+            "minLength": 1,
+            "maxLength": 300,
+            "displayMethod": null,
+            "trim": true
+          },
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "比较单张纸尺寸，避免误用包装尺寸",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "纸张尺寸与纸卷尺寸、包装尺寸分开"
+            }
+          ]
+        },
+        {
+          "id": "roll.perforation",
+          "name": "每卷数量",
+          "conceptKey": "paper.perforation",
+          "definition": "暂名；保留来源明确的每卷数量及原计数单位文本，不统一张/节/格，不按层数倍乘。口径核实后再确定正式名称与数值化，不作为已统一的张数比较",
+          "scope": "single-roll-perforation",
+          "fieldType": "text",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": {
+            "format": "ANY",
+            "minLength": 1,
+            "maxLength": 300,
+            "displayMethod": null,
+            "trim": true
+          },
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "拟比较每卷可用纸张数量；目前只保留原计数口径候选，未确认张/节/格可比性",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "每卷数量暂保留原文数量及计数单位"
+            }
+          ]
+        },
+        {
+          "id": "roll.fragrance",
+          "name": "香型",
+          "conceptKey": "paper.fragrance",
+          "definition": "单个文本字段保留明确的无香、具体香型或仅有香味的原文；仅知有香不编香型，未说明留未知；归一化需另有已核实词表",
+          "scope": "finished-paper-fragrance",
+          "fieldType": "text",
+          "unit": null,
+          "enumValues": [],
+          "multi": false,
+          "valueLevel": "SKU",
+          "numberConfig": null,
+          "textConfig": {
+            "format": "ANY",
+            "minLength": 1,
+            "maxLength": 300,
+            "displayMethod": null,
+            "trim": true
+          },
+          "optionConfig": null,
+          "defaultValue": null,
+          "rationale": "按原文香型供选择与搜索；缺失不默认无香",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "香型统一使用一个文本字段"
+            }
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "attributeId": "roll.coreless",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "同族共同保留是否无芯，类目名不代填SKU值；已说明独立用途但强制填写必要性未核实，先选填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 1,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": "roll.coreless",
+          "differenceReason": "无芯小卷纸仍需在SKU层显式区分纸芯结构，以便与有芯类对照及检索；定义、类型和选填性沿用共享基线，本叶不修改共同定义。"
+        },
+        {
+          "attributeId": "roll.layers",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 2,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": "roll.layers",
+          "differenceReason": "本类商品需按层数比较成品纸张叠层，故将共同层数定义绑定到本叶SKU；不改变共享定义、单位和范围。"
+        },
+        {
+          "attributeId": "roll.declared_mass",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": false,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 3,
+          "uses": [
+            "selection",
+            "comparison",
+            "display"
+          ],
+          "baselineAttributeId": "roll.declared_mass",
+          "differenceReason": "本类需按单卷重量进行规格比较，需在无芯小卷纸SKU承载该共同定义；是否含芯/包装的口径仍待核实，不修改共享定义。"
+        },
+        {
+          "attributeId": "roll.raw_material",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": true,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 4,
+          "uses": [
+            "selection",
+            "comparison",
+            "display",
+            "search"
+          ],
+          "baselineAttributeId": "roll.raw_material",
+          "differenceReason": "本类需保留原料原文供采购检索与选型，故绑定共同原料定义；不改变共享文本配置和含义。"
+        },
+        {
+          "attributeId": "roll.sheet_size",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": true,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 5,
+          "uses": [
+            "selection",
+            "comparison",
+            "display",
+            "search"
+          ],
+          "baselineAttributeId": "roll.sheet_size",
+          "differenceReason": "本类需比较单张纸尺寸，绑定共同纸张尺寸定义到本叶SKU；轴向和尺寸口径仍待核实，不修改共享类型与文本配置。"
+        },
+        {
+          "attributeId": "roll.perforation",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": true,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 6,
+          "uses": [
+            "selection",
+            "comparison",
+            "display",
+            "search"
+          ],
+          "baselineAttributeId": "roll.perforation",
+          "differenceReason": "本类需保留每卷数量原文用于可用量比较，故绑定共同定义；张/节/格计数口径仍待核实，不修改共享定义。"
+        },
+        {
+          "attributeId": "roll.fragrance",
+          "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+          "requiredness": "optional",
+          "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填。",
+          "isKeySpec": false,
+          "isPublic": true,
+          "searchable": true,
+          "displayInTitle": false,
+          "displayInList": false,
+          "sortIndex": 7,
+          "uses": [
+            "selection",
+            "comparison",
+            "display",
+            "search"
+          ],
+          "baselineAttributeId": "roll.fragrance",
+          "differenceReason": "本类需按原文香型供选择与检索，故将共同香型定义绑定到本叶SKU；不改变共享文本配置与未知值处理方式。"
+        }
+      ],
+      "extensionCandidates": [
+        {
+          "id": "roll.printed",
+          "name": "是否印花",
+          "conceptKey": "paper.printed",
+          "scope": "finished-paper-print",
+          "potentialUse": "采购方明确要求纸张印刷图案时供选型或展示",
+          "deferReason": "当前小卷纸业务尚未确认独立选型价值；不因电商有字段就默认建立",
+          "activationCriteria": "确认具体采购用途、维护收益和印花定义后，另提同族基线修订；不得把压花当印花的下位枚举",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        },
+        {
+          "id": "roll.embossed",
+          "name": "是否压花",
+          "conceptKey": "paper.embossed",
+          "scope": "finished-paper-emboss",
+          "potentialUse": "有明确纸面纹理工艺要求时供采购比对",
+          "deferReason": "工艺存在不等于值得设字段；本轮暂不进入SKU合同",
+          "activationCriteria": "确认本类业务要求及工艺边界；不以压花推断印花、柔软度或质量，另提共享修订",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        },
+        {
+          "id": "coverage.roll_diameter",
+          "name": "卷外径",
+          "conceptKey": "paper.roll_diameter",
+          "scope": "finished-paper-roll-diameter",
+          "potentialUse": "指定纸架容纳空间的适配判断",
+          "deferReason": "当前普通小卷纸尚未确认纸架空间选型需求",
+          "activationCriteria": "确认适用纸架场景、测量对象及独立用途后再定类型/单位和绑定",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        },
+        {
+          "id": "coverage.roll_width",
+          "name": "卷宽",
+          "conceptKey": "paper.roll_width",
+          "scope": "finished-paper-roll-width",
+          "potentialUse": "指定纸架轴向空间的适配判断",
+          "deferReason": "需先核实是否已由纸张尺寸表达，避免重复",
+          "activationCriteria": "确认轴向含义、与纸张尺寸的关系及独立适配用途，再提共享修订",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        },
+        {
+          "id": "coverage.core_diameter",
+          "name": "纸芯内径",
+          "conceptKey": "paper.core_diameter",
+          "scope": "finished-paper-core-inner-diameter",
+          "potentialUse": "有芯纸卷与指定轴杆的适配判断",
+          "deferReason": "本类是否存在此适配需求及无芯类适用性尚待确认",
+          "activationCriteria": "明确有芯/无芯适用边界与业务用途；无芯不自动填0或不适用，再另建绑定",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        },
+        {
+          "id": "coverage.roll_length",
+          "name": "单卷长度",
+          "conceptKey": "paper.roll_length",
+          "scope": "finished-paper-unwound-length",
+          "potentialUse": "按整卷展开总长度比较可用纸量",
+          "deferReason": "尚未确认相对每卷数量的独立比较价值；外部同名可能实际为单节尺寸",
+          "activationCriteria": "核实整卷展开长度与单节长度、卷宽的区别及采购用途，不能按字段名或数值大小猜测映射",
+          "references": [
+            {
+              "kind": "knowledge",
+              "id": "small-roll-paper-research-20261022",
+              "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+              "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+            }
+          ]
+        }
+      ],
+      "unresolved": [
+        "同族 small-toilet-roll 及有芯/无芯合并仍为同批待人工核实候选，本次末级方案依赖该候选基线，不能视为已发布标准。",
+        "每卷数量的张/节/格计数口径尚未取得厂家定义；当前仅以文本保留原文与计数单位，未确认不同计数词可比性，不按层数倍乘或换算。",
+        "单卷重量是否含芯/包装、是否实测尚未核实；当前按来源明确标出的每卷重量记录，不能当作去芯净纸重或物流重量。",
+        "单卷重量现有3位小数精度的专业依据未逐字段登记；保留冻结核对值，必要时另提共享修订评估，不在本叶直接改配置。",
+        "纸张尺寸在来源缺轴向语义时保留长×宽原文；单张、整卷与包装尺寸的边界及轴向含义仍待核实。",
+        "扩展候选（印花、压花、卷外径、卷宽、纸芯内径、单卷长度）启用前须修订共享基线并核实业务用途，当前不进入SKU属性合同或待填值列表；纸芯内径在无芯类的适用性也待业务确认。",
+        "本轮共同属性均先选填；是否应将是否无芯、层数或单卷重量设为必填、关键规格或标题/列表展示，待业务确认后再提绑定差异。"
+      ]
+    },
+    "finalRequestKey": "5fd116c5b479e8994832192b68a0f3747370eed3528c3f2288001f73b00cf93f"
+  },
+  "emptyIndependent": {
+    "categoryId": "f00be7ff-9f41-4ea2-b032-60c6d7bdcf4b",
+    "baselineVersion": null,
+    "attributes": [],
+    "bindings": [],
+    "extensionCandidates": [
+      {
+        "id": "ext-tissue-box-mounting",
+        "name": "安装方式",
+        "conceptKey": "paper.tissue_box.mounting",
+        "scope": "清洁用品>清洁纸品>纸品配件>纸巾盒",
+        "potentialUse": "若确实存在台式、壁挂、嵌入等放置/安装差别，会改变采购方的安装条件判断与同规格比价口径，并影响列表筛选与展示。",
+        "deferReason": "必读知识把纸巾盒的“器具用途、安装、容纳与补充装兼容”列为需先明确的业务判断，但明确指出本体与容纳空间、配套系统/型号及安装方式是否值得设字段仍需专业或业务核实；本轮无该类目商品证据，也没有可复用的属性池定义（属性池与本族基线均为空），枚举边界无法核定，故暂不进入属性合同。",
+        "activationCriteria": "业务确认该类目实际存在需要按安装方式区分的采购/安装判断，并给出经核实的取值口径（例如台式与壁挂是否为互斥单选、是否含嵌入式）；同族共享基线建立后由共享修订集中启用，不由本叶直接新增。",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "clean-paper-admission-20261023",
+            "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+            "quote": "器具用途、安装、容纳与补充装兼容"
+          }
+        ]
+      },
+      {
+        "id": "ext-tissue-box-inner-cavity",
+        "name": "内腔容纳尺寸",
+        "conceptKey": "paper.tissue_box.inner_cavity_size",
+        "scope": "清洁用品>清洁纸品>纸品配件>纸巾盒",
+        "potentialUse": "用于判断纸巾盒能容纳的抽纸包/纸巾规格，属补充装适配判断；与基础字段的商品长宽高（物流/包装尺寸）对象不同，不能互相替代。",
+        "deferReason": "是否值得单独设字段（以及长、宽、高是否各自有独立适配用途、内腔与外形口径如何区分）仍需业务核实；无本类目商品资料，无法确定计量口径与精度，不能凭经验设阈值，故仅保留候选。",
+        "activationCriteria": "业务确认采购选型确需按内腔容纳空间筛选或适配，并明确计量对象（内腔还是外形）、单位与是否需要分长/宽/高；必要时同步提报共享基线修订，避免与卷纸配件、擦手纸配件的同名参数口径分叉。",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "clean-paper-admission-20261023",
+            "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+            "quote": "本体与容纳空间、配套系统/型号及安装方式是否值得设字段"
+          },
+          {
+            "kind": "knowledge",
+            "id": "scm-field-responsibilities-20261022",
+            "version": "affcf4095798cbb58ba3e80b1431ed821e74e3b6e1bba640a72630c279185319",
+            "quote": "StdProduct.weight是商品重量，不能排除单卷标称质量；长度宽度同样按对象区分"
+          }
+        ]
+      },
+      {
+        "id": "ext-tissue-box-refill-compatibility",
+        "name": "适配纸巾形态",
+        "conceptKey": "paper.tissue_box.refill_compatibility",
+        "scope": "清洁用品>清洁纸品>纸品配件>纸巾盒",
+        "potentialUse": "用于说明纸巾盒适配的纸巾形态（如盒装抽纸、软包抽纸等），直接影响“买了盒子是否配得上现有纸巾”的选用判断与检索。",
+        "deferReason": "已读资料只证明容器/器具与补充装需要区分（分配器目录、兼容补充装型号），不足以支持本地该类目的取值全集与互斥关系；直接由外形尺寸推兼容性被明确列为反例，故本轮不建立枚举选项，也不设待填值。",
+        "activationCriteria": "业务确认该类目确需按适配纸巾形态筛选，并提供经核实的形态清单及是否可能同时适配多形态（决定单选/多选）；枚举扩充与共享基线同版处理。",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "clean-paper-admission-20261023",
+            "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+            "quote": "该页同时提供系统、材质、外形尺寸及兼容补充装型号"
+          }
+        ]
+      },
+      {
+        "id": "ext-tissue-box-material",
+        "name": "材质",
+        "conceptKey": "paper.tissue_box.material",
+        "scope": "清洁用品>清洁纸品>纸品配件>纸巾盒",
+        "potentialUse": "潜在用于比较盒体材质带来的使用环境适配（如潮湿环境、耐磕碰）与外观档次判断。",
+        "deferReason": "已读资料只在器具页面列出材质，未说明本业务是否据此选型；准入价值与取值口径均未核实，按准入规则先入扩展候选，不因外部页面有该字段就列为选填属性。",
+        "activationCriteria": "业务确认材质确实影响该类目采购选型或使用环境适配，并给出经核实的材质取值表；否则保持候补，不进入属性池。",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "clean-paper-admission-20261023",
+            "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+            "quote": "目录将擦手纸、公用卫生纸、卫卷、面巾纸、餐巾纸和分配器分开展示，并区分补充装与分配器"
+          }
+        ]
+      }
+    ],
+    "unresolved": [
+      "本叶阶段缺少可用同族基线（baselineStatus=missing_candidate_only，family 与属性池均为空，attributePool total=0），本轮未产生任何可继承定义；若需与卷纸配件、擦手纸配件共用器具类共同属性，必须先登记同族并形成共享基线后另批处理，不能在本叶静默新建重复定义。",
+      "同族归属待人工核实：纸巾盒与其兄弟末级卷纸配件、擦手纸配件同属“纸品配件”，但同父节点不足以证明同族；亦未检索到跨分支的纸巾分配器类目，需业务确认这类容器/器具是否应作为一个族，及其与耗材族（小卷纸、擦手纸）的边界。",
+      "类目对象范围待确认：本类目名称为纸巾盒，是否只含放置/收纳抽纸的盒（含装饰性罩盒），还是也含壁挂或公共区域用纸巾分配器；对象边界不明会直接改变适配与安装类属性的准入结论。",
+      "必读知识仅为研究资料（research_pending_professional_review），其明确指出纸巾盒的器具用途、安装、容纳与补充装兼容“是否值得设字段”仍需专业或业务核实；本轮据此全部放入扩展候选，不设必填也不设选填属性，需业务给出准入结论后再建合同。",
+      "基础字段与本类属性职责边界待确认：商品长宽高与商品重量已有既有职责（物流/包装口径），内腔容纳尺寸是否仍需独立属性、以及计量对象与单位，需业务确认后才能判断是否设立。",
+      "适配纸巾形态的取值全集、单选/多选口径及是否需要与耗材类目的包装规格对齐，均缺已核实依据；不得由外形尺寸推导兼容性，也不得在枚举中加“其他”兜底。",
+      "本轮未读取任何该类目商品的冻结证据（evidence 为空、product 为空），因此上述结论仅为建模候选，不构成任何SKU取值核实或完整取值范围认定，全部结果待人工采用。"
+    ]
+  }
+}

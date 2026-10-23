@@ -95,6 +95,8 @@ export async function runStage(options: {
     mode: client.mode,
   });
   try {
+    if (plan.input.sharedContext.modelingMode === "inherited_leaf" && !snapshot.baseline(task))
+      throw new Blocked("family_dependency", "inherited leaf requires a completed usable baseline; cannot fall back to independent generation");
     const knowledgeGaps = plan.tools.knowledgeGaps();
     if (task.stage !== "domain-research" && knowledgeGaps.length)
       throw new Blocked(
@@ -107,7 +109,7 @@ export async function runStage(options: {
         (forceFinal || toolCount >= limits.maxToolCalls || round + 1 === limits.maxRounds);
       const protocol = corrections.maxCorrections || corrections.converge ?
         `\n运行预算：本次请求为${round + 1}/${limits.maxRounds}轮；剩余模型工具调用${limits.maxToolCalls - toolCount}次（预取不占此额度）。` +
-        "sharedContext已经预取完整适用同族基线和必读知识，不必重复读取。工具参数必须合法JSON，UUID必须用双引号。" +
+        "sharedContext已预取实际可用基线及其引用依赖、必读知识。按modelingMode执行：independent_proposal可提出独立待审方案，缺少基线本身不是不建属性的理由；inherited_leaf必须继承。工具参数必须合法JSON，类目ID必须来自树，缺省使用JSON null而非字符串null。" +
         "search_attribute_pool的query与categoryId至少一个非空，不要用null/null；多概念分开查询，结果不是同族继承合同。" +
         "baselineAttributeId仅引用当前适用family基线中的ID；属性池里看见同名属性不代表存在继承关系。共同定义须完整保持包括类型配置；叶绑定有变更必须写differenceReason。" +
         "isPublic或标题/列表展示为true时uses须包含display；searchable须包含search。引用只用实际已读版本和逐字原文。" +

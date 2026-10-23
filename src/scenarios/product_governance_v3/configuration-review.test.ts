@@ -158,6 +158,17 @@ test("the exporter refuses mismatched row/config identities instead of prettifyi
   const input = historicalReview(); input.attributes[0]![0] = "别的属性";
   expect(() => projectConfigurationReview(input)).toThrow("identity mismatch");
 });
+test("cross-category human review signals cannot become false local configuration assertions", () => {
+  const input: any = historicalReview(); input.issues[0][2] = "用途需核实";
+  input.modelingReview = { automaticSemanticApproval: false, signals: [{ ruleId: "R07", categoryIds: ["historical-leaf"],
+    question: "核实不同对象的取舍", evidence: [{ category: "另一个类目", name: "单卷重量", scope: "另一个计量对象",
+      disposition: "extension", text: "单卷重量精度为2" }] }] };
+  const projected = projectConfigurationReview(input);
+  expect(projected.configurationAudit.conflictCount).toBe(0);
+  expect(projected.issues[0][2]).toContain("单卷重量精度为2");
+  expect(projected.issues[0][11]).toBe("用途需核实");
+  expect(projected.attributes[0][15]).toBe(input.attributes[0][15]);
+});
 test("audit projection never silently drops an orphan or duplicate attribute or category", () => {
   const orphan = historicalReview(); orphan.issues[0]![8] = "different-category";
   expect(() => projectConfigurationReview(orphan)).toThrow("identity mismatch");

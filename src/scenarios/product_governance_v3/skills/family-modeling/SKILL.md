@@ -6,13 +6,16 @@ description: 为商品治理候选类目建立同族共同属性和有理由的�
 先理解商品对象、结构、用途和现有系统字段职责，再建立候选属性；不能把当前样本缺少某信息当作业务不需要。
 
 1. 阅读预取的节点、跨分支同族候选、基线状态和按类目范围预取的属性池。线索不足时用categories_search、find_related_categories、get_family_context补查；search_attribute_pool按概念、对象或参数名查询，不能只拿完整末级名搜一次就认定没有可复用定义。相似名称只产生候选，需要说明业务共同点。
-   批次candidate.kind=batch_modeling_scope时，family成员和归组理由是待人工核实的范围资料，不是已确认的专业结论。phase=family-seed先设计所有所列成员共同适用的定义，categoryId仅为schema锚点；锚点专有的参数不能变成全族共性，不能确定的共同性及差异写unresolved。程序仅将检查通过且非空的结果登记为同批候选模板，不自动发布。phase=leaf必须消费等待完成后的冻结基线，再提出有理由的末级绑定差异；不可忽略基线或把他批候选当作可用。
+   以sharedContext.modelingMode区分任务：family_seed设计所列成员共同适用的定义，categoryId只是schema锚点；inherited_leaf消费已完成的冻结基线，再提出有理由的末级绑定差异；independent_proposal没有适用基线，按对象、业务用途及知识提出独立待审方案，baselineVersion和baselineAttributeId为null。缺少基线本身不是不建属性的理由，也不能伪造继承关系。phase=leaf只是调度阶段，不表示一定有同族基线。失败或在途的已登记依赖不能降级为独立生成。
+   批次family成员和归组理由是待核实范围，不是已确认专业结论。锚点专有参数不能变成全族共性，共同性疑点写unresolved。程序仅将检查通过且非空的同族种子登记为本批候选模板，不自动发布；不可把他批候选当作可用。
 2. attributes只描述共同定义；bindings逐项引用attributeId并绑定当前末级categoryId，承载requiredness、用途、关键规格、公开、搜索、标题/列表和排序。继承关系baselineAttributeId及differenceReason位于绑定。共同名称、概念、类型、单位、口径、枚举和约束不能在本叶静默修改；必填性等绑定确需不同，写清requirednessReason和differenceReason，仍待人工核实。是否无芯在有芯/无芯两类共同保留。
 3. 对照systemFields排除已由基础字段负责的概念；统一SKU。固定数量和计量单位合为一个定义，检查与已出属性的交叉；只有独立选择、适配、比较或计算用途才细分。
    每项rationale说明具体场景和改变的业务判断，并评估填写维护成本。设立价值未明确的放extensionCandidates，填写potentialUse、deferReason、activationCriteria和已读references，不建立binding或类型配置。新族无可准入属性时允许attributes/bindings为空，候选或unresolved写明原因，不凑造字段。复述冻结基线中的扩展候选，启用或改动先另提共享修订。不要因技术页或电商有字段就默认纳入，也不要因样本没值而删除必要参数。
 4. 必填性只用required/optional，尚未弄清是否应强制填写先optional。按输出schema填写与类型相符的numberConfig/textConfig/optionConfig，其他配置置null；未确定的范围、精度等用null，不猜专业阈值。文本format只能用原生预设枚举，不能填正则。defaultValue必须null。枚举不得用“其他”掩盖没研究的范围，多值须为同SKU同口径同时成立。
+   requirednessReason回答“缺失会妨碍哪项业务决定，是否必须强制填写”；“样本没写、包装未标注、可稳定取证后再必填”不是必填性依据，资料缺口另写unresolved。若业务影响未明，具体列出待确认的用途，不把缺证说成不重要。独立尺寸必须说明计量对象、展开/折叠/装载状态和适配关系；不能用展开宽度直接推出分配器开口是否适配。
    这里的optional只处理已有独立用途的属性是否强制填写，不能替代准入判断。名称采用不歧义的短称，细节放定义；不得用笼统“规格”混装重量/尺寸/数量，也不得机械删掉净/毛、内/外等必要限定。同概念的粗细信息优先由一个稳定类型表达，例如香型文本，不另造真假+描述两字段。工艺能否共存、计数词能否等价先核实，不凭外部标签合并。
    当前设置直接核对sharedContext.currentBaselineConfiguration及实际定义/绑定，程序会生成说明；unresolved写业务问题，不重复概括整份配置。精度、范围等已配置不代表专业依据已核实；冻结值有疑问时记录依据缺口及共享修订建议，保持本叶定义不变。不得把“依据待核实”写成“配置均为null”，也不得把“建议调整”写成已调整。
 5. 先看knowledgeRequirements、knowledgeGaps和knowledgeInventory，knowledge_list可发现未被名称路由命中的白名单材料，再用knowledge_read读取正文并判断适用性。建模依据用references记录kind=knowledge、id、实际返回的version和已读quote；它不是某个SKU的取值证据，不要求为建属性找到现有商品值。引用SKU资料则用kind=sku-source及其sha256版本，并受任务SKU范围约束。没有引用可提出有理由的候选，不伪造引用；缺必读知识时依赖候选会被阻断，应转查证并保留unresolved。
+   基线引用依赖由宿主预取并记录实际读取；补充或替换引用仍须逐字核实及判断适用性，不需要因此改定义/取舍。不能仅因泛类资料未展开某概念，就在一类保留、相似对象另一类暂缓；比较场景与对象的真实差异，不确定则列出共同待核实问题。只读到通用准入文件和字段职责，不等于专业研究完成。
 
 本阶段必须阅读[建模正反例](references/cases.md)。程序只能核查合同和基线一致性，业务必要性与同族归属仍交人工。

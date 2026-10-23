@@ -98,7 +98,7 @@ export const RULE_REGISTRY: Rule[] = [
         "implemented",
       ),
     ],
-    ["必填理由是否明确影响关键选型？拿不准必要性是否先选填？"],
+    ["必填理由是否明确影响关键选型？拿不准必要性是否先选填？modelingReview中资料可得性措辞仅为复核线索，须核实是否误用取值证据作业务判据。"],
     [],
     ["bindings.requiredness", "bindings.requirednessReason"],
     "选填且理由待确认",
@@ -113,7 +113,7 @@ export const RULE_REGISTRY: Rule[] = [
       check(
         "family-contract",
         "checks.ts:checkResult",
-        "contracts-regression.test.ts:binding differences",
+        "recorded-batch-regression.test.ts:recorded coreless response loses false binding errors",
       ),
     ],
     ["同族的共同定义和有理由的末级差异是否合理？"],

@@ -13,6 +13,8 @@ import { ResponsesClient } from "./responses.ts";
 import { systemFieldsFromInventory } from "./scm-field-inventory.ts";
 import { rollDefinitions, rollBindings, rollExtensionCandidates } from "./roll-pilot.ts";
 import { CONFIGURATION_REVIEW_VERSION } from "./scripts/configuration-review.mjs";
+import { proposalReadiness, proposalCounts } from "./proposal-readiness.ts";
+import { modelingReviewSignals } from "./modeling-review.ts";
 
 export const CLEAN_PAPER_ID = "77e31cf2-8331-4c73-ab10-823d2d1d7ab0";
 export const DEFAULT_TREE = resolve(ROOT, "../../../outputs/category-id-refresh-20261021/mapped-tree.updated.json");
@@ -125,6 +127,7 @@ export function batchTask(plan: BatchPlan, categoryId: string, phase: BatchJob["
     candidate: {
       kind: "batch_modeling_scope",
       phase,
+      modelingMode: phase === "family-seed" ? "family_seed" : group ? "inherited_leaf" : "independent_proposal",
       family: group ? {
         id: group.id,
         members: group.members.map((id) => {
@@ -342,9 +345,9 @@ export async function executeBatch(
         if (job.code === "budget_exhausted" || job.code === "http_error") stop = job.error;
       }
       await save(join(plan.outDir, "jobs", phase + "-" + hash(categoryId).slice(0, 20) + ".json"), {
-        batchId: plan.id, ...job, artifactHash: job.artifact ? hash(job.artifact) : null,
+        batchId: plan.id, ...job, proposalReadiness: proposalReadiness(job), artifactHash: job.artifact ? hash(job.artifact) : null,
       });
-      progress({ event: "finished", phase, categoryId, category: snapshot.tree.get(categoryId).name, status: job.status, code: job.code });
+      progress({ event: "finished", phase, categoryId, category: snapshot.tree.get(categoryId).name, status: job.status, code: job.code, proposalReadiness: proposalReadiness(job) });
       return job;
     };
     const input = new DataSnapshot(plan.snapshot), seeds = plan.groups.filter((g) => g.needsSeed);
@@ -383,6 +386,7 @@ export async function executeBatch(
       inputVersion: plan.inputVersion, sharedSnapshotVersion: snapshot.version,
       total: leaves.length, passed: leaves.filter((j) => j.status === "program_pass_pending_human").length,
       blocked: leaves.filter((j) => j.status === "program_blocked").length,
+      ...proposalCounts(leaves),
       familySeeds, leaves, budget: await client.budget.status(),
       networkCallsThisExecution: client.mode === "network" ? client.calls - initialCalls : 0,
       mockCallsThisExecution: client.mode === "offline" ? client.calls - initialCalls : 0,
@@ -393,7 +397,7 @@ export async function executeBatch(
     await save(join(plan.outDir, "batch.review.json"), buildBatchReview(plan, leaves, snapshot, client.mode));
     await save(join(plan.outDir, "batch.summary.json"), {
       ...result, familySeeds: familySeeds.map(({ artifact, ...j }) => j),
-      leaves: leaves.map(({ artifact, ...j }) => j),
+      leaves: leaves.map((job) => { const { artifact, ...j } = job; return { ...j, proposalReadiness: proposalReadiness(job) }; }),
     });
     return result;
   });
@@ -401,13 +405,17 @@ export async function executeBatch(
 
 export function buildBatchReview(plan: BatchPlan, jobs: BatchJob[], snapshot: DataSnapshot, mode: "offline" | "network") {
   const attributes: unknown[][] = [], extensions: unknown[][] = [], issues: unknown[][] = [];
+  const signals = modelingReviewSignals(jobs.filter(j => j.status === "program_pass_pending_human" && j.artifact).map(j => ({
+    ...j.artifact!.result as any, categoryId: j.categoryId, category: snapshot.tree.get(j.categoryId).name,
+  })));
   const types = { boolean: "是否", number: "数值", text: "文本", option: "选项", date: "日期" };
   for (const job of jobs) {
     const node = snapshot.tree.get(job.categoryId), result = job.artifact?.result as any;
     const eligible = job.status === "program_pass_pending_human";
     const group = groupFor(plan, node.id), familyTitle = group
       ? group.members.map((id) => snapshot.tree.get(id).name).join(" / ") : "独立建模，归族待审";
-    issues.push([node.name, eligible ? "程序通过，待人工审阅" : "阻断，方案未纳入",
+    issues.push([node.name, !eligible ? "阻断，方案未纳入" : proposalReadiness(job) === "no_admitted_attributes"
+      ? "零属性，建模缺口待审" : "已有方案，待人工审阅",
       job.error ?? result?.unresolved?.join("\n") ?? "", "", eligible ? result.attributes.length : null,
       familyTitle, job.code ?? "", node.path, node.id,
       job.artifact?.runKey ?? "", plan.releaseId]);
@@ -428,6 +436,8 @@ export function buildBatchReview(plan: BatchPlan, jobs: BatchJob[], snapshot: Da
   return { format: 1, batchId: plan.id, root: plan.root, releaseId: plan.releaseId,
     mode,
     adoption: "pending_human", productionWrites: 0, categoryCount: jobs.length,
+    ...proposalCounts(jobs),
+    modelingReview: { automaticSemanticApproval: false, signals },
     configurationReview: { version: CONFIGURATION_REVIEW_VERSION, source: "host_checker" },
     attributes, extensions, issues };
 }

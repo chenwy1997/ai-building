@@ -13,7 +13,8 @@ export function progressLogger(format: LogFormat,
     const name = String(event.category ?? event.categoryId ?? "");
     const label = event.event === "started" ? "开始" : event.event === "model-request"
       ? "模型请求" : event.event === "model-response" ? event.cached ? "读取缓存" : "模型响应"
-      : failed ? "阻断" : "完成，待人工审阅";
+      : failed ? "阻断" : event.proposalReadiness === "no_admitted_attributes"
+        ? "零属性，建模缺口待审" : "已有方案，待人工审阅";
     const line = format === "json" ? JSON.stringify(event) :
       `[${label}] ${phase} · ${name}${event.code ? " · " + event.code : ""}`;
     (failed ? err : out)(line + (format === "human" && event.round ? " · 第" + event.round + "轮" : ""));

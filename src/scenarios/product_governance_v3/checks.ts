@@ -136,7 +136,9 @@ export function checkResult(
     for (const c of baseline?.extensionCandidates ?? []) {
       if (attributes.some((a) => sameParameter(a, c)))
         add("R07", c.id, "frozen extension cannot enter the SKU contract; revise the shared baseline separately");
-      if (!extensions.some((other) => canonical(other) === canonical(c)))
+      // References establish provenance (R11), not the frozen business disposition.
+      const disposition = ({ references: _references, ...business }: ExtensionCandidate) => business;
+      if (!extensions.some((other) => canonical(disposition(other)) === canonical(disposition(c))))
         add("R03", c.id, "frozen extension disposition changed or omitted; propose a shared revision separately");
     }
     if (
@@ -215,7 +217,6 @@ export function checkResult(
         )!;
       const bindingFields: (keyof AttributeBinding)[] = [
         "requiredness",
-        "requirednessReason",
         "isKeySpec",
         "isPublic",
         "searchable",

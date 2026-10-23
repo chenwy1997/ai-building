@@ -9,6 +9,7 @@ import { checkResult } from "./checks.ts";
 import { projectNative } from "./native-contract.ts";
 import { parseResultJson, responseText } from "./result-json.ts";
 import { batchTask, buildBatchReview, pendingFamily, type BatchPlan, type BatchJob } from "./batch.ts";
+import { proposalReadiness, proposalCounts } from "./proposal-readiness.ts";
 import { runStage, BATCH_CORRECTIONS } from "./runner.ts";
 import type { ResponsesClient } from "./responses.ts";
 import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
@@ -246,6 +247,7 @@ async function recheckUnlocked(dir: string, release: Release) {
     mode: "offline_recheck", responseOrigin: execution.mode, total: jobs.length,
     originallyPassed: originalResults.passed,
     passed: jobs.filter((j) => j.status === "program_pass_pending_human").length,
+    ...proposalCounts(jobs),
     blocked: jobs.filter((j) => j.status === "program_blocked").length,
     additionalPassed: jobs.filter((j) => j.status === "program_pass_pending_human" &&
       !originalResults.leaves.some((old: BatchJob) => old.categoryId === j.categoryId && old.status === "program_pass_pending_human"))
@@ -330,7 +332,7 @@ export async function correctBatchLeaf(dir: string, release: Release, categoryId
           code: error instanceof Blocked ? error.code : "stage_error", error: String(error) };
       }
       await save(join(outDir, "jobs", target.phase + "-" + target.categoryId + ".json"), next);
-      progress({ event: "finished", phase: target.phase, categoryId: target.categoryId, category: name, status: next.status, code: next.code });
+      progress({ event: "finished", phase: target.phase, categoryId: target.categoryId, category: name, status: next.status, code: next.code, proposalReadiness: proposalReadiness(next) });
       return next;
     };
     const group = plan.groups.find((g) => g.members.includes(categoryId));
@@ -358,6 +360,7 @@ export async function correctBatchLeaf(dir: string, release: Release, categoryId
       sourceFingerprint: recheck.sourceFingerprint,
       releaseId: release.id, selectedCategoryId: categoryId,
       passed: corrected.status === "program_pass_pending_human" ? 1 : 0,
+      ...proposalCounts([corrected]),
       blocked: corrected.status === "program_blocked" ? 1 : 0,
       newModelRequests: client.calls - callsBefore, cacheHits: client.cacheHits - cacheBefore,
       cumulativeReservedCny: Number(budget.committedUpperBoundCny.toFixed(2)),

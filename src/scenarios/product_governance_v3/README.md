@@ -2,7 +2,15 @@
 
 v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认离线，`batch --execute`、`batch-rerun --execute`或指定失败末级的`batch-recover --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
 
-**当前清洁纸品按用户选择，使用新规则全量重跑入口。** 先预览，追加`--execute`才付费：
+**2026-10-23：rules-20261023已由用户运行完成；当前修复先做离线验收。** 见[真实响应回归与修复结果](docs/rerun-repair-20261023.md)。旧轮次为17个程序通过（其中6个零属性）、4个阻断。新代码修复参数纠错、继承引用依赖和误拦，并把已有方案、零属性、阻断分别展示。没有替用户追加DeepSeek请求，旧结果和预算不改。
+
+复核开发修复，不需要密钥或新轮次：
+
+```sh
+bun test ./src/scenarios/product_governance_v3/recorded-batch-regression.test.ts
+```
+
+以下是该历史轮次的命令，保留用于说明参数，**不能用当前新release继续旧轮次**。后续如验证新规则，须显式决定范围与新轮次名，费用继续沿用原台账；当前不要求整批重跑。
 
 ```sh
 bun src/scenarios/product_governance_v3/cli.ts batch-rerun \
@@ -12,7 +20,7 @@ bun src/scenarios/product_governance_v3/cli.ts batch-rerun \
   --concurrency 32
 ```
 
-21个末级及2个共同方案重新生成，旧提案保留。结果进入原目录`reruns/rules-20261023/`，请求与累计预算仍在原根目录。同名命令只恢复这一轮，可调并发；规则、范围和输入固定，普通失败不要换名。详见[全量重跑及验收](docs/full-rerun-20261023.md)。开发只做离线预览与模拟验收，未替用户执行付费重跑。
+该轮覆盖21个末级及2个共同方案，结果在原目录`reruns/rules-20261023/`，请求与累计预算仍在原根目录。同版规则下同名命令只恢复该轮，可调并发；规则、范围和输入固定，普通失败不要换名。详见[全量重跑及验收](docs/full-rerun-20261023.md)。
 
 2026-10-23新增[配置说明一致性修复](docs/configuration-explanations-20261023.md)：当前设置由程序从冻结合同生成，接入DeepSeek上下文、R08检查和审阅导出。新规范/skill/检查器已升级，**历史付费批次的跨版本续跑仍阻断，勿换目录整批重跑**。查看原纠正结果的新版专项复审表，只需离线重导出：
 
@@ -23,9 +31,9 @@ bun src/scenarios/product_governance_v3/cli.ts batch-export \
 
 该命令不读取模型密钥或请求模型，保留原表，新增“说明核对”及程序设置说明；专项复核不重新认定整份合同通过。同业务合同下的宿主修复仍可用`batch-recover`零请求复核；业务材料/检查器已变则需先做显式规则迁移，不能直接继续付费。详见[恢复与单类验证](docs/batch-runbook.md#宿主修复后的恢复与单类验证)及[真实失败复盘](docs/batch-recovery-20261023.md)。
 
-## 批处理入口
+## 批处理入口（初始批次示例）
 
-清洁纸品21个末级，先预检，无模型请求：
+以下为初次创建批次时的用法。已有清洁纸品目录已冻结旧版本，不能用本次新代码执行这条命令来绕过版本和累计预算；当前先用上方离线回归入口。清洁纸品21个末级，预检无模型请求：
 
 ```sh
 bun src/scenarios/product_governance_v3/cli.ts batch --category-id 77e31cf2-8331-4c73-ab10-823d2d1d7ab0 --concurrency 32 --out outputs/product-governance-v3/clean-paper-batch-20261023
@@ -91,10 +99,10 @@ flowchart LR
 | --- | --- |
 | 固定规则 | `rules.ts`登记R01—R26的来源章节、阶段、程序入口、开发回归证据、人工问题、未实施项及正反例；`release.ts`按登记加载规范及后台合同，包含原先漏接的采用/结束/核验/回退/成本规则 |
 | 阶段skill | `skills/`中建模、原文事实提取、SKU取值、审核辅助、领域研究各一包；正文及必需判例直接进入instructions，文件路径索引不算加载 |
-| 动态知识 | `knowledgeRequirements`固定当前范围必读项，优先于名称路由；`knowledge_list`发现全部白名单资料，`knowledge_read`补读。缺必读知识在请求前阻断依赖阶段，研究阶段保留具体问题 |
+| 动态知识 | `knowledgeRequirements`固定当前范围必读项；适用基线的knowledge引用也是必须实际预取的同版依赖，优先于名称路由。`knowledge_list`发现白名单资料，`knowledge_read`补读。缺必读资料或基线依赖在请求前阻断，不能以删引文绕过 |
 | 同族与属性池 | 固定快照区分confirmed、同批/他批候选、在途、失败；按类目及相关族预取定义，模型可再按概念查询；共用定义保持一致，类目绑定差异有理由且仍待审 |
 | 工具循环 | 真实`tools`声明、严格参数验证、调用分发、`call_id`配对及完整历史回传；服务端不替我们管循环上限 |
-| 程序检查 | 直接检查最终输出并决定是否阻断；不能靠模型自报“检查通过”；程序通过仍待人工 |
+| 程序检查 | 直接检查最终输出并决定是否阻断；不能靠模型自报“检查通过”。passed只计合同检查通过；proposalsPendingHuman与noAdmittedAttributes分别计已有方案和零属性。业务措辞/跨类取舍的modelingReview线索只辅助人工，不自动判错或通过 |
 
 必要的节点/祖先、跨分支候选、同族基线、字段职责、属性池命中、适用知识及SKU资料由程序预取，不依赖模型主动想起去查。分页和切片明确total、truncated、nextCursor/nextOffset；必需预取超过上下文预算就阻断，不静默删资料。
 

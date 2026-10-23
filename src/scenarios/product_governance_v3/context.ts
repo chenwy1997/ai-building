@@ -18,7 +18,10 @@ export async function assemble(
   maxContextBytes = 200000,
 ) {
   snapshot.assertTask(task);
-  snapshot.baseline(task);
+  const baseline = snapshot.baseline(task);
+  const baselineReferences = [
+    ...(baseline?.attributes ?? []), ...(baseline?.extensionCandidates ?? []),
+  ].flatMap((item) => item.references);
   const tools = new ToolRegistry(snapshot, release, task),
     prefetched: Record<string, unknown> = {};
   const allPages = async (name: string, args: Record<string, unknown>) => {
@@ -72,6 +75,14 @@ export async function assemble(
   const requiredKnowledge = new Set(
     snapshot.knowledgeRequirements(task).flatMap((r) => r.knowledgeIds),
   );
+  // Inheritance carries provenance dependencies even when name routing misses
+  // them. Never fabricate a read or silently import a new knowledge version.
+  for (const ref of baselineReferences) if (ref.kind === "knowledge") {
+    if (!snapshot.data.knowledgeIds.includes(ref.id) ||
+        release.knowledge[ref.id]?.sha256 !== ref.version)
+      throw new Blocked("baseline_reference", "frozen baseline requires unavailable/wrong-version knowledge: " + ref.id);
+    requiredKnowledge.add(ref.id);
+  }
   for (const id of snapshot.data.knowledgeIds) {
     const k = release.knowledge[id];
     if (!k)
@@ -111,6 +122,10 @@ export async function assemble(
         offset = part.nextOffset;
       } while (offset !== null);
     }
+  }
+  for (const ref of baselineReferences) {
+    const error = tools.referenceError(ref);
+    if (error) throw new Blocked("baseline_reference", `${ref.id}: ${error}`);
   }
   const instructions = instructionsFor(release, task.stage);
   let candidateProgramChecks = null;
@@ -156,7 +171,10 @@ export async function assemble(
         ? "gap_requires_research_or_human"
         : "registered_material_only",
       baselineStatus:
-        snapshot.baseline(task)?.status ?? "missing_candidate_only",
+        baseline?.status ?? "missing_candidate_only",
+      baselineReferenceDependencies: baselineReferences,
+      modelingMode: task.stage === "family-modeling"
+        ? (task.candidate as any)?.modelingMode ?? (baseline ? "inherited_leaf" : "independent_proposal") : null,
       // Derived from the same frozen baseline; configured values are not claims of professional verification.
       currentBaselineConfiguration: {
         version: CONFIGURATION_REVIEW_VERSION,

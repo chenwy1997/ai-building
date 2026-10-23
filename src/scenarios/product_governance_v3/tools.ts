@@ -48,7 +48,7 @@ const definitions = {
   },
   search_attribute_pool: {
     description:
-      "检索可复用属性定义；检查概念、对象及口径，相同名称不等于同义。",
+      "检索可复用属性定义；categoryId只接受已读类目ID或JSON null（不是字符串null），query与categoryId至少一个非空。相同名称不等于同义。",
     parameters: object({
       query: nullable(text()),
       categoryId: nullable(text()),
@@ -142,6 +142,16 @@ export class ToolRegistry {
         "tool not allowed in stage: " + name,
       );
     assertSchema(def.parameters, args, "tool " + name);
+    // Validate the whole model call group before executing any reads. A guessed ID
+    // is an argument error, not a tree failure or permission to widen the scope.
+    const categoryKey = ({ categories_search: "scopeId", categories_get: "id",
+      categories_children: "id", find_related_categories: "id",
+      get_family_context: "categoryId", search_attribute_pool: "categoryId" } as Record<string, string>)[name];
+    if (categoryKey) {
+      const id = (args as Record<string, unknown>)[categoryKey];
+      if (id !== null && !this.snapshot.tree.byId.has(id as string))
+        throw new Blocked("tool_arguments", `${name}.${categoryKey}: unknown category ID ${JSON.stringify(id)}; use an ID from the frozen tree. Nullable fields accept JSON null, never the string "null". Discover IDs with categories_search; do not guess or silently broaden scope.`);
+    }
   }
   has(sourceId: string, quote: string) {
     const source = this.snapshot.source(sourceId, this.task);
