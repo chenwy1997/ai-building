@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-23",
+  "scope": "user-selected full rerun under current rules; offline development acceptance only",
+  "releaseId": "d0d2263b0268db9e17b3dc9544484d5ef49ea8537b94c14e31927f1a9991e1d1",
+  "tests": {
+    "command": "bun --no-env-file test ./src/scenarios/product_governance_v3",
+    "passed": 198,
+    "failed": 0,
+    "expectCalls": 3462,
+    "files": 10,
+    "newRerunTests": 13
+  },
+  "typecheck": "passed",
+  "diffCheck": "passed",
+  "sourceIntegrity": {
+    "checkedFiles": 357,
+    "changedFiles": [],
+    "newRealModelRequests": 0,
+    "productionWrites": 0,
+    "apiCredentialsRead": false
+  },
+  "realBatchPreview": {
+    "mode": "new_round_preview",
+    "ready": true,
+    "originalDirectory": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023",
+    "outDir": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023/reruns/rules-20261023",
+    "roundName": "rules-20261023",
+    "roundId": "eb7134e124f2e119de161fa4aab979ba0cc688dac4f6a7f2387f73838ad048b7",
+    "releaseId": "d0d2263b0268db9e17b3dc9544484d5ef49ea8537b94c14e31927f1a9991e1d1",
+    "originalReleaseId": "826ed2544800ecdf01ceb96ce3c6cdbacffef6e57670bf5f2a1e8b6f99b6eaab",
+    "categoryId": "77e31cf2-8331-4c73-ab10-823d2d1d7ab0",
+    "leafCount": 21,
+    "familySeeds": [
+      "jumbo-toilet-roll",
+      "facial-tissue"
+    ],
+    "concurrency": 32,
+    "preflight": [],
+    "sourceProposalsReused": 0,
+    "preservedReviewedBaselineFamilies": [
+      "small-toilet-roll"
+    ],
+    "originalRequestCount": 54,
+    "cumulativeReservedCny": 70.2,
+    "budgetLimitCny": 200,
+    "remainingReservationCny": 129.8,
+    "maximumAdditionalRequests": 138,
+    "maximumAdditionalReservationCny": 179.4,
+    "fullWorstCaseFitsRemainingBudget": false,
+    "accounting": "沿用原费用台账，数值为保守预留，不是实际账单；触顶停止，不自动提额",
+    "networkCalls": 0,
+    "productionWrites": 0,
+    "adoption": "pending_human",
+    "next": "同名同范围命令加--execute才付费；重复执行只恢复这一轮，可调并发；不换round名处理普通失败"
+  },
+  "constructedAcceptance": {
+    "stages": 23,
+    "leaves": 21,
+    "familySeeds": 2,
+    "mockRequests": 46,
+    "toolCallsPerStage": 1,
+    "concurrency": 4,
+    "allPassed": true,
+    "replayNewRequests": 0,
+    "replayCacheHits": 46,
+    "paidRequests": 0,
+    "notes": "Constructed responses exercise the actual assembled context, tools, checker and shared accounting. Not evidence of DeepSeek domain quality."
+  },
+  "remaining": {
+    "realRerunExecuted": false,
+    "professionalPrecisionBasis": "pending",
+    "countUnits": "张/节/格口径仍待核实",
+    "automaticAdoption": false,
+    "productionApplication": false
+  }
+}

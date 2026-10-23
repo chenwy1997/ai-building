@@ -78,6 +78,7 @@ export interface BatchPlan {
   maximumReservationCny: number;
   productionWrites: 0;
   adoption: "pending_human";
+  accounting?: { directory: string; originalBatchId: string; roundName: string; roundId: string };
 }
 type StageArtifact = Awaited<ReturnType<typeof runStage>>;
 export interface BatchJob {
@@ -290,17 +291,33 @@ export async function executeBatch(
   if (plan.releaseId !== release.id || hash(plan.snapshot) !== plan.inputVersion)
     throw Error("batch/release/input integrity mismatch");
   if (plan.preflight.length) throw new Blocked("batch_preflight", "resolve preflight issues before paid execution");
-  if (resolve(client.dir) !== plan.outDir || resolve(client.budget.path) !== join(plan.outDir, "budget.json"))
+  const accountingDir = plan.accounting?.directory ?? plan.outDir;
+  if (resolve(client.dir) !== accountingDir || resolve(client.budget.path) !== join(accountingDir, "budget.json"))
     throw Error("all batch jobs must share the same output directory and budget ledger");
   if (client.mode === "network" && (client.reserveCny !== plan.reserveCny ||
       client.budget.limitCny !== plan.budgetCny || client.budget.pricingId !== plan.pricingId))
     throw Error("network client reservation/budget differs from the frozen batch");
-  return lock(join(plan.outDir, "execution.lock"), async () => {
+  return lock(join(accountingDir, "execution.lock"), async () => {
+    if (plan.accounting) {
+      const source = await read(join(accountingDir, "batch.identity.json")), { id: sourceId, ...sourceIdentity } = source,
+        round = await read(join(plan.outDir, "rerun.identity.json")), { id: roundId, ...roundIdentity } = round,
+        execution = await read(join(accountingDir, "execution.identity.json"));
+      if (sourceId !== hash(sourceIdentity) || sourceId !== plan.accounting.originalBatchId ||
+          roundId !== hash(roundIdentity) || roundId !== plan.accounting.roundId || round.sourceBatchId !== sourceId ||
+          round.releaseId !== plan.releaseId || round.roundName !== plan.accounting.roundName ||
+          plan.outDir !== join(accountingDir, "reruns", plan.accounting.roundName) ||
+          round.snapshotVersion !== plan.inputVersion || hash(round.categoryIds) !== hash(plan.categoryIds) ||
+          hash(round.model) !== hash(plan.model) || hash(round.limits) !== hash(plan.limits) ||
+          execution.batchId !== sourceId || execution.mode !== client.mode || execution.transportId !== client.transportId ||
+          execution.budgetCny !== client.budget.limitCny || execution.pricingId !== client.budget.pricingId)
+        throw new Blocked("rerun_identity_drift", "rerun scope, release or shared accounting differs from its frozen identity");
+    }
     await freezeFile(join(plan.outDir, "batch.identity.json"), { ...identity, id: plan.id });
     const initialCalls = client.calls, initialCacheHits = client.cacheHits;
     await freezeFile(join(plan.outDir, "execution.identity.json"), {
       batchId: plan.id, mode: client.mode, transportId: client.transportId,
       budgetCny: client.budget.limitCny, pricingId: client.budget.pricingId,
+      ...(plan.accounting ? { accountingDirectory: accountingDir, originalBatchId: plan.accounting.originalBatchId } : {}),
     });
     await client.budget.init();
     let stop: string | null = null;

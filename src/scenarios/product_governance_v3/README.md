@@ -1,6 +1,18 @@
 # 商品治理v3：类目属性提案与审阅
 
-v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认离线，`batch --execute`或指定失败末级的`batch-recover --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
+v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认离线，`batch --execute`、`batch-rerun --execute`或指定失败末级的`batch-recover --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
+
+**当前清洁纸品按用户选择，使用新规则全量重跑入口。** 先预览，追加`--execute`才付费：
+
+```sh
+bun src/scenarios/product_governance_v3/cli.ts batch-rerun \
+  --out outputs/product-governance-v3/clean-paper-batch-20261023 \
+  --round rules-20261023 \
+  --category-id 77e31cf2-8331-4c73-ab10-823d2d1d7ab0 \
+  --concurrency 32
+```
+
+21个末级及2个共同方案重新生成，旧提案保留。结果进入原目录`reruns/rules-20261023/`，请求与累计预算仍在原根目录。同名命令只恢复这一轮，可调并发；规则、范围和输入固定，普通失败不要换名。详见[全量重跑及验收](docs/full-rerun-20261023.md)。开发只做离线预览与模拟验收，未替用户执行付费重跑。
 
 2026-10-23新增[配置说明一致性修复](docs/configuration-explanations-20261023.md)：当前设置由程序从冻结合同生成，接入DeepSeek上下文、R08检查和审阅导出。新规范/skill/检查器已升级，**历史付费批次的跨版本续跑仍阻断，勿换目录整批重跑**。查看原纠正结果的新版专项复审表，只需离线重导出：
 
@@ -55,7 +67,7 @@ bun src/scenarios/product_governance_v3/cli.ts plan --snapshot /绝对路径/sna
 
 `sku-filling`、`fact-extraction`另需`--product-id`；`review-assistance`另需`--candidate` JSON文件，包含`stage`（family-modeling或sku-filling）和`result`（候选结果）。审核SKU取值时需带对应`--product-id`读取证据。候选程序错误直接进入审核上下文，并继续阻断结果，模型不能靠空意见列表把错误抹掉。参数严格校验，错命令/未知参数报错。`batch`调用相同`runStage`，共享全批预算和冻结依赖，不接受商品试填阶段；没有`apply`入口。
 
-小卷纸的只读采集、准备、录制回放、工作簿与初次事实意见导入，见[样板运行说明](docs/roll-pilot-runbook.md)。只有显式`capture-roll-pilot`联网读取供应链及其密钥；固定两类各最多3件，不自动翻页/重试。模型密钥仅由`batch --execute`和指定失败末级的`batch-recover --execute`读取。
+小卷纸的只读采集、准备、录制回放、工作簿与初次事实意见导入，见[样板运行说明](docs/roll-pilot-runbook.md)。只有显式`capture-roll-pilot`联网读取供应链及其密钥；固定两类各最多3件，不自动翻页/重试。模型密钥仅由`batch --execute`、`batch-rerun --execute`和指定失败末级的`batch-recover --execute`读取。
 
 ## 资料怎样真正进入DeepSeek
 

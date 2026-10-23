@@ -6,6 +6,7 @@
 
 | 文档 | 用途与状态 | 如何进入执行 |
 | --- | --- | --- |
+| [按新规则全量重跑](full-rerun-20261023.md) / [验收记录](full-rerun-acceptance-20261023.json) | 当前用户选择：重新生成清洁纸品全批提案，保留旧结果与累计费用 | `batch-rerun --round 固定名称`默认离线预览，显式`--execute`付费；同名重复只恢复这一轮 |
 | [配置说明一致性修复](configuration-explanations-20261023.md) | 真实DeepSeek说明与precision=3的矛盾、程序生成设置、业务疑点与配置依据分开 | 新上下文/skill/R08和离线专项复审；原响应及配置保留，跨业务版本付费续跑仍阻断 |
 | [真实失败复盘与恢复](batch-recovery-20261023.md) / [验收摘要](batch-recovery-acceptance-20261023.json) | 用户首轮21类的实际响应、根因、离线复核和单类纠正 | 先`batch-recover`零请求复核；170项回归；指定一个失败末级并`--execute`才新增付费请求，沿用原累计费用 |
 | [类目属性批处理](batch-runbook.md) / [验收记录](batch-entry-acceptance-20261023.json) | 2026-10-23用户授权新增的手动DeepSeek提案入口、并发/类目参数、同族屏障、恢复及费用 | 152项回归通过；`batch`默认预检，`--execute`才请求付费模型；没有试填或线上写入 |
