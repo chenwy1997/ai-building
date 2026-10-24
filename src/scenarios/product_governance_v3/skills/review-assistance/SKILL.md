@@ -13,4 +13,6 @@ description: 对商品治理候选提供按规则定位的审核线索，适用�
 
 说明与配置分别核对：当前设置读结构化定义/绑定及程序投影，业务疑点核查依据。不能把“精度依据待核实”解释成当前precision=null，配置存在也不等于专业阈值已经确认。发现冲突定位字段和两种陈述；真实修改建议不当成当前事实。程序仅识别部分明确断言，不能据此免除自然语言人审。
 
+核对decisions与attributes、bindings、extensionCandidates的对应；businessNeed、professionalReadiness和valueEvidence不能混为一谈。程序检查requiredNecessity与必填的冲突，以及数量字段同/异/条件重合的职责计划；这些声明是否真实合理仍需人审。跨族已有ID也须保持同一完整定义。包内数量不能默认与销售单位数量相同或独立，conditional须有明确的两种条件及重合时复用基础字段的措施。
+
 本阶段必须阅读[审核正反例](references/cases.md)。专业问题交有相应知识的人裁定，并扩查共同模板、同族和依赖结果。

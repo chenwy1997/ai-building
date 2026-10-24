@@ -1,3 +1,4 @@
+import { needsQuantityMapping, type ModelingDecision } from "./modeling-contract.ts";
 import {
   jsonClone,
   hash,
@@ -160,13 +161,13 @@ export function fixtureSnapshot(): Snapshot {
     version: "fixture-2",
     kind: "fixture",
     tree: { nodes },
-    systemFields: jsonClone(REQUIRED_SYSTEM_OWNERS),
+    systemFields: [...jsonClone(REQUIRED_SYSTEM_OWNERS), {key: "unitMin", names: ["最小计量单位"], conceptKeys: ["sales.min_unit"]}],
     systemFieldCoverage: {
       version: "fixture-ownership-1",
       source: "constructed fixture; not a production inventory",
       sourceHash: "pending",
       status: "complete",
-      coveredKeys: ["brandId", "supplierId", "salesUnit", "specName"],
+      coveredKeys: ["brandId", "supplierId", "salesUnit", "specName", "unitMin"],
     },
     families: [
       {
@@ -405,7 +406,7 @@ export function fixtureOutput(stage: Stage): any {
     };
   }
   if (stage === "family-modeling")
-    return {
+    return withFixtureDecisions({
       categoryId,
       baselineVersion: "fixture-baseline-1",
       attributes: fixtureSnapshot().attributes,
@@ -416,7 +417,7 @@ export function fixtureOutput(stage: Stage): any {
       })),
       extensionCandidates: fixtureSnapshot().families[0]!.extensionCandidates ?? [],
       unresolved: ["构造样例，需人工判定必要性"],
-    };
+    });
   if (stage === "sku-filling")
     return {
       categoryId,
@@ -589,4 +590,26 @@ export function happyScript(stage: Stage) {
       return [finalMessage(result)];
     },
   ]);
+}
+
+// Explicit annotations for constructed/offline test responses. Not a model-result migration.
+// Decision tests explicitly override the facts under test; these annotations are never evidence of business correctness.
+export function withFixtureDecisions<T extends {attributes: any[]; bindings: any[]; extensionCandidates: any[]}>(output: T): T & {decisions: ModelingDecision[]} {
+  return {...output, decisions: [...output.attributes, ...output.extensionCandidates].map(item => {
+    const admitted = output.attributes.some(a => a.id === item.id);
+    return {
+      objectId: item.id, disposition: admitted ? "admitted" : "extension",
+      businessNeed: admitted ? "confirmed" : "pending", admissionBasis: "business_need",
+      businessReason: "离线构造的业务决策注释，仅用于检查接线，不是已完成人工确认",
+      requiredNecessity: output.bindings.find(b => b.attributeId === item.id)?.requiredness === "required" ? "confirmed" : "pending",
+      requirednessBasis: "business_need", professionalReadiness: admitted ? "defined" : "pending",
+      professionalReason: "离线构造的定义就绪注释；不代表真实专业验收", valueEvidence: "unassessed",
+      quantity: needsQuantityMapping(item) ? {
+        measure: "contents_per_package", countedObject: "构造纸张", denominator: "package", countTerms: ["张"],
+        systemFieldKeys: ["unitMin"], relation: "conditional", sameWhen: "销售单位=包且最小单位=张，口径相同",
+        differentWhen: "销售单位=提且最小单位=包，包内张数是另一个参数", overlapAction: "reuse_system_field",
+        reason: "仅构造两种单位层级，用于离线检查；不从商品缺值推导准入",
+      } : null,
+    } as ModelingDecision;
+  })};
 }

@@ -1,3 +1,4 @@
+import { withFixtureDecisions } from "./fixtures.ts";
 import { test, expect, beforeAll, afterAll } from "bun:test";
 import { mkdtemp, rm, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -142,8 +143,8 @@ test("normal progress is stdout; only blocked progress is stderr", () => {
 const LEAF = "f4bb18c7-b736-4fe6-91d1-60c4d05fcee6";
 const good = (id = LEAF) => {
   const a = attribute({ id: "synthetic.recovery", name: "模拟参数", conceptKey: "synthetic.recovery", fieldType: "text" });
-  return { categoryId: id, baselineVersion: null, attributes: [a], bindings: [binding(a.id, { categoryId: id })],
-    extensionCandidates: [], unresolved: ["构造的历史失败回执，非真实业务结论"] };
+  return withFixtureDecisions({ categoryId: id, baselineVersion: null, attributes: [a], bindings: [binding(a.id, { categoryId: id })],
+    extensionCandidates: [], unresolved: ["构造的历史失败回执，非真实业务结论"] });
 };
 async function legacy(code: "final_json" | "tool_arguments" = "final_json") {
   const dir = next(), plan = await prepareBatch({ categoryId: LEAF, outDir: dir, runId: "legacy-mock", concurrency: 1,
@@ -256,7 +257,7 @@ test("targeted recovery creates the failed common baseline first and never dispa
       result.baselineVersion = baseline.version;
       result.bindings = baseline.bindings.map((b: any) => ({ ...b, categoryId: id, baselineAttributeId: b.attributeId }));
     }
-    return Response.json({ status: "completed", output: [finalMessage(result)] });
+    return Response.json({ status: "completed", output: [finalMessage(withFixtureDecisions(result))] });
   };
   const client = new ResponsesClient({ mode: "offline", transportId: "family-recovery", fetch }, dir, budget);
   const result = await correctBatchLeaf(dir, release, id, client);

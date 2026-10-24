@@ -1,3 +1,4 @@
+import { uniqueDefinitions, usableDefinitions } from "./modeling-contract.ts";
 import {
   object,
   text,
@@ -317,15 +318,12 @@ export class ToolRegistry {
           ...(!relatedIds ? this.snapshot.data.attributes : []),
           ...families.flatMap((f) => f.attributes),
         ];
-        const items = [
-          ...new Map(candidates.map((a) => [hash(a), a])).values(),
-        ].filter(
-          (a) =>
-            !q ||
-            [a.name, a.conceptKey, a.definition, a.scope].some((s) =>
-              s.toLowerCase().includes(q),
-            ),
-        );
+        const matched = candidates.filter(a => !q ||
+          [a.name, a.conceptKey, a.definition, a.scope].some(s => s.normalize("NFKC").toLowerCase().includes(q)));
+        const candidateIds = new Set(matched.map(a => a.id));
+        // Inspect all versions of matched IDs; unrelated conflicts do not poison a targeted search.
+        uniqueDefinitions(usableDefinitions(this.snapshot.data, this.task.runId).filter(a => candidateIds.has(a.id)));
+        const items = uniqueDefinitions(matched);
         result = paginate(items, {
           name,
           query: args.query,

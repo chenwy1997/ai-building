@@ -10,3 +10,6 @@
 - 普通业务属性仍由模型提案、人工采用；fixture仅为构造验收样例，不发布为真实类目标准。
 - 验收必须经过实际装配、function调用/回传、结果检查和记录保存；不能仅检查工具名称或提示词出现。
 - 新建审阅Excel默认复用scripts/review-layout.defaults.json和review-workbook-layout.mjs；除显式指定外不另造字号/行高/表头样式。左侧冻结通过参数配置，不能在新模板写死列数。具体边界及命令见docs/excel-review-layout.md。
+
+- 2026-10-24：family-modeling输出必须有逐项decisions，业务必要性、专业定义及SKU取值资料分开；数量按对象/分母/计数词对照unitMin职责，同ID跨族也不能改定义。历史响应缺新字段应明确报告合同不兼容，禁止运行时自动补成“confirmed”；fixtures注释只供离线测试。
+- 预算提额只能通过用户明确授权的budget-set-remaining追加记录，保持原limitCny身份及所有历史预留；同授权ID重复不补余额。有效额度读取adjustments，不得直接改原始limit或自动清零/提额。

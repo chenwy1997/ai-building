@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
 import { resolve, join as joinPath } from "node:path";
-import { read, save, STAGES, type Stage, type Task } from "./core.ts";
+import { read, save, hash, lock, STAGES, type Stage, type Task } from "./core.ts";
 import { freezeRelease, loadRelease } from "./release.ts";
 import { DataSnapshot } from "./snapshot.ts";
 import { CategoryIndex } from "./catalog.ts";
@@ -37,6 +37,7 @@ const USAGE = `商品治理v3：类目属性提案；默认离线，batch、batc
   bun src/scenarios/product_governance_v3/cli.ts offline-acceptance --out outputs/product-governance-v3/offline
   bun src/scenarios/product_governance_v3/cli.ts plan --snapshot /abs/snapshot.json --category-id ID --stage family-modeling --run-id BATCH --out /abs/plan.json
   bun src/scenarios/product_governance_v3/cli.ts tree-search --tree scratch-category-baseline-20261010/mapped-tree.json --query 小卷纸 --limit 10
+  bun src/scenarios/product_governance_v3/cli.ts budget-set-remaining --out /original-batch-dir --remaining-cny 100 --adjustment-id user-20261024 --reason 用户确认增加剩余预留额度
   bun src/scenarios/product_governance_v3/cli.ts freeze-release
   bun src/scenarios/product_governance_v3/cli.ts capture-roll-pilot --out /new/capture-dir
   bun src/scenarios/product_governance_v3/cli.ts inventory-scm-fields --source-root /local/scm-repository --out /abs/inventory.json
@@ -84,6 +85,9 @@ export async function main(argv: string[]) {
       "freeze-through": { type: "string", multiple: true },
       "log-format": { type: "string" },
       round: { type: "string" },
+      "remaining-cny": { type: "string" },
+      "adjustment-id": { type: "string" },
+      reason: { type: "string" },
     },
   });
   const required = (key: keyof typeof values) => {
@@ -96,7 +100,25 @@ export async function main(argv: string[]) {
   if (values.round && positionals[0] !== "batch-rerun") throw Error("--round仅用于batch-rerun");
   if ((values["category-ids"] !== undefined || values["reasoning-effort"] !== undefined) && positionals[0] !== "batch-rerun")
     throw Error("--category-ids和--reasoning-effort当前仅用于batch-rerun");
+  if (["remaining-cny", "adjustment-id", "reason"].some(k => values[k as keyof typeof values] !== undefined) && positionals[0] !== "budget-set-remaining")
+    throw Error("额度调整参数只用于budget-set-remaining");
   switch (positionals[0]) {
+    case "budget-set-remaining": {
+      for (const key of Object.keys(values)) if (!["out", "remaining-cny", "adjustment-id", "reason"].includes(key))
+        throw Error("budget-set-remaining只接受原批次目录、剩余额度、授权ID和原因；不会执行模型任务");
+      const directory = resolve(required("out"));
+      return lock(joinPath(directory, "execution.lock"), async () => {
+        const source = await read(joinPath(directory, "batch.identity.json")), {id, ...identity} = source,
+          execution = await read(joinPath(directory, "execution.identity.json"));
+        if (source.accounting || source.format !== 1 || id !== hash(identity) || execution.batchId !== id)
+          throw Error("额度调整须指向完整的原始批次根目录");
+        const budget = new Budget(directory, execution.budgetCny, execution.pricingId);
+        const result = await budget.setRemaining(Number(required("remaining-cny")), required("adjustment-id"), required("reason"));
+        return {budgetPath: budget.path, originalLimitCny: result.originalLimitCny, limitCny: result.limitCny,
+          cumulativeReservedCny: Number(result.committedUpperBoundCny.toFixed(2)), remainingReservationCny: result.remainingReservationCny,
+          adjustment: result.adjustments?.at(-1), accounting: result.accounting, modelRequests: 0};
+      });
+    }
     case "batch-export":
       return exportBatchReview(resolve(required("out")), layoutArgs(values));
     case "batch-rerun": {

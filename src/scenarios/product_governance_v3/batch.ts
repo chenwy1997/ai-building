@@ -276,13 +276,13 @@ export async function mapConcurrent<T, R>(items: T[], concurrency: number, work:
 }
 export function pendingFamily(group: Group, artifact: StageArtifact, runId: string): Family {
   const result = artifact.result as {
-    attributes: AttributeDefinition[]; bindings: AttributeBinding[]; extensionCandidates: ExtensionCandidate[];
+    attributes: AttributeDefinition[]; bindings: AttributeBinding[]; extensionCandidates: ExtensionCandidate[]; decisions: import("./modeling-contract.ts").ModelingDecision[];
   };
   const bindings = result.bindings.map((b) => ({ ...b, categoryId: null, baselineAttributeId: null, differenceReason: null }));
   return {
     id: group.id, members: group.members, status: "candidate", runId,
-    version: hash({ attributes: result.attributes, bindings, extensionCandidates: result.extensionCandidates }),
-    attributes: result.attributes, bindings, extensionCandidates: result.extensionCandidates,
+    version: hash({ attributes: result.attributes, bindings, extensionCandidates: result.extensionCandidates, decisions: result.decisions }),
+    attributes: result.attributes, bindings, extensionCandidates: result.extensionCandidates, decisions: result.decisions,
   };
 }
 export async function executeBatch(
@@ -426,7 +426,7 @@ export function buildBatchReview(plan: BatchPlan, jobs: BatchJob[], snapshot: Da
         types[a.fieldType] + (a.unit ? " / " + a.unit : ""), a.rationale, "", "", a.definition,
         b.requirednessReason, b.differenceReason ?? "", familyTitle,
         node.path, a.id, a.conceptKey, a.scope,
-        JSON.stringify({ ...a, references: undefined, ...b }),
+        JSON.stringify({ ...a, references: undefined, ...b, decision: result.decisions?.find((d: any) => d.objectId === a.id) }),
         a.references.map((r) => `${r.id} @${r.version}\n${r.quote}`).join("\n\n")]);
     }
     for (const c of result.extensionCandidates as ExtensionCandidate[])
@@ -438,6 +438,9 @@ export function buildBatchReview(plan: BatchPlan, jobs: BatchJob[], snapshot: Da
     adoption: "pending_human", productionWrites: 0, categoryCount: jobs.length,
     ...proposalCounts(jobs),
     modelingReview: { automaticSemanticApproval: false, signals },
+    modelingDecisions: jobs.filter(j => j.status === "program_pass_pending_human" && j.artifact).map(j => ({
+      categoryId: j.categoryId, decisions: (j.artifact!.result as any).decisions ?? [],
+    })),
     configurationReview: { version: CONFIGURATION_REVIEW_VERSION, source: "host_checker" },
     attributes, extensions, issues };
 }

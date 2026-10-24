@@ -6,7 +6,8 @@
 
 | 文档 | 用途与状态 | 如何进入执行 |
 | --- | --- | --- |
-| [洗脸巾与抽纸同族小范围验证](small-scope-reasoning-pilot-20261023.md) | 当前：精确3类和1次同族共同方案；原请求为low，先A组再决定high对照 | 用户执行`batch-rerun --category-ids ... --reasoning-effort low --execute`；同轮冻结范围/档位，所有组共用原累计预算，开发不启动付费请求 |
+| [low/high前三项质量修复](pilot-quality-fixes-20261024.md) | 当前：共享ID、必填冲突、数量职责、准入依据；226项离线测试＋五阶段模拟验收 | 新合同强制decisions，真实8份结果作回归，旧结果不自动补全；未新增付费请求；剩余预留100元 |
+| [洗脸巾与抽纸同族小范围验证](small-scope-reasoning-pilot-20261023.md) | 历史：精确3类和1次同族共同方案；low/high两轮现已执行 | 用户执行`batch-rerun --category-ids ... --reasoning-effort low --execute`；同轮冻结范围/档位，所有组共用原累计预算，开发不启动付费请求 |
 | [真实响应回归与修复](rerun-repair-20261023.md) | 当前：修复rules-20261023的参数纠错、引用漏接、误拦及空方案展示；210项离线回归通过 | 原始响应录制进入真实装配/工具循环/检查；未新增模型请求，历史status与预算不改；专业质量仍待研究、人审 |
 | [按新规则全量重跑](full-rerun-20261023.md) / [验收记录](full-rerun-acceptance-20261023.json) | 已由用户执行的历史轮次，保留旧结果与累计费用 | `batch-rerun --round 固定名称`同名只支持同版恢复；当前规则已有修复，不能直接继续该历史轮次 |
 | [配置说明一致性修复](configuration-explanations-20261023.md) | 真实DeepSeek说明与precision=3的矛盾、程序生成设置、业务疑点与配置依据分开 | 新上下文/skill/R08和离线专项复审；原响应及配置保留，跨业务版本付费续跑仍阻断 |

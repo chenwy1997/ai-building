@@ -1,3 +1,4 @@
+import { QUANTITY_RESPONSIBILITY } from "./modeling-contract.ts";
 import { canonical, hash, type Task, Blocked } from "./core.ts";
 import { outputSchemas } from "./contracts.ts";
 import {
@@ -19,9 +20,9 @@ export async function assemble(
 ) {
   snapshot.assertTask(task);
   const baseline = snapshot.baseline(task);
-  const baselineReferences = [
+  const baselineReferences = [...new Map([
     ...(baseline?.attributes ?? []), ...(baseline?.extensionCandidates ?? []),
-  ].flatMap((item) => item.references);
+  ].flatMap((item) => item.references).map(ref => [hash(ref), ref])).values()];
   const tools = new ToolRegistry(snapshot, release, task),
     prefetched: Record<string, unknown> = {};
   const allPages = async (name: string, args: Record<string, unknown>) => {
@@ -159,6 +160,9 @@ export async function assemble(
       snapshotVersion: snapshot.version,
       snapshotKind: snapshot.data.kind,
       systemFields: snapshot.data.systemFields,
+      quantityResponsibility: task.stage === "family-modeling" ||
+        (task.stage === "review-assistance" && (task.candidate as any)?.stage === "family-modeling")
+        ? QUANTITY_RESPONSIBILITY : null,
       systemFieldCoverage: snapshot.data.systemFieldCoverage,
       ruleResponsibilities: RULE_REGISTRY.filter((r) =>
         r.stages.includes(task.stage),

@@ -1,3 +1,4 @@
+import { effectiveBudgetLimit } from "./budget.ts";
 import { readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { read, save, exists, hash, lock, jsonClone, Blocked, type Task } from "./core.ts";
@@ -256,7 +257,7 @@ async function recheckUnlocked(dir: string, release: Release) {
       .map((j) => ({ categoryId: j.categoryId, category: shared.tree.get(j.categoryId).name, note: "程序通过但无已建模属性，须人工决定是否需补研究" })),
     pending, traces, reusedCorrections,
     cumulativeReservedCny: Number(budgetBefore.entries.reduce((sum: number, e: any) => sum + e.reservedCny, 0).toFixed(2)),
-    budgetLimitCny: budgetBefore.limitCny, accounting: "保守累计预留，不是实际账单",
+    budgetLimitCny: effectiveBudgetLimit(budgetBefore), accounting: "保守累计预留，不是实际账单",
     newModelRequests: 0, originalArtifactsModified: false, businessRepairs: 0, productionWrites: 0,
     adoption: "pending_human",
   };

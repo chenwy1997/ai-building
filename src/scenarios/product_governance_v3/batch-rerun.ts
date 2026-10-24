@@ -1,3 +1,4 @@
+import { effectiveBudgetLimit } from "./budget.ts";
 import { readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { read, save, exists, hash, lock, jsonClone, Blocked } from "./core.ts";
@@ -115,7 +116,7 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
     await frozen(join(outDir, "rerun.identity.json"), { ...roundIdentity, id: roundId });
     await frozen(join(outDir, "batch.identity.json"), { ...identity, id: plan.id });
     const reserved = Number(ledger.entries.reduce((sum: number, e: any) => sum + e.reservedCny, 0).toFixed(2)),
-      remaining = Number((ledger.limitCny - reserved).toFixed(2));
+      remaining = Number((effectiveBudgetLimit(ledger) - reserved).toFixed(2));
     const preview = { mode: "new_round_preview", ready: !plan.preflight.length, originalDirectory: directory, outDir,
       roundName: options.roundName, roundId, releaseId: release.id, originalReleaseId: source.releaseId,
       categoryId: options.categoryIds ? null : categoryId, categoryIds,
@@ -123,7 +124,7 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
       leafCount: categoryIds.length, familySeeds: groups.filter((g) => g.needsSeed).map((g) => g.id),
       concurrency: plan.concurrency, preflight: plan.preflight, sourceProposalsReused: 0,
       preservedReviewedBaselineFamilies: groups.filter((g) => !g.needsSeed).map((g) => g.id),
-      originalRequestCount: keys.length, cumulativeReservedCny: reserved, budgetLimitCny: ledger.limitCny,
+      originalRequestCount: keys.length, cumulativeReservedCny: reserved, budgetLimitCny: effectiveBudgetLimit(ledger),
       remainingReservationCny: remaining, maximumAdditionalRequests: plan.maximumRequests,
       maximumAdditionalReservationCny: plan.maximumReservationCny,
       fullWorstCaseFitsRemainingBudget: remaining >= plan.maximumReservationCny,

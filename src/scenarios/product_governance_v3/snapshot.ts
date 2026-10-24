@@ -23,6 +23,7 @@ import {
   attributeSchema,
   bindingSchema,
   extensionCandidateSchema,
+  modelingDecisionSchema,
   valueSchema,
 } from "./contracts.ts";
 import { CategoryIndex } from "./catalog.ts";
@@ -115,6 +116,7 @@ const snapshotSchema = object({
         attributes: list(attributeSchema),
         bindings: list(bindingSchema),
         extensionCandidates: list(extensionCandidateSchema),
+        decisions: list(modelingDecisionSchema),
       },
       ["id", "version", "members", "status", "runId", "attributes", "bindings"],
     ),

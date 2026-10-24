@@ -1,3 +1,4 @@
+import { withFixtureDecisions } from "./fixtures.ts";
 import { beforeAll, afterAll, describe, test, expect } from "bun:test";
 import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -58,7 +59,7 @@ async function checked(
 ) {
   return checkResult(
     fixtureTask(stage),
-    output,
+    stage === "family-modeling" ? withFixtureDecisions(output as any) : output,
     (await plan(stage, data)).tools,
   );
 }
@@ -219,7 +220,7 @@ describe("system ownership and fact preparation prerequisites", () => {
     disguised.systemFieldCoverage.sourceHash = hash(disguised.systemFields);
     expect(() => new DataSnapshot(disguised)).toThrow("responsibilities");
     expect(new DataSnapshot(fixtureSnapshot()).data.systemFields).toHaveLength(
-      4,
+      5,
     );
   });
   test("old flat format and stale fact preparation fail explicitly", () => {
@@ -354,6 +355,7 @@ describe("native configuration contract is exercised in persisted stage output",
     const data = fixtureSnapshot(),
       output = fixtureOutput("family-modeling");
     data.families = [];
+    data.attributes = []; // New constructed definitions, not mutation of a registered ID.
     output.baselineVersion = null;
     output.bindings.forEach((b: any) => (b.baselineAttributeId = null));
     output.attributes[1].numberConfig = {
@@ -369,7 +371,7 @@ describe("native configuration contract is exercised in persisted stage output",
     });
     const { artifact, dir } = await runMock(
       "family-modeling",
-      scriptedFetch([[finalMessage(output)]]),
+      scriptedFetch([[finalMessage(withFixtureDecisions(output))]]),
       data,
     );
     expect(artifact.checks.status).toBe("program_pass_pending_human");

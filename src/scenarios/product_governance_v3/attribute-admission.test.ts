@@ -1,3 +1,4 @@
+import { withFixtureDecisions } from "./fixtures.ts";
 import { beforeAll, afterAll, test, expect } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -37,7 +38,7 @@ async function plan(stage: Stage, data: Snapshot = fixtureSnapshot()) {
   return assemble(release, new DataSnapshot(data), fixtureTask(stage));
 }
 async function report(stage: Stage, result: unknown, data: Snapshot) {
-  return checkResult(fixtureTask(stage), result, (await plan(stage, data)).tools);
+  return checkResult(fixtureTask(stage), stage === "family-modeling" ? withFixtureDecisions(result as any) : result, (await plan(stage, data)).tools);
 }
 
 test("extensions travel through actual context and function return without becoming attributes or native projections", async () => {
@@ -52,7 +53,7 @@ test("extensions travel through actual context and function return without becom
     request => {
       const returned = request.input.find((i: any) => i.type === "function_call_output");
       expect(JSON.parse(returned.output).items[0].extensionCandidates).toEqual([extension()]);
-      return [finalMessage(output)];
+      return [finalMessage(withFixtureDecisions(output))];
     },
   ]);
   const dir = join(temp, String(serial++)),
@@ -162,7 +163,7 @@ test("roll contract uses concise names with exact registered references and keep
   output.attributes = attrs;
   output.extensionCandidates = extensions;
   output.bindings = rollBindings(attrs).map(b => ({...b, categoryId: output.categoryId, baselineAttributeId: b.attributeId}));
-  expect(checkResult(fixtureTask("family-modeling"), output, p.tools).errors).toEqual([]);
+  expect(checkResult(fixtureTask("family-modeling"), withFixtureDecisions(output), p.tools).errors).toEqual([]);
   for (const a of [...attrs, ...extensions])
     for (const ref of a.references) expect(p.tools.referenceError(ref)).toBeNull();
   expect(attrs.find(a => a.id === "roll.declared_mass")!.scope).toBe("single-roll-declared-mass");

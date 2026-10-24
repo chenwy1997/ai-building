@@ -121,3 +121,19 @@ bun src/scenarios/product_governance_v3/cli.ts batch-recover \
 开发验收使用真实节点和登记资料装配上下文，注入构造响应验证23任务、实际工具回传、同族顺序、并发、失败、恢复、共享费用及Excel导出。真实模型请求为0，不能据此宣称DeepSeek质量或行业准确率。
 
 清洁纸品广域包只是建模起点与缺口清单。完整标准全文、湿巾功效/接触用途等专业材料仍不足；程序读完文件不代表21类都对齐了完整行业标准。关键专业疑点须进入unresolved或扩展候选，不能编阈值或检测结论。当前仍以人工审属性为主，语义自动归族、正式采用/发布及线上apply/readback/rollback均未开放。
+
+## 显式调整剩余预留额度（2026-10-24）
+
+只能在用户明确要求提额时执行，`--out`必须是原始批次根目录。该命令不读取模型密钥、不发送模型请求，也不改思考档位、轮次身份或旧响应：
+
+```sh
+bun src/scenarios/product_governance_v3/cli.ts budget-set-remaining \
+  --out outputs/product-governance-v3/clean-paper-batch-20261023 \
+  --remaining-cny 100 \
+  --adjustment-id user-20261024-remaining-100 \
+  --reason '用户确认剩余可用预留额度提高到100元，保留原累计用量'
+```
+
+该授权已经执行：累计保守预留180.70元，剩余100元，有效总上限280.70元。不是向模型账户充值，也不是实际账单。budget.json原始limitCny=200仍用于校验旧批次身份，追加adjustments保存授权、当时的历史预留指纹和新有效上限。运行、状态、重跑预检均读取有效上限。同一adjustment-id重复执行不重新补足余额；另一次提额必须有新的用户授权，不能自动改ID重试。`batch --budget-cny`仍只配置新批次，不能用它重设旧批次。
+
+新规则/合同改变后，历史轮次不能借提额换成新输入继续付费；是否新建小范围验证轮次仍由用户另行触发。当前阶段仅离线验收。

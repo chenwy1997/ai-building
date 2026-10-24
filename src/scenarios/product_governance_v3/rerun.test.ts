@@ -1,3 +1,4 @@
+import { withFixtureDecisions } from "./fixtures.ts";
 import { test, expect, beforeAll, afterAll } from "bun:test";
 import { mkdtemp, rm, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -53,9 +54,9 @@ function mock(options: { tool?: boolean; reject?: boolean; badExplanationOnce?: 
       if (!badExplanation) expect(JSON.parse(body.input.at(-1).content).errors.some((e: any) => e.ruleId === "R08")).toBe(true);
     }
     if (seed) seeds.add(scope.family.id);
-    return Response.json({ status: "completed", output: [finalMessage({ categoryId: task.categoryId,
+    return Response.json({ status: "completed", output: [finalMessage(withFixtureDecisions({ categoryId: task.categoryId,
       baselineVersion: family?.version ?? null, attributes, bindings, extensionCandidates: family?.extensionCandidates ?? [],
-      unresolved: [badExplanation ? "单卷重量精度均留null" : "构造验收，非真实DeepSeek业务结果；精度依据仍待核实"] })] });
+      unresolved: [badExplanation ? "单卷重量精度均留null" : "构造验收，非真实DeepSeek业务结果；精度依据仍待核实"] }))] });
   };
   return { fetch, requests, get maximum() { return maximum; } };
 }
@@ -306,4 +307,21 @@ test("CLI exposes exact leaf selection and reasoning in its no-network preview a
   for (const cmd of ["batch", "batch-recover", "batch-export"])
     for (const flag of [["--category-ids", WASH], ["--reasoning-effort", "high"]])
       await expect(main([cmd, "--out", dir, ...flag])).rejects.toThrow("仅用于batch-rerun");
+});
+
+test("explicit budget adjustment changes available headroom without changing frozen round/model identity", async () => {
+  const {dir} = await original(LEAF, dir => new Budget(dir, 2, "adjustment-test"));
+  const first = await prepare(dir), b = new Budget(dir, 2, "adjustment-test");
+  await b.setRemaining(100, "user-remaining-100", "explicit offline regression authorization");
+  const second = await prepare(dir);
+  expect(second.preview.roundId).toBe(first.preview.roundId);
+  expect(second.plan.id).toBe(first.plan.id);
+  expect(second.plan.model).toEqual(first.plan.model);
+  expect(second.preview.remainingReservationCny).toBe(100);
+  expect(second.preview.budgetLimitCny).toBe(100);
+  expect(second.execution.budgetCny).toBe(2);
+  const m = mock();
+  const result = await executeBatch(second.plan, release, client(dir, m.fetch, b));
+  expect(result.blocked).toBe(0); expect(result.budget.limitCny).toBe(100);
+  expect(result.budget.entries.length).toBeGreaterThan(1);
 });

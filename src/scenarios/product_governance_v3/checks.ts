@@ -19,6 +19,7 @@ import {
   definitionConfigErrors,
   valueConstraintErrors,
 } from "./native-contract.ts";
+import { sharedDefinitionErrors, modelingDecisionErrors, DEFINITION_FIELDS } from "./modeling-contract.ts";
 import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
 
 // These checks establish structural consistency and provenance, not the truth of domain judgments.
@@ -115,6 +116,10 @@ export function checkResult(
     if (value.baselineVersion !== (baseline?.version ?? null))
       add("R05", task.categoryId, "wrong/absent baseline version");
     checkDefinitions(attributes, bindings);
+    executed.add("shared-definition-identity");
+    errors.push(...sharedDefinitionErrors(attributes, snapshot.data, task.runId));
+    executed.add("modeling-decisions");
+    errors.push(...modelingDecisionErrors(value, snapshot.data));
     executed.add("configuration-explanations");
     for (const conflict of modelConfigurationReview(value).conflicts)
       add("R08", conflict.attributeId,
@@ -183,21 +188,7 @@ export function checkResult(
         add("R03", b.id, "applicable family attribute omitted");
         continue;
       }
-      const fields: (keyof AttributeDefinition)[] = [
-        "name",
-        "conceptKey",
-        "definition",
-        "scope",
-        "fieldType",
-        "unit",
-        "enumValues",
-        "multi",
-        "valueLevel",
-        "numberConfig",
-        "textConfig",
-        "optionConfig",
-        "defaultValue",
-      ];
+      const fields = DEFINITION_FIELDS;
       const binding = bindings.find((x) => x.attributeId === a.id);
       if (
         fields.some((f) => canonical(a[f]) !== canonical(b[f])) ||

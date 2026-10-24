@@ -1,0 +1,3127 @@
+{
+  "registryFamily": {
+    "id": "small-toilet-roll",
+    "members": [
+      "15216d47-17c6-4b18-9391-83097f6f7447",
+      "67adeef9-8c1f-47e2-ad72-462ad35a5a75"
+    ],
+    "status": "candidate",
+    "runId": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023",
+    "version": "9f672545509f6a99770a1b0b445e44f05496f459b2f151d2c3cb17d9aaad42e5",
+    "attributes": [
+      {
+        "id": "roll.coreless",
+        "name": "是否无芯",
+        "conceptKey": "paper.coreless",
+        "definition": "纸卷是否没有纸芯；两类共用，值不可由类目名代填",
+        "scope": "single-roll-core",
+        "fieldType": "boolean",
+        "unit": null,
+        "enumValues": [],
+        "multi": false,
+        "valueLevel": "SKU",
+        "numberConfig": null,
+        "textConfig": null,
+        "optionConfig": null,
+        "defaultValue": null,
+        "rationale": "区分纸芯结构，支持有芯/无芯选型及同族对照；强制填写尚未确认",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "有芯和无芯小卷纸应先使用同一组共同定义。"
+          }
+        ]
+      },
+      {
+        "id": "roll.layers",
+        "name": "层数",
+        "conceptKey": "paper.layers",
+        "definition": "成品纸张叠层数量，不是包装或托盘层数",
+        "scope": "finished-paper-ply",
+        "fieldType": "number",
+        "unit": "层",
+        "enumValues": [],
+        "multi": false,
+        "valueLevel": "SKU",
+        "numberConfig": {
+          "isInt": true,
+          "precision": null,
+          "min": 1,
+          "max": null
+        },
+        "textConfig": null,
+        "optionConfig": null,
+        "defaultValue": null,
+        "rationale": "对照成品纸张叠层；不以层数推定质量",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "层数是成品纸张叠层；不能与托盘层数、包装层级混淆。"
+          }
+        ]
+      },
+      {
+        "id": "roll.declared_mass",
+        "name": "单卷重量",
+        "conceptKey": "paper.declared_mass",
+        "definition": "来源明确标出的每卷重量，单位g；是否含芯/包装需核实，不等于去芯净纸重或实测重量",
+        "scope": "single-roll-declared-mass",
+        "fieldType": "number",
+        "unit": "g",
+        "enumValues": [],
+        "multi": false,
+        "valueLevel": "SKU",
+        "numberConfig": {
+          "isInt": false,
+          "precision": 3,
+          "min": 0,
+          "max": null
+        },
+        "textConfig": null,
+        "optionConfig": null,
+        "defaultValue": null,
+        "rationale": "按明确的每卷重量及相同含芯/包装口径比较，避免与商品物流重量混用",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "单卷重量记录来源明确标出的每卷重量"
+          }
+        ]
+      },
+      {
+        "id": "roll.raw_material",
+        "name": "原料",
+        "conceptKey": "paper.raw_material",
+        "definition": "商家对原料的原文描述，不能由品牌推定",
+        "scope": "finished-paper-material",
+        "fieldType": "text",
+        "unit": null,
+        "enumValues": [],
+        "multi": false,
+        "valueLevel": "SKU",
+        "numberConfig": null,
+        "textConfig": {
+          "format": "ANY",
+          "minLength": 1,
+          "maxLength": 300,
+          "displayMethod": null,
+          "trim": true
+        },
+        "optionConfig": null,
+        "defaultValue": null,
+        "rationale": "按原料声明检索；保留厂商措辞，不推断检测结论",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "原料保留商家确切措辞"
+          }
+        ]
+      },
+      {
+        "id": "roll.sheet_size",
+        "name": "纸张尺寸",
+        "conceptKey": "paper.sheet_size",
+        "definition": "单张纸尺寸完整文本；不猜轴向或包装尺寸",
+        "scope": "finished-paper-sheet-size",
+        "fieldType": "text",
+        "unit": null,
+        "enumValues": [],
+        "multi": false,
+        "valueLevel": "SKU",
+        "numberConfig": null,
+        "textConfig": {
+          "format": "ANY",
+          "minLength": 1,
+          "maxLength": 300,
+          "displayMethod": null,
+          "trim": true
+        },
+        "optionConfig": null,
+        "defaultValue": null,
+        "rationale": "比较单张纸尺寸，避免误用包装尺寸",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "纸张尺寸与纸卷尺寸、包装尺寸分开"
+          }
+        ]
+      },
+      {
+        "id": "roll.perforation",
+        "name": "每卷数量",
+        "conceptKey": "paper.perforation",
+        "definition": "暂名；保留来源明确的每卷数量及原计数单位文本，不统一张/节/格，不按层数倍乘。口径核实后再确定正式名称与数值化，不作为已统一的张数比较",
+        "scope": "single-roll-perforation",
+        "fieldType": "text",
+        "unit": null,
+        "enumValues": [],
+        "multi": false,
+        "valueLevel": "SKU",
+        "numberConfig": null,
+        "textConfig": {
+          "format": "ANY",
+          "minLength": 1,
+          "maxLength": 300,
+          "displayMethod": null,
+          "trim": true
+        },
+        "optionConfig": null,
+        "defaultValue": null,
+        "rationale": "拟比较每卷可用纸张数量；目前只保留原计数口径候选，未确认张/节/格可比性",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "每卷数量暂保留原文数量及计数单位"
+          }
+        ]
+      },
+      {
+        "id": "roll.fragrance",
+        "name": "香型",
+        "conceptKey": "paper.fragrance",
+        "definition": "单个文本字段保留明确的无香、具体香型或仅有香味的原文；仅知有香不编香型，未说明留未知；归一化需另有已核实词表",
+        "scope": "finished-paper-fragrance",
+        "fieldType": "text",
+        "unit": null,
+        "enumValues": [],
+        "multi": false,
+        "valueLevel": "SKU",
+        "numberConfig": null,
+        "textConfig": {
+          "format": "ANY",
+          "minLength": 1,
+          "maxLength": 300,
+          "displayMethod": null,
+          "trim": true
+        },
+        "optionConfig": null,
+        "defaultValue": null,
+        "rationale": "按原文香型供选择与搜索；缺失不默认无香",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "香型统一使用一个文本字段"
+          }
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "attributeId": "roll.coreless",
+        "categoryId": null,
+        "requiredness": "optional",
+        "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填",
+        "isKeySpec": false,
+        "isPublic": true,
+        "searchable": false,
+        "displayInTitle": false,
+        "displayInList": false,
+        "sortIndex": 1,
+        "uses": [
+          "selection",
+          "comparison",
+          "display"
+        ],
+        "baselineAttributeId": null,
+        "differenceReason": null
+      },
+      {
+        "attributeId": "roll.layers",
+        "categoryId": null,
+        "requiredness": "optional",
+        "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填",
+        "isKeySpec": false,
+        "isPublic": true,
+        "searchable": false,
+        "displayInTitle": false,
+        "displayInList": false,
+        "sortIndex": 2,
+        "uses": [
+          "selection",
+          "comparison",
+          "display"
+        ],
+        "baselineAttributeId": null,
+        "differenceReason": null
+      },
+      {
+        "attributeId": "roll.declared_mass",
+        "categoryId": null,
+        "requiredness": "optional",
+        "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填",
+        "isKeySpec": false,
+        "isPublic": true,
+        "searchable": false,
+        "displayInTitle": false,
+        "displayInList": false,
+        "sortIndex": 3,
+        "uses": [
+          "selection",
+          "comparison",
+          "display"
+        ],
+        "baselineAttributeId": null,
+        "differenceReason": null
+      },
+      {
+        "attributeId": "roll.raw_material",
+        "categoryId": null,
+        "requiredness": "optional",
+        "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填",
+        "isKeySpec": false,
+        "isPublic": true,
+        "searchable": true,
+        "displayInTitle": false,
+        "displayInList": false,
+        "sortIndex": 4,
+        "uses": [
+          "selection",
+          "comparison",
+          "display",
+          "search"
+        ],
+        "baselineAttributeId": null,
+        "differenceReason": null
+      },
+      {
+        "attributeId": "roll.sheet_size",
+        "categoryId": null,
+        "requiredness": "optional",
+        "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填",
+        "isKeySpec": false,
+        "isPublic": true,
+        "searchable": true,
+        "displayInTitle": false,
+        "displayInList": false,
+        "sortIndex": 5,
+        "uses": [
+          "selection",
+          "comparison",
+          "display",
+          "search"
+        ],
+        "baselineAttributeId": null,
+        "differenceReason": null
+      },
+      {
+        "attributeId": "roll.perforation",
+        "categoryId": null,
+        "requiredness": "optional",
+        "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填",
+        "isKeySpec": false,
+        "isPublic": true,
+        "searchable": true,
+        "displayInTitle": false,
+        "displayInList": false,
+        "sortIndex": 6,
+        "uses": [
+          "selection",
+          "comparison",
+          "display",
+          "search"
+        ],
+        "baselineAttributeId": null,
+        "differenceReason": null
+      },
+      {
+        "attributeId": "roll.fragrance",
+        "categoryId": null,
+        "requiredness": "optional",
+        "requirednessReason": "已说明独立用途；强制填写必要性尚未核实，先选填；不按样本覆盖率设必填",
+        "isKeySpec": false,
+        "isPublic": true,
+        "searchable": true,
+        "displayInTitle": false,
+        "displayInList": false,
+        "sortIndex": 7,
+        "uses": [
+          "selection",
+          "comparison",
+          "display",
+          "search"
+        ],
+        "baselineAttributeId": null,
+        "differenceReason": null
+      }
+    ],
+    "extensionCandidates": [
+      {
+        "id": "roll.printed",
+        "name": "是否印花",
+        "conceptKey": "paper.printed",
+        "scope": "finished-paper-print",
+        "potentialUse": "采购方明确要求纸张印刷图案时供选型或展示",
+        "deferReason": "当前小卷纸业务尚未确认独立选型价值；不因电商有字段就默认建立",
+        "activationCriteria": "确认具体采购用途、维护收益和印花定义后，另提同族基线修订；不得把压花当印花的下位枚举",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+          }
+        ]
+      },
+      {
+        "id": "roll.embossed",
+        "name": "是否压花",
+        "conceptKey": "paper.embossed",
+        "scope": "finished-paper-emboss",
+        "potentialUse": "有明确纸面纹理工艺要求时供采购比对",
+        "deferReason": "工艺存在不等于值得设字段；本轮暂不进入SKU合同",
+        "activationCriteria": "确认本类业务要求及工艺边界；不以压花推断印花、柔软度或质量，另提共享修订",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+          }
+        ]
+      },
+      {
+        "id": "coverage.roll_diameter",
+        "name": "卷外径",
+        "conceptKey": "paper.roll_diameter",
+        "scope": "finished-paper-roll-diameter",
+        "potentialUse": "指定纸架容纳空间的适配判断",
+        "deferReason": "当前普通小卷纸尚未确认纸架空间选型需求",
+        "activationCriteria": "确认适用纸架场景、测量对象及独立用途后再定类型/单位和绑定",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+          }
+        ]
+      },
+      {
+        "id": "coverage.roll_width",
+        "name": "卷宽",
+        "conceptKey": "paper.roll_width",
+        "scope": "finished-paper-roll-width",
+        "potentialUse": "指定纸架轴向空间的适配判断",
+        "deferReason": "需先核实是否已由纸张尺寸表达，避免重复",
+        "activationCriteria": "确认轴向含义、与纸张尺寸的关系及独立适配用途，再提共享修订",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+          }
+        ]
+      },
+      {
+        "id": "coverage.core_diameter",
+        "name": "纸芯内径",
+        "conceptKey": "paper.core_diameter",
+        "scope": "finished-paper-core-inner-diameter",
+        "potentialUse": "有芯纸卷与指定轴杆的适配判断",
+        "deferReason": "本类是否存在此适配需求及无芯类适用性尚待确认",
+        "activationCriteria": "明确有芯/无芯适用边界与业务用途；无芯不自动填0或不适用，再另建绑定",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+          }
+        ]
+      },
+      {
+        "id": "coverage.roll_length",
+        "name": "单卷长度",
+        "conceptKey": "paper.roll_length",
+        "scope": "finished-paper-unwound-length",
+        "potentialUse": "按整卷展开总长度比较可用纸量",
+        "deferReason": "尚未确认相对每卷数量的独立比较价值；外部同名可能实际为单节尺寸",
+        "activationCriteria": "核实整卷展开长度与单节长度、卷宽的区别及采购用途，不能按字段名或数值大小猜测映射",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "印花、压花及卷外径、卷宽、纸芯内径、单卷长度均为扩展候选"
+          }
+        ]
+      }
+    ]
+  },
+  "notice": "Verbatim model results from the two real rounds. No credentials, SKU records or chain-of-thought. New-schema decision annotations exist only in tests, not here.",
+  "samples": [
+    {
+      "arm": "low",
+      "phase": "family-seed",
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "provenance": {
+        "relativeJobPath": "reruns/pilot-wash-tissue-low-20261023/jobs/family-seed-18f161be522f0b274f86.json",
+        "artifactHash": "0484a2e0f0dbb4cf52ee053fc2b066e0084cf66a5151a05d9672d09b62b9567f",
+        "requestKey": "c8edf186e11521ee57c24db3d46893b5e87f52b63e08d698aeed0bb7bb99af80",
+        "releaseId": "ad677dda6503ee7cb94469c38531f2ef064685331bcc5989805cece06dc6ed3b",
+        "resultHash": "447c287f7ed8e8a1de2ca1f040b5700af8adc441c5a0072d62f8867813723777",
+        "responseHash": "c67e7ee446323b17cbe91d699d07e9ff9c689259f77031d6f38ecc66972b2043"
+      },
+      "result": {
+        "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "baselineVersion": null,
+        "attributes": [
+          {
+            "id": "roll.layers",
+            "name": "层数",
+            "conceptKey": "paper.layers",
+            "definition": "成品纸张的叠层数量（如2层、3层），不是包装或托盘层数；按SKU成品实际层数填写",
+            "scope": "finished-paper-ply",
+            "fieldType": "number",
+            "unit": "层",
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": {
+              "isInt": true,
+              "precision": null,
+              "min": 1,
+              "max": null
+            },
+            "textConfig": null,
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "抽取式面巾纸的2/3/4层直接改变厚度、强度与单抽吸水量判断，是采购比价和买家选规格的档位依据。定义复用属性池已登记的paper.layers（名称、定义、类型、单位一致），仅在本族两个末级绑定，不另建同义定义。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "不统一张、抽、节、格，不按层数换算张数。"
+              }
+            ]
+          },
+          {
+            "id": "roll.sheet_size",
+            "name": "纸张尺寸",
+            "conceptKey": "paper.sheet_size",
+            "definition": "一张成品纸展开后的长×宽，按原文填写并注明单位（如200×200mm）；不是整包外廓尺寸、不是包装尺寸基础字段，也不是折叠后的形态尺寸",
+            "scope": "finished-paper-sheet-size",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "单张尺寸决定单次擦拭的覆盖面积和手感，是比较不同规格同价位商品的基础量，并与基础字段中的包装长宽高属不同对象。族内暂保留一个规范组合文本，不拆长宽，因为目前没有独立的筛选或器具适配用途；复用属性池paper.sheet_size的既有定义。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "不可因简化而混同净重/毛重、内径/外径、单张/整卷/包装。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.pack_count",
+            "name": "每包数量",
+            "conceptKey": "paper.pack_count",
+            "definition": "一个最小销售单元（一包）内含的抽取次数或张数，按包装原文填写并保留原计数词（如“100抽”“120张”）；不把抽与张、片互换，不用层数换算张数，不把一提/一箱的包数写入本属性（该口径由销售单位及最小计量单位数量基础字段承载）",
+            "scope": "single-pack-sheet-count",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "每包可用量决定更换频次和单位可用量成本，是比较同价位抽纸最直接的量。计数词存在抽/张等不可互换口径，先按原文单个文本承载，待核实后再提数值化；属性池仅有面向单卷的每卷数量（不同计量对象），故按本族对象新建待审定义。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "固定数值及单位合为一个定义；真正可变计数词先用保留原文的单个文本，不拆独立单位字段。不统一张、抽、节、格，不按层数换算张数。"
+              }
+            ]
+          },
+          {
+            "id": "roll.raw_material",
+            "name": "原料",
+            "conceptKey": "paper.raw_material",
+            "definition": "商家对成品纸主要纤维原料的原文描述（如原生木浆、原生竹浆、混合浆、再生纸浆）；不由品牌或价格推定，不推断配比、漂白工艺或检测结论",
+            "scope": "finished-paper-material",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "抽取式面巾纸直接接触面部、手部及口鼻附近，原料影响触感、吸水性与卫生安全预期，是触肤用途匹配和原生浆/混合浆/再生浆档位比价的判断项；保留商家原措辞，避免在无核实词表时自造枚举。复用属性池paper.raw_material定义。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "属性必须服务具体的采购选型、适配、比较、检索或展示判断。技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "roll.fragrance",
+            "name": "香型",
+            "conceptKey": "paper.fragrance",
+            "definition": "单个文本字段保留原文：明确的无香、具体香型，或仅说明有香味；只知有香时保留原描述而不编具体香型，资料未说明则留未知，缺失不得默认无香",
+            "scope": "finished-paper-fragrance",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "无香与具体香型是买家（婴幼、敏感人群、餐饮及前台场景）选择与搜索时的实际区分项；同一文本承载“无香/具体香型/仅说明有香味”的粗细信息，不另建配套真假字段。复用属性池paper.fragrance定义。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "名称用不歧义的短称，计量对象、分母、口径和限制写在定义。"
+              }
+            ]
+          }
+        ],
+        "bindings": [
+          {
+            "attributeId": "roll.layers",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "缺少层数会妨碍厚度、强度与单抽吸水量的同档比较及买家按规格筛选；业务尚未确认是否所有盒装抽纸都必须标注层数，先选填，待人工确认后再提必填。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 1,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "facial-tissue.pack_count",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "缺少每包数量无法判断可用量与单位可用量成本、更换频次，是选型比较的核心量；但计数口径（抽/张）尚未统一核实且业务未确认强制，先选填。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 2,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.sheet_size",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "缺少单张尺寸会妨碍单次覆盖面积与手感比较，也影响与同价位不同规格的比较；是否强制标注尚未确认，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 3,
+            "uses": [
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.raw_material",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "缺少原料会妨碍触肤场景匹配与原生木浆/竹浆/再生浆档位比价；业务未确认强制填写，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 4,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.fragrance",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "缺少香型会妨碍无香场景选择与按香型检索；是否强制标注未确认，先选填，且缺失不得默认无香。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 5,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          }
+        ],
+        "extensionCandidates": [
+          {
+            "id": "facial-tissue.embossing",
+            "name": "压花",
+            "conceptKey": "paper.embossing",
+            "scope": "finished-paper-surface",
+            "potentialUse": "压花影响手感、层间贴合与厚度感知，可能成为同价位抽纸的比较与筛选维度",
+            "deferReason": "本轮未取得压花花纹类型、工艺可共存关系及其对采购选型实际影响的依据；小卷族的印花/压花亦处于暂缓，不凭电商字段直接准入",
+            "activationCriteria": "业务确认压花是抽纸的独立可选维度、给出可比口径（有无/花纹类型）并需要筛选或展示时，先按共享修订流程补入族基线，再绑定末级",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.printing",
+            "name": "印花",
+            "conceptKey": "paper.printing",
+            "scope": "finished-paper-surface",
+            "potentialUse": "印花图案影响外观与场景匹配（如餐饮、前台、婴童），可能用于外观筛选",
+            "deferReason": "印花与压花是不同概念，不能并为互斥枚举；本轮无两者关系及独立选型价值的核实依据，暂缓",
+            "activationCriteria": "业务确认印花/压花各自独立成立、且需要单独检索或展示时，经共享修订分别启用，不合并为单一工艺选项",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.lotion",
+            "name": "保湿/乳霜添加",
+            "conceptKey": "paper.lotion",
+            "scope": "finished-paper-treatment",
+            "potentialUse": "乳霜或保湿处理影响触感与适用人群（如鼻炎、婴幼、频繁擦拭场景），可能是采购选型的独立维度",
+            "deferReason": "未取得产品声明与处理剂成分口径的证据，功效类描述存在夸大风险，本轮不设（也不设配套真假字段）",
+            "activationCriteria": "取得可核实的商品声明或标准依据、明确“保湿/乳霜”判定口径后，经共享修订评估是否作为单一文本或选项属性",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.wet-strength",
+            "name": "可湿水性能",
+            "conceptKey": "paper.wet_strength",
+            "scope": "finished-paper-performance",
+            "potentialUse": "湿水后强度决定能否代替湿巾用于擦拭台面或婴幼清洁，可能影响使用场景匹配",
+            "deferReason": "湿强度属检测口径参数，未取得标准全文与测试方法，不能凭宣称设枚举或编阈值；本轮暂缓",
+            "activationCriteria": "取得标准/检测方法全文并确认业务需要按性能档位比较时，另提共享修订；存在多个宣称时保留原文，不编杀菌或医疗声明",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "本资料给出业务建模起点及已知问题，不补造未读的专业知识。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.pack_net_weight",
+            "name": "单包净重",
+            "conceptKey": "paper.pack_net_weight",
+            "scope": "single-pack-net-weight",
+            "potentialUse": "在同一销售单位内含包数不同时，单包净重可用于单位重量成本比较，弥补物流重量口径无法反映内容物量的不足",
+            "deferReason": "基础字段只有商品重量/物流重量口径，单包净重与含包装毛重的区分尚无来源核实，且多数抽纸包装未标净重，暂缓",
+            "activationCriteria": "业务确认净重与毛重口径可区分、且供应商资料能稳定提供单包净重（含单位）时，按共享修订新增数值定义并说明计量对象",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "基础商品重量、物流尺寸不自动排除单卷重量、纸张尺寸或器具工作尺寸，先核对对象和用途。"
+              }
+            ]
+          }
+        ],
+        "unresolved": [
+          "同族边界待人工确认：盒装抽纸与软包抽纸按“抽取式面巾纸”共同对象归族，仅包装形态不同；与手帕纸、餐巾纸、卷纸、厨房纸巾是否同族（及应排除的反例）未核实，本输出仅为候选种子。",
+          "本族无可用的已登记共享基线（baselineStatus=missing_candidate_only），baselineVersion 为 null，所有绑定均为待审候选；采用范围与是否登记为共享基线须人工决定。",
+          "按宿主合同，本次每个定义只输出锚点末级（盒装抽纸 640b5b8b-9d6e-4784-a8e2-53c291f0b7f7）的一个绑定；软包抽纸（ce3a9f67-613c-4707-bf3a-95193edb8a2d）的绑定未在本合同生成，其必填性/关键规格是否与锚点存在有理由差异，留待同族模板转末级时人工确认。",
+          "每包数量的计数口径：抽/张/片是否可统一、盒装与软包是否惯例使用不同计数词、是否出现按“包数”表述的规格，均未核实；当前用原文文本承载，数值化前需业务给出可换算依据。",
+          "单张尺寸的折叠/展开口径及盒装（折叠抽取）与软包的实际标注差异未核实；若软包需与分配器/抽取盒配套，是否需拆长宽或增加适配参数，待专业查证。",
+          "原料是否应改为受控选项（原生木浆/原生竹浆/混合浆/再生纸浆）需业务提供词表；同时未核实是否需要接触食品/皮肤的相关声明字段，本轮不设功效类参数。",
+          "香型是否需要与“无香”筛选联动、以及归一化词表未见，当前仅用单文本且规定缺失不得默认无香。",
+          "必填性均为待定：层数、每包数量是否应强制填写尚缺业务确认；样本是否标注不能作为必填性依据，本次一律先选填。",
+          "包装形态作为末级拆分是否覆盖实际形态未知（如挂式抽纸、抽取式面巾以外的盒装形态），是否需要“包装形式/出纸方式”属性以避免遗漏，待核实，本轮不设该属性。",
+          "器具适配未查证：盒装抽纸是否需与纸巾盒/壁挂分配器匹配、软包是否需要分配器适配，不能由外形尺寸推断兼容性；若确需适配判断，应另提尺寸或系统型号类参数。",
+          "未取得 GB/T 20808 等纸品标准全文，也未取得本族商品样本；吸水量、湿强度等性能参数的阈值与可比口径不能编造，相关需求保留在扩展候选与查证清单。"
+        ]
+      }
+    },
+    {
+      "arm": "low",
+      "phase": "leaf",
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "provenance": {
+        "relativeJobPath": "reruns/pilot-wash-tissue-low-20261023/jobs/leaf-18f161be522f0b274f86.json",
+        "artifactHash": "2f73459e329bce301162f863663c12545b388253ef7b0f69deb30df78892f294",
+        "requestKey": "20e2b7fbabf69651a64f424db8113562e1c9a1f597dde99beb96e625efc5b3dc",
+        "releaseId": "ad677dda6503ee7cb94469c38531f2ef064685331bcc5989805cece06dc6ed3b",
+        "resultHash": "d672acaff312f10354b81116deacbf5afcc5e34eaf4c64449560617229adbed3",
+        "responseHash": "afce57dbdda6e1c1b066d56b8d2fdb08527bf90d5a98e4d4d8edc7220a0297ff"
+      },
+      "result": {
+        "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "baselineVersion": "e361e611a3bbcc8943a55c0bceafa96dde61be33207c057a5bdd8aee94f626bf",
+        "attributes": [
+          {
+            "id": "roll.layers",
+            "name": "层数",
+            "conceptKey": "paper.layers",
+            "definition": "成品纸张的叠层数量（如2层、3层），不是包装或托盘层数；按SKU成品实际层数填写",
+            "scope": "finished-paper-ply",
+            "fieldType": "number",
+            "unit": "层",
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": {
+              "isInt": true,
+              "precision": null,
+              "min": 1,
+              "max": null
+            },
+            "textConfig": null,
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "抽取式面巾纸的2/3/4层直接改变厚度、强度与单抽吸水量判断，是采购比价和买家选规格的档位依据。定义复用属性池已登记的paper.layers（名称、定义、类型、单位一致），仅在本族两个末级绑定，不另建同义定义。",
+            "references": [
+              {
+                "id": "clean-paper-admission-20261023",
+                "kind": "knowledge",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "不统一张、抽、节、格，不按层数换算张数。"
+              }
+            ]
+          },
+          {
+            "id": "roll.sheet_size",
+            "name": "纸张尺寸",
+            "conceptKey": "paper.sheet_size",
+            "definition": "一张成品纸展开后的长×宽，按原文填写并注明单位（如200×200mm）；不是整包外廓尺寸、不是包装尺寸基础字段，也不是折叠后的形态尺寸",
+            "scope": "finished-paper-sheet-size",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "单张尺寸决定单次擦拭的覆盖面积和手感，是比较不同规格同价位商品的基础量，并与基础字段中的包装长宽高属不同对象。族内暂保留一个规范组合文本，不拆长宽，因为目前没有独立的筛选或器具适配用途；复用属性池paper.sheet_size的既有定义。",
+            "references": [
+              {
+                "id": "clean-paper-admission-20261023",
+                "kind": "knowledge",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "不可因简化而混同净重/毛重、内径/外径、单张/整卷/包装。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.pack_count",
+            "name": "每包数量",
+            "conceptKey": "paper.pack_count",
+            "definition": "一个最小销售单元（一包）内含的抽取次数或张数，按包装原文填写并保留原计数词（如“100抽”“120张”）；不把抽与张、片互换，不用层数换算张数，不把一提/一箱的包数写入本属性（该口径由销售单位及最小计量单位数量基础字段承载）",
+            "scope": "single-pack-sheet-count",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "每包可用量决定更换频次和单位可用量成本，是比较同价位抽纸最直接的量。计数词存在抽/张等不可互换口径，先按原文单个文本承载，待核实后再提数值化；属性池仅有面向单卷的每卷数量（不同计量对象），故按本族对象新建待审定义。",
+            "references": [
+              {
+                "id": "clean-paper-admission-20261023",
+                "kind": "knowledge",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "固定数值及单位合为一个定义；真正可变计数词先用保留原文的单个文本，不拆独立单位字段。不统一张、抽、节、格，不按层数换算张数。"
+              }
+            ]
+          },
+          {
+            "id": "roll.raw_material",
+            "name": "原料",
+            "conceptKey": "paper.raw_material",
+            "definition": "商家对成品纸主要纤维原料的原文描述（如原生木浆、原生竹浆、混合浆、再生纸浆）；不由品牌或价格推定，不推断配比、漂白工艺或检测结论",
+            "scope": "finished-paper-material",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "抽取式面巾纸直接接触面部、手部及口鼻附近，原料影响触感、吸水性与卫生安全预期，是触肤用途匹配和原生浆/混合浆/再生浆档位比价的判断项；保留商家原措辞，避免在无核实词表时自造枚举。复用属性池paper.raw_material定义。",
+            "references": [
+              {
+                "id": "clean-paper-admission-20261023",
+                "kind": "knowledge",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "属性必须服务具体的采购选型、适配、比较、检索或展示判断。技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "roll.fragrance",
+            "name": "香型",
+            "conceptKey": "paper.fragrance",
+            "definition": "单个文本字段保留原文：明确的无香、具体香型，或仅说明有香味；只知有香时保留原描述而不编具体香型，资料未说明则留未知，缺失不得默认无香",
+            "scope": "finished-paper-fragrance",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "无香与具体香型是买家（婴幼、敏感人群、餐饮及前台场景）选择与搜索时的实际区分项；同一文本承载“无香/具体香型/仅说明有香味”的粗细信息，不另建配套真假字段。复用属性池paper.fragrance定义。",
+            "references": [
+              {
+                "id": "clean-paper-admission-20261023",
+                "kind": "knowledge",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "名称用不歧义的短称，计量对象、分母、口径和限制写在定义。"
+              }
+            ]
+          }
+        ],
+        "bindings": [
+          {
+            "attributeId": "roll.layers",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "缺少层数会妨碍厚度、强度与单抽吸水量的同档比较及买家按规格筛选；业务尚未确认是否所有盒装抽纸都必须标注层数，先选填，待人工确认后再提必填。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 1,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "roll.layers",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "facial-tissue.pack_count",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "缺少每包数量无法判断可用量与单位可用量成本、更换频次，是选型比较的核心量；但计数口径（抽/张）尚未统一核实且业务未确认强制，先选填。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 2,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "facial-tissue.pack_count",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.sheet_size",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "缺少单张尺寸会妨碍单次覆盖面积与手感比较，也影响与同价位不同规格的比较；是否强制标注尚未确认，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 3,
+            "uses": [
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "roll.sheet_size",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.raw_material",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "缺少原料会妨碍触肤场景匹配与原生木浆/竹浆/再生浆档位比价；业务未确认强制填写，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 4,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": "roll.raw_material",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.fragrance",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "缺少香型会妨碍无香场景选择与按香型检索；是否强制标注未确认，先选填，且缺失不得默认无香。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 5,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": "roll.fragrance",
+            "differenceReason": null
+          }
+        ],
+        "extensionCandidates": [
+          {
+            "id": "facial-tissue.embossing",
+            "name": "压花",
+            "conceptKey": "paper.embossing",
+            "scope": "finished-paper-surface",
+            "potentialUse": "压花影响手感、层间贴合与厚度感知，可能成为同价位抽纸的比较与筛选维度",
+            "deferReason": "本轮未取得压花花纹类型、工艺可共存关系及其对采购选型实际影响的依据；小卷族的印花/压花亦处于暂缓，不凭电商字段直接准入",
+            "activationCriteria": "业务确认压花是抽纸的独立可选维度、给出可比口径（有无/花纹类型）并需要筛选或展示时，先按共享修订流程补入族基线，再绑定末级",
+            "references": [
+              {
+                "id": "clean-paper-admission-20261023",
+                "kind": "knowledge",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.printing",
+            "name": "印花",
+            "conceptKey": "paper.printing",
+            "scope": "finished-paper-surface",
+            "potentialUse": "印花图案影响外观与场景匹配（如餐饮、前台、婴童），可能用于外观筛选",
+            "deferReason": "印花与压花是不同概念，不能并为互斥枚举；本轮无两者关系及独立选型价值的核实依据，暂缓",
+            "activationCriteria": "业务确认印花/压花各自独立成立、且需要单独检索或展示时，经共享修订分别启用，不合并为单一工艺选项",
+            "references": [
+              {
+                "id": "clean-paper-admission-20261023",
+                "kind": "knowledge",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.lotion",
+            "name": "保湿/乳霜添加",
+            "conceptKey": "paper.lotion",
+            "scope": "finished-paper-treatment",
+            "potentialUse": "乳霜或保湿处理影响触感与适用人群（如鼻炎、婴幼、频繁擦拭场景），可能是采购选型的独立维度",
+            "deferReason": "未取得产品声明与处理剂成分口径的证据，功效类描述存在夸大风险，本轮不设（也不设配套真假字段）",
+            "activationCriteria": "取得可核实的商品声明或标准依据、明确“保湿/乳霜”判定口径后，经共享修订评估是否作为单一文本或选项属性",
+            "references": [
+              {
+                "id": "clean-paper-admission-20261023",
+                "kind": "knowledge",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.wet-strength",
+            "name": "可湿水性能",
+            "conceptKey": "paper.wet_strength",
+            "scope": "finished-paper-performance",
+            "potentialUse": "湿水后强度决定能否代替湿巾用于擦拭台面或婴幼清洁，可能影响使用场景匹配",
+            "deferReason": "湿强度属检测口径参数，未取得标准全文与测试方法，不能凭宣称设枚举或编阈值；本轮暂缓",
+            "activationCriteria": "取得标准/检测方法全文并确认业务需要按性能档位比较时，另提共享修订；存在多个宣称时保留原文，不编杀菌或医疗声明",
+            "references": [
+              {
+                "id": "clean-paper-admission-20261023",
+                "kind": "knowledge",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "本资料给出业务建模起点及已知问题，不补造未读的专业知识。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.pack_net_weight",
+            "name": "单包净重",
+            "conceptKey": "paper.pack_net_weight",
+            "scope": "single-pack-net-weight",
+            "potentialUse": "在同一销售单位内含包数不同时，单包净重可用于单位重量成本比较，弥补物流重量口径无法反映内容物量的不足",
+            "deferReason": "基础字段只有商品重量/物流重量口径，单包净重与含包装毛重的区分尚无来源核实，且多数抽纸包装未标净重，暂缓",
+            "activationCriteria": "业务确认净重与毛重口径可区分、且供应商资料能稳定提供单包净重（含单位）时，按共享修订新增数值定义并说明计量对象",
+            "references": [
+              {
+                "id": "clean-paper-admission-20261023",
+                "kind": "knowledge",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "基础商品重量、物流尺寸不自动排除单卷重量、纸张尺寸或器具工作尺寸，先核对对象和用途。"
+              }
+            ]
+          }
+        ],
+        "unresolved": [
+          "盒装抽纸与软包抽纸共用五项参数是否成立仍需人工确认；包装形态差异（盒体尺寸、抽取口/抽取方式）是否应作为独立选型或适配参数，本轮未取得依据，暂不新增。",
+          "每包数量的计数口径（抽/张/片/节/格）能否统一、层数与张数的换算关系，未取得标准全文或业务规则，保持单文本原文填写并待专业核实。",
+          "层数与每包数量是否应对盒装抽纸强制填写，尚未由业务确认；当前五项均先选填。",
+          "纸张尺寸采用整张展开的长×宽文本，是否需要对盒装抽取口或盒体容纳空间另设适配尺寸，未取得适配关系依据，暂不假设。",
+          "冻结合同中纸张尺寸、香型、原料等文本长度上限及层数下限1的业务依据仍需逐字段核实；当前值与共享基线一致，未在本叶修改。"
+        ]
+      }
+    },
+    {
+      "arm": "low",
+      "phase": "leaf",
+      "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "provenance": {
+        "relativeJobPath": "reruns/pilot-wash-tissue-low-20261023/jobs/leaf-6eb15d64ca1deb54ee61.json",
+        "artifactHash": "a58b4a520cfe4cd4839c24a28a1c20c978342ebec7ad18d334ae3613aac6dcce",
+        "requestKey": "b8226dc087fe3d5ba4375ed8fcdba26d7a6de01798aa757d86ba2b589b66a18b",
+        "releaseId": "ad677dda6503ee7cb94469c38531f2ef064685331bcc5989805cece06dc6ed3b",
+        "resultHash": "a7f74e63745252c10ea98956c1b6fb23c8eddf040797782dcbdc37cc9f34bd3f",
+        "responseHash": "7ad37294474bac6a452280da77ce8b0b6a80a066dcc68319bc446888a50d78e4"
+      },
+      "result": {
+        "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+        "baselineVersion": null,
+        "attributes": [
+          {
+            "id": "wash-towel.material",
+            "name": "材质",
+            "conceptKey": "facial_towel.material",
+            "definition": "洗脸巾与皮肤接触部分的主要纤维材质，按包装或商品标识原文填写（如棉、植物纤维、粘胶纤维、涤纶及其混纺），不推断纤维配比、漂白工艺或检测结论；本属性只描述纤维成分，不表示商品是否为纸浆制品，也不等同于品牌或产地",
+            "scope": "facial-cleansing-towel-fiber-material",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "洗脸巾直接接触面部与手部，纤维材质（纯棉、植物纤维、粘胶/涤纶混纺等）改变触感、吸水预期和价位档位的采购判断，也是买家在同类洗脸巾之间选型与比价的主要依据，并可作为按材质检索的关键词；保留商家原措辞、不造枚举，填写成本为一项短文本，收益高于维护成本。本类目无已登记同族基线与可复用定义（属性池仅有面向成品纸浆的原料定义），故为独立待审提案，不冒充继承。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "产品用途与材料对象、尺寸、是否有独立选型信息"
+              },
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "仅凭“纸品”推成纸浆制品或与普通卫生纸同合同"
+              }
+            ]
+          },
+          {
+            "id": "wash-towel.sheet_size",
+            "name": "单张尺寸",
+            "conceptKey": "paper.sheet_size",
+            "definition": "一张洗脸巾在干态平铺展开状态下的长×宽，按原文填写并注明单位（如200×200mm）；不指折叠后的形态尺寸，不指整包或包装外廓尺寸（后者由商品包装长宽高基础字段承载）；不得用外廓尺寸推断与洗脸巾分配器具的适配关系。长度与宽度本轮无独立筛选或适配用途，保留规范组合文本，不拆为两个属性",
+            "scope": "facial-cleansing-towel-single-sheet-size",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "单张平铺尺寸决定单次擦脸的覆盖面积与用量感，是同等价位不同规格洗脸巾的主要可选参数和比较项，也便于在列表/详情展示规格；对象限定为单张成品，避免与包装尺寸或折叠尺寸混用。计量状态（干态展开）与是否需要数值化筛选仍是待确认专业问题，故先以单个文本承载并按原文填写，填写成本仅一项。属性池中存在语义相近的单张纸张尺寸定义（面向纸张对象），本叶未建立继承关系，取用共享定义需另走共享修订核对对象描述。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "不可因简化而混同净重/毛重、内径/外径、单张/整卷/包装。"
+              },
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "产品用途与材料对象、尺寸、是否有独立选型信息"
+              }
+            ]
+          }
+        ],
+        "bindings": [
+          {
+            "attributeId": "wash-towel.material",
+            "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+            "requiredness": "optional",
+            "requirednessReason": "缺失时买家无法判断是否含棉或为植物纤维、粘胶/涤纶混纺等接触皮肤的主要成分，会影响同类洗脸巾的选型与比价；但业务是否要求强制填写尚未确认，按要求先设选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 10,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "wash-towel.sheet_size",
+            "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+            "requiredness": "optional",
+            "requirednessReason": "缺失单张平铺尺寸会妨碍同等价位不同规格洗脸巾的覆盖面积与用量比较，也削弱规格展示；是否应强制填写尚未与业务确认，先设选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 20,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          }
+        ],
+        "extensionCandidates": [
+          {
+            "id": "ext-wash-towel.pack-count",
+            "name": "每包数量",
+            "conceptKey": "paper.pack_count",
+            "scope": "facial-cleansing-towel-single-pack-sheet-count",
+            "potentialUse": "比较一包内含张/抽数，用于更换频次与单位可用量成本比较，是同价位包装规格的常用比价依据。",
+            "deferReason": "与销售单位、最小计量单位及“销售单位中含最小计量单位数量”基础字段的职责是否重叠尚未核实，直接建模易造成同一数量重复填写；属性池中现有的每包数量定义面向抽取式面巾纸，计量对象与计数词（张/抽/片）是否同样适用需业务确认。",
+            "activationCriteria": "确认包内张/抽数不能由最小计量单位及其数量基础字段承载，且核实本类计数词口径后，按共享基线/属性池流程取用或修订定义再启用。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "scm-field-responsibilities-20261022",
+                "version": "affcf4095798cbb58ba3e80b1431ed821e74e3b6e1bba640a72630c279185319",
+                "quote": "销售单位中含最小计量单位数量"
+              },
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "固定数值及单位合为一个定义；真正可变计数词先用保留原文的单个文本，不拆独立单位字段。不统一张、抽、节、格，不按层数换算张数。"
+              }
+            ]
+          },
+          {
+            "id": "ext-wash-towel.usage-mode",
+            "name": "使用次数",
+            "conceptKey": "facial_towel.usage_mode",
+            "scope": "facial-cleansing-towel-disposable-or-reusable",
+            "potentialUse": "区分一次性洗脸巾与可重复使用洗脸巾，影响采购对象、使用成本与洗涤/更换管理方式的选择判断。",
+            "deferReason": "本末级是否同时包含一次性制品与可复用布巾类商品尚未核实；若本叶全部为一次性棉柔巾，则该维度无区分作用，且取值词表与判定依据（产品声明而非推测）尚缺。",
+            "activationCriteria": "确认本叶真实存在两类商品且采购需据此选择，并取得可作为取值依据的商品声明词表后，再提共享修订启用。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "一次性/复用、干/湿使用对象及纤维术语"
+              },
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "未确认价值的保留扩展候选，给出潜在用途、暂缓原因、启用条件。"
+              }
+            ]
+          },
+          {
+            "id": "ext-wash-towel.gram-weight",
+            "name": "克重",
+            "conceptKey": "facial_towel.grammage",
+            "scope": "facial-cleansing-towel-area-weight",
+            "potentialUse": "单位面积质量可用于比较同尺寸洗脸巾的厚实度与用料，辅助同价位档位选型。",
+            "deferReason": "未取得专业依据与统一计量口径（g/m² 与每张克重易混），标签是否稳定提供该参数亦未核实，仅凭技术页或电商字段不足以准入。",
+            "activationCriteria": "取得专业资料确认计量对象与单位口径，并核实多数商品标识可取得后再评估设立。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "属性必须服务具体的采购选型、适配、比较、检索或展示判断。技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "ext-wash-towel.wet-dry-use",
+            "name": "干湿使用方式",
+            "conceptKey": "facial_towel.wet_dry_use",
+            "scope": "facial-cleansing-towel-dry-wet-usage",
+            "potentialUse": "区分仅干用与干湿两用，影响使用场景匹配与选型。",
+            "deferReason": "术语边界（干湿两用、可湿水、湿用）与取值判定依据未核实，且与材质、厚度等参数的关系不清，易重复表达同一信息。",
+            "activationCriteria": "取得匹配的产品资料与用途定义，确认该维度可独立区分选型且不与材质重复后，按共享修订流程启用。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "一次性/复用、干/湿使用对象及纤维术语"
+              }
+            ]
+          }
+        ],
+        "unresolved": [
+          "本类目无已登记同族与属性池条目（family、related、分类范围内属性池均为空，baselineStatus=missing_candidate_only），本方案为独立待审提案，不是继承结果；若后续建立盒装/软包抽纸、面巾纸等同族基线，须复核本叶共同属性与差异。",
+          "洗脸巾的商品对象边界未核实：本叶是否只含一次性无纺布/棉柔巾，是否混有可复用布巾或湿巾类商品；边界未定会影响使用次数、湿用等属性准入，需业务确认。",
+          "单张尺寸的计量口径待专业/业务确认：干态平铺展开的长×宽是否为买卖双方通用口径，折叠形态尺寸是否有独立选型价值，以及是否需要拆分为长、宽做数值筛选（拆分会涉及类型与检索配置变更）。",
+          "材质/纤维术语（棉、植物纤维、粘胶纤维、涤纶、混纺）的标准写法和标注合规性未取得匹配标准全文（仅读到GB/T 20808-2022元数据），当前仅按原文保留，不设枚举；是否需区分干/湿使用对象亦待核实。",
+          "包装内含张/抽数与基础字段（销售单位、最小计量单位、销售单位中含最小计量单位数量）的职责边界未核实，故本轮未准入该属性而放入扩展候选，需业务裁定后再决定取用属性池定义或新建。",
+          "两个属性的关键规格（isKeySpec）本轮均设为false：材质或尺寸是否实际作为买家选择规格的维度尚未核实，不在统一SKU下自动开启关键规格。",
+          "单张尺寸为组合文本，当前关键词索引对数值型筛选支持不足；若业务需要按尺寸区间筛选，属系统改造议题，离线产物不假装已落地。",
+          "同概念跨类目复核项：属性池已有面向纸张对象的单张尺寸定义与原料定义，本叶未建立继承关系；如后续确定复用，须先提共享修订核对“纸张→无纺布巾”的对象与计量口径差异，再启用共享版本。"
+        ]
+      }
+    },
+    {
+      "arm": "low",
+      "phase": "leaf",
+      "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+      "provenance": {
+        "relativeJobPath": "reruns/pilot-wash-tissue-low-20261023/jobs/leaf-bce2eecc9a98bfef6251.json",
+        "artifactHash": "00e05ed794061bc865a74b149c8229d2655c84782bfeb3303c4a18e0b68afc68",
+        "requestKey": "d39593262b06387ba2d2abf0f233f8cfe4aec1a2ac1bbe742722a3f1d192e48d",
+        "releaseId": "ad677dda6503ee7cb94469c38531f2ef064685331bcc5989805cece06dc6ed3b",
+        "resultHash": "22492ef5927cd75ccbad8e8133ed87f846ab4c7f4a85bc3747ee22ec7733688b",
+        "responseHash": "754435d14de469746030d584bc4f4a87f7a7585785a4fd874c71afc41ed3ca91"
+      },
+      "result": {
+        "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+        "baselineVersion": "e361e611a3bbcc8943a55c0bceafa96dde61be33207c057a5bdd8aee94f626bf",
+        "attributes": [
+          {
+            "id": "roll.layers",
+            "name": "层数",
+            "conceptKey": "paper.layers",
+            "definition": "成品纸张的叠层数量（如2层、3层），不是包装或托盘层数；按SKU成品实际层数填写",
+            "scope": "finished-paper-ply",
+            "fieldType": "number",
+            "unit": "层",
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": {
+              "isInt": true,
+              "precision": null,
+              "min": 1,
+              "max": null
+            },
+            "textConfig": null,
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "抽取式面巾纸的2/3/4层直接改变厚度、强度与单抽吸水量判断，是采购比价和买家选规格的档位依据。定义复用属性池已登记的paper.layers（名称、定义、类型、单位一致），仅在本族两个末级绑定，不另建同义定义。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "不统一张、抽、节、格，不按层数换算张数。"
+              }
+            ]
+          },
+          {
+            "id": "roll.sheet_size",
+            "name": "纸张尺寸",
+            "conceptKey": "paper.sheet_size",
+            "definition": "一张成品纸展开后的长×宽，按原文填写并注明单位（如200×200mm）；不是整包外廓尺寸、不是包装尺寸基础字段，也不是折叠后的形态尺寸",
+            "scope": "finished-paper-sheet-size",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "单张尺寸决定单次擦拭的覆盖面积和手感，是比较不同规格同价位商品的基础量，并与基础字段中的包装长宽高属不同对象。族内暂保留一个规范组合文本，不拆长宽，因为目前没有独立的筛选或器具适配用途；复用属性池paper.sheet_size的既有定义。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "不可因简化而混同净重/毛重、内径/外径、单张/整卷/包装。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.pack_count",
+            "name": "每包数量",
+            "conceptKey": "paper.pack_count",
+            "definition": "一个最小销售单元（一包）内含的抽取次数或张数，按包装原文填写并保留原计数词（如“100抽”“120张”）；不把抽与张、片互换，不用层数换算张数，不把一提/一箱的包数写入本属性（该口径由销售单位及最小计量单位数量基础字段承载）",
+            "scope": "single-pack-sheet-count",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "每包可用量决定更换频次和单位可用量成本，是比较同价位抽纸最直接的量。计数词存在抽/张等不可互换口径，先按原文单个文本承载，待核实后再提数值化；属性池仅有面向单卷的每卷数量（不同计量对象），故按本族对象新建待审定义。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "固定数值及单位合为一个定义；真正可变计数词先用保留原文的单个文本，不拆独立单位字段。不统一张、抽、节、格，不按层数换算张数。"
+              }
+            ]
+          },
+          {
+            "id": "roll.raw_material",
+            "name": "原料",
+            "conceptKey": "paper.raw_material",
+            "definition": "商家对成品纸主要纤维原料的原文描述（如原生木浆、原生竹浆、混合浆、再生纸浆）；不由品牌或价格推定，不推断配比、漂白工艺或检测结论",
+            "scope": "finished-paper-material",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "抽取式面巾纸直接接触面部、手部及口鼻附近，原料影响触感、吸水性与卫生安全预期，是触肤用途匹配和原生浆/混合浆/再生浆档位比价的判断项；保留商家原措辞，避免在无核实词表时自造枚举。复用属性池paper.raw_material定义。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "属性必须服务具体的采购选型、适配、比较、检索或展示判断。技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "roll.fragrance",
+            "name": "香型",
+            "conceptKey": "paper.fragrance",
+            "definition": "单个文本字段保留原文：明确的无香、具体香型，或仅说明有香味；只知有香时保留原描述而不编具体香型，资料未说明则留未知，缺失不得默认无香",
+            "scope": "finished-paper-fragrance",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "无香与具体香型是买家（婴幼、敏感人群、餐饮及前台场景）选择与搜索时的实际区分项；同一文本承载“无香/具体香型/仅说明有香味”的粗细信息，不另建配套真假字段。复用属性池paper.fragrance定义。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "名称用不歧义的短称，计量对象、分母、口径和限制写在定义。"
+              }
+            ]
+          }
+        ],
+        "bindings": [
+          {
+            "attributeId": "roll.layers",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "optional",
+            "requirednessReason": "缺少层数会妨碍厚度、强度与单抽吸水量的同档比较及买家按规格筛选；业务尚未确认是否所有盒装抽纸都必须标注层数，先选填，待人工确认后再提必填。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 1,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "roll.layers",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "facial-tissue.pack_count",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "optional",
+            "requirednessReason": "缺少每包数量无法判断可用量与单位可用量成本、更换频次，是选型比较的核心量；但计数口径（抽/张）尚未统一核实且业务未确认强制，先选填。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 2,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "facial-tissue.pack_count",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.sheet_size",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "optional",
+            "requirednessReason": "缺少单张尺寸会妨碍单次覆盖面积与手感比较，也影响与同价位不同规格的比较；是否强制标注尚未确认，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 3,
+            "uses": [
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "roll.sheet_size",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.raw_material",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "optional",
+            "requirednessReason": "缺少原料会妨碍触肤场景匹配与原生木浆/竹浆/再生浆档位比价；业务未确认强制填写，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 4,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": "roll.raw_material",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.fragrance",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "optional",
+            "requirednessReason": "缺少香型会妨碍无香场景选择与按香型检索；是否强制标注未确认，先选填，且缺失不得默认无香。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 5,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": "roll.fragrance",
+            "differenceReason": null
+          }
+        ],
+        "extensionCandidates": [
+          {
+            "id": "facial-tissue.embossing",
+            "name": "压花",
+            "conceptKey": "paper.embossing",
+            "scope": "finished-paper-surface",
+            "potentialUse": "压花影响手感、层间贴合与厚度感知，可能成为同价位抽纸的比较与筛选维度",
+            "deferReason": "本轮未取得压花花纹类型、工艺可共存关系及其对采购选型实际影响的依据；小卷族的印花/压花亦处于暂缓，不凭电商字段直接准入",
+            "activationCriteria": "业务确认压花是抽纸的独立可选维度、给出可比口径（有无/花纹类型）并需要筛选或展示时，先按共享修订流程补入族基线，再绑定末级",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.printing",
+            "name": "印花",
+            "conceptKey": "paper.printing",
+            "scope": "finished-paper-surface",
+            "potentialUse": "印花图案影响外观与场景匹配（如餐饮、前台、婴童），可能用于外观筛选",
+            "deferReason": "印花与压花是不同概念，不能并为互斥枚举；本轮无两者关系及独立选型价值的核实依据，暂缓",
+            "activationCriteria": "业务确认印花/压花各自独立成立、且需要单独检索或展示时，经共享修订分别启用，不合并为单一工艺选项",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.lotion",
+            "name": "保湿/乳霜添加",
+            "conceptKey": "paper.lotion",
+            "scope": "finished-paper-treatment",
+            "potentialUse": "乳霜或保湿处理影响触感与适用人群（如鼻炎、婴幼、频繁擦拭场景），可能是采购选型的独立维度",
+            "deferReason": "未取得产品声明与处理剂成分口径的证据，功效类描述存在夸大风险，本轮不设（也不设配套真假字段）",
+            "activationCriteria": "取得可核实的商品声明或标准依据、明确“保湿/乳霜”判定口径后，经共享修订评估是否作为单一文本或选项属性",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "技术上存在某参数、电商有字段或AI能想到它，都不足以直接设属性。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.wet-strength",
+            "name": "可湿水性能",
+            "conceptKey": "paper.wet_strength",
+            "scope": "finished-paper-performance",
+            "potentialUse": "湿水后强度决定能否代替湿巾用于擦拭台面或婴幼清洁，可能影响使用场景匹配",
+            "deferReason": "湿强度属检测口径参数，未取得标准全文与测试方法，不能凭宣称设枚举或编阈值；本轮暂缓",
+            "activationCriteria": "取得标准/检测方法全文并确认业务需要按性能档位比较时，另提共享修订；存在多个宣称时保留原文，不编杀菌或医疗声明",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "本资料给出业务建模起点及已知问题，不补造未读的专业知识。"
+              }
+            ]
+          },
+          {
+            "id": "facial-tissue.pack_net_weight",
+            "name": "单包净重",
+            "conceptKey": "paper.pack_net_weight",
+            "scope": "single-pack-net-weight",
+            "potentialUse": "在同一销售单位内含包数不同时，单包净重可用于单位重量成本比较，弥补物流重量口径无法反映内容物量的不足",
+            "deferReason": "基础字段只有商品重量/物流重量口径，单包净重与含包装毛重的区分尚无来源核实，且多数抽纸包装未标净重，暂缓",
+            "activationCriteria": "业务确认净重与毛重口径可区分、且供应商资料能稳定提供单包净重（含单位）时，按共享修订新增数值定义并说明计量对象",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "基础商品重量、物流尺寸不自动排除单卷重量、纸张尺寸或器具工作尺寸，先核对对象和用途。"
+              }
+            ]
+          }
+        ],
+        "unresolved": [
+          "同族基线 facial-tissue 版本 e361e611a3bbcc8943a55c0bceafa96dde61be33207c057a5bdd8aee94f626bf 状态为 candidate/same_run_pending：本叶绑定与共同定义均随之待审，不能作为其他批次默认标准，也不授权线上变更。",
+          "属性池中 roll.sheet_size 存在两条同ID、同概念但定义不同的记录：一条为“单张纸尺寸完整文本；不猜轴向或包装尺寸”（引用 small-roll-paper-research-20261022），另一条为本族“一张成品纸展开后的长×宽…不是折叠后的形态尺寸”。本叶按冻结基线采用后者，但两版同ID定义的权威归属与合并须走共享修订确认，未确认前不得在运行中静默改变语义。",
+          "软包抽纸与盒装抽纸包装形态不同，是否存在仅软包才需要的独立参数（如便携性、抽出顺畅度等）尚未取得依据；本轮未据此新增属性，也不据此改变共同名称与计数口径，留待业务人审确认。",
+          "每包数量的计数词“抽/张/片”口径关系未获业务依据，仍以原文文本承载，不能互换或按层数换算为张数；是否可数值化（数值+固定单位）待人工裁定。",
+          "层数、每包数量的必填性（是否 required）业务未确认，本轮按未明先选填，不将样本是否标注作为必填性依据，待人工确认后另提绑定变更。",
+          "扩展候选（压花、印花、保湿/乳霜添加、可湿水性能、单包净重）均保持冻结取舍，启用条件未满足；任何启用须先修订同族共享基线，不在本末级以“选填”直接转入属性合同。",
+          "baselineReferenceDependencies 中的 clean-paper-admission-20261023 状态为 research_pending_professional_review，且 GB/T 20808-2022 仅取得元数据页、未取得标准全文；本叶不引用检测阈值，涉及湿强度等性能参数的判定口径仍待专业查证。"
+        ]
+      }
+    },
+    {
+      "arm": "high",
+      "phase": "family-seed",
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "provenance": {
+        "relativeJobPath": "reruns/pilot-wash-tissue-high-20261023/jobs/family-seed-18f161be522f0b274f86.json",
+        "artifactHash": "e4942b8e8c6f3afd8d55fd1549cd915a34208c9421815cd460dbd6c5fb57f6c3",
+        "requestKey": "1dee9c46d02de565c4c0cd1445427f8a013229a3456f3c0b0b975eb04a60752c",
+        "releaseId": "ad677dda6503ee7cb94469c38531f2ef064685331bcc5989805cece06dc6ed3b",
+        "resultHash": "0fb81a58a0f51755f30a62b2e07dc50d9bb553e71d9d22d72836162d0d083ba6",
+        "responseHash": "c91c5bc42d23832c70d2e2ffb78b0921c6bef28f2d464e44eb26559c82abc35e"
+      },
+      "result": {
+        "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "baselineVersion": null,
+        "attributes": [
+          {
+            "id": "roll.layers",
+            "name": "层数",
+            "conceptKey": "paper.layers",
+            "definition": "成品纸张叠层数量，不是包装或托盘层数",
+            "scope": "finished-paper-ply",
+            "fieldType": "number",
+            "unit": "层",
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": {
+              "isInt": true,
+              "precision": null,
+              "min": 1,
+              "max": null
+            },
+            "textConfig": null,
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池已登记的成品纸张叠层定义。盒装与软包抽纸按包比价时，层数直接改变厚度、湿强度和使用手感的判断，是同类商品选型与规格比较的核心参数；每SKU一个整数、单位固定为层，填写成本低，不需另设计数单位属性。数值字段不进入本地关键词索引，检索用途按范围筛选能力另行评估，不为凑搜索改成文本。复用该定义属待审候选，小卷资料只证明叠层口径，不证明面巾纸必须强制填写。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "层数是成品纸张叠层；不能与托盘层数、包装层级混淆。"
+              }
+            ]
+          },
+          {
+            "id": "roll.fragrance",
+            "name": "香型",
+            "conceptKey": "paper.fragrance",
+            "definition": "单个文本字段保留明确的无香、具体香型或仅有香味的原文；仅知有香不编香型，未说明留未知；归一化需另有已核实词表",
+            "scope": "finished-paper-fragrance",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池的单一文本香型定义：同一字段既能记录明确的“无香”，也能记录具体香型或仅说明有香味，未说明保持未知，不另建“是否有香味”布尔字段。对气味敏感或指定无香的采购场景，香型会改变选型判断，也支持按“无香”等词检索；单文本维护成本低。面巾纸是否普遍标注香型、是否应强制填写尚未由业务确认，故必填性先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "香型统一使用一个文本字段"
+              }
+            ]
+          },
+          {
+            "id": "roll.raw_material",
+            "name": "原料",
+            "conceptKey": "paper.raw_material",
+            "definition": "商家对原料的原文描述，不能由品牌推定",
+            "scope": "finished-paper-material",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池的原料原文定义。面巾纸直接接触口鼻皮肤，原生木浆、竹浆或混浆等原料声明会改变敏感人群适用性与环保要求方面的选型判断，并支持按原料关键词检索；保留商家确切措辞、不得由品牌推定，单文本维护成本低。原料词表未取得核实版本，暂不建枚举，必填性先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "原料保留商家确切措辞"
+              }
+            ]
+          },
+          {
+            "id": "roll.sheet_size",
+            "name": "纸张尺寸",
+            "conceptKey": "paper.sheet_size",
+            "definition": "单张纸尺寸完整文本；不猜轴向或包装尺寸",
+            "scope": "finished-paper-sheet-size",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池的单张纸尺寸文本定义，与基础字段里的商品包装长宽高、物流尺寸区分开。盒装与软包抽纸的实际使用面积和单次擦拭覆盖与该参数有关，用户会按标准/加大尺寸比较，而标题中的尺寸表述常不完整；先存完整文本可避免把折叠或展开状态猜成某一轴向。必填必要性未确认，先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "纸张尺寸与纸卷尺寸、包装尺寸分开"
+              }
+            ]
+          },
+          {
+            "id": "facial.package_count",
+            "name": "每包数量",
+            "conceptKey": "paper.package_count",
+            "definition": "单个零售包装内可抽取纸张的数量及原文计数词（如100抽、200张），保留来源计数单位，不把抽当张、不按层数换算，也不与销售单位及其含最小计量数量重复",
+            "scope": "facial-tissue-package-count",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "抽取式面巾纸按包销售，每包可抽取数量决定可用量与单抽成本，是采购比价和规格选择的关键依据，也用于把“加量装”与标准装分开比较。抽/张计数口径尚未核实，故先用单一文本保留原文计数词，不另设计量单位属性；口径确认后再提数值化修订。每SKU一个短文本，维护成本低。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "真正可变计数词先用保留原文的单个文本，不拆独立单位字段。不统一张、抽、节、格，不按层数换算张数。"
+              }
+            ]
+          },
+          {
+            "id": "facial.pack_form",
+            "name": "包装形式",
+            "conceptKey": "paper.pack_form",
+            "definition": "抽取式面巾纸最小销售包装的形态：盒装指带盒体的抽取包装，软包指柔性薄膜包装。类目归属不能作为该取值的证据，需按实际商品填写；当前候选值域覆盖本族两个末级形态，其他形态需按共享修订扩充，不以“其他”兜底",
+            "scope": "facial-tissue-pack-form",
+            "fieldType": "option",
+            "unit": null,
+            "enumValues": [
+              "盒装",
+              "软包"
+            ],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": null,
+            "optionConfig": {
+              "minCount": null,
+              "maxCount": null
+            },
+            "defaultValue": null,
+            "rationale": "本族由盒装抽纸与软包抽纸两个末级组成，包装形态影响能否立放桌面、携带方式和是否需配套盒体，也是跨末级统一比较的区分维度；按同族保留统一区分维度的要求，类目名已含形态不构成删除该维度的理由。单选、两个候选值，填写成本低。业务上该形态目前主要由类目归属区分，属性是否强制填写待确认。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "盒装/软包抽纸、大卷/中心抽大卷纸目前只是预配置的候选族。先设计共同定义，再说明包装、出纸方式或设备适配是否带来绑定差异。"
+              }
+            ]
+          }
+        ],
+        "bindings": [
+          {
+            "attributeId": "roll.layers",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "required",
+            "requirednessReason": "层数是同类抽纸比价时的核心规格：缺失将无法判断厚度、湿强度与单位使用成本，直接妨碍同品比较与规格选型，故本叶要求必填；商品包装未标注时属取值缺口，不据此降为选填。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": true,
+            "displayInList": true,
+            "sortIndex": 10,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "facial.package_count",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "每包可抽取数量影响可用量与单抽成本比较；因抽/张计数口径尚未核实、业务也未确认必须强制填写，先选填，避免强制后产生不可比数据。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": true,
+            "displayInList": true,
+            "sortIndex": 20,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.sheet_size",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "单张尺寸影响使用面积与单次擦拭覆盖的比较，是规格判断的一项依据；业务尚未确认强制索取，且折叠/展开状态口径待核实，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 30,
+            "uses": [
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.raw_material",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "原料影响敏感人群适用性与环保要求的选型判断，并用于按原料关键词检索；原料声明并非所有商品齐全、业务未确认强制，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 40,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.fragrance",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "香型影响无香、气味敏感场景的选型与按“无香”检索；是否普遍标注未确认，先选填，缺失不默认无香。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 50,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "facial.pack_form",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "包装形态影响桌面立放、携带与是否需配套盒体的判断；当前类目归属已从业务上区分盒装/软包，强制填写必要性待业务确认，先选填，类目名不作为取值证据。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 60,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          }
+        ],
+        "extensionCandidates": [
+          {
+            "id": "ext-facial-print-pattern",
+            "name": "纸面印花",
+            "conceptKey": "paper.print_pattern",
+            "scope": "facial-tissue-surface-print",
+            "potentialUse": "区分有印花/无印花或图案差异，可能用于外观类选型与销售展示",
+            "deferReason": "本轮未确认印花会改变采购或规格判断，也没有面巾纸印花的适用资料（小卷纸资料明示不可外推面巾纸），因此不建类型配置与绑定",
+            "activationCriteria": "业务确认需按纸面印花筛选或展示时，先提共享基线修订，明确其与压花的独立关系及取值表达后再启用",
+            "references": []
+          },
+          {
+            "id": "ext-facial-embossing",
+            "name": "纸面压花",
+            "conceptKey": "paper.embossing",
+            "scope": "facial-tissue-surface-emboss",
+            "potentialUse": "压花影响手感与外观，可能用于差异化选型或展示",
+            "deferReason": "用途与业务准入未确认；压花与印花是不同工艺，不能并为互斥枚举，且缺面巾纸适用资料，故不进SKU合同",
+            "activationCriteria": "业务确认需按压花选型或展示时，先经共享修订确定独立定义、类型与是否可与其他工艺共存",
+            "references": []
+          },
+          {
+            "id": "ext-facial-usage-scene",
+            "name": "使用对象",
+            "conceptKey": "paper.usage_scene",
+            "scope": "facial-tissue-usage-scene",
+            "potentialUse": "区分家用、商用、母婴等采购场景，辅助按使用对象选型与检索",
+            "deferReason": "场景词表与业务口径未定义，无法确定枚举边界或文本填写规则，暂不建立属性与绑定",
+            "activationCriteria": "业务给出场景范围、检索用途与维护责任后，评估文本或受控枚举方案并走共享修订",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "使用对象、尺寸和可用纸量的比较"
+              }
+            ]
+          }
+        ],
+        "unresolved": [
+          "属性池中 roll.layers、roll.fragrance、roll.raw_material、roll.sheet_size 的依据文本来自小卷卫生纸研究包，该包明示不可外推面巾纸；面巾纸复用这四个定义的业务适用性需专业与业务人审，如要改为通用成品纸张定义应走共享修订，本输出不视为已确认标准。",
+          "盒装抽纸与软包抽纸是否确属同一同族（对象同为抽取式面巾纸、仅包装形态不同）需人工样板确认，并补充相关但不同族的反例（手帕纸、餐巾纸、厨房纸巾）用于误合并与漏发现评估；程序检索 related 与属性池均无已登记同族基线。",
+          "每包数量的抽/张计数口径未核实：一抽是否等于一张、层数与张数如何换算、行业按张还是按抽标注，需专业确认后才能把该文本属性数值化并据此比较单抽成本。",
+          "纸张尺寸的计量状态（折叠状态或展开状态）未在定义中限定；盒装与软包折叠方式不同，取值可比性待确认，必要时提共享修订在定义中限定状态。",
+          "包装形式的候选值域只取了盒装、软包两个当前末级形态；是否存在塑盒、挂式抽取等其他形态，以及软包是否还要区分抽取式与便携装，需业务确认后按共享修订扩充枚举，不以“其他”兜底。",
+          "软包抽纸（ce3a9f67-613c-4707-bf3a-95193edb8a2d）的共同绑定与必填性是否与盒装完全一致，待该成员叶子阶段确认；本轮只输出锚点叶绑定。",
+          "销售单位、规格名称、最小计量单位及其数量已由基础字段承载，本族未重复建立销售单位/销售总数量属性；需核对本类目实际使用的字段，确认每包数量与最小计量单位数量不重复维护。",
+          "原料、香型、纸张尺寸、包装形式一律先按选填处理；若业务要求其中某项必填，需补充其妨碍哪项关键选型的依据后再改，不以当前样本缺值作为必填性判据。",
+          "层数在本叶设为必填，依据是同类比价对厚度/湿强度的影响；若业务确认该值可由规格名称等既有字段稳定承载，应改为选填并说明，避免重复强制填写。"
+        ]
+      }
+    },
+    {
+      "arm": "high",
+      "phase": "leaf",
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "provenance": {
+        "relativeJobPath": "reruns/pilot-wash-tissue-high-20261023/jobs/leaf-18f161be522f0b274f86.json",
+        "artifactHash": "66a89f55bc7875298408b9c19fb2d3f39c71e5b217db1bfeddebe9e04d3be0ab",
+        "requestKey": "15702564a1cfdcdd7e255383ecdca66bd3bde28e92869c8c11775c5bab2bd5ad",
+        "releaseId": "ad677dda6503ee7cb94469c38531f2ef064685331bcc5989805cece06dc6ed3b",
+        "resultHash": "a958a15c388ab94e2a7513a2a701a3b127b06abd65be56f3dac8664bf1034805",
+        "responseHash": "56108edacce9664cfd1ba0ec635fd95408f20d64ec89e9ea01a5e47b28fa7187"
+      },
+      "result": {
+        "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "baselineVersion": "3a50d8c6336cdd6e2cb80833ddddba9b3694f5410184d3d1ac84584fa24db0d8",
+        "attributes": [
+          {
+            "id": "roll.layers",
+            "name": "层数",
+            "conceptKey": "paper.layers",
+            "definition": "成品纸张叠层数量，不是包装或托盘层数",
+            "scope": "finished-paper-ply",
+            "fieldType": "number",
+            "unit": "层",
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": {
+              "isInt": true,
+              "precision": null,
+              "min": 1,
+              "max": null
+            },
+            "textConfig": null,
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池已登记的成品纸张叠层定义。盒装与软包抽纸按包比价时，层数直接改变厚度、湿强度和使用手感的判断，是同类商品选型与规格比较的核心参数；每SKU一个整数、单位固定为层，填写成本低，不需另设计数单位属性。数值字段不进入本地关键词索引，检索用途按范围筛选能力另行评估，不为凑搜索改成文本。复用该定义属待审候选，小卷资料只证明叠层口径，不证明面巾纸必须强制填写。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "层数是成品纸张叠层；不能与托盘层数、包装层级混淆。"
+              }
+            ]
+          },
+          {
+            "id": "roll.fragrance",
+            "name": "香型",
+            "conceptKey": "paper.fragrance",
+            "definition": "单个文本字段保留明确的无香、具体香型或仅有香味的原文；仅知有香不编香型，未说明留未知；归一化需另有已核实词表",
+            "scope": "finished-paper-fragrance",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池的单一文本香型定义：同一字段既能记录明确的“无香”，也能记录具体香型或仅说明有香味，未说明保持未知，不另建“是否有香味”布尔字段。对气味敏感或指定无香的采购场景，香型会改变选型判断，也支持按“无香”等词检索；单文本维护成本低。面巾纸是否普遍标注香型、是否应强制填写尚未由业务确认，故必填性先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "香型统一使用一个文本字段"
+              }
+            ]
+          },
+          {
+            "id": "roll.raw_material",
+            "name": "原料",
+            "conceptKey": "paper.raw_material",
+            "definition": "商家对原料的原文描述，不能由品牌推定",
+            "scope": "finished-paper-material",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池的原料原文定义。面巾纸直接接触口鼻皮肤，原生木浆、竹浆或混浆等原料声明会改变敏感人群适用性与环保要求方面的选型判断，并支持按原料关键词检索；保留商家确切措辞、不得由品牌推定，单文本维护成本低。原料词表未取得核实版本，暂不建枚举，必填性先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "原料保留商家确切措辞"
+              }
+            ]
+          },
+          {
+            "id": "roll.sheet_size",
+            "name": "纸张尺寸",
+            "conceptKey": "paper.sheet_size",
+            "definition": "单张纸尺寸完整文本；不猜轴向或包装尺寸",
+            "scope": "finished-paper-sheet-size",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池的单张纸尺寸文本定义，与基础字段里的商品包装长宽高、物流尺寸区分开。盒装与软包抽纸的实际使用面积和单次擦拭覆盖与该参数有关，用户会按标准/加大尺寸比较，而标题中的尺寸表述常不完整；先存完整文本可避免把折叠或展开状态猜成某一轴向。必填必要性未确认，先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "纸张尺寸与纸卷尺寸、包装尺寸分开"
+              }
+            ]
+          },
+          {
+            "id": "facial.package_count",
+            "name": "每包数量",
+            "conceptKey": "paper.package_count",
+            "definition": "单个零售包装内可抽取纸张的数量及原文计数词（如100抽、200张），保留来源计数单位，不把抽当张、不按层数换算，也不与销售单位及其含最小计量数量重复",
+            "scope": "facial-tissue-package-count",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "抽取式面巾纸按包销售，每包可抽取数量决定可用量与单抽成本，是采购比价和规格选择的关键依据，也用于把“加量装”与标准装分开比较。抽/张计数口径尚未核实，故先用单一文本保留原文计数词，不另设计量单位属性；口径确认后再提数值化修订。每SKU一个短文本，维护成本低。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "真正可变计数词先用保留原文的单个文本，不拆独立单位字段。不统一张、抽、节、格，不按层数换算张数。"
+              }
+            ]
+          },
+          {
+            "id": "facial.pack_form",
+            "name": "包装形式",
+            "conceptKey": "paper.pack_form",
+            "definition": "抽取式面巾纸最小销售包装的形态：盒装指带盒体的抽取包装，软包指柔性薄膜包装。类目归属不能作为该取值的证据，需按实际商品填写；当前候选值域覆盖本族两个末级形态，其他形态需按共享修订扩充，不以“其他”兜底",
+            "scope": "facial-tissue-pack-form",
+            "fieldType": "option",
+            "unit": null,
+            "enumValues": [
+              "盒装",
+              "软包"
+            ],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": null,
+            "optionConfig": {
+              "minCount": null,
+              "maxCount": null
+            },
+            "defaultValue": null,
+            "rationale": "本族由盒装抽纸与软包抽纸两个末级组成，包装形态影响能否立放桌面、携带方式和是否需配套盒体，也是跨末级统一比较的区分维度；按同族保留统一区分维度的要求，类目名已含形态不构成删除该维度的理由。单选、两个候选值，填写成本低。业务上该形态目前主要由类目归属区分，属性是否强制填写待确认。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "盒装/软包抽纸、大卷/中心抽大卷纸目前只是预配置的候选族。先设计共同定义，再说明包装、出纸方式或设备适配是否带来绑定差异。"
+              }
+            ]
+          }
+        ],
+        "bindings": [
+          {
+            "attributeId": "roll.layers",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "required",
+            "requirednessReason": "层数是同类抽纸比价时的核心规格：缺失将无法判断厚度、湿强度与单位使用成本，直接妨碍同品比较与规格选型，故本叶要求必填；商品包装未标注时属取值缺口，不据此降为选填。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": true,
+            "displayInList": true,
+            "sortIndex": 10,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "roll.layers",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "facial.package_count",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "每包可抽取数量影响可用量与单抽成本比较；因抽/张计数口径尚未核实、业务也未确认必须强制填写，先选填，避免强制后产生不可比数据。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": true,
+            "displayInList": true,
+            "sortIndex": 20,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "facial.package_count",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.sheet_size",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "单张尺寸影响使用面积与单次擦拭覆盖的比较，是规格判断的一项依据；业务尚未确认强制索取，且折叠/展开状态口径待核实，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 30,
+            "uses": [
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "roll.sheet_size",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.raw_material",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "原料影响敏感人群适用性与环保要求的选型判断，并用于按原料关键词检索；原料声明并非所有商品齐全、业务未确认强制，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 40,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": "roll.raw_material",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.fragrance",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "香型影响无香、气味敏感场景的选型与按“无香”检索；是否普遍标注未确认，先选填，缺失不默认无香。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 50,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": "roll.fragrance",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "facial.pack_form",
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "requiredness": "optional",
+            "requirednessReason": "包装形态影响桌面立放、携带与是否需配套盒体的判断；当前类目归属已从业务上区分盒装/软包，强制填写必要性待业务确认，先选填，类目名不作为取值证据。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 60,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "facial.pack_form",
+            "differenceReason": null
+          }
+        ],
+        "extensionCandidates": [
+          {
+            "id": "ext-facial-print-pattern",
+            "name": "纸面印花",
+            "conceptKey": "paper.print_pattern",
+            "scope": "facial-tissue-surface-print",
+            "potentialUse": "区分有印花/无印花或图案差异，可能用于外观类选型与销售展示",
+            "deferReason": "本轮未确认印花会改变采购或规格判断，也没有面巾纸印花的适用资料（小卷纸资料明示不可外推面巾纸），因此不建类型配置与绑定",
+            "activationCriteria": "业务确认需按纸面印花筛选或展示时，先提共享基线修订，明确其与压花的独立关系及取值表达后再启用",
+            "references": []
+          },
+          {
+            "id": "ext-facial-embossing",
+            "name": "纸面压花",
+            "conceptKey": "paper.embossing",
+            "scope": "facial-tissue-surface-emboss",
+            "potentialUse": "压花影响手感与外观，可能用于差异化选型或展示",
+            "deferReason": "用途与业务准入未确认；压花与印花是不同工艺，不能并为互斥枚举，且缺面巾纸适用资料，故不进SKU合同",
+            "activationCriteria": "业务确认需按压花选型或展示时，先经共享修订确定独立定义、类型与是否可与其他工艺共存",
+            "references": []
+          },
+          {
+            "id": "ext-facial-usage-scene",
+            "name": "使用对象",
+            "conceptKey": "paper.usage_scene",
+            "scope": "facial-tissue-usage-scene",
+            "potentialUse": "区分家用、商用、母婴等采购场景，辅助按使用对象选型与检索",
+            "deferReason": "场景词表与业务口径未定义，无法确定枚举边界或文本填写规则，暂不建立属性与绑定",
+            "activationCriteria": "业务给出场景范围、检索用途与维护责任后，评估文本或受控枚举方案并走共享修订",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "使用对象、尺寸和可用纸量的比较"
+              }
+            ]
+          }
+        ],
+        "unresolved": [
+          "本同族基线（version 3a50d8c6…，status=candidate，availability=same_run_pending）为本批待审候选：本叶六项绑定与三个扩展候选一并待人工审核，确认前不得作为其他批次默认标准或据此执行线上变更。",
+          "三个扩展候选按冻结基线原样复述，本叶未启用、未删除、也未修改其潜在用途、暂缓原因或启用条件；任何启用或改动须另提共享基线修订。属性池按“使用对象”概念检索未发现可复用定义，仅为后续修订的检索线索，不构成启用结论。",
+          "每包数量的计数口径（抽/张/节/格是否同义、是否等同成品叠层可撕单元/相邻撕线间单元）缺少面巾纸厂家定义与已核实词表；当前用单个文本保留原文，未与销售单位、最小计量单位及其数量合并，数值化与属性级单位方案待口径裁定后按共享修订处理。",
+          "层数在本叶设为必填依据是同族候选契约中“缺失妨碍厚度/湿强度与单位成本比较”的判断，该必填必要性与语义范围仍待业务确认；若业务认为不构成关键选型阻塞，应在共享基线层改为选填，不在本叶单独调整。",
+          "层数的 numberConfig 现为整数、下限1、精度与上限未设置：下限1与整数口径的业务依据未见独立登记，null 仅表示未设置而非专业上无限制；如需明确精度或范围，另提共享修订，本叶保持冻结值不变。",
+          "包装形式与类目归属存在职责重叠疑点：本叶为“盒装抽纸”，该维度目前主要由类目归属区分；是否继续保留为SKU属性及是否必填待业务确认，若确认由类目归属替代，须按共享修订评估删除或降级，不在本叶静默删除。",
+          "纸张尺寸的计量对象与状态（单张/展开/折叠、长宽轴向）未核实，当前仅存完整文本且不作数值化；是否应参与尺寸适配类筛选亦未确认，故未设关键规格与检索。",
+          "香型暂无已核实归一化词表，仅能按原文记录（含“无香”“具体香型”或仅有香味），未说明时保持未知；是否需要统一展示口径待词表登记。",
+          "层数为数值字段，本地关键词索引只覆盖文本与选项，范围筛选路径及线上生效情况需另行验证；searchable=false 反映当前配置，不代表业务无检索需求。",
+          "同族登记（盒装抽纸+软包抽纸，status=configured_candidate_pending_human）及六项共同定义在两末级的适用性仍属待核实范围，锚点类目专有需求不得升为全族共性；若出现必须存在的末级差异，另附业务理由提出。",
+          "本轮未取得任何SKU证据与商品样本，未进行取值；抽取式面巾纸的行业标准全文（如GB/T 20808-2022）未获取，不可据此声明任何检测限值或强制填写规则。"
+        ]
+      }
+    },
+    {
+      "arm": "high",
+      "phase": "leaf",
+      "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "provenance": {
+        "relativeJobPath": "reruns/pilot-wash-tissue-high-20261023/jobs/leaf-6eb15d64ca1deb54ee61.json",
+        "artifactHash": "5d6205b6a9be2dba3b5e865709337dda5042f58dd2be8828e105c00527f3d871",
+        "requestKey": "9d7838a4a82b21a66b4cae0781de0df20b9f906415e28172e4f2d8913d6612b0",
+        "releaseId": "ad677dda6503ee7cb94469c38531f2ef064685331bcc5989805cece06dc6ed3b",
+        "resultHash": "4556948661381d64a3cccb33d15415a8c86ef398d558eedaf8ff3ed7ba9d9e0f",
+        "responseHash": "a7b5484e8159b3c5ca6be2634939cf211c6c68fd4826f3eecdf7b784888a745e"
+      },
+      "result": {
+        "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+        "baselineVersion": null,
+        "attributes": [
+          {
+            "id": "attr.wash-towel.material",
+            "name": "材质",
+            "conceptKey": "wash_towel.material",
+            "definition": "制品主要材料，按商品实际标注填写材料或纤维名称；标注为棉、粘胶纤维、聚酯纤维或混纺等时按原文转录，不推断成分比例与工艺。不得因类目名称含“纸品”或上级为“卫生纸”而推定为纸浆制品；未标注材料的商品留空，并在治理记录中单独记取值缺口。",
+            "scope": "清洁用品>清洁纸品>卫生纸>洗脸巾（独立提案，本批无已登记同族基线）",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": null,
+              "minLength": null,
+              "maxLength": null,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "洗脸巾直接接触面部皮肤，材料决定其是否可用于敏感肌、婴童等接触场景，并影响吸水与耐拉扯表现的横向比较；采购在同价商品间做材质取舍时必须依赖该判断，维护成本为每个SKU一次转录商品标注的材料名称，收益高于填写成本，因此设为准入属性。纤维术语与可归一的取值集合尚无已读专业依据，故先用文本承载原文，不预置枚举；是否必须强制取得尚未确认，先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "仅凭“纸品”推成纸浆制品或与普通卫生纸同合同"
+              },
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "产品用途与材料对象、尺寸、是否有独立选型信息"
+              }
+            ]
+          },
+          {
+            "id": "attr.wash-towel.sheet-size",
+            "name": "展开尺寸",
+            "conceptKey": "wash_towel.sheet_size",
+            "definition": "单个使用单元（一张或一节，按商品标注的计数单元）完全展开后的平面长×宽，单位cm，填写格式“长×宽”（如20×20）。不填折叠或卷绕状态下的尺寸，不含包装外廓，不得由包装尺寸或商品长宽高推算；计数单元用词（张/节/抽）未核实统一，填写时保留商品原文用词。",
+            "scope": "清洁用品>清洁纸品>卫生纸>洗脸巾（独立提案，本批无已登记同族基线）",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": null,
+              "minLength": null,
+              "maxLength": null,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "单次使用单元的展开面积决定单次覆盖面积与实际可用量，采购比较同价商品时需要判断单片是否更大、每包用量是否更省，属于选型和比价判断，故单独设立。洗脸巾不存在出纸器开口、装载腔等适配关系，长与宽没有各自独立的筛选或计算用途，因此按规范保留“长×宽”组合表达，不拆成长、宽两个数值字段以免运营重复填写。计量对象限定为单个使用单元的展开尺寸，与已有商品/包装尺寸基础字段的对象区分；是否强制填写未确认，先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "不可因简化而混同净重/毛重、内径/外径、单张/整卷/包装。"
+              },
+              {
+                "kind": "knowledge",
+                "id": "scm-field-responsibilities-20261022",
+                "version": "affcf4095798cbb58ba3e80b1431ed821e74e3b6e1bba640a72630c279185319",
+                "quote": "StdProduct.weight是商品重量，不能排除单卷标称质量；长度宽度同样按对象区分"
+              }
+            ]
+          }
+        ],
+        "bindings": [
+          {
+            "attributeId": "attr.wash-towel.material",
+            "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+            "requiredness": "optional",
+            "requirednessReason": "缺失时无法判断该商品是否可用于面部皮肤直接接触的场景（敏感肌、婴童等），也难以完成同价商品间的材料取舍比较；但本业务是否必须强制取得材料标注尚未确认，按规范先选填，待业务与专业确认后再提出必填变更。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 1,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          },
+          {
+            "attributeId": "attr.wash-towel.sheet-size",
+            "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+            "requiredness": "optional",
+            "requirednessReason": "缺失时无法比较单片覆盖面积与每包实际用量，会妨碍同规格比价和按脸型需求的选型；是否必须强制填写尚未确认，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 2,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": null,
+            "differenceReason": null
+          }
+        ],
+        "extensionCandidates": [
+          {
+            "id": "ext.wash-towel.grammage",
+            "name": "克重",
+            "conceptKey": "wash_towel.grammage",
+            "scope": "清洁用品>清洁纸品>卫生纸>洗脸巾（候选，未进入SKU合同）",
+            "potentialUse": "在同一材料下比较厚实度、吸水与用量，可能支持按克重区间筛选或排序，服务采购比价与高标准场景选型。",
+            "deferReason": "已读资料只提出需核实材料与尺寸，未给出克重口径（每平方米还是每张/每节）、测量方法及它在本业务中是否真的改变选型判断；本地数值字段也不进入关键词索引，无专业依据前不设定义、单位与阈值。",
+            "activationCriteria": "取得供应商标注的克重口径与单位并经业务确认该参数影响选型，同时评估数值筛选能力后再修订共享基线，不在本叶直接启用。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "产品用途与材料对象、尺寸、是否有独立选型信息"
+              }
+            ]
+          },
+          {
+            "id": "ext.wash-towel.disposability",
+            "name": "是否一次性",
+            "conceptKey": "wash_towel.disposability",
+            "scope": "清洁用品>清洁纸品>卫生纸>洗脸巾（候选，未进入SKU合同）",
+            "potentialUse": "区分一次性使用与可复用产品，影响采购的更换频率、备货量与卫生管理判断，也影响检索时与其他类目商品的分流。",
+            "deferReason": "已读资料把“一次性/复用”列为待核实项，本末级实际收录范围未确认；若整类均为一次性，则取值恒定、无区分与检索价值，先不设绑定。",
+            "activationCriteria": "确认本类目同时收录可复用类产品（如可重复清洗的棉柔巾），或采购明确要求按使用方式检索后，以单选枚举形式进入共享基线评审。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "一次性/复用、干/湿使用对象及纤维术语"
+              }
+            ]
+          },
+          {
+            "id": "ext.wash-towel.dispensing-form",
+            "name": "取用形式",
+            "conceptKey": "wash_towel.dispensing_form",
+            "scope": "清洁用品>清洁纸品>卫生纸>洗脸巾（候选，未进入SKU合同）",
+            "potentialUse": "区分卷式、抽取式、片装等取用方式，影响使用场景适配（家用抽取、外出单片）与补货方式判断，也可能用于检索。",
+            "deferReason": "取用形式很可能已由规格名称或原始销售属性承载，已读资料也未给出本类目稳定的取值边界，先不重复设立以免与既有销售规格冲突。",
+            "activationCriteria": "核实规格名称/销售属性未承载取用方式，且取得可枚举的取值集合并经业务确认该维度影响选型后，再提案进入共享基线。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "已有基础字段承担品牌、供应商、销售单位、规格名称等职责；属性建模不再重复。"
+              }
+            ]
+          },
+          {
+            "id": "ext.wash-towel.usage-scene",
+            "name": "适用场景",
+            "conceptKey": "wash_towel.usage_scene",
+            "scope": "清洁用品>清洁纸品>卫生纸>洗脸巾（候选，未进入SKU合同）",
+            "potentialUse": "区分婴童洗脸、卸妆、敏感肌护理等使用对象，帮助采购按使用对象选型并支持按场景检索。",
+            "deferReason": "已读资料要求核实“干/湿使用对象”，但未提供本业务可用的场景词表；含功效或护肤声明时还需另行取得匹配用途的产品资料，当前无依据建立枚举。",
+            "activationCriteria": "取得匹配用途的产品资料或合规声明，并由业务确认稳定的场景词表后可归一时，以单选或多选选项形式提交共享基线评审。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "一次性/复用、干/湿使用对象及纤维术语"
+              }
+            ]
+          }
+        ],
+        "unresolved": [
+          "本末级是否仅含一次性洗脸巾、是否同时收录可复用棉柔巾或洁面巾尚未确认；“洗脸巾”“棉柔巾”“洁面巾”是否同义对象需业务裁定，这既影响类目范围，也决定“是否一次性”属性能否准入。",
+          "材料与纤维术语缺少已读专业依据：已读的GB/T 20808-2022仅有元数据、未取得全文且属纸巾标准，不能推定适用于洗脸巾；材料枚举可否归一（棉、粘胶纤维、聚酯纤维、混纺）及是否应强制填写，待业务与专业人员确认，本轮仅以文本承载原文。",
+          "属性池中已有 paper.sheet_size（名称“纸张尺寸”，文本）定义，是否可复用于本类目单次使用单元尺寸尚未确认：该定义以“纸”为计量对象，与本类目可能为无纺布/织物材料不同，本轮未将其作为继承依据，请人工裁定复用、改写还是保留本类独立定义。",
+          "单次使用单元尺寸是否需要拆成长、宽两个数值字段，取决于采购是否按尺寸区间筛选；当前组合文本无法做数值区间比较，而本地关键词索引仅支持文本与选项，数值范围筛选及部署生效情况另需核实，拆分提案与系统改造议题应分开评估。",
+          "“最小计量单位”“销售单位中含最小计量单位数量”基础字段与本类目每包/每卷张、节、抽数量的对应关系、实际填写情况与计数词口径待核实；本轮因此不另设每包数量属性，避免与基础字段重复，也不推定张、抽、节、格之间可换算。",
+          "基础字段“商品长度/宽度/高度”的计量对象（包装外廓还是商品本体）需核实；单次使用单元展开尺寸与其对象不同，不得互相推算或覆盖，需在取值阶段保持两者独立。",
+          "干用/湿用边界、是否含护肤或功效成分及其声明证据要求尚未核实；在取得匹配用途的产品资料前不设功效类属性，也不得据类目名推定相关性能。",
+          "本方案为无已登记同族基线的独立待审提案（program检查仅覆盖合同结构），属性准入、命名、必填性与同族归组仍须人工主审确认，不能据本文件启动线上配置或SKU取值。"
+        ]
+      }
+    },
+    {
+      "arm": "high",
+      "phase": "leaf",
+      "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+      "provenance": {
+        "relativeJobPath": "reruns/pilot-wash-tissue-high-20261023/jobs/leaf-bce2eecc9a98bfef6251.json",
+        "artifactHash": "07ba032f1945b969cfaf9b85364efac9440459686a06ce1ef8a505704b643bdf",
+        "requestKey": "f9874cadf539959e15b721c58d0054546362b0e8a3898075cce6a8fba2ccb6d8",
+        "releaseId": "ad677dda6503ee7cb94469c38531f2ef064685331bcc5989805cece06dc6ed3b",
+        "resultHash": "5cfa5f22e550e3070c4da1a57dce584c795ec1a08cd3006bf5ffe1c4b0384456",
+        "responseHash": "08c0f0758667be3e2ac597fe58e32dbf424fd02ae1d026a1146ab202524eb849"
+      },
+      "result": {
+        "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+        "baselineVersion": "3a50d8c6336cdd6e2cb80833ddddba9b3694f5410184d3d1ac84584fa24db0d8",
+        "attributes": [
+          {
+            "id": "roll.layers",
+            "name": "层数",
+            "conceptKey": "paper.layers",
+            "definition": "成品纸张叠层数量，不是包装或托盘层数",
+            "scope": "finished-paper-ply",
+            "fieldType": "number",
+            "unit": "层",
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": {
+              "isInt": true,
+              "precision": null,
+              "min": 1,
+              "max": null
+            },
+            "textConfig": null,
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池已登记的成品纸张叠层定义。盒装与软包抽纸按包比价时，层数直接改变厚度、湿强度和使用手感的判断，是同类商品选型与规格比较的核心参数；每SKU一个整数、单位固定为层，填写成本低，不需另设计数单位属性。数值字段不进入本地关键词索引，检索用途按范围筛选能力另行评估，不为凑搜索改成文本。复用该定义属待审候选，小卷资料只证明叠层口径，不证明面巾纸必须强制填写。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "层数是成品纸张叠层；不能与托盘层数、包装层级混淆。"
+              }
+            ]
+          },
+          {
+            "id": "roll.fragrance",
+            "name": "香型",
+            "conceptKey": "paper.fragrance",
+            "definition": "单个文本字段保留明确的无香、具体香型或仅有香味的原文；仅知有香不编香型，未说明留未知；归一化需另有已核实词表",
+            "scope": "finished-paper-fragrance",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池的单一文本香型定义：同一字段既能记录明确的“无香”，也能记录具体香型或仅说明有香味，未说明保持未知，不另建“是否有香味”布尔字段。对气味敏感或指定无香的采购场景，香型会改变选型判断，也支持按“无香”等词检索；单文本维护成本低。面巾纸是否普遍标注香型、是否应强制填写尚未由业务确认，故必填性先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "香型统一使用一个文本字段"
+              }
+            ]
+          },
+          {
+            "id": "roll.raw_material",
+            "name": "原料",
+            "conceptKey": "paper.raw_material",
+            "definition": "商家对原料的原文描述，不能由品牌推定",
+            "scope": "finished-paper-material",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池的原料原文定义。面巾纸直接接触口鼻皮肤，原生木浆、竹浆或混浆等原料声明会改变敏感人群适用性与环保要求方面的选型判断，并支持按原料关键词检索；保留商家确切措辞、不得由品牌推定，单文本维护成本低。原料词表未取得核实版本，暂不建枚举，必填性先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "原料保留商家确切措辞"
+              }
+            ]
+          },
+          {
+            "id": "roll.sheet_size",
+            "name": "纸张尺寸",
+            "conceptKey": "paper.sheet_size",
+            "definition": "单张纸尺寸完整文本；不猜轴向或包装尺寸",
+            "scope": "finished-paper-sheet-size",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "复用属性池的单张纸尺寸文本定义，与基础字段里的商品包装长宽高、物流尺寸区分开。盒装与软包抽纸的实际使用面积和单次擦拭覆盖与该参数有关，用户会按标准/加大尺寸比较，而标题中的尺寸表述常不完整；先存完整文本可避免把折叠或展开状态猜成某一轴向。必填必要性未确认，先选填。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "small-roll-paper-research-20261022",
+                "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+                "quote": "纸张尺寸与纸卷尺寸、包装尺寸分开"
+              }
+            ]
+          },
+          {
+            "id": "facial.package_count",
+            "name": "每包数量",
+            "conceptKey": "paper.package_count",
+            "definition": "单个零售包装内可抽取纸张的数量及原文计数词（如100抽、200张），保留来源计数单位，不把抽当张、不按层数换算，也不与销售单位及其含最小计量数量重复",
+            "scope": "facial-tissue-package-count",
+            "fieldType": "text",
+            "unit": null,
+            "enumValues": [],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": {
+              "format": "ANY",
+              "minLength": 1,
+              "maxLength": 300,
+              "displayMethod": null,
+              "trim": true
+            },
+            "optionConfig": null,
+            "defaultValue": null,
+            "rationale": "抽取式面巾纸按包销售，每包可抽取数量决定可用量与单抽成本，是采购比价和规格选择的关键依据，也用于把“加量装”与标准装分开比较。抽/张计数口径尚未核实，故先用单一文本保留原文计数词，不另设计量单位属性；口径确认后再提数值化修订。每SKU一个短文本，维护成本低。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "真正可变计数词先用保留原文的单个文本，不拆独立单位字段。不统一张、抽、节、格，不按层数换算张数。"
+              }
+            ]
+          },
+          {
+            "id": "facial.pack_form",
+            "name": "包装形式",
+            "conceptKey": "paper.pack_form",
+            "definition": "抽取式面巾纸最小销售包装的形态：盒装指带盒体的抽取包装，软包指柔性薄膜包装。类目归属不能作为该取值的证据，需按实际商品填写；当前候选值域覆盖本族两个末级形态，其他形态需按共享修订扩充，不以“其他”兜底",
+            "scope": "facial-tissue-pack-form",
+            "fieldType": "option",
+            "unit": null,
+            "enumValues": [
+              "盒装",
+              "软包"
+            ],
+            "multi": false,
+            "valueLevel": "SKU",
+            "numberConfig": null,
+            "textConfig": null,
+            "optionConfig": {
+              "minCount": null,
+              "maxCount": null
+            },
+            "defaultValue": null,
+            "rationale": "本族由盒装抽纸与软包抽纸两个末级组成，包装形态影响能否立放桌面、携带方式和是否需配套盒体，也是跨末级统一比较的区分维度；按同族保留统一区分维度的要求，类目名已含形态不构成删除该维度的理由。单选、两个候选值，填写成本低。业务上该形态目前主要由类目归属区分，属性是否强制填写待确认。",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "盒装/软包抽纸、大卷/中心抽大卷纸目前只是预配置的候选族。先设计共同定义，再说明包装、出纸方式或设备适配是否带来绑定差异。"
+              }
+            ]
+          }
+        ],
+        "bindings": [
+          {
+            "attributeId": "roll.layers",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "required",
+            "requirednessReason": "层数是同类抽纸比价时的核心规格：缺失将无法判断厚度、湿强度与单位使用成本，直接妨碍同品比较与规格选型，故本叶要求必填；商品包装未标注时属取值缺口，不据此降为选填。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": true,
+            "displayInList": true,
+            "sortIndex": 10,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "roll.layers",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "facial.package_count",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "optional",
+            "requirednessReason": "每包可抽取数量影响可用量与单抽成本比较；因抽/张计数口径尚未核实、业务也未确认必须强制填写，先选填，避免强制后产生不可比数据。",
+            "isKeySpec": true,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": true,
+            "displayInList": true,
+            "sortIndex": 20,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "facial.package_count",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.sheet_size",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "optional",
+            "requirednessReason": "单张尺寸影响使用面积与单次擦拭覆盖的比较，是规格判断的一项依据；业务尚未确认强制索取，且折叠/展开状态口径待核实，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 30,
+            "uses": [
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "roll.sheet_size",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.raw_material",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "optional",
+            "requirednessReason": "原料影响敏感人群适用性与环保要求的选型判断，并用于按原料关键词检索；原料声明并非所有商品齐全、业务未确认强制，先选填。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 40,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": "roll.raw_material",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "roll.fragrance",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "optional",
+            "requirednessReason": "香型影响无香、气味敏感场景的选型与按“无香”检索；是否普遍标注未确认，先选填，缺失不默认无香。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": true,
+            "displayInTitle": false,
+            "displayInList": false,
+            "sortIndex": 50,
+            "uses": [
+              "selection",
+              "comparison",
+              "search",
+              "display"
+            ],
+            "baselineAttributeId": "roll.fragrance",
+            "differenceReason": null
+          },
+          {
+            "attributeId": "facial.pack_form",
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "requiredness": "optional",
+            "requirednessReason": "包装形态影响桌面立放、携带与是否需配套盒体的判断；当前类目归属已从业务上区分盒装/软包，强制填写必要性待业务确认，先选填，类目名不作为取值证据。",
+            "isKeySpec": false,
+            "isPublic": true,
+            "searchable": false,
+            "displayInTitle": false,
+            "displayInList": true,
+            "sortIndex": 60,
+            "uses": [
+              "selection",
+              "comparison",
+              "display"
+            ],
+            "baselineAttributeId": "facial.pack_form",
+            "differenceReason": null
+          }
+        ],
+        "extensionCandidates": [
+          {
+            "id": "ext-facial-print-pattern",
+            "name": "纸面印花",
+            "conceptKey": "paper.print_pattern",
+            "scope": "facial-tissue-surface-print",
+            "potentialUse": "区分有印花/无印花或图案差异，可能用于外观类选型与销售展示",
+            "deferReason": "本轮未确认印花会改变采购或规格判断，也没有面巾纸印花的适用资料（小卷纸资料明示不可外推面巾纸），因此不建类型配置与绑定",
+            "activationCriteria": "业务确认需按纸面印花筛选或展示时，先提共享基线修订，明确其与压花的独立关系及取值表达后再启用",
+            "references": []
+          },
+          {
+            "id": "ext-facial-embossing",
+            "name": "纸面压花",
+            "conceptKey": "paper.embossing",
+            "scope": "facial-tissue-surface-emboss",
+            "potentialUse": "压花影响手感与外观，可能用于差异化选型或展示",
+            "deferReason": "用途与业务准入未确认；压花与印花是不同工艺，不能并为互斥枚举，且缺面巾纸适用资料，故不进SKU合同",
+            "activationCriteria": "业务确认需按压花选型或展示时，先经共享修订确定独立定义、类型与是否可与其他工艺共存",
+            "references": []
+          },
+          {
+            "id": "ext-facial-usage-scene",
+            "name": "使用对象",
+            "conceptKey": "paper.usage_scene",
+            "scope": "facial-tissue-usage-scene",
+            "potentialUse": "区分家用、商用、母婴等采购场景，辅助按使用对象选型与检索",
+            "deferReason": "场景词表与业务口径未定义，无法确定枚举边界或文本填写规则，暂不建立属性与绑定",
+            "activationCriteria": "业务给出场景范围、检索用途与维护责任后，评估文本或受控枚举方案并走共享修订",
+            "references": [
+              {
+                "kind": "knowledge",
+                "id": "clean-paper-admission-20261023",
+                "version": "67d179e3644faf864e453e85c39fa69ba331f640cb134e711a6ab728a833a661",
+                "quote": "使用对象、尺寸和可用纸量的比较"
+              }
+            ]
+          }
+        ],
+        "unresolved": [
+          "继承的同族基线 facial-tissue 版本 3a50d8c6336cdd6e2cb80833ddddba9b3694f5410184d3d1ac84584fa24db0d8 状态为同批候选（same_run_pending），本叶绑定与之一并待人工采用，不能作为其他批次默认标准或据此启动线上变更。",
+          "每包数量的计数口径未裁定：抽、张、节、格是否等价、节/格是否指相邻撕线间单元、不分节产品如何承载均无厂家定义或业务结论；当前只按共享定义保留原文计数词，若确认口径需数值化并以属性级单位承载，属共享基线修订提案，不在本叶静默改类型或补换算。",
+          "层数在本叶为必填（继承自共享基线）所依据的“厚度、湿强度、单位使用成本比较”判断由本族资料提出，小卷纸资料明确不可外推面巾纸；必填性本身无异议依据前不做改动，需业务确认面巾纸是否普遍可取得层数。",
+          "包装形式与类目归属的职责边界待业务确认：软包抽纸类目名已表明形态，但类目名不能作为SKU取值证据；是否仍需强制填写，以及是否与基础字段“规格名称/标题”重复，需人工核实。",
+          "纸张尺寸的计量对象未定义：折叠态、展开态、单张有效使用面积三者可能不同，同族只在文本中保留来源原文，不猜轴向或包装尺寸；是否改为必填以支持与纸巾盒等容纳空间的适配比较，待业务确认。",
+          "原料与香型目前只做原文保留，未取得经核实的归一化词表（纯木浆与原生木浆的关系、无香味与有香味的具体措辞），同义归一与是否强制填写均待业务确认。",
+          "面巾纸专业资料缺口：本轮仅取得 GB/T 20808-2022 元数据（未取得全文）与清洁纸品通用准入资料，无面巾纸厂商技术页可作为参数依据；是否需在共享基线新增湿强度/可湿水等性能参数，须先查证对象与业务用途再走共享修订，本轮未设立属性也未列入扩展候选。",
+          "共享扩展候选（纸面印花、纸面压花、使用对象）本叶只复述、未启用；启用或修改启用条件须先修订共享基线，不能在末级直接转入属性合同。",
+          "本叶未提出与共享基线的差异：共同定义的名称、类型、单位、口径、枚举与配置保持同版，全部绑定 differenceReason 为 null，绑定仅在类目维度落到软包抽纸；系统字段职责核对显示品牌、供应商、销售单位、规格名称、商品重量、包装长宽高、最小计量单位及其数量已由基础字段承载，未重复生成。"
+        ]
+      }
+    }
+  ]
+}

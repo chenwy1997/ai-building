@@ -1,3 +1,4 @@
+import { withFixtureDecisions } from "./fixtures.ts";
 import { describe, test, expect, afterAll, beforeAll } from "bun:test";
 import { mkdtemp, rm, mkdir, cp, writeFile, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -336,7 +337,7 @@ describe("modeling invariants and the accepted sibling-category correction", () 
         differenceReason: "独立适配用途",
       }),
     );
-    expect((await checked("family-modeling", output)).status).toBe(
+    expect((await checked("family-modeling", withFixtureDecisions(output))).status).toBe(
       "program_pass_pending_human",
     );
   });
@@ -403,12 +404,14 @@ describe("facts, state, scope, and arithmetic are connected to final checks", ()
     const data = fixtureSnapshot();
     data.families[0]!.attributes[0]!.name = "品牌";
     data.families[0]!.attributes[0]!.conceptKey = "common.brand";
+    data.attributes = []; // Exercise invalid native ownership independently of pool identity collisions.
     blocks(
       await checked("sku-filling", fixtureOutput("sku-filling"), data),
       "R01",
     );
     const numeric = fixtureSnapshot();
     numeric.families[0]!.attributes[1]!.unit = null;
+    numeric.attributes = [];
     blocks(
       await checked("sku-filling", fixtureOutput("sku-filling"), numeric),
       "R06",
@@ -572,6 +575,7 @@ describe("facts, state, scope, and arithmetic are connected to final checks", ()
         ],
         targetUnit: "卷/提",
       };
+      data.attributes = []; // This test varies the arithmetic target definition, not registry identity.
       blocks(await checked("sku-filling", output, data), "R14");
     }
   });

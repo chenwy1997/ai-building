@@ -83,6 +83,31 @@ export const extensionCandidateSchema = object({
   activationCriteria: text(),
   references: list(modelReferenceSchema),
 });
+// Decisions concern business modeling, not the availability of values in sampled SKUs.
+export const modelingDecisionSchema = object({
+  objectId: text(),
+  disposition: text("admitted", "extension", "system_owned", "not_needed"),
+  businessNeed: text("confirmed", "pending", "not_needed"),
+  admissionBasis: text("business_need", "sample_availability"),
+  businessReason: text(),
+  requiredNecessity: text("confirmed", "pending", "optional"),
+  requirednessBasis: text("business_need", "sample_availability"),
+  professionalReadiness: text("defined", "pending"),
+  professionalReason: text(),
+  valueEvidence: text("available", "missing", "unassessed"),
+  quantity: nullable(object({
+    measure: text("contents_per_package", "sales_unit_count", "other_count"),
+    countedObject: text(),
+    denominator: text("package", "sales_unit", "other"),
+    countTerms: list(text(), 1),
+    systemFieldKeys: list(text(), 1),
+    relation: text("same", "distinct", "conditional", "unresolved"),
+    sameWhen: nullable(text()),
+    differentWhen: nullable(text()),
+    overlapAction: text("reuse_system_field", "not_applicable"),
+    reason: text(),
+  })),
+});
 export const factRefSchema = object({ sourceId: text(), factId: text() });
 export const derivationSchema = object({
   policyId: text(),
@@ -130,6 +155,7 @@ export const outputSchemas: Record<Stage, Schema> = {
     attributes: list(attributeSchema),
     bindings: list(bindingSchema),
     extensionCandidates: list(extensionCandidateSchema),
+    decisions: list(modelingDecisionSchema),
     unresolved: strings,
   }),
   "sku-filling": object({

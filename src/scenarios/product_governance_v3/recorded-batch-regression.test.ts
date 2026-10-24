@@ -1,3 +1,4 @@
+import { withFixtureDecisions } from "./fixtures.ts";
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -50,14 +51,14 @@ for (const [i, id] of ["7a1ea510-8777-46ba-bfa0-955b472a0d61", "640b5b8b-9d6e-47
       expect(feedback.every((x: any) => JSON.parse(x.output).ok === false)).toBe(true);
       expect(JSON.stringify(feedback)).toContain("JSON null");
       return corrected;
-    }, [finalMessage(output)]]);
+    }, [finalMessage(withFixtureDecisions(output))]]);
     expect(artifact.checks.errors).toEqual([]);
     expect(artifact.feedback).toHaveLength(1);
     expect(artifact.feedback[0]!.code).toBe("tool_arguments");
     expect(artifact.toolEvents.filter(e => e.origin === "model")).toHaveLength(original.length);
     expect(artifact.toolCount).toBe(original.length);
     expect(mock.requests).toHaveLength(3);
-    expect(artifact.result).toEqual(output);
+    expect(artifact.result).toEqual(withFixtureDecisions(output));
   });
 }
 
@@ -94,21 +95,22 @@ async function centerPlan() {
   const snapshot = new DataSnapshot(p.snapshot), task = batchTask(p, id, "leaf");
   return { p, snapshot, task, assembled: await assemble(release, snapshot, task) };
 }
-test("recorded center-roll final passes with unchanged business values and real baseline knowledge prefetch", async () => {
+// The annotations are synthetic; historical attributes/bindings/references stay unchanged.
+test("recorded center-roll final with explicit decision annotations passes with unchanged business values and real baseline knowledge prefetch", async () => {
   const { snapshot, task, assembled } = await centerPlan(), knowledgeId = "small-roll-paper-research-20261022";
   expect(snapshot.knowledgeRequirements(task).some(r => r.knowledgeIds.includes(knowledgeId))).toBe(false);
   expect(assembled.tools.knowledgeReadIds.has(knowledgeId)).toBe(true);
   expect(assembled.input.sharedContext.knowledge.some(k => k.id === knowledgeId)).toBe(true);
   expect(assembled.manifest.knowledge.some(k => k.id === knowledgeId)).toBe(true);
-  const { artifact } = await replay(snapshot, task, [[finalMessage(recordings.center.result)]]);
+  const { artifact } = await replay(snapshot, task, [[finalMessage(withFixtureDecisions(recordings.center.result))]]);
   expect(artifact.checks.errors).toEqual([]);
-  expect(artifact.result).toEqual(recordings.center.result);
+  expect(artifact.result).toEqual(withFixtureDecisions(recordings.center.result));
   expect(artifact.feedback).toHaveLength(0);
 });
 test("provenance may change independently of disposition; wrong citations and changed activation stay blocked", async () => {
   const { task, assembled } = await centerPlan();
   const original = jsonClone(recordings.center.result);
-  const check = (result: unknown) => checkResult(task, result, assembled.tools);
+  const check = (result: any) => checkResult(task, withFixtureDecisions(result), assembled.tools);
   for (const field of ["deferReason", "activationCriteria", "potentialUse", "scope", "name"] as const) {
     const changed = jsonClone(original); changed.extensionCandidates[0]![field] += " 改动";
     expect(check(changed).errors.some(e => e.ruleId === "R03")).toBe(true);
@@ -131,16 +133,16 @@ test("baseline references with unavailable versions/IDs/quotes fail before a dep
 test("recorded coreless response loses false binding errors but still corrects a real extension change", async () => {
   const original = recordings.coreless.result, p = await plan(original.categoryId), task = batchTask(p, original.categoryId, "leaf"),
     snapshot = new DataSnapshot(p.snapshot), { tools } = await assemble(release, snapshot, task);
-  const errors = checkResult(task, original, tools).errors;
+  const errors = checkResult(task, withFixtureDecisions(original), tools).errors;
   expect(errors).toHaveLength(1);
   expect(errors[0]!.objectId).toBe("coverage.core_diameter");
   expect(errors[0]!.message).toContain("extension disposition");
-  const { artifact } = await replay(snapshot, task, [[finalMessage(original)], [finalMessage(recordings.coreless.finalResult)]]);
+  const { artifact } = await replay(snapshot, task, [[finalMessage(withFixtureDecisions(original))], [finalMessage(withFixtureDecisions(recordings.coreless.finalResult))]]);
   expect(artifact.checks.errors).toEqual([]); expect(artifact.feedback).toHaveLength(1);
-  expect(artifact.result).toEqual(recordings.coreless.finalResult);
+  expect(artifact.result).toEqual(withFixtureDecisions(recordings.coreless.finalResult));
   const punctuation = jsonClone(recordings.coreless.finalResult);
   punctuation.bindings.forEach(b => { b.requirednessReason += "。"; });
-  expect(checkResult(task, punctuation, tools).errors).toEqual([]);
+  expect(checkResult(task, withFixtureDecisions(punctuation), tools).errors).toEqual([]);
   for (const mutate of [
     (r: any) => { r.bindings[0].requiredness = "required"; },
     (r: any) => { r.bindings[0].isPublic = !r.bindings[0].isPublic; },
@@ -149,13 +151,13 @@ test("recorded coreless response loses false binding errors but still corrects a
     const changed = jsonClone(recordings.coreless.finalResult);
     (changed.bindings as AttributeBinding[]).forEach(b => { b.differenceReason = null; });
     mutate(changed);
-    expect(checkResult(task, changed, tools).errors.some(e => e.ruleId === "R03")).toBe(true);
+    expect(checkResult(task, withFixtureDecisions(changed), tools).errors.some(e => e.ruleId === "R03")).toBe(true);
   }
 });
 
 test("independent empty recording stays visible as a gap; inheritance still requires a usable baseline", async () => {
   const original = recordings.emptyIndependent, p = await plan(original.categoryId), task = batchTask(p, original.categoryId, "leaf"),
-    snapshot = new DataSnapshot(p.snapshot), { artifact, mock } = await replay(snapshot, task, [[finalMessage(original)]]);
+    snapshot = new DataSnapshot(p.snapshot), { artifact, mock } = await replay(snapshot, task, [[finalMessage(withFixtureDecisions(original))]]);
   expect(JSON.parse(mock.requests[0]!.input[0].content).sharedContext.modelingMode).toBe("independent_proposal");
   const job: BatchJob = { phase: "leaf", categoryId: task.categoryId, familyId: null, status: artifact.checks.status, code: null, error: null, artifact };
   expect(proposalReadiness(job)).toBe("no_admitted_attributes");
