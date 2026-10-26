@@ -67,7 +67,7 @@ test("null/null pool scope returns a recoverable error without pretending a glob
   const { artifact } = await stage([
     [functionCall("search_attribute_pool", { query: null, categoryId: null, limit: 30, cursor: null }, "scope")],
     (body) => {
-      expect(JSON.parse(body.input.at(-1).output).error.code).toBe("pool_scope");
+      expect(JSON.parse(body.input.at(-2).output).error.code).toBe("pool_scope");
       return [final()];
     },
   ]);
@@ -98,7 +98,7 @@ test("actual display-use violations are returned to the model and only its corre
   const { artifact, dir } = await stage([
     [finalMessage(bad)],
     (body) => {
-      const feedback = JSON.parse(body.input.at(-1).content);
+      const feedback = JSON.parse(body.input.at(-2).content);
       expect(feedback.kind).toBe("host_contract_feedback");
       expect(feedback.errors.some((e: any) => e.ruleId === "R07")).toBe(true);
       return [final()];
@@ -218,20 +218,21 @@ test("a failed target uses a new recorded correction and replay makes zero addit
   expect(await read(join(dir, "requests", key + ".request.json"))).toEqual(originalRequest);
 });
 test("corrupt responses, changed validators and outcome-unknown requests cannot be recovered or resent", async () => {
-  for (const change of ["response", "validator", "input", "unknown"]) {
+  for (const change of ["response", "validator", "input", "wire-layout", "unknown"]) {
     const { dir, key } = await legacy();
     if (change === "response") {
       const path = join(dir, "requests", key + ".response.json"), r = await read(path);
       r.response.output[0].content[0].text = "{}"; await save(path, r);
-    } else if (change === "validator" || change === "input") {
+    } else if (change === "validator" || change === "input" || change === "wire-layout") {
       const file = (await readdir(join(dir, "runs"))).find((f) => f.endsWith(".manifest.json"))!,
         path = join(dir, "runs", file), manifest = await read(path);
       if (change === "validator") manifest.engineFiles["checks.ts"] = "changed";
+      else if (change === "wire-layout") manifest.requestLayout.inputWireHash = "changed";
       else manifest.inputHash = "changed";
       await save(path, manifest);
     } else await rm(join(dir, "requests", key + ".response.json"));
     const message = change === "unknown" ? "never resend" : change === "response" ? "integrity" :
-      change === "input" ? "context identity mismatch" : "material changed";
+      ["input", "wire-layout"].includes(change) ? "context identity mismatch" : "material changed";
     await expect(recheckBatch(dir, release)).rejects.toThrow(message);
   }
 });

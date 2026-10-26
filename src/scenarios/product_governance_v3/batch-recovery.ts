@@ -14,6 +14,7 @@ import { proposalReadiness, proposalCounts } from "./proposal-readiness.ts";
 import { runStage, BATCH_CORRECTIONS } from "./runner.ts";
 import type { ResponsesClient } from "./responses.ts";
 import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
+import { matchesContextLayout } from "./request-layout.ts";
 
 // A historical response may be checked under a newer host only if the actual business
 // materials, schema, validator and read tools are unchanged. This is not a release-ID bypass.
@@ -111,6 +112,7 @@ async function recheckUnlocked(dir: string, release: Release) {
           response.request.transportId !== execution.transportId || response.request.mode !== execution.mode ||
           hash(JSON.parse(response.request.body.input[0].content).task) !== hash(task) ||
           hash(JSON.parse(response.request.body.input[0].content)) !== manifest.inputHash ||
+          !matchesContextLayout(response.request.body.input[0].content, manifest.requestLayout) ||
           typeof response.request.body.instructions !== "string" ||
           !response.request.body.instructions.startsWith(historicalInstructions))
         throw new Blocked("cache_corrupt", "historical response/task/context identity mismatch");
@@ -193,6 +195,7 @@ async function recheckUnlocked(dir: string, release: Release) {
       if (task.categoryId !== job.categoryId || task.runId !== original.runId ||
           (task.candidate as any)?.phase !== job.phase || first.request.identity.releaseId !== release.id ||
           hash(JSON.parse(first.request.body.input[0].content)) !== artifact.manifest.inputHash ||
+          !matchesContextLayout(first.request.body.input[0].content, artifact.manifest.requestLayout) ||
           artifact.manifest.instructionsHash !== hash(instructionsFor(release, task.stage)))
         throw new Blocked("cache_corrupt", "saved correction task/manifest changed");
       let last: Awaited<ReturnType<typeof durable>> | null = null;
@@ -201,6 +204,7 @@ async function recheckUnlocked(dir: string, release: Release) {
         if (last.request.identity.releaseId !== release.id || last.request.identity.snapshotVersion !== snapshot.version ||
             last.request.transportId !== execution.transportId || last.request.mode !== execution.mode ||
             hash(JSON.parse(last.request.body.input[0].content)) !== artifact.manifest.inputHash ||
+            !matchesContextLayout(last.request.body.input[0].content, artifact.manifest.requestLayout) ||
             typeof last.request.body.instructions !== "string" ||
             !last.request.body.instructions.startsWith(instructionsFor(release, task.stage)))
           throw new Blocked("cache_corrupt", "saved correction request context changed");

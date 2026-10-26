@@ -47,13 +47,13 @@ function mock(options: {
     if (!isSeed && scope.family && scope.family.id !== "small-toilet-roll")
       expect(completedSeeds.has(scope.family.id)).toBe(true);
     if (!isSeed && options.throwLeaf === task.categoryId) throw new Error("mock connection dropped; outcome unknown");
-    if (body.input.length === 1) {
+    if (body.input.length === 2) {
       return Response.json({ status: "completed", output: [functionCall("categories_get", { id: task.categoryId }, "category-read")] });
     }
-    if (body.input.at(-1).type === "function_call_output") {
-      expect(body.input.at(-1).call_id).toBe("category-read");
-      expect(JSON.parse(body.input.at(-1).output).node.id).toBe(task.categoryId);
-    } else expect(JSON.parse(body.input.at(-1).content).kind).toBe("host_contract_feedback");
+    if (body.input.at(-2).type === "function_call_output") {
+      expect(body.input.at(-2).call_id).toBe("category-read");
+      expect(JSON.parse(body.input.at(-2).output).node.id).toBe(task.categoryId);
+    } else expect(JSON.parse(body.input.at(-2).content).kind).toBe("host_contract_feedback");
     const baseline = input.sharedContext.family.flatMap((p: any) => p.items).find((f: any) => f.usable);
     const attrs = baseline ? jsonClone(baseline.attributes) : [attribute({
       id: "mock." + (scope.family?.id ?? task.categoryId), name: "模拟验收参数", conceptKey: "mock." + (scope.family?.id ?? task.categoryId),
@@ -279,8 +279,8 @@ test("actual CLI execute branch reaches Responses, tool loop, checks and exit co
       if(url!=="https://api.deepseek.com/responses" || init.headers.authorization!=="Bearer offline-synthetic-credential") throw Error("unexpected transport/credential");
       if(process.env.PGV3_SYNTHETIC_FAILURE==="401")return new Response("synthetic unauthorized",{status:401});
       const body=JSON.parse(init.body), input=JSON.parse(body.input[0].content), id=input.task.categoryId;
-      if(body.input.length===1)return Response.json({status:"completed",output:[functionCall("categories_get",{id},"cli-call")]});
-      if(body.input.at(-1).call_id!=="cli-call")throw Error("tool result not paired");
+      if(body.input.length===2)return Response.json({status:"completed",output:[functionCall("categories_get",{id},"cli-call")]});
+      if(body.input.at(-2).call_id!=="cli-call")throw Error("tool result not paired");
       const a=attribute({id:"synthetic.cli",name:"模拟CLI验收参数",conceptKey:"synthetic.cli",scope:"synthetic-only",fieldType:"text"});
       return Response.json({status:"completed",output:[finalMessage(withFixtureDecisions({categoryId:id,baselineVersion:null,attributes:[a],bindings:[binding(a.id,{categoryId:id})],extensionCandidates:[],unresolved:["仅模拟CLI验收，无真实模型或业务结论"]}))],usage:{input_tokens:1,output_tokens:1}});
     };

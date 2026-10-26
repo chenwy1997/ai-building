@@ -33,11 +33,11 @@ function mock(options: { tool?: boolean; reject?: boolean; badExplanationOnce?: 
     requests.push(body); active++; maximum = Math.max(maximum, active); await Bun.sleep(2); active--;
     const scope = task.candidate, seed = scope.phase === "family-seed";
     if (!seed && scope.family && scope.family.id !== "small-toilet-roll") expect(seeds.has(scope.family.id)).toBe(true);
-    if (options.tool && body.input.length === 1)
+    if (options.tool && body.input.length === 2)
       return Response.json({ status: "completed", output: [functionCall("categories_get", { id: task.categoryId }, "read-category")] });
-    if (body.input.at(-1).type === "function_call_output") {
-      expect(body.input.at(-1).call_id).toBe("read-category");
-      expect(JSON.parse(body.input.at(-1).output).node.id).toBe(task.categoryId);
+    if (body.input.at(-2).type === "function_call_output") {
+      expect(body.input.at(-2).call_id).toBe("read-category");
+      expect(JSON.parse(body.input.at(-2).output).node.id).toBe(task.categoryId);
     }
     const family = input.sharedContext.family.flatMap((p: any) => p.items).find((f: any) => f.usable);
     const attributes = family ? jsonClone(family.attributes) : [attribute({ id: "test.rerun." + (scope.family?.id ?? task.categoryId),
@@ -51,7 +51,7 @@ function mock(options: { tool?: boolean; reject?: boolean; badExplanationOnce?: 
     const badExplanation = options.badExplanationOnce && requests.length === 1;
     if (options.badExplanationOnce) {
       expect(input.sharedContext.currentBaselineConfiguration.items.find((a: any) => a.attributeId === "roll.declared_mass").facts["numberConfig.precision"]).toBe(3);
-      if (!badExplanation) expect(JSON.parse(body.input.at(-1).content).errors.some((e: any) => e.ruleId === "R08")).toBe(true);
+      if (!badExplanation) expect(JSON.parse(body.input.at(-2).content).errors.some((e: any) => e.ruleId === "R08")).toBe(true);
     }
     if (seed) seeds.add(scope.family.id);
     return Response.json({ status: "completed", output: [finalMessage(withFixtureDecisions({ categoryId: task.categoryId,
@@ -163,7 +163,7 @@ test("explicit leaves run exactly the wash and tissue pilot, with one shared see
     expect(body.reasoning).toEqual({ effort: "high" });
     expect(body.max_output_tokens).toBe(p.limits.maxOutputTokens);
   }
-  expect(m.requests.filter((b) => b.input.length === 1 && JSON.parse(b.input[0].content).task.candidate.phase === "family-seed")).toHaveLength(1);
+  expect(m.requests.filter((b) => b.input.length === 2 && JSON.parse(b.input[0].content).task.candidate.phase === "family-seed")).toHaveLength(1);
   const replay = await executeBatch(reordered.plan, release, client(dir, async () => { throw Error("do not rebuy pilot"); }));
   expect(replay.mockCallsThisExecution).toBe(0); expect(replay.cacheHitsThisExecution).toBe(8);
 });

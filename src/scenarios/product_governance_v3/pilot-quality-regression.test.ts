@@ -150,10 +150,10 @@ test("actual request and bounded correction loop carry decisions, skill, tools a
       expect(JSON.stringify(body.text.format.schema)).toContain("requiredNecessity");
       return [functionCall("search_attribute_pool", {query: "层数", categoryId: null, limit: 10, cursor: null})];
     }, body => {
-      expect(JSON.parse(body.input.at(-1).output).items.some((a: any) => a.id === "fixture-layers")).toBe(true);
+      expect(JSON.parse(body.input.at(-2).output).items.some((a: any) => a.id === "fixture-layers")).toBe(true);
       return [finalMessage(bad)];
     }, body => {
-      expect(JSON.parse(body.input.at(-1).content).errors.some((e: any) => e.ruleId === "R02")).toBe(true);
+      expect(JSON.parse(body.input.at(-2).content).errors.some((e: any) => e.ruleId === "R02")).toBe(true);
       return [finalMessage(good)];
     },
   ]);

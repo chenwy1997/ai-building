@@ -13,3 +13,4 @@
 
 - 2026-10-24：family-modeling输出必须有逐项decisions，业务必要性、专业定义及SKU取值资料分开；数量按对象/分母/计数词对照unitMin职责，同ID跨族也不能改定义。历史响应缺新字段应明确报告合同不兼容，禁止运行时自动补成“confirmed”；fixtures注释只供离线测试。
 - 预算提额只能通过用户明确授权的budget-set-remaining追加记录，保持原limitCny身份及所有历史预留；同授权ID重复不补余额。有效额度读取adjustments，不得直接改原始limit或自动清零/提额。
+- 请求布局使用request-layout.ts：规则/skill及已选共享资料置前，类目与任务数据后置，运行状态只在完整工具回传/纠错反馈后追加；不得改写历史、截断资料或为缓存加载无关知识。模型状态、纠错和工具预算仍由程序检查；离线前缀指标不冒充provider token命中率。

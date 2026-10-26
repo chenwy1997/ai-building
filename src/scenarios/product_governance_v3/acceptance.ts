@@ -1,11 +1,12 @@
 import { join } from "node:path";
-import { STAGES, save, canonical, type Stage, Blocked } from "./core.ts";
+import { STAGES, save, read, hash, canonical, type Stage, Blocked } from "./core.ts";
 import { loadRelease } from "./release.ts";
 import { DataSnapshot } from "./snapshot.ts";
 import { fixtureSnapshot, fixtureTask, happyScript } from "./fixtures.ts";
 import { Budget } from "./budget.ts";
 import { ResponsesClient } from "./responses.ts";
-import { runStage } from "./runner.ts";
+import { runStage, BATCH_CORRECTIONS } from "./runner.ts";
+import { matchesContextLayout } from "./request-layout.ts";
 
 export async function offlineAcceptance(outDir: string) {
   const release = await loadRelease(),
@@ -26,6 +27,7 @@ export async function offlineAcceptance(outDir: string) {
       task: fixtureTask(stage),
       client,
       outDir: dir,
+      corrections: BATCH_CORRECTIONS,
     });
     if (
       artifact.checks.status !== "program_pass_pending_human" ||
@@ -37,6 +39,16 @@ export async function offlineAcceptance(outDir: string) {
         "acceptance_failed",
         stage + " did not complete actual tool loop/checks",
       );
+    const bodies = await Promise.all(artifact.requestKeys.map(async (key) =>
+      (await read(join(dir, "requests", key + ".request.json"))).body));
+    const contextIntegrity = bodies.every(body =>
+      hash(JSON.parse(body.input[0].content)) === artifact.manifest.inputHash &&
+      matchesContextLayout(body.input[0].content, artifact.manifest.requestLayout));
+    const stableInstructions = bodies.every(body => body.instructions === bodies[0].instructions);
+    const appendOnlyHistory = bodies.slice(1).every((body, index) =>
+      canonical(body.input.slice(0, bodies[index].input.length)) === canonical(bodies[index].input));
+    if (!contextIntegrity || !stableInstructions || !appendOnlyHistory)
+      throw new Blocked("acceptance_failed", stage + " lost context or changed the existing request prefix");
     stages.push({
       stage,
       runKey: artifact.runKey,
@@ -44,6 +56,10 @@ export async function offlineAcceptance(outDir: string) {
       requests: client.calls,
       cachedResponses: client.cacheHits,
       modelToolCalls: artifact.toolCount,
+      requestLayout: artifact.manifest.requestLayout,
+      contextIntegrity,
+      stableInstructions,
+      appendOnlyHistory,
       actualMaterialHashes: artifact.manifest.skill,
       knowledge: artifact.manifest.knowledge,
       ruleRegistryHash: artifact.manifest.ruleRegistryHash,

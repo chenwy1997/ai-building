@@ -104,7 +104,7 @@ test("configuration assertions are part of the real request, result checker and 
       return [finalMessage(bad)];
     },
     (body) => {
-      const feedback = JSON.parse(body.input.at(-1).content);
+      const feedback = JSON.parse(body.input.at(-2).content);
       expect(feedback.errors.some((e: any) => e.ruleId === "R08" && e.message.includes("configuration explanation"))).toBe(true);
       return [finalMessage(good)];
     },

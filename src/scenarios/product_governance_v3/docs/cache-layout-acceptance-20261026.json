@@ -1,0 +1,429 @@
+{
+  "date": "2026-10-26",
+  "kind": "offline_request_layout_acceptance",
+  "releaseId": "6aba8c8be9a5fdff81744b895e0e35e9b40338a50ec981078ea0e0a188db8e2f",
+  "tests": {
+    "passed": 235,
+    "failed": 0,
+    "files": 15,
+    "typecheck": "passed"
+  },
+  "stages": [
+    {
+      "stage": "family-modeling",
+      "requests": 2,
+      "cachedResponses": 0,
+      "modelToolCalls": 1,
+      "contextIntegrity": true,
+      "stableInstructions": true,
+      "appendOnlyHistory": true,
+      "requestLayout": {
+        "version": "stable-prefix-v1",
+        "inputWireHash": "6376334612dcc1f4316b8fe81a1838743e5429f101ee56dd442931cdde1d0ed7"
+      }
+    },
+    {
+      "stage": "sku-filling",
+      "requests": 2,
+      "cachedResponses": 0,
+      "modelToolCalls": 1,
+      "contextIntegrity": true,
+      "stableInstructions": true,
+      "appendOnlyHistory": true,
+      "requestLayout": {
+        "version": "stable-prefix-v1",
+        "inputWireHash": "dcddd20c5e359af004c3849b7bc8facb707ef7ef2d3358938c0db5180c3bb615"
+      }
+    },
+    {
+      "stage": "review-assistance",
+      "requests": 2,
+      "cachedResponses": 0,
+      "modelToolCalls": 1,
+      "contextIntegrity": true,
+      "stableInstructions": true,
+      "appendOnlyHistory": true,
+      "requestLayout": {
+        "version": "stable-prefix-v1",
+        "inputWireHash": "9ded3124b7deb469c7b895c81067699725e613eaffaa9c05451488dd9e165efe"
+      }
+    },
+    {
+      "stage": "fact-extraction",
+      "requests": 2,
+      "cachedResponses": 0,
+      "modelToolCalls": 1,
+      "contextIntegrity": true,
+      "stableInstructions": true,
+      "appendOnlyHistory": true,
+      "requestLayout": {
+        "version": "stable-prefix-v1",
+        "inputWireHash": "2a668c43fa8004177024b91ecc367f615f9655144d151e09423419856192d26c"
+      }
+    },
+    {
+      "stage": "domain-research",
+      "requests": 2,
+      "cachedResponses": 0,
+      "modelToolCalls": 1,
+      "contextIntegrity": true,
+      "stableInstructions": true,
+      "appendOnlyHistory": true,
+      "requestLayout": {
+        "version": "stable-prefix-v1",
+        "inputWireHash": "36666a0e94349755b1517f47de9587dece68b0d5667b2418f8a9be228e99bb78"
+      }
+    }
+  ],
+  "historicalComparison": {
+    "kind": "read_only_historical_request_layout_comparison",
+    "date": "2026-10-26",
+    "groups": [
+      {
+        "arm": "low",
+        "categoryPairs": [
+          {
+            "categories": [
+              "盒装抽纸",
+              "软包抽纸"
+            ],
+            "beforeChars": 31516,
+            "afterChars": 134671
+          },
+          {
+            "categories": [
+              "盒装抽纸",
+              "洗脸巾"
+            ],
+            "beforeChars": 25233,
+            "afterChars": 116894
+          },
+          {
+            "categories": [
+              "软包抽纸",
+              "洗脸巾"
+            ],
+            "beforeChars": 25233,
+            "afterChars": 116894
+          }
+        ],
+        "runs": [
+          {
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "category": "盒装抽纸",
+            "phase": "leaf",
+            "runKey": "52a78f8c5dfca5e228045e8695e31a13bdc5474ebe6a867c288a80c021fcc893",
+            "requestKeys": [
+              "20e2b7fbabf69651a64f424db8113562e1c9a1f597dde99beb96e625efc5b3dc"
+            ],
+            "initialContextChars": 112671,
+            "contextsAndAllHistoricalItemsPreserved": true,
+            "maxRepackedRequestBytes": 216154,
+            "withinOriginal350000ByteCap": true,
+            "roundPairs": []
+          },
+          {
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "category": "软包抽纸",
+            "phase": "leaf",
+            "runKey": "56b8f5f30a395ae91b002b6f9b7bc5a8c2ca80f10d60d162c9370d8a3024d4f3",
+            "requestKeys": [
+              "93aeed1d9da039c0f9b126f910b2ca792f9164734867a1739139a034f34099fb",
+              "6a5f1a6f4706a032a117755a79897e56d76c4e04b58a0215201f6663689cb6d2",
+              "d39593262b06387ba2d2abf0f233f8cfe4aec1a2ac1bbe742722a3f1d192e48d"
+            ],
+            "initialContextChars": 112671,
+            "contextsAndAllHistoricalItemsPreserved": true,
+            "maxRepackedRequestBytes": 258302,
+            "withinOriginal350000ByteCap": true,
+            "roundPairs": [
+              {
+                "fromRound": 1,
+                "toRound": 2,
+                "beforeChars": 24525,
+                "afterChars": 137964,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 2,
+                "toRound": 3,
+                "beforeChars": 24525,
+                "afterChars": 153972,
+                "previousInputIsExactPrefix": true
+              }
+            ]
+          },
+          {
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "category": "盒装抽纸",
+            "phase": "family-seed",
+            "runKey": "83b066515ed4df3bc2912bc4fe6c7f3c572259d0f7298059fd6386f5ffad975c",
+            "requestKeys": [
+              "e15074337152fa88d0a822cd2301f09d834a8481db96c1dce2a68b8d9f2841d6",
+              "32982680a7dc5b3bfe5564ca763c3a217476225cfae41fc2102be48db5627eda",
+              "4a162960e7a32d1ae9fb3df92f07c1bc1b8c71db69536212d6cc44d6eaa88d67",
+              "a56ff9c2cac082f8e438131ab65fabd0977de7ab8f2be0d70e5afc320f4ebf99",
+              "c8edf186e11521ee57c24db3d46893b5e87f52b63e08d698aeed0bb7bb99af80"
+            ],
+            "initialContextChars": 95724,
+            "contextsAndAllHistoricalItemsPreserved": true,
+            "maxRepackedRequestBytes": 268626,
+            "withinOriginal350000ByteCap": true,
+            "roundPairs": [
+              {
+                "fromRound": 1,
+                "toRound": 2,
+                "beforeChars": 24525,
+                "afterChars": 121017,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 2,
+                "toRound": 3,
+                "beforeChars": 24525,
+                "afterChars": 126562,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 3,
+                "toRound": 4,
+                "beforeChars": 24525,
+                "afterChars": 151068,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 4,
+                "toRound": 5,
+                "beforeChars": 24525,
+                "afterChars": 156619,
+                "previousInputIsExactPrefix": true
+              }
+            ]
+          },
+          {
+            "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+            "category": "洗脸巾",
+            "phase": "leaf",
+            "runKey": "b3dda56a0c704f7aedc1ad9d379877c4885cfc6bb0101990e3f0e7d75d1aa773",
+            "requestKeys": [
+              "d20be1c73ac62cd5cd570014bfd7d5c5468e0bd825508efbb073b81173ad7df2",
+              "dfb2afee9f5a0f243f1ea32cda069a0d51f6f4af528294a86010471c0f929b66",
+              "b8226dc087fe3d5ba4375ed8fcdba26d7a6de01798aa757d86ba2b589b66a18b"
+            ],
+            "initialContextChars": 95410,
+            "contextsAndAllHistoricalItemsPreserved": true,
+            "maxRepackedRequestBytes": 215846,
+            "withinOriginal350000ByteCap": true,
+            "roundPairs": [
+              {
+                "fromRound": 1,
+                "toRound": 2,
+                "beforeChars": 24525,
+                "afterChars": 120703,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 2,
+                "toRound": 3,
+                "beforeChars": 24525,
+                "afterChars": 135735,
+                "previousInputIsExactPrefix": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "arm": "high",
+        "categoryPairs": [
+          {
+            "categories": [
+              "盒装抽纸",
+              "软包抽纸"
+            ],
+            "beforeChars": 31645,
+            "afterChars": 139032
+          },
+          {
+            "categories": [
+              "盒装抽纸",
+              "洗脸巾"
+            ],
+            "beforeChars": 25233,
+            "afterChars": 116872
+          },
+          {
+            "categories": [
+              "软包抽纸",
+              "洗脸巾"
+            ],
+            "beforeChars": 25233,
+            "afterChars": 116872
+          }
+        ],
+        "runs": [
+          {
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "category": "盒装抽纸",
+            "phase": "leaf",
+            "runKey": "26ffde30488893aaa90e8cb5132ca2911ead5e13f047f67a60ec1845a4dee100",
+            "requestKeys": [
+              "b22dc2dfa7030beeabe6de6daf2eb02c4e3527f3cddb586ef073826ba4151a7d",
+              "366bba39d4bdade622794354512f3aeaf83a92f20765bd56009fa517a154c97c",
+              "3a775ea01999d485f4d3e68233246dde7e8e8dbb227b6be3f2d63eb1e0feb461",
+              "15702564a1cfdcdd7e255383ecdca66bd3bde28e92869c8c11775c5bab2bd5ad"
+            ],
+            "initialContextChars": 117033,
+            "contextsAndAllHistoricalItemsPreserved": true,
+            "maxRepackedRequestBytes": 281788,
+            "withinOriginal350000ByteCap": true,
+            "roundPairs": [
+              {
+                "fromRound": 1,
+                "toRound": 2,
+                "beforeChars": 24525,
+                "afterChars": 142326,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 2,
+                "toRound": 3,
+                "beforeChars": 24525,
+                "afterChars": 169677,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 3,
+                "toRound": 4,
+                "beforeChars": 24525,
+                "afterChars": 172707,
+                "previousInputIsExactPrefix": true
+              }
+            ]
+          },
+          {
+            "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+            "category": "软包抽纸",
+            "phase": "leaf",
+            "runKey": "6d3044a097ecb2bcaafa6a6347850e7f7817f7d62aa8fc794732da5990985212",
+            "requestKeys": [
+              "cdf822107fb752de2a97db1da5adb832efccb088fab39e2a6538fcf05086fa07",
+              "f9874cadf539959e15b721c58d0054546362b0e8a3898075cce6a8fba2ccb6d8"
+            ],
+            "initialContextChars": 117033,
+            "contextsAndAllHistoricalItemsPreserved": true,
+            "maxRepackedRequestBytes": 245263,
+            "withinOriginal350000ByteCap": true,
+            "roundPairs": [
+              {
+                "fromRound": 1,
+                "toRound": 2,
+                "beforeChars": 24525,
+                "afterChars": 142326,
+                "previousInputIsExactPrefix": true
+              }
+            ]
+          },
+          {
+            "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+            "category": "盒装抽纸",
+            "phase": "family-seed",
+            "runKey": "803203e31475a68bb403c37bc43ec224f36ab610cec50bf0a57971d0d5bc5243",
+            "requestKeys": [
+              "c9d8b9325e1c58fe2b7c01bfa9ca5824d670742ec4904c8ffb3909b9bf21aeaf",
+              "8ba0b1e3f4ffc495a77dc0efea6af5622466c4464c026fc2c6fb131fe51fff6a",
+              "1dee9c46d02de565c4c0cd1445427f8a013229a3456f3c0b0b975eb04a60752c"
+            ],
+            "initialContextChars": 95725,
+            "contextsAndAllHistoricalItemsPreserved": true,
+            "maxRepackedRequestBytes": 235824,
+            "withinOriginal350000ByteCap": true,
+            "roundPairs": [
+              {
+                "fromRound": 1,
+                "toRound": 2,
+                "beforeChars": 24525,
+                "afterChars": 121018,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 2,
+                "toRound": 3,
+                "beforeChars": 24525,
+                "afterChars": 142575,
+                "previousInputIsExactPrefix": true
+              }
+            ]
+          },
+          {
+            "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+            "category": "洗脸巾",
+            "phase": "leaf",
+            "runKey": "a0380d386dcf2c67df400cccf2e3b0823dd189a50f3749e2c0d92d1b1c9282eb",
+            "requestKeys": [
+              "17e379d8ffdad3a091952377027a545fb73a1d8cf5fbcf68adfde96e4be87f38",
+              "791cb615283a9d926847807884e497fdddda3cd8fb169fb6421c8dcfa8b0c8cb",
+              "8b9826f46c97921a6fa936c1a608c5092b41ef6ea2a711f77d00bb0d2404b1e5",
+              "0b5e3168ed32a341a462c82cc50761a0b05da26ea17df9c46ca6afdbea18f051",
+              "9d7838a4a82b21a66b4cae0781de0df20b9f906415e28172e4f2d8913d6612b0"
+            ],
+            "initialContextChars": 95411,
+            "contextsAndAllHistoricalItemsPreserved": true,
+            "maxRepackedRequestBytes": 235182,
+            "withinOriginal350000ByteCap": true,
+            "roundPairs": [
+              {
+                "fromRound": 1,
+                "toRound": 2,
+                "beforeChars": 24525,
+                "afterChars": 120704,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 2,
+                "toRound": 3,
+                "beforeChars": 24525,
+                "afterChars": 145407,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 3,
+                "toRound": 4,
+                "beforeChars": 24525,
+                "afterChars": 151187,
+                "previousInputIsExactPrefix": true
+              },
+              {
+                "fromRound": 4,
+                "toRound": 5,
+                "beforeChars": 24525,
+                "afterChars": 155436,
+                "previousInputIsExactPrefix": true
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "measurement": "UTF-16 character prefix of instructions + ordered role/content representations; not tokens or provider prompt serialization",
+    "historicalPromptRulesPreservedForComparison": true,
+    "currentOutputContractRevalidation": false,
+    "contextAndHistoryDropped": false,
+    "contextArrayOrderChanged": false,
+    "newProviderRequests": 0,
+    "paidCalls": 0,
+    "productionWrites": 0,
+    "measuredProviderCacheHitRate": null,
+    "budgetBeforeHash": "865831acc3ea4f56e8888d056274df9dac91f02d4c833e771e4a8659fce339da",
+    "budgetAfterHash": "865831acc3ea4f56e8888d056274df9dac91f02d4c833e771e4a8659fce339da"
+  },
+  "externalNetworkCalls": 0,
+  "paidModelCalls": 0,
+  "productionWrites": 0,
+  "providerCacheHitRateMeasured": false,
+  "reasoningDefaultsChanged": false,
+  "artifacts": {
+    "acceptance": "outputs/product-governance-v3/offline-cache-layout-20261026/acceptance.json",
+    "historicalPrefixAudit": "outputs/product-governance-v3/offline-cache-layout-20261026/historical-prefix-audit.json"
+  }
+}
