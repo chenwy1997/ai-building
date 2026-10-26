@@ -233,7 +233,7 @@ test("corrupt responses, changed validators and outcome-unknown requests cannot 
       else manifest.inputHash = "changed";
       await save(path, manifest);
     } else await rm(join(dir, "requests", key + ".response.json"));
-    const message = change === "unknown" ? "never resend" : change === "response" ? "integrity" :
+    const message = change === "unknown" ? "no automatic resend" : change === "response" ? "integrity" :
       ["input", "wire-layout"].includes(change) ? "context identity mismatch" : "material changed";
     await expect(recheckBatch(dir, release)).rejects.toThrow(message);
   }

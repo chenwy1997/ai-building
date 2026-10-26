@@ -20,6 +20,8 @@ import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
 import { runtimeState } from "./request-layout.ts";
 import { materializeModelResult } from "./modeling-proposal.ts";
 import { correctableToolError } from "./runtime-errors.ts";
+import { isOutputTruncated, terminalFailure } from "./response-outcome.ts";
+import { outputTokens } from "./response-capacity.ts";
 
 export interface Limits {
   maxRounds: number;
@@ -63,6 +65,9 @@ export async function runStage(options: {
   // Host-only recovery keeps the frozen business version on the wire so paid
   // requests can replay exactly; record the actual host release separately.
   hostResume?: { hostReleaseId: string; sourceBatchId: string; sourceFingerprint: string };
+  // Explicit recovery only. The historical incomplete request consumes a round;
+  // one larger-capacity request may follow without resetting tools/corrections.
+  outputRecovery?: { maxOutputTokens: number };
 }) {
   const { release, snapshot, task, client, outDir } = options,
     limits = { ...DEFAULT_LIMITS, ...options.limits },
@@ -76,6 +81,8 @@ export async function runStage(options: {
   for (const [key, value] of Object.entries(limits))
     if (!Number.isInteger(value) || value < 1)
       throw Error("invalid limit " + key);
+  outputTokens(limits.maxOutputTokens);
+  if (options.outputRecovery) outputTokens(options.outputRecovery.maxOutputTokens);
   if (client.mode === "network" && snapshot.data.kind === "fixture")
     throw new Blocked("fixture_network", "fixture cannot enter paid transport");
   const plan = await assembleStageContext({ release, snapshot, task, limits, model, corrections }),
@@ -86,6 +93,7 @@ export async function runStage(options: {
       limits,
       model,
       corrections,
+      ...(options.outputRecovery ? { outputRecovery: options.outputRecovery } : {}),
     }),
     runPath = join(outDir, "runs", runKey);
   const history: InputItem[] = [
@@ -95,7 +103,8 @@ export async function runStage(options: {
     callIds = new Set<string>();
   const withRuntimeState = Boolean(corrections.maxCorrections || corrections.converge);
   let toolCount = 0,
-    toolBytes = 0, forceFinal = false;
+    toolBytes = 0, forceFinal = false, effectiveOutputTokens = limits.maxOutputTokens;
+  const capacityRecoveries: { round: number; requestKey: string; from: number; to: number }[] = [];
   const feedback: { round: number; code: string; details: unknown }[] = [];
   await client.budget.init();
   await save(runPath + ".manifest.json", {
@@ -105,6 +114,7 @@ export async function runStage(options: {
     model,
     corrections,
     ...(options.hostResume ? { hostResume: options.hostResume } : {}),
+    ...(options.outputRecovery ? { outputRecovery: options.outputRecovery } : {}),
     mode: client.mode,
   });
   try {
@@ -124,7 +134,7 @@ export async function runStage(options: {
       // Never rewrite earlier states: the previous request remains an exact input prefix.
       if (withRuntimeState) history.push(runtimeState({ round: round + 1, maxRounds: limits.maxRounds,
         toolCallsRemaining: limits.maxToolCalls - toolCount, finalOnly }));
-      const body = stageRequest(plan, task, model, limits, corrections, history, finalOnly);
+      const body = stageRequest(plan, task, model, { ...limits, maxOutputTokens: effectiveOutputTokens }, corrections, history, finalOnly);
       if (Buffer.byteLength(canonical(body)) > limits.maxRequestBytes)
         throw new Blocked(
           "request_budget",
@@ -138,6 +148,19 @@ export async function runStage(options: {
       });
       requestKeys.push(key);
       options.onProgress?.({ event: "model-response", round: round + 1, cached });
+      if (response.status !== "completed") {
+        const increased = options.outputRecovery?.maxOutputTokens;
+        if (!isOutputTruncated(response) || !increased || increased <= effectiveOutputTokens ||
+            capacityRecoveries.length || round + 1 === limits.maxRounds) throw terminalFailure(response);
+        capacityRecoveries.push({ round: round + 1, requestKey: key, from: effectiveOutputTokens, to: increased });
+        effectiveOutputTokens = increased;
+        // Keep the complete original input/tool history. The unfinished response
+        // is archived in the journal, never executed, spliced or treated as fact.
+        history.push({ role: "user", content: canonical({ kind: "host_output_capacity_feedback",
+          reason: "max_output_tokens", instruction: "上一轮响应达到输出上限而截断，未采用其中的业务字段或工具调用。完整原输入和已完成工具结果仍在上文；本轮已提高输出额度，请返回符合原合同的完整结果。业务规则、模型思考档位和纠错额度不变。" }) });
+        options.onProgress?.({ event: "output-capacity-recovery", round: round + 1, maxOutputTokens: increased });
+        continue;
+      }
       const calls = response.output.filter((i) => i.type === "function_call");
       if (calls.length) {
         const overBudget = toolCount + calls.length > limits.maxToolCalls;
@@ -271,6 +294,7 @@ export async function runStage(options: {
         configurationReview: checks.executedChecks.includes("configuration-explanations") ? modelConfigurationReview(result) : null,
         outputParsing,
         feedback,
+        ...(options.outputRecovery ? { outputRecovery: options.outputRecovery, capacityRecoveries } : {}),
         factPreparation:
           task.stage === "fact-extraction" && !checks.errors.length
             ? preparationBundle(task, result as FactExtraction, plan.tools)
@@ -310,6 +334,7 @@ export async function runStage(options: {
       toolCount,
       toolEvents: plan.tools.events,
       feedback,
+      ...(options.outputRecovery ? { outputRecovery: options.outputRecovery, capacityRecoveries } : {}),
       status: "program_blocked",
       code: error instanceof Blocked ? error.code : "stage_error",
       knowledgeGaps: plan.tools.knowledgeGaps(),

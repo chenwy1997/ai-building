@@ -8,7 +8,9 @@ import { ROOT, type Release } from "./release.ts";
 import { CategoryIndex } from "./catalog.ts";
 import { DataSnapshot } from "./snapshot.ts";
 import { assembleStageContext } from "./stage-context.ts";
-import { runStage, DEFAULT_LIMITS, BATCH_CORRECTIONS, type ModelOptions } from "./runner.ts";
+import { runStage, DEFAULT_LIMITS, BATCH_CORRECTIONS, type ModelOptions, type Limits } from "./runner.ts";
+import { DEFAULT_BATCH_OUTPUT_TOKENS, outputTokens, outputReservation, BATCH_PRICING_ID } from "./response-capacity.ts";
+export { BATCH_PRICING_ID } from "./response-capacity.ts";
 import { ResponsesClient } from "./responses.ts";
 import { systemFieldsFromInventory } from "./scm-field-inventory.ts";
 import { rollDefinitions, rollBindings, rollExtensionCandidates } from "./roll-pilot.ts";
@@ -22,12 +24,11 @@ import { familyCoverage } from "./family-coverage.ts";
 
 export const CLEAN_PAPER_ID = "77e31cf2-8331-4c73-ab10-823d2d1d7ab0";
 export const DEFAULT_TREE = resolve(ROOT, "../../../outputs/category-id-refresh-20261021/mapped-tree.updated.json");
-export const BATCH_LIMITS = Object.freeze({ ...DEFAULT_LIMITS, maxOutputTokens: 24000 });
+export const BATCH_LIMITS: Readonly<Limits> = Object.freeze({ ...DEFAULT_LIMITS, maxOutputTokens: DEFAULT_BATCH_OUTPUT_TOKENS });
 export const BATCH_MODEL: ModelOptions = Object.freeze({ model: "deepseek-flash", reasoningEffort: "low" });
 // A local conservative reservation, NOT an expected invoice. Frozen separately from provider billing.
-// 350000 input bytes + 24000 output tokens at 2026-10-23 peak USD rates, 9 CNY/USD allowance.
-export const REQUEST_RESERVE_CNY = 1.3;
-export const BATCH_PRICING_ID = "deepseek-flash-20261023-peak-byte-bound-cny9-v1";
+// Original byte-bound reservation plus the configured extra output allowance.
+export const REQUEST_RESERVE_CNY = outputReservation(24000, 1.3, DEFAULT_BATCH_OUTPUT_TOKENS, BATCH_PRICING_ID);
 export const DEFAULT_BUDGET_CNY = 200;
 
 export interface BatchOptions {
@@ -38,6 +39,7 @@ export interface BatchOptions {
   treePath?: string;
   snapshotPath?: string;
   budgetCny?: number;
+  maxOutputTokens?: number;
 }
 interface Group {
   id: string;
@@ -227,13 +229,14 @@ export async function prepareBatch(options: BatchOptions, release: Release): Pro
   }
   if (new Set(groups.flatMap((g) => g.members)).size !== groups.flatMap((g) => g.members).length)
     throw new Blocked("ambiguous_baseline", "batch members overlap multiple family groups");
+  const limits = { ...BATCH_LIMITS, maxOutputTokens: outputTokens(options.maxOutputTokens ?? BATCH_LIMITS.maxOutputTokens) };
   const plan: BatchPlan = {
     format: 1, modelingContractVersion: MODELING_PROPOSAL_VERSION, releaseId: release.id, id: "", runId: options.runId,
     root: { id: root.id, name: root.name, path: root.path }, categoryIds, groups,
     snapshot: snapshot.data, inputVersion: snapshot.version, profileVersion,
-    model: BATCH_MODEL, limits: BATCH_LIMITS,
+    model: BATCH_MODEL, limits,
     budgetCny: options.budgetCny ?? DEFAULT_BUDGET_CNY,
-    reserveCny: REQUEST_RESERVE_CNY, pricingId: BATCH_PRICING_ID,
+    reserveCny: outputReservation(24000, 1.3, limits.maxOutputTokens, BATCH_PRICING_ID), pricingId: BATCH_PRICING_ID,
     outDir: resolve(options.outDir), concurrency: options.concurrency, preflight: [],
     maximumStageTasks: categoryIds.length + groups.filter((g) => g.needsSeed).length,
     maximumRequests: 0, maximumReservationCny: 0,

@@ -953,7 +953,7 @@ describe("shared budget, durable recovery, and material versions", () => {
         { input: "fixture" },
         { releaseId: release.id, snapshotVersion: "fixture" },
       ),
-    ).rejects.toThrow("completed response");
+    ).rejects.toThrow("recognized terminal reason");
     await expect(
       client.request(
         { input: "fixture" },

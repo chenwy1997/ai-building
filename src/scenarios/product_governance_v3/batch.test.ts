@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ROOT, loadRelease, type Release } from "./release.ts";
 import { read, save, hash, jsonClone, Blocked } from "./core.ts";
-import { prepareBatch, executeBatch, mapConcurrent, CLEAN_PAPER_ID, type BatchPlan } from "./batch.ts";
+import { prepareBatch, executeBatch, mapConcurrent, CLEAN_PAPER_ID, REQUEST_RESERVE_CNY, type BatchPlan } from "./batch.ts";
 import { Budget } from "./budget.ts";
 import { ResponsesClient, type FetchLike } from "./responses.ts";
 import { attribute, binding, functionCall, finalMessage, fixtureSnapshot } from "./fixtures.ts";
@@ -296,7 +296,7 @@ test("actual CLI execute branch reaches Responses, tool loop, checks and exit co
   expect(exit).toBe(0);
   const result = JSON.parse(stdout);
   expect(result.passed).toBe(1); expect(result.requests).toBe(2); expect(result.productionWrites).toBe(0);
-  expect(result.reservedCny).toBe(2.6);
+  expect(result.reservedCny).toBe(2 * REQUEST_RESERVE_CNY);
   const stored = await read(join(out, "batch.results.json"));
   expect(stored.leaves[0].artifact.toolCount).toBe(1);
   expect(stored.leaves[0].artifact.checks.status).toBe("program_pass_pending_human");

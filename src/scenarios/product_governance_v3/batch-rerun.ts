@@ -6,7 +6,8 @@ import type { Release } from "./release.ts";
 import { DataSnapshot } from "./snapshot.ts";
 import { assembleStageContext } from "./stage-context.ts";
 import { BATCH_CORRECTIONS } from "./runner.ts";
-import { batchTask, validateBatchOptions, type BatchPlan } from "./batch.ts";
+import { batchTask, validateBatchOptions, BATCH_LIMITS, type BatchPlan } from "./batch.ts";
+import { outputTokens, outputReservation } from "./response-capacity.ts";
 import type { ModelOptions } from "./runner.ts";
 import { MODELING_PROPOSAL_VERSION } from "./modeling-proposal.ts";
 import { attachPilotKnowledge } from "./pilot-knowledge.ts";
@@ -19,6 +20,7 @@ export interface RerunOptions {
   categoryIds?: string[];
   reasoningEffort?: ModelOptions["reasoningEffort"];
   concurrency: number;
+  maxOutputTokens?: number;
 }
 
 export function parseReasoningEffort(value?: string): ModelOptions["reasoningEffort"] | undefined {
@@ -71,14 +73,16 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
       ? attachPilotKnowledge(data, [...new Set([...categoryIds, ...groups.flatMap(g => g.members)])]) : null;
     const snapshot = new DataSnapshot(data), node = snapshot.tree.get(categoryId), outDir = join(directory, "reruns", options.roundName);
     const model: ModelOptions = { ...source.model, reasoningEffort: reasoningEffort ?? source.model.reasoningEffort };
+    const limits = { ...source.limits, maxOutputTokens: outputTokens(options.maxOutputTokens ?? BATCH_LIMITS.maxOutputTokens) },
+      reserveCny = outputReservation(source.limits.maxOutputTokens, source.reserveCny, limits.maxOutputTokens, source.pricingId);
     const roundIdentity = { format: 1, modelingContractVersion: MODELING_PROPOSAL_VERSION, roundName: options.roundName, sourceBatchId: sourceId, sourceReleaseId: source.releaseId,
       sourceInputVersion: source.inputVersion, releaseId: release.id, snapshotVersion: snapshot.version, categoryIds, knowledgeUpdate,
-      model, limits: source.limits, budgetLimitCny: execution.budgetCny, pricingId: execution.pricingId,
-      reserveCny: source.reserveCny, transportId: execution.transportId, mode: execution.mode };
+      model, limits, budgetLimitCny: execution.budgetCny, pricingId: execution.pricingId,
+      reserveCny, transportId: execution.transportId, mode: execution.mode };
     const roundId = hash(roundIdentity);
     const plan: BatchPlan = {
       ...source, modelingContractVersion: MODELING_PROPOSAL_VERSION, id: "", releaseId: release.id, runId, snapshot: snapshot.data, inputVersion: snapshot.version,
-      root: { id: node.id, name: node.name, path: node.path }, categoryIds, groups, model,
+      root: { id: node.id, name: node.name, path: node.path }, categoryIds, groups, model, limits, reserveCny,
       budgetCny: execution.budgetCny, pricingId: execution.pricingId, outDir, concurrency: options.concurrency, preflight: [],
       accounting: { directory, originalBatchId: sourceId, roundName: options.roundName, roundId },
       maximumStageTasks: categoryIds.length + groups.filter((g) => g.needsSeed).length,

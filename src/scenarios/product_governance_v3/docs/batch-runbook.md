@@ -2,7 +2,7 @@
 
 2026-10-23新增。只设计类目属性，不试填SKU值、不采集商品、不改类目树或线上数据。结果均待人工审阅，没有自动采用。
 
-**当前恢复全量轮次的预算/游标中断，见[公共组件与续跑命令](full-batch-resume-20261026.md)。** 使用`batch-resume --from-round clean-paper-full-20261026`，动态选择失败末级，保留已生成基线和成功结果，保持low、并发32和原账本。此前[两个抽纸末级续跑](context-continuation-20261026.md)已执行完毕；下列`batch`命令仅用于初次建立批次。
+**当前补全量续跑后的输出截断，见[输出上限与补跑命令](output-truncation-recovery-20261026.md)。** `batch-resume --from-round clean-paper-full-20261026 --max-output-tokens 65536`保留20个已有结果和原基线，只补可验证的截断失败。此前预算/游标续跑和两个抽纸末级续跑已由用户执行；下列`batch`命令用于初次建立批次。
 
 ## 直接执行
 
@@ -38,6 +38,7 @@ bun src/scenarios/product_governance_v3/cli.ts batch \
 | `--tree` | 显式类目树；默认优先本机`outputs/category-id-refresh-20261021/mapped-tree.updated.json`完整树，缺失时回退到随代码提交的清洁纸品26节点摘录（21末级及祖先）。摘录仅能检索摘录内节点 |
 | `--snapshot` | 与`--tree`互斥；已有format=2本地业务快照，可用于其他根类目，必须有完整字段职责、适用知识要求和可用同族状态；fixture拒绝进入批处理 |
 | `--budget-cny` | 默认200元保守预留封顶，**不是预计账单**；全批共享，恢复不得隐式提额或清零 |
+| `--max-output-tokens` | 新`batch`/`batch-rerun`默认65536，含思考与正文，支持1..393216；已执行轮次配置冻结。`batch-resume`显式传入时仅恢复已保存resumption中的输出截断，原轮数不重置 |
 | `--execute` | 明确请求付费模型；省略只预检 |
 | `--log-format` | `human`（默认）、`json`或`quiet`。正常开始、逐轮请求/响应、缓存、完成走stdout；实际阻断走stderr。`quiet`仅输出最后JSON汇总 |
 | `--no-excel` | 先只保存JSON，稍后`batch-export`补导，无需重调模型 |
@@ -56,7 +57,7 @@ bun src/scenarios/product_governance_v3/cli.ts batch \
 5. 每个请求实际装入规范对应章节、后台合同、family-modeling skill及判例、字段职责、节点/祖先/相关族/属性池和适用知识。function参数/权限验证后执行本地只读工具，完整回传call_id历史；没有任意URL/文件/SQL或写入工具。
 6. 最终JSON只允许去掉一个无歧义的Markdown展示外壳，不修语法或业务字段。程序独立检查结果；可将工具参数错误、范围缺失和合同错误完整反馈给模型，最多2次纠错且仍受6轮/16次工具硬上限约束，所有改动由模型重新提案并重新检查。不可用工具、未知证据、重复call_id等权限/边界错误继续硬拦。预算将尽或最后一轮用`tool_choice=none`收敛。错误原件保留但不混入可审表，模型不能批准自己的提案。所有末级成功/失败及专业疑点均进入汇总。退出码0表示执行/导出完成且无程序阻断，2表示有阻断或导出失败，1表示参数或前置错误；0仍不等于人工采用。
 
-全范围为21叶+2次共同方案。默认`deepseek-flash`、reasoning=low，单请求240秒、最多6轮/16次模型工具调用、350000字节请求、160000字节工具结果、24000输出token。已核对2026-10-23的[官方Responses合同](https://api-docs.deepseek.com/api/create-response/)和[官方价格](https://api-docs.deepseek.com/quick_start/pricing/)。供应商别名不能固定其内部模型权重。
+全范围为21叶+2次共同方案。默认`deepseek-flash`、reasoning=low，最多6轮/16次模型工具调用、350000字节请求、160000字节工具结果；新任务默认65536输出token（含思考），单请求600秒。历史24000上限原件不改，显式输出恢复才提高后续请求额度。已核对2026-10-23的[官方Responses合同](https://api-docs.deepseek.com/api/create-response/)和[官方价格](https://api-docs.deepseek.com/quick_start/pricing/)。供应商别名不能固定其内部模型权重。
 
 最多138次Responses请求。按当日Flash峰值输入$0.30/百万token、输出$1.20/百万token、输入每字节保守按1token及9元/美元折算，每请求预留1.3元，最多179.4元。默认200元是本地保守封顶配置，不是预计花费、充值指令或供应商扣款保证。实际用量与未知状态留存，账单需到供应商侧核对；资费或汇率超出假设时须显式更新价格身份。
 

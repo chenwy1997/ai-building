@@ -1,12 +1,12 @@
 import { Blocked, hash } from "./core.ts";
-import type { CompletedRequest } from "./request-journal.ts";
+import type { RecordedRequest } from "./request-journal.ts";
 import type { StageClient } from "./runner.ts";
 
 // Reusable for any stage. Reconstruct all history with the normal loop, verify
 // each paid request, then either stop for an offline preview or delegate the
 // next request to the ordinary cached/accounted transport. No new loop budget.
 export function verifiedReplayClient(options: { client: StageClient | null;
-  mode: "offline" | "network"; transportId: string; transcript: CompletedRequest[] }) {
+  mode: "offline" | "network"; transportId: string; transcript: RecordedRequest[] }) {
   const { client, mode, transportId, transcript } = options;
   let cursor = 0;
   const replay: StageClient = { mode, transportId, budget: { init: async () => {} },

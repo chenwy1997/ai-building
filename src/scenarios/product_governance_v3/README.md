@@ -2,7 +2,9 @@
 
 v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认离线，`batch --execute`、`batch-rerun --execute`、`batch-continue --execute`、`batch-resume --execute`或指定失败末级的`batch-recover --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
 
-**当前：恢复清洁纸品全量轮次的预算/游标中断**，见[公共重放组件、真实预检与命令](docs/full-batch-resume-20261026.md)。`batch-resume`按原结果动态选择可恢复失败，保持成功结果与原基线，重放已付费响应后接续剩余轮数；没有写死类目ID或任务数。全量轮次实际为11个本地预算中断、1个游标错误，另9个程序通过（其中2个零属性仍待补研究）。保持low与并发32，原累计预留上限已获授权设为1000元。默认只离线核验，用户加`--execute`才发新请求。
+**当前：处理全量续跑后的输出截断**，见[核实结果、输出参数与补跑命令](docs/output-truncation-recovery-20261026.md)。21类中16份属性方案待审、4类零属性缺口、1类抽式擦手纸达到输出上限。`batch-resume --max-output-tokens 65536`根据可验证回执仅恢复该失败，保留20类和全部基线，原4次请求只本地重放；最多新增2次请求，不重置轮数、low档位或1000元累计额度。开发离线验收，用户执行`--execute`才付费。
+
+此前的[预算/游标中断恢复](docs/full-batch-resume-20261026.md)已由用户执行；其12个目标有11个完成。该文中的旧状态和预检数字保留作历史记录。
 
 此前的[完整上下文容量与抽纸续跑](docs/context-continuation-20261026.md)已由用户执行并审阅。`batch-continue`仍适用于发送前context_budget的原场景；其成功基线和小范围原件保留。
 

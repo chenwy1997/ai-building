@@ -4,7 +4,7 @@ import { save, read, exists, lock, hash, Blocked } from "./core.ts";
 interface Entry {
   id: string;
   reservedCny: number;
-  status: "reserved" | "completed" | "outcome_unknown";
+  status: "reserved" | "completed" | "incomplete" | "failed" | "outcome_unknown";
   usage: unknown;
 }
 export interface Ledger {

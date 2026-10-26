@@ -2,6 +2,7 @@ import { parseArgs } from "node:util";
 import { prepareContinuation } from "./batch-continuation.ts";
 import { prepareResume, executeResume } from "./batch-resume.ts";
 import { validateBatchAccounting } from "./batch-accounting.ts";
+import { outputTimeoutMs } from "./response-capacity.ts";
 import { resolve, join as joinPath } from "node:path";
 import { read, save, hash, lock, STAGES, type Stage, type Task } from "./core.ts";
 import { freezeRelease, loadRelease } from "./release.ts";
@@ -56,6 +57,7 @@ batch支持--tree或--snapshot、--budget-cny（默认200保守预留额度，�
 batch-rerun另支持--category-ids逗号分隔末级ID列表（与--category-id互斥，不展开上级）、--reasoning-effort none|low|high|max（none关闭思考，省略沿用原档位）。范围和思考档位随轮次冻结；A/B须用不同固定轮次名，仍共用原累计预算。详见docs/small-scope-reasoning-pilot-20261023.md。
 batch-continue只续跑发送前context_budget阻断的末级，完整核对并复用已通过基线。--from-round指定原轮次，保持原runId/资料/模型档位与累计预算；省略--execute仅预检。同源轮次固定continuations目录，重复执行恢复原请求，不重新生成基线或购买新循环。
 batch-resume用于本地预留触顶或已修复的分页游标错误：先离线逐请求重放核对，再从原中断位置继续；保留成功末级和已生成基线，6轮/2次纠错额度不重置。固定resumptions/来源轮次目录，--execute由用户显式执行；不重置预算，不处理结果未知的请求。
+batch、batch-rerun的新任务默认max-output-tokens=65536，可显式配置。batch-resume加--max-output-tokens 65536核对已保存的resumption，仅恢复明确因max_output_tokens截断的失败；固定写入其output-recovery目录，保留全部其他结果，最多提高一次额度且计入原6轮。大于24000时单请求超时600秒，预留随输出上限调整。
 freeze-release仅更新本地材料/代码指纹，不能替代规范内容的人类评审。`;
 export async function main(argv: string[]) {
   const { positionals, values } = parseArgs({
@@ -68,6 +70,7 @@ export async function main(argv: string[]) {
       "category-id": { type: "string" },
       "category-ids": { type: "string" },
       "reasoning-effort": { type: "string" },
+      "max-output-tokens": { type: "string" },
       stage: { type: "string" },
       "run-id": { type: "string" },
       "product-id": { type: "string" },
@@ -104,6 +107,8 @@ export async function main(argv: string[]) {
     return v;
   };
   if (values.help || !positionals.length) return { help: USAGE };
+  if (values["max-output-tokens"] !== undefined && !["batch", "batch-rerun", "batch-resume"].includes(positionals[0]!))
+    throw Error("--max-output-tokens仅用于batch、batch-rerun或batch-resume");
   if (positionals.length !== 1) throw Error("one command required");
   if (values.round && positionals[0] !== "batch-rerun") throw Error("--round仅用于batch-rerun");
   if (values["from-round"] && !["batch-continue", "batch-resume"].includes(positionals[0]!)) throw Error("--from-round仅用于batch-continue或batch-resume");
@@ -132,10 +137,11 @@ export async function main(argv: string[]) {
       return exportBatchReview(resolve(required("out")), layoutArgs(values));
     case "batch-resume": {
       for (const key of Object.keys(values)) if (!["out", "from-round", "concurrency", "reasoning-effort", "execute",
-        "no-excel", "layout", "freeze-left", "freeze-through", "log-format"].includes(key))
+        "no-excel", "layout", "freeze-left", "freeze-through", "log-format", "max-output-tokens"].includes(key))
         throw Error("batch-resume只恢复原轮次已识别的失败；不能更换范围、输入、轮次或预算");
       const options = { directory: resolve(required("out")), fromRound: required("from-round"),
-        concurrency: Number(values.concurrency ?? "32"), reasoningEffort: parseReasoningEffort(values["reasoning-effort"]) },
+        concurrency: Number(values.concurrency ?? "32"), reasoningEffort: parseReasoningEffort(values["reasoning-effort"]),
+        ...(values["max-output-tokens"] === undefined ? {} : { maxOutputTokens: Number(values["max-output-tokens"]) }) },
         release = await loadRelease(), format = logFormat(values["log-format"]);
       await validateBatchExport(layoutArgs(values));
       const preview = await prepareResume(options, release);
@@ -146,7 +152,7 @@ export async function main(argv: string[]) {
       const key = process.env.DEEPSEEK_API_KEY?.trim();
       if (!key) throw Error("缺少DEEPSEEK_API_KEY；预检已保存，未新增模型请求");
       const client = new ResponsesClient({ mode: "network", allowNetwork: true, apiKey: key,
-        transportId: root.execution.transportId, perRequestUpperBoundCny: root.source.reserveCny, timeoutMs: 240000 },
+        transportId: root.execution.transportId, perRequestUpperBoundCny: preview.requestReserveCny, timeoutMs: preview.timeoutMs },
         options.directory, new Budget(options.directory, root.execution.budgetCny, root.execution.pricingId));
       const result = await executeResume(options, release, client, progressLogger(format));
       let excel: unknown = null, exportError: string | null = null;
@@ -169,7 +175,8 @@ export async function main(argv: string[]) {
           reasoningEffort: parseReasoningEffort(values["reasoning-effort"]), concurrency: Number(values.concurrency ?? "2") }, release)
         : await prepareRerun({ directory, roundName: required("round"),
         categoryId: values["category-id"], categoryIds: values["category-ids"]?.split(",").map((id) => id.trim()),
-        reasoningEffort: parseReasoningEffort(values["reasoning-effort"]), concurrency: Number(values.concurrency ?? "8") }, release);
+        reasoningEffort: parseReasoningEffort(values["reasoning-effort"]), concurrency: Number(values.concurrency ?? "8"),
+        ...(values["max-output-tokens"] === undefined ? {} : { maxOutputTokens: Number(values["max-output-tokens"]) }) }, release);
       if (!values.execute) {
         if (plan.preflight.length) process.exitCode = 2;
         return preview;
@@ -179,7 +186,7 @@ export async function main(argv: string[]) {
       const key = process.env.DEEPSEEK_API_KEY?.trim();
       if (!key) throw Error("缺少DEEPSEEK_API_KEY；新一轮预检已保存，未新增模型请求");
       const client = new ResponsesClient({ mode: "network", allowNetwork: true, apiKey: key,
-        transportId: execution.transportId, perRequestUpperBoundCny: plan.reserveCny, timeoutMs: 240000 },
+        transportId: execution.transportId, perRequestUpperBoundCny: plan.reserveCny, timeoutMs: outputTimeoutMs(plan.limits.maxOutputTokens) },
         directory, new Budget(directory, execution.budgetCny, execution.pricingId));
       const result = await executeBatch(plan, release, client, progressLogger(format));
       let excel: unknown = null, exportError: string | null = null;
@@ -253,6 +260,7 @@ export async function main(argv: string[]) {
           ...(values.tree ? { treePath: values.tree } : {}),
           ...(values.snapshot ? { snapshotPath: values.snapshot } : {}),
           ...(values["budget-cny"] !== undefined ? { budgetCny: Number(values["budget-cny"]) } : {}),
+          ...(values["max-output-tokens"] === undefined ? {} : { maxOutputTokens: Number(values["max-output-tokens"]) }),
         }, release);
       if (!values.execute) {
         if (plan.preflight.length) process.exitCode = 2;
@@ -263,7 +271,7 @@ export async function main(argv: string[]) {
       if (!key) throw Error("缺少DEEPSEEK_API_KEY；在本地.env设置后重跑，未请求DeepSeek。不要将密钥放在命令参数或提交到Git。");
       const budget = new Budget(outDir, plan.budgetCny, plan.pricingId),
         client = new ResponsesClient({ mode: "network", allowNetwork: true, apiKey: key,
-          transportId: "deepseek-official-responses-v1", perRequestUpperBoundCny: plan.reserveCny, timeoutMs: 240000 }, outDir, budget),
+          transportId: "deepseek-official-responses-v1", perRequestUpperBoundCny: plan.reserveCny, timeoutMs: outputTimeoutMs(plan.limits.maxOutputTokens) }, outDir, budget),
         result = await executeBatch(plan, release, client,
           progressLogger(format));
       let excel: unknown = null, exportError: string | null = null;

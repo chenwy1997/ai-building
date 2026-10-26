@@ -3,6 +3,8 @@ import { mkdtemp, mkdir, rm, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import recording from "./fixtures/clean-paper-full-stop-20261026.json";
+import truncation from "./fixtures/output-truncation-20261026.json";
+import { readTerminalRequest } from "./request-journal.ts";
 import { Blocked, hash, read, save, jsonClone } from "./core.ts";
 import { ROOT, loadRelease, type Release } from "./release.ts";
 import { prepareBatch, executeBatch, CLEAN_PAPER_ID } from "./batch.ts";
@@ -79,13 +81,13 @@ test("wrong or stale cursors do not silently restart, grant pages, or receive un
 // Recorded scope/status distribution and cursor response; model finals, transport,
 // ledger and injected stop points are constructed. No paid request is replayed to
 // a provider. Exercise both pre-request and mid-loop budget exhaustion.
-async function stoppedRound() {
+async function stoppedRound(maxOutputTokens?: number) {
   const dir = next(), files = { ...release.files, "runner.ts": hash("prior cursor host") }, old = { ...release, files, id: hash(files) },
     root = await prepareBatch({ categoryId: CLEAN_PAPER_ID, runId: "resume-root", outDir: dir,
-      concurrency: 32, treePath: join(ROOT, "profiles/clean-paper-tree.json") }, old);
+      concurrency: 32, treePath: join(ROOT, "profiles/clean-paper-tree.json"), maxOutputTokens }, old);
   await save(join(dir, "execution.identity.json"), { batchId: root.id, mode: "offline", transportId: "resume-fixture", budgetCny: 0, pricingId: "offline-zero" });
   await new Budget(dir, 0, "offline-zero").init(); await mkdir(join(dir, "requests"));
-  const { plan } = await prepareRerun({ directory: dir, roundName: round, concurrency: 32 }, old),
+  const { plan } = await prepareRerun({ directory: dir, roundName: round, concurrency: 32, maxOutputTokens }, old),
     c = client(dir, async (_u, init) => {
       const body = JSON.parse(init.body), task = JSON.parse(body.input[0].content).task;
       if (task.candidate.phase === "leaf" && task.categoryId === CURSOR)
@@ -187,4 +189,67 @@ test("generic replay rejects changed body/identity before dispatch and generic s
   for (const code of ["http_error", "outcome_unknown", "program_checks", "stage_error", "family_dependency"])
     expect(resumableFailure({ status: "program_blocked", code, error: "unrecognized failure" })).toBeNull();
   expect(resumableFailure({ status: "program_pass_pending_human", code: "budget_exhausted", error: null })).toBeNull();
+});
+
+test("real output truncation resumes only the remaining leaf, preserves all successes/context, restores known usage and cannot rebuy on repeat", async () => {
+  const s = await stoppedRound(truncation.response.max_output_tokens);
+  let targetCalls = 0;
+  const first = await executeResume(opts(s.dir), release, client(s.dir, async (_u, init) => {
+    const body = JSON.parse(init.body), task = JSON.parse(body.input[0].content).task;
+    if (task.categoryId !== CURSOR) return Response.json({ status: "completed", output: [finalFor(body)] });
+    targetCalls++;
+    if (targetCalls === 1) return Response.json({ status: "completed", output: [functionCall("categories_get", { id: CURSOR }, "read-again")] });
+    if (targetCalls === 2) return Response.json({ status: "completed", output: [functionCall("search_attribute_pool", { categoryId: CURSOR, query: "层数", cursor: null, limit: 10 }, "pool-again")] });
+    return Response.json(truncation.response);
+  }));
+  expect(first.passed).toBe(20); expect(first.blocked).toBe(1);
+  const parent = await read(join(first.outDir, "resume.results.json")),
+    failed = parent.budget.entries.find((e: any) => e.status === "incomplete"),
+    failedBase = join(s.dir, "requests", failed.id),
+    request = await read(failedBase + ".request.json");
+  expect(failed.usage).toEqual(truncation.response.usage);
+  // Recreate the old host's bug from the real run: response transport is durable,
+  // but receipt/ledger call this an unknown outcome and omit usage.
+  await rm(failedBase + ".response.json");
+  await save(failedBase + ".receipt.json", { key: failed.id, status: "outcome_unknown", error: "Blocked: completed response with output array required" });
+  const ledger = await read(join(s.dir, "budget.json"));
+  Object.assign(ledger.entries.find((e: any) => e.id === failed.id), { status: "outcome_unknown", usage: null });
+  Object.assign(failed, { status: "outcome_unknown", usage: null });
+  await save(join(s.dir, "budget.json"), ledger); await save(join(first.outDir, "resume.results.json"), parent);
+  const before = hash(parent), receiptHash = hash(await read(failedBase + ".receipt.json")),
+    options = { ...opts(s.dir), maxOutputTokens: 65536 }, preview = await prepareResume(options, release);
+  expect(preview.ready).toBe(true); expect(preview.targets.map(t => t.categoryId)).toEqual([CURSOR]);
+  expect(preview.preservedLeaves).toHaveLength(20); expect(preview.familySeedsToRun).toEqual([]);
+  expect(preview.paidRequestsReplayedOffline).toBe(4); expect(preview.maximumNewRequests).toBe(2);
+  expect(preview.requestReserveCny).toBe(0); expect(preview.timeoutMs).toBe(600000);
+  expect(hash(await read(join(s.dir, "budget.json")))).toBe(hash(ledger));
+  const c = client(s.dir, async (_u, init) => {
+    const body = JSON.parse(init.body);
+    expect(JSON.parse(body.input[0].content).task.categoryId).toBe(CURSOR);
+    expect(body.max_output_tokens).toBe(65536); expect(body.reasoning.effort).toBe("low");
+    expect(body.input.slice(0, request.body.input.length)).toEqual(request.body.input);
+    expect(body.instructions).toBe(request.body.instructions); expect(body.tools).toEqual(request.body.tools);
+    return Response.json({ status: "completed", output: [finalFor(body)], usage: { input_tokens: 20, output_tokens: 10 } });
+  });
+  const result = await executeResume(options, release, c);
+  expect(result.passed).toBe(21); expect(c.calls).toBe(1);
+  const after = await read(join(result.outDir, "resume.results.json"));
+  for (const job of parent.leaves.filter((j: any) => j.status === "program_pass_pending_human"))
+    expect(after.leaves.find((j: any) => j.categoryId === job.categoryId)).toEqual(job);
+  const recovered = after.leaves.find((j: any) => j.categoryId === CURSOR).artifact;
+  expect(recovered.requestKeys).toHaveLength(5); expect(recovered.capacityRecoveries).toHaveLength(1);
+  expect(recovered.feedback.map((f: any) => f.code)).toEqual(["tool_arguments"]);
+  const billed = (await c.budget.status()).entries;
+  expect(billed).toHaveLength(ledger.entries.length + 1);
+  expect(billed.find(e => e.id === failed.id)?.status).toBe("incomplete");
+  expect(billed.find(e => e.id === failed.id)?.usage).toEqual(truncation.response.usage);
+  expect(hash(await read(failedBase + ".receipt.json"))).toBe(receiptHash);
+  expect((await read(failedBase + ".outcome-resolution.json")).originalReceiptPreserved).toBe(true);
+  expect(hash(await read(join(first.outDir, "resume.results.json")))).toBe(before);
+  const repeat = client(s.dir, () => { throw Error("must not send again"); });
+  await executeResume(options, release, repeat); expect(repeat.calls).toBe(0);
+  await expect(prepareResume({ ...options, maxOutputTokens: 98304 }, release)).rejects.toThrow("fixed resume");
+  const transport = await read(failedBase + ".transport-response.json"); transport.text += " ";
+  await save(failedBase + ".transport-response.json", transport);
+  await expect(readTerminalRequest(s.dir, failed.id)).rejects.toThrow("integrity mismatch");
 });

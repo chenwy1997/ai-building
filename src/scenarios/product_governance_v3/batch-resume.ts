@@ -13,10 +13,13 @@ import type { ResponsesClient } from "./responses.ts";
 import { proposalCounts, proposalReadiness } from "./proposal-readiness.ts";
 import { familyCoverage } from "./family-coverage.ts";
 import { effectiveBudgetLimit } from "./budget.ts";
+import { loadResumptionForOutputRecovery } from "./batch-resume-source.ts";
+import { outputTokens, outputReservation, outputTimeoutMs } from "./response-capacity.ts";
 
 export interface ResumeOptions {
   directory: string; fromRound: string; concurrency: number;
   reasoningEffort?: ModelOptions["reasoningEffort"];
+  maxOutputTokens?: number;
 }
 async function frozen(path: string, value: unknown) {
   if (await exists(path)) {
@@ -30,6 +33,7 @@ async function inspect(options: ResumeOptions, release: Release) {
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(options.fromRound)) throw Error("invalid --from-round");
   if (!Number.isInteger(options.concurrency) || options.concurrency < 1 || options.concurrency > 128)
     throw Error("concurrency must be 1..128");
+  if (options.maxOutputTokens !== undefined) outputTokens(options.maxOutputTokens);
   const root = await validateBatchAccounting(directory), sourceDir = join(directory, "reruns", options.fromRound),
     checked = await recheckUnlocked(sourceDir, release), source = checked.original as BatchPlan;
   if (source.accounting?.directory !== directory || source.accounting.originalBatchId !== root.sourceId)
@@ -47,22 +51,34 @@ async function inspect(options: ResumeOptions, release: Release) {
   }
   if (hash(shared) !== hash(checked.shared))
     throw new Blocked("resume_context_drift", "original full context/baselines changed");
-  const originalResults = await read(join(sourceDir, "batch.results.json")),
+  let originalResults = await read(join(sourceDir, "batch.results.json")),
     targets = checked.historicalJobs.filter(j => resumableFailure(j) !== null),
-    outDir = join(directory, "resumptions", options.fromRound),
-    wireRelease = { ...release, id: source.releaseId },
+    outDir = join(directory, "resumptions", options.fromRound), effectiveSourceDir = sourceDir;
+  const wireRelease = { ...release, id: source.releaseId },
     provenance = { hostReleaseId: release.id, sourceBatchId: source.id, sourceFingerprint: checked.sourceFingerprint },
-    snapshot = new DataSnapshot(shared),
+    snapshot = new DataSnapshot(shared);
+  const outputRecovery = options.maxOutputTokens === undefined ? undefined : { maxOutputTokens: options.maxOutputTokens };
+  const parent = outputRecovery ? await loadResumptionForOutputRecovery({ directory, parentDir: outDir, source,
+    sourceFingerprint: checked.sourceFingerprint, originalResults, snapshot, wireRelease,
+    ledger: root.ledger, execution: root.execution, maxOutputTokens: outputRecovery.maxOutputTokens }) : null;
+  if (parent) {
+    originalResults = parent.originalResults; targets = parent.targets; outDir = parent.outDir; effectiveSourceDir = parent.sourceDir;
+  }
+  const reserveCny = root.execution.mode === "offline" ? 0 : outputRecovery ? outputReservation(source.limits.maxOutputTokens, source.reserveCny,
+    outputRecovery.maxOutputTokens, source.pricingId) : source.reserveCny,
+    timeoutMs = outputTimeoutMs(outputRecovery?.maxOutputTokens ?? source.limits.maxOutputTokens),
     identity = { format: 1, sourceBatchId: source.id, originalBatchId: root.sourceId,
       sourceFingerprint: checked.sourceFingerprint, fromRound: options.fromRound,
       businessReleaseId: source.releaseId, hostReleaseId: release.id,
       categoryIds: targets.map(j => j.categoryId), inputVersion: snapshot.version,
       model: source.model, limits: source.limits, corrections: BATCH_CORRECTIONS,
       transportId: root.execution.transportId, mode: root.execution.mode,
-      budgetPath: join(directory, "budget.json"), originalLimitCny: root.execution.budgetCny, pricingId: root.execution.pricingId };
+      budgetPath: join(directory, "budget.json"), originalLimitCny: root.execution.budgetCny, pricingId: root.execution.pricingId,
+      ...(parent ? { parentFingerprint: parent.parentFingerprint, outputRecovery, reserveCny, timeoutMs } : {}) };
   const traces = new Map(checked.report.traces.filter(t => t.phase === "leaf").map(t => [t.categoryId, t]));
   const transcripts = new Map<string, Awaited<ReturnType<typeof durable>>[]>();
   for (const target of targets) {
+    if (parent) { transcripts.set(target.categoryId, parent.transcripts.get(target.categoryId)!); continue; }
     const keys = traces.get(target.categoryId)?.originalRequestKeys ?? [];
     transcripts.set(target.categoryId, await Promise.all(keys.map((key: string) => durable(directory, key))));
   }
@@ -73,8 +89,8 @@ async function inspect(options: ResumeOptions, release: Release) {
     await frozen(join(outDir, "resume.execution.json"), record);
     await frozen(join(outDir, "resume.identity.json"), record);
   } else await save(join(outDir, "resume.identity.json"), record);
-  return { directory, sourceDir, outDir, checked, source, originalResults, targets, snapshot,
-    wireRelease, provenance, transcripts, identity, root };
+  return { directory, sourceDir: effectiveSourceDir, outDir, checked, source, originalResults, targets, snapshot,
+    wireRelease, provenance, transcripts, identity, root, outputRecovery, reserveCny, timeoutMs };
 }
 
 // Caller holds the accounting root lock. No provider, ledger mutation or export
@@ -89,7 +105,7 @@ async function previewUnlocked(options: ResumeOptions, release: Release) {
       await runStage({ release: state.wireRelease, snapshot: state.snapshot,
         task: batchTask(state.source, job.categoryId, "leaf"), client: replay.client,
         outDir: join(state.outDir, "offline-replay"), model: state.source.model,
-        limits: state.source.limits, corrections: BATCH_CORRECTIONS, hostResume: state.provenance });
+        limits: state.source.limits, corrections: BATCH_CORRECTIONS, hostResume: state.provenance, outputRecovery: state.outputRecovery });
     } catch (e) {
       if (!(e instanceof Blocked) || e.code !== "resume_ready") {
         code = e instanceof Blocked ? e.code : "stage_error"; error = String(e);
@@ -112,7 +128,9 @@ async function previewUnlocked(options: ResumeOptions, release: Release) {
         status: state.snapshot.data.families.find(f => f.id === g.id)?.status })),
       familySeedsToRun: [], familyCoverage: familyCoverage(state.source, state.snapshot),
       paidRequestsReplayedOffline: leaves.reduce((s, l) => s + l.paidRequestsReplayed, 0), maximumNewRequests,
-      maximumAdditionalReservationCny: Number((maximumNewRequests * state.source.reserveCny).toFixed(2)),
+      maxOutputTokens: state.outputRecovery?.maxOutputTokens ?? state.source.limits.maxOutputTokens,
+      requestReserveCny: state.reserveCny, timeoutMs: state.timeoutMs,
+      maximumAdditionalReservationCny: Number((maximumNewRequests * (state.root.execution.mode === "network" ? state.reserveCny : 0)).toFixed(2)),
       cumulativeReservedCny: reserved, budgetLimitCny: limit, remainingReservationCny: Number((limit - reserved).toFixed(2)),
       budgetMeaning: "本地累计保守预留，不是DeepSeek账号余额或实际账单", newModelRequests: 0,
       sourceArtifactsModified: false, productionWrites: 0, adoption: "pending_human",
@@ -132,7 +150,7 @@ export async function executeResume(options: ResumeOptions, release: Release, cl
     if (resolve(client.dir) !== state.directory || client.mode !== state.root.execution.mode ||
         client.transportId !== state.root.execution.transportId || client.budget.path !== join(state.directory, "budget.json") ||
         client.budget.limitCny !== state.root.execution.budgetCny || client.budget.pricingId !== state.root.execution.pricingId ||
-        (client.mode === "network" && client.reserveCny !== source.reserveCny))
+        (client.mode === "network" && (client.reserveCny !== state.reserveCny || client.timeoutMs !== state.timeoutMs)))
       throw new Blocked("resume_identity_drift", "resume must retain the original transport and cumulative ledger");
     await frozen(join(state.outDir, "resume.execution.json"), { ...state.identity, id: hash(state.identity) });
     const start = client.calls, cached = client.cacheHits;
@@ -147,7 +165,7 @@ export async function executeResume(options: ResumeOptions, release: Release, cl
           transcript: state.transcripts.get(target.categoryId)! });
         const artifact = await runStage({ release: state.wireRelease, snapshot, task: batchTask(source, target.categoryId, "leaf"),
           client: replay.client, outDir: state.outDir, model: source.model, limits: source.limits,
-          corrections: BATCH_CORRECTIONS, hostResume: state.provenance,
+          corrections: BATCH_CORRECTIONS, hostResume: state.provenance, outputRecovery: state.outputRecovery,
           onProgress: e => progress({ ...e, phase: "leaf", categoryId: target.categoryId, category }) });
         job = { ...target, artifact, status: artifact.checks.status,
           code: artifact.checks.errors.length ? "program_checks" : null,

@@ -1,7 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { exists, read, hash, Blocked } from "./core.ts";
-import { readCompletedRequest } from "./request-journal.ts";
+import { readTerminalRequest } from "./request-journal.ts";
 
 // Caller holds the original root execution lock. No writes, keys, or HTTP.
 export async function validateBatchAccounting(directory: string) {
@@ -19,10 +19,9 @@ export async function validateBatchAccounting(directory: string) {
   for (const entry of ledger.entries) {
     if (!/^[a-f0-9]{64}$/.test(entry.id) || !Number.isFinite(entry.reservedCny) || entry.reservedCny < 0)
       throw new Blocked("budget_change", "invalid historical request reservation");
-    const base = join(directory, "requests", entry.id);
-    if (entry.status !== "completed" || !await exists(base + ".response.json"))
-      throw new Blocked("outcome_unknown", "unresolved paid outcome must be inspected before a new round; no implicit resend: " + entry.id);
-    const { request } = await readCompletedRequest(directory, entry.id);
+    const record = await readTerminalRequest(directory, entry.id), { request } = record;
+    if (entry.status !== record.response.status && !(record.legacyTransportHash && entry.status === "outcome_unknown"))
+      throw new Blocked("outcome_unknown", "unresolved paid outcome disagrees with durable terminal response: " + entry.id);
     if (request.mode !== execution.mode || request.transportId !== execution.transportId)
       throw new Blocked("cache_corrupt", "historical request identity changed");
   }

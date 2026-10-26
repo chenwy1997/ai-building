@@ -1,12 +1,16 @@
 import { join } from "node:path";
 import { hash, save, read, exists, lock, Blocked, canonical } from "./core.ts";
 import { Budget } from "./budget.ts";
+import { assertTerminalResponse, type TerminalStatus } from "./response-outcome.ts";
+import { readTerminalRequest } from "./request-journal.ts";
 
 export type InputItem = Record<string, any>;
 export interface ResponseBody {
   status: string;
   output: InputItem[];
   usage?: unknown;
+  incomplete_details?: { reason: string } | null;
+  error?: { code: string; message: string } | null;
 }
 export type FetchLike = (
   url: string,
@@ -84,31 +88,22 @@ export class ResponsesClient {
       responsePath = base + ".response.json",
       receiptPath = base + ".receipt.json";
     return lock(base + ".lock", async () => {
-      if (await exists(responsePath)) {
-        const record = await read<{
-          key: string;
-          response: ResponseBody;
-          sha256: string;
-        }>(responsePath);
-        if (record.key !== key || hash(record.response) !== record.sha256)
-          throw new Blocked(
-            "cache_corrupt",
-            "cached response failed integrity check",
-          );
-        assertResponse(record.response);
+      if (await exists(responsePath) || await exists(receiptPath)) {
+        const record = await readTerminalRequest(this.dir, key);
+        if (record.legacyTransportHash) await save(base + ".outcome-resolution.json", {
+          key, status: record.response.status, responseHash: record.responseHash,
+          transportHash: record.legacyTransportHash, previousReceiptHash: hash(await read(receiptPath)),
+          reason: record.response.incomplete_details?.reason, usage: record.response.usage,
+          originalReceiptPreserved: true, newModelRequests: 0,
+        });
         await this.budget.finish(
           key,
-          "completed",
+          record.response.status as TerminalStatus,
           record.response.usage ?? null,
         );
         this.cacheHits++;
         return { key, response: record.response, cached: true };
       }
-      if (await exists(receiptPath))
-        throw new Blocked(
-          "outcome_unknown",
-          "request was reserved/sent without a durable response; no automatic resend",
-        );
       await this.budget.reserve(key, this.reserveCny);
       await save(base + ".request.json", {
         key,
@@ -155,12 +150,12 @@ export class ResponsesClient {
             `Responses HTTP ${response.status}; inspect receipt before explicit retry`,
           );
         const raw: unknown = JSON.parse(responseText);
-        assertResponse(raw);
+        assertTerminalResponse(raw);
         await save(responsePath, { key, response: raw, sha256: hash(raw) });
-        await this.budget.finish(key, "completed", raw.usage ?? null);
+        await this.budget.finish(key, raw.status as TerminalStatus, raw.usage ?? null);
         await save(receiptPath, {
           key,
-          status: "completed",
+          status: raw.status,
           responseHash: hash(raw),
         });
         return { key, response: raw, cached: false };
@@ -174,32 +169,5 @@ export class ResponsesClient {
         throw error;
       }
     });
-  }
-}
-function assertResponse(value: unknown): asserts value is ResponseBody {
-  if (
-    !value ||
-    typeof value !== "object" ||
-    !Array.isArray((value as any).output) ||
-    (value as any).status !== "completed"
-  )
-    throw new Blocked(
-      "incomplete_response",
-      "completed response with output array required",
-    );
-  for (const item of (value as any).output) {
-    if (!item || !["function_call", "message", "reasoning"].includes(item.type))
-      throw new Blocked(
-        "unsupported_output",
-        "unregistered response item type",
-      );
-    if (
-      item.type === "function_call" &&
-      (!item.call_id ||
-        typeof item.call_id !== "string" ||
-        typeof item.name !== "string" ||
-        typeof item.arguments !== "string")
-    )
-      throw new Blocked("bad_tool_call", "invalid function call");
   }
 }

@@ -12,12 +12,13 @@ export function progressLogger(format: LogFormat,
     const phase = event.phase === "family-seed" ? "同族基线" : "类目方案";
     const name = String(event.category ?? event.categoryId ?? "");
     const label = event.event === "started" ? "开始" : event.event === "model-request"
-      ? "模型请求" : event.event === "model-response" ? event.cached ? "读取缓存" : "模型响应"
+      ? "模型请求" : event.event === "output-capacity-recovery" ? "输出截断续跑" : event.event === "model-response" ? event.cached ? "读取缓存" : "模型响应"
       : failed ? "阻断" : event.proposalReadiness === "no_admitted_attributes"
         ? "零属性，建模缺口待审" : "已有方案，待人工审阅";
     const line = format === "json" ? JSON.stringify(event) :
       `[${label}] ${phase} · ${name}${event.code ? " · " + event.code : ""}${event.code === "budget_exhausted" ? "（本地预留额度触顶，不代表账号余额不足）" : ""}`;
     (failed ? err : out)(line + (format === "human" && event.round ? " · 第" + event.round + "轮" : "") +
-      (format === "human" && event.model ? " · " + event.model + " / 思考=" + event.reasoningEffort : ""));
+      (format === "human" && event.model ? " · " + event.model + " / 思考=" + event.reasoningEffort : "") +
+      (format === "human" && event.event === "output-capacity-recovery" ? " · 输出上限=" + event.maxOutputTokens : ""));
   };
 }
