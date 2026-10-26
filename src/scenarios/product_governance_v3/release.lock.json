@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "id": "6aba8c8be9a5fdff81744b895e0e35e9b40338a50ec981078ea0e0a188db8e2f",
+  "id": "70121bbba81cbc9e83ab03006081b807649a16af40e157e5584a21b9442fce93",
   "files": {
     "../product_governance_v2/runtime/store.ts": "1e5fb3eb4aec0c8c449e49b3eda7501a9a178dad1213cdfe636b6016d0c78c02",
     "acceptance.ts": "c1f3f0bb95fc65bf77f38da68e2f0d2b078b50c797de81fc79817b215feba0af",
@@ -13,7 +13,7 @@
     "catalog.ts": "4e639897702bbef1198a603c6b85eac5b7720fa772232731fd4c3e20b19923c1",
     "checks.ts": "5c9436fdce3c2b48da3a097d75757e1f1b755ad198c4ac63919dad1f1611e2ce",
     "cli.ts": "1446f36f79875501e7bbda62a632c0394d17f637fa1e2e89db2304db3ad84287",
-    "context.ts": "a7e985fc71c276d424873aeb0afe80a819c64b95bbf5132e61a9da925723b9df",
+    "context.ts": "3e7c31199c3e53fb55a4374dd6805d6ee44109acdf88d63e5bbdd9499f3d294c",
     "contracts.ts": "0d0c743b388a1aca43b1f2a0780ac13d4a0f7af09c614ca390bc5d7341704f62",
     "core.ts": "652f97cb30df949397f6a43278e97ee6b7994c36c2349db3f5e77ec66b3261da",
     "docs/governance-design-v1-20261022.md": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7",
@@ -31,7 +31,7 @@
     "profiles/clean-paper.json": "f0ffd22e9a00d145c84de7020a5e8563e12036794848dc5b6d3d748827929b87",
     "progress.ts": "48210cd48b9fdfbce4fb94ddc23d9b5508bfa16977be8d734aad31653b9465aa",
     "proposal-readiness.ts": "ebc006b32b33300346dc70c67bfb97da4d11a1f33c99798c23696f56a54db7df",
-    "release.ts": "4ddcf162cc371f9f87d2a3b0f68c0b8588d89720b9404d108f589ebbb8fe125e",
+    "release.ts": "6fbfdaa84089a21c24c3020b2b10ee482e3e5f0385bdcd20b24d94fd6e279d70",
     "request-layout.ts": "d31d149b33f121a0e4a73dd9c7cfb96dfd683fad7f58893f845efbd364cfb4a7",
     "responses.ts": "84cabc80f1a510f51f39c2fdedf7d7d36d1e98afebf9db76d412a5230b81ea82",
     "result-json.ts": "21b44a43e85f6d65ac8aaba94ab74ca7ce6ccd55a89bfc48653941bfcc032185",

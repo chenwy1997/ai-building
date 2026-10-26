@@ -1,0 +1,1091 @@
+{
+  "kind": "offline_audit_of_user_executed_round",
+  "date": "2026-10-26",
+  "round": "pilot-wash-tissue-quality-cache-20261026",
+  "originalReleaseId": "6aba8c8be9a5fdff81744b895e0e35e9b40338a50ec981078ea0e0a188db8e2f",
+  "fixedReleaseId": "70121bbba81cbc9e83ab03006081b807649a16af40e157e5584a21b9442fce93",
+  "model": {
+    "model": "deepseek-flash",
+    "reasoningEffort": "low",
+    "changedByAudit": false
+  },
+  "sources": [
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-low-20261023/batch.identity.json",
+      "sha256": "29c957b7345232d8377d829d346f0e0af4634ec0583ae3a9236fe532b20b0331"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-low-20261023/batch.shared-snapshot.json",
+      "sha256": "8c4cc443783a74b85606980f78bc036edd62b46e2bfc7ac6d185b46fab09b09e"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-low-20261023/batch.results.json",
+      "sha256": "b773c4ce8191b4e9eb5f32cf9491440eef68811952db1765dcb00738e6b4d5a4"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-low-20261023/batch.summary.json",
+      "sha256": "3801521b1b3249457d527f9830cddb80cc81d74eaa47d8b1b3efd2730b956f6d"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-high-20261023/batch.identity.json",
+      "sha256": "8b75a31aed015575dc2ddfcde0217ceb6dcd5efb4c5299f73e06d28e18d796c5"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-high-20261023/batch.shared-snapshot.json",
+      "sha256": "d6209479e6bcd7fe618f227b4b2494b9b63d153d332f385d539ff9e846b98506"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-high-20261023/batch.results.json",
+      "sha256": "2d3ed810eaf29f4446f87e0f6b592aeb74690c9c3ce4e84e485be48998ff273d"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-high-20261023/batch.summary.json",
+      "sha256": "5751628ad0f5306b37475f9dbc7f2aed62ba166c27172c3dced600c7ad4c6ce1"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-quality-cache-20261026/batch.identity.json",
+      "sha256": "a26d94bff667f35082eaa8419f99d112e2a16ddd5ddd5267c65814520f754208"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-quality-cache-20261026/batch.shared-snapshot.json",
+      "sha256": "0a25d316130ec60fcbed59a782408db1c1102c5d95ee16a93363d2597e1e4380"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-quality-cache-20261026/batch.results.json",
+      "sha256": "ae8c633461d22e460e9d0188776aab9bd11064538db2263955813d89e9681166"
+    },
+    {
+      "path": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-quality-cache-20261026/batch.summary.json",
+      "sha256": "b2a27cc5126170e7c6521ce23fced6c83ea31572e6c6ba4bf9c10b7d9c589cef"
+    }
+  ],
+  "context": {
+    "unit": "UTF-8 bytes in initial instructions plus serialized input; not model tokens",
+    "limitBytes": 200000,
+    "before": [
+      {
+        "category": "洗脸巾",
+        "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+        "totalBytes": 165309,
+        "instructionBytes": 54675,
+        "inputBytes": 110634,
+        "inputComponents": {
+          "sharedContext": 109675,
+          "task": 742,
+          "dataBoundary": 90,
+          "candidateProgramChecks": 4,
+          "contractAttributes": 4,
+          "product": 4,
+          "evidence": 2
+        },
+        "sharedComponents": {
+          "knowledge": 82038,
+          "ruleResponsibilities": 12340,
+          "systemFields": 9097,
+          "systemFieldCoverage": 1525,
+          "quantityResponsibility": 1201,
+          "knowledgeInventory": 993,
+          "category": 852,
+          "knowledgeRequirements": 398,
+          "currentBaselineConfiguration": 210,
+          "related": 141,
+          "family": 141,
+          "attributePool": 139,
+          "releaseId": 66,
+          "snapshotVersion": 66,
+          "knowledgeCoverage": 26,
+          "baselineStatus": 24,
+          "modelingMode": 22,
+          "snapshotKind": 7,
+          "knowledgeGaps": 2,
+          "baselineReferenceDependencies": 2
+        },
+        "families": [],
+        "knowledge": [
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 0,
+            "end": 8000,
+            "bytes": 9842
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 8000,
+            "end": 16000,
+            "bytes": 10052
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 16000,
+            "end": 24000,
+            "bytes": 10742
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 24000,
+            "end": 32000,
+            "bytes": 10603
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 32000,
+            "end": 40000,
+            "bytes": 10337
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 40000,
+            "end": 48000,
+            "bytes": 10602
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 48000,
+            "end": 56000,
+            "bytes": 10015
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 56000,
+            "end": 58469,
+            "bytes": 3302
+          },
+          {
+            "id": "clean-paper-admission-20261023",
+            "offset": 0,
+            "end": 2469,
+            "bytes": 6533
+          }
+        ],
+        "attributePool": []
+      },
+      {
+        "category": "盒装抽纸",
+        "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "totalBytes": 202364,
+        "instructionBytes": 54675,
+        "inputBytes": 147689,
+        "inputComponents": {
+          "sharedContext": 146270,
+          "task": 1202,
+          "dataBoundary": 90,
+          "candidateProgramChecks": 4,
+          "contractAttributes": 4,
+          "product": 4,
+          "evidence": 2
+        },
+        "sharedComponents": {
+          "knowledge": 91157,
+          "family": 16883,
+          "ruleResponsibilities": 12340,
+          "systemFields": 9097,
+          "attributePool": 5341,
+          "currentBaselineConfiguration": 2962,
+          "baselineReferenceDependencies": 2515,
+          "systemFieldCoverage": 1525,
+          "quantityResponsibility": 1201,
+          "knowledgeInventory": 993,
+          "category": 858,
+          "related": 421,
+          "knowledgeRequirements": 398,
+          "releaseId": 66,
+          "snapshotVersion": 66,
+          "knowledgeCoverage": 26,
+          "modelingMode": 16,
+          "baselineStatus": 11,
+          "snapshotKind": 7,
+          "knowledgeGaps": 2
+        },
+        "families": [
+          {
+            "id": "facial-tissue",
+            "bytes": 16742,
+            "fields": {
+              "decisions": 6355,
+              "attributes": 5204,
+              "extensionCandidates": 2865,
+              "bindings": 1845,
+              "runId": 144,
+              "members": 79,
+              "version": 66,
+              "availability": 18,
+              "id": 15,
+              "status": 11,
+              "usable": 4
+            }
+          }
+        ],
+        "knowledge": [
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 0,
+            "end": 8000,
+            "bytes": 9842
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 8000,
+            "end": 16000,
+            "bytes": 10052
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 16000,
+            "end": 24000,
+            "bytes": 10742
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 24000,
+            "end": 32000,
+            "bytes": 10603
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 32000,
+            "end": 40000,
+            "bytes": 10337
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 40000,
+            "end": 48000,
+            "bytes": 10602
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 48000,
+            "end": 56000,
+            "bytes": 10015
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 56000,
+            "end": 58469,
+            "bytes": 3302
+          },
+          {
+            "id": "clean-paper-admission-20261023",
+            "offset": 0,
+            "end": 2469,
+            "bytes": 6533
+          },
+          {
+            "id": "small-roll-paper-research-20261022",
+            "offset": 0,
+            "end": 3705,
+            "bytes": 9118
+          }
+        ],
+        "attributePool": [
+          {
+            "id": "roll.layers",
+            "bytes": 1168
+          },
+          {
+            "id": "roll.fragrance",
+            "bytes": 1161
+          },
+          {
+            "id": "roll.sheet_size",
+            "bytes": 1270
+          },
+          {
+            "id": "facial.pack_count",
+            "bytes": 1600
+          }
+        ]
+      },
+      {
+        "category": "软包抽纸",
+        "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+        "totalBytes": 202364,
+        "instructionBytes": 54675,
+        "inputBytes": 147689,
+        "inputComponents": {
+          "sharedContext": 146270,
+          "task": 1202,
+          "dataBoundary": 90,
+          "candidateProgramChecks": 4,
+          "contractAttributes": 4,
+          "product": 4,
+          "evidence": 2
+        },
+        "sharedComponents": {
+          "knowledge": 91157,
+          "family": 16883,
+          "ruleResponsibilities": 12340,
+          "systemFields": 9097,
+          "attributePool": 5341,
+          "currentBaselineConfiguration": 2962,
+          "baselineReferenceDependencies": 2515,
+          "systemFieldCoverage": 1525,
+          "quantityResponsibility": 1201,
+          "knowledgeInventory": 993,
+          "category": 858,
+          "related": 421,
+          "knowledgeRequirements": 398,
+          "releaseId": 66,
+          "snapshotVersion": 66,
+          "knowledgeCoverage": 26,
+          "modelingMode": 16,
+          "baselineStatus": 11,
+          "snapshotKind": 7,
+          "knowledgeGaps": 2
+        },
+        "families": [
+          {
+            "id": "facial-tissue",
+            "bytes": 16742,
+            "fields": {
+              "decisions": 6355,
+              "attributes": 5204,
+              "extensionCandidates": 2865,
+              "bindings": 1845,
+              "runId": 144,
+              "members": 79,
+              "version": 66,
+              "availability": 18,
+              "id": 15,
+              "status": 11,
+              "usable": 4
+            }
+          }
+        ],
+        "knowledge": [
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 0,
+            "end": 8000,
+            "bytes": 9842
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 8000,
+            "end": 16000,
+            "bytes": 10052
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 16000,
+            "end": 24000,
+            "bytes": 10742
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 24000,
+            "end": 32000,
+            "bytes": 10603
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 32000,
+            "end": 40000,
+            "bytes": 10337
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 40000,
+            "end": 48000,
+            "bytes": 10602
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 48000,
+            "end": 56000,
+            "bytes": 10015
+          },
+          {
+            "id": "scm-field-responsibilities-20261022",
+            "offset": 56000,
+            "end": 58469,
+            "bytes": 3302
+          },
+          {
+            "id": "clean-paper-admission-20261023",
+            "offset": 0,
+            "end": 2469,
+            "bytes": 6533
+          },
+          {
+            "id": "small-roll-paper-research-20261022",
+            "offset": 0,
+            "end": 3705,
+            "bytes": 9118
+          }
+        ],
+        "attributePool": [
+          {
+            "id": "roll.layers",
+            "bytes": 1168
+          },
+          {
+            "id": "roll.fragrance",
+            "bytes": 1161
+          },
+          {
+            "id": "roll.sheet_size",
+            "bytes": 1270
+          },
+          {
+            "id": "facial.pack_count",
+            "bytes": 1600
+          }
+        ]
+      }
+    ],
+    "after": [
+      {
+        "category": "洗脸巾",
+        "contextUsage": {
+          "totalBytes": 153309,
+          "limitBytes": 200000,
+          "instructionsBytes": 54765,
+          "inputBytes": 98544,
+          "sharedComponents": {
+            "releaseId": 66,
+            "snapshotVersion": 66,
+            "snapshotKind": 7,
+            "systemFields": 9097,
+            "quantityResponsibility": 1201,
+            "systemFieldCoverage": 1525,
+            "ruleResponsibilities": 250,
+            "category": 852,
+            "related": 141,
+            "family": 141,
+            "attributePool": 139,
+            "knowledgeInventory": 993,
+            "knowledge": 82038,
+            "knowledgeRequirements": 398,
+            "knowledgeGaps": 2,
+            "knowledgeCoverage": 26,
+            "baselineStatus": 24,
+            "baselineReferenceDependencies": 2,
+            "modelingMode": 22,
+            "currentBaselineConfiguration": 210
+          }
+        }
+      },
+      {
+        "category": "盒装抽纸",
+        "contextUsage": {
+          "totalBytes": 190364,
+          "limitBytes": 200000,
+          "instructionsBytes": 54765,
+          "inputBytes": 135599,
+          "sharedComponents": {
+            "releaseId": 66,
+            "snapshotVersion": 66,
+            "snapshotKind": 7,
+            "systemFields": 9097,
+            "quantityResponsibility": 1201,
+            "systemFieldCoverage": 1525,
+            "ruleResponsibilities": 250,
+            "category": 858,
+            "related": 421,
+            "family": 16883,
+            "attributePool": 5341,
+            "knowledgeInventory": 993,
+            "knowledge": 91157,
+            "knowledgeRequirements": 398,
+            "knowledgeGaps": 2,
+            "knowledgeCoverage": 26,
+            "baselineStatus": 11,
+            "baselineReferenceDependencies": 2515,
+            "modelingMode": 16,
+            "currentBaselineConfiguration": 2962
+          }
+        }
+      },
+      {
+        "category": "软包抽纸",
+        "contextUsage": {
+          "totalBytes": 190364,
+          "limitBytes": 200000,
+          "instructionsBytes": 54765,
+          "inputBytes": 135599,
+          "sharedComponents": {
+            "releaseId": 66,
+            "snapshotVersion": 66,
+            "snapshotKind": 7,
+            "systemFields": 9097,
+            "quantityResponsibility": 1201,
+            "systemFieldCoverage": 1525,
+            "ruleResponsibilities": 250,
+            "category": 858,
+            "related": 421,
+            "family": 16883,
+            "attributePool": 5341,
+            "knowledgeInventory": 993,
+            "knowledge": 91157,
+            "knowledgeRequirements": 398,
+            "knowledgeGaps": 2,
+            "knowledgeCoverage": 26,
+            "baselineStatus": 11,
+            "baselineReferenceDependencies": 2515,
+            "modelingMode": 16,
+            "currentBaselineConfiguration": 2962
+          }
+        }
+      }
+    ],
+    "change": "Duplicate registry body in sharedContext replaced by location, rule IDs and hash; exact full body remains in instructions",
+    "truncatedContent": false,
+    "requestLimitIncreased": false
+  },
+  "providerUsage": {
+    "comparisonScope": "family-seed plus washcloth leaf only; blocked tissue leaves sent zero requests",
+    "rounds": [
+      {
+        "round": "pilot-wash-tissue-low-20261023",
+        "comparable": {
+          "requests": 8,
+          "toolCalls": 17,
+          "corrections": 2,
+          "input": 436585,
+          "hit": 83456,
+          "miss": 353129,
+          "output": 31680,
+          "reasoning": 16599,
+          "hitRate": 0.19115636130421337
+        },
+        "wholeRound": {
+          "requests": 12,
+          "toolCalls": 19,
+          "corrections": 3,
+          "input": 671611,
+          "hit": 135680,
+          "miss": 535931,
+          "output": 47365,
+          "reasoning": 20556,
+          "hitRate": 0.20202170601732253
+        },
+        "jobs": [
+          {
+            "category": "盒装抽纸",
+            "phase": "family-seed",
+            "status": "program_pass_pending_human",
+            "code": null,
+            "requests": 5,
+            "toolCalls": 10,
+            "corrections": 2,
+            "input": 281756,
+            "hit": 45568,
+            "miss": 236188,
+            "output": 21828,
+            "reasoning": 10194,
+            "hitRate": 0.16172858785615923,
+            "perRequest": [
+              {
+                "key": "e15074337152fa88d0a822cd2301f09d834a8481db96c1dce2a68b8d9f2841d6",
+                "input": 48177,
+                "hit": 0,
+                "output": 776
+              },
+              {
+                "key": "32982680a7dc5b3bfe5564ca763c3a217476225cfae41fc2102be48db5627eda",
+                "input": 49721,
+                "hit": 11392,
+                "output": 7118
+              },
+              {
+                "key": "4a162960e7a32d1ae9fb3df92f07c1bc1b8c71db69536212d6cc44d6eaa88d67",
+                "input": 57271,
+                "hit": 11392,
+                "output": 419
+              },
+              {
+                "key": "a56ff9c2cac082f8e438131ab65fabd0977de7ab8f2be0d70e5afc320f4ebf99",
+                "input": 58945,
+                "hit": 11392,
+                "output": 8588
+              },
+              {
+                "key": "c8edf186e11521ee57c24db3d46893b5e87f52b63e08d698aeed0bb7bb99af80",
+                "input": 67642,
+                "hit": 11392,
+                "output": 4927
+              }
+            ]
+          },
+          {
+            "category": "洗脸巾",
+            "phase": "leaf",
+            "status": "program_pass_pending_human",
+            "code": null,
+            "requests": 3,
+            "toolCalls": 7,
+            "corrections": 0,
+            "input": 154829,
+            "hit": 37888,
+            "miss": 116941,
+            "output": 9852,
+            "reasoning": 6405,
+            "hitRate": 0.24470867860672096,
+            "perRequest": [
+              {
+                "key": "d20be1c73ac62cd5cd570014bfd7d5c5468e0bd825508efbb073b81173ad7df2",
+                "input": 47987,
+                "hit": 15104,
+                "output": 3783
+              },
+              {
+                "key": "dfb2afee9f5a0f243f1ea32cda069a0d51f6f4af528294a86010471c0f929b66",
+                "input": 52527,
+                "hit": 11392,
+                "output": 720
+              },
+              {
+                "key": "b8226dc087fe3d5ba4375ed8fcdba26d7a6de01798aa757d86ba2b589b66a18b",
+                "input": 54315,
+                "hit": 11392,
+                "output": 5349
+              }
+            ]
+          },
+          {
+            "category": "盒装抽纸",
+            "phase": "leaf",
+            "status": "program_pass_pending_human",
+            "code": null,
+            "requests": 1,
+            "toolCalls": 0,
+            "corrections": 0,
+            "input": 54970,
+            "hit": 14720,
+            "miss": 40250,
+            "output": 4686,
+            "reasoning": 1025,
+            "hitRate": 0.26778242677824265,
+            "perRequest": [
+              {
+                "key": "20e2b7fbabf69651a64f424db8113562e1c9a1f597dde99beb96e625efc5b3dc",
+                "input": 54970,
+                "hit": 14720,
+                "output": 4686
+              }
+            ]
+          },
+          {
+            "category": "软包抽纸",
+            "phase": "leaf",
+            "status": "program_pass_pending_human",
+            "code": null,
+            "requests": 3,
+            "toolCalls": 2,
+            "corrections": 1,
+            "input": 180056,
+            "hit": 37504,
+            "miss": 142552,
+            "output": 10999,
+            "reasoning": 2932,
+            "hitRate": 0.2082907539876483,
+            "perRequest": [
+              {
+                "key": "93aeed1d9da039c0f9b126f910b2ca792f9164734867a1739139a034f34099fb",
+                "input": 54961,
+                "hit": 14720,
+                "output": 1035
+              },
+              {
+                "key": "6a5f1a6f4706a032a117755a79897e56d76c4e04b58a0215201f6663689cb6d2",
+                "input": 60028,
+                "hit": 11392,
+                "output": 4915
+              },
+              {
+                "key": "d39593262b06387ba2d2abf0f233f8cfe4aec1a2ac1bbe742722a3f1d192e48d",
+                "input": 65067,
+                "hit": 11392,
+                "output": 5049
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "round": "pilot-wash-tissue-high-20261023",
+        "comparable": {
+          "requests": 8,
+          "toolCalls": 21,
+          "corrections": 1,
+          "input": 440901,
+          "hit": 86784,
+          "miss": 354117,
+          "output": 34861,
+          "reasoning": 25626,
+          "hitRate": 0.19683330271421476
+        },
+        "wholeRound": {
+          "requests": 14,
+          "toolCalls": 30,
+          "corrections": 2,
+          "input": 818567,
+          "hit": 161792,
+          "miss": 656775,
+          "output": 58080,
+          "reasoning": 36172,
+          "hitRate": 0.19765272726606375
+        },
+        "jobs": [
+          {
+            "category": "盒装抽纸",
+            "phase": "family-seed",
+            "status": "program_pass_pending_human",
+            "code": null,
+            "requests": 3,
+            "toolCalls": 10,
+            "corrections": 0,
+            "input": 162178,
+            "hit": 22784,
+            "miss": 139394,
+            "output": 21129,
+            "reasoning": 16517,
+            "hitRate": 0.14048761237652457,
+            "perRequest": [
+              {
+                "key": "c9d8b9325e1c58fe2b7c01bfa9ca5824d670742ec4904c8ffb3909b9bf21aeaf",
+                "input": 48171,
+                "hit": 0,
+                "output": 5218
+              },
+              {
+                "key": "8ba0b1e3f4ffc495a77dc0efea6af5622466c4464c026fc2c6fb131fe51fff6a",
+                "input": 54562,
+                "hit": 11392,
+                "output": 1614
+              },
+              {
+                "key": "1dee9c46d02de565c4c0cd1445427f8a013229a3456f3c0b0b975eb04a60752c",
+                "input": 59445,
+                "hit": 11392,
+                "output": 14297
+              }
+            ]
+          },
+          {
+            "category": "洗脸巾",
+            "phase": "leaf",
+            "status": "program_pass_pending_human",
+            "code": null,
+            "requests": 5,
+            "toolCalls": 11,
+            "corrections": 1,
+            "input": 278723,
+            "hit": 64000,
+            "miss": 214723,
+            "output": 13732,
+            "reasoning": 9109,
+            "hitRate": 0.2296186536453755,
+            "perRequest": [
+              {
+                "key": "17e379d8ffdad3a091952377027a545fb73a1d8cf5fbcf68adfde96e4be87f38",
+                "input": 47987,
+                "hit": 15104,
+                "output": 6720
+              },
+              {
+                "key": "791cb615283a9d926847807884e497fdddda3cd8fb169fb6421c8dcfa8b0c8cb",
+                "input": 55524,
+                "hit": 14720,
+                "output": 631
+              },
+              {
+                "key": "8b9826f46c97921a6fa936c1a608c5092b41ef6ea2a711f77d00bb0d2404b1e5",
+                "input": 57519,
+                "hit": 11392,
+                "output": 468
+              },
+              {
+                "key": "0b5e3168ed32a341a462c82cc50761a0b05da26ea17df9c46ca6afdbea18f051",
+                "input": 58511,
+                "hit": 11392,
+                "output": 475
+              },
+              {
+                "key": "9d7838a4a82b21a66b4cae0781de0df20b9f906415e28172e4f2d8913d6612b0",
+                "input": 59182,
+                "hit": 11392,
+                "output": 5438
+              }
+            ]
+          },
+          {
+            "category": "盒装抽纸",
+            "phase": "leaf",
+            "status": "program_pass_pending_human",
+            "code": null,
+            "requests": 4,
+            "toolCalls": 5,
+            "corrections": 1,
+            "input": 258487,
+            "hit": 48896,
+            "miss": 209591,
+            "output": 15141,
+            "reasoning": 6730,
+            "hitRate": 0.1891623176407324,
+            "perRequest": [
+              {
+                "key": "b22dc2dfa7030beeabe6de6daf2eb02c4e3527f3cddb586ef073826ba4151a7d",
+                "input": 57389,
+                "hit": 14720,
+                "output": 5957
+              },
+              {
+                "key": "366bba39d4bdade622794354512f3aeaf83a92f20765bd56009fa517a154c97c",
+                "input": 64962,
+                "hit": 11392,
+                "output": 348
+              },
+              {
+                "key": "3a775ea01999d485f4d3e68233246dde7e8e8dbb227b6be3f2d63eb1e0feb461",
+                "input": 65806,
+                "hit": 11392,
+                "output": 4433
+              },
+              {
+                "key": "15702564a1cfdcdd7e255383ecdca66bd3bde28e92869c8c11775c5bab2bd5ad",
+                "input": 70330,
+                "hit": 11392,
+                "output": 4403
+              }
+            ]
+          },
+          {
+            "category": "软包抽纸",
+            "phase": "leaf",
+            "status": "program_pass_pending_human",
+            "code": null,
+            "requests": 2,
+            "toolCalls": 4,
+            "corrections": 0,
+            "input": 119179,
+            "hit": 26112,
+            "miss": 93067,
+            "output": 8078,
+            "reasoning": 3816,
+            "hitRate": 0.21909900234101645,
+            "perRequest": [
+              {
+                "key": "cdf822107fb752de2a97db1da5adb832efccb088fab39e2a6538fcf05086fa07",
+                "input": 57380,
+                "hit": 14720,
+                "output": 3348
+              },
+              {
+                "key": "f9874cadf539959e15b721c58d0054546362b0e8a3898075cce6a8fba2ccb6d8",
+                "input": 61799,
+                "hit": 11392,
+                "output": 4730
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "round": "pilot-wash-tissue-quality-cache-20261026",
+        "comparable": {
+          "requests": 10,
+          "toolCalls": 20,
+          "corrections": 3,
+          "input": 603049,
+          "hit": 532992,
+          "miss": 70057,
+          "output": 48394,
+          "reasoning": 22803,
+          "hitRate": 0.8838286772716645
+        },
+        "wholeRound": {
+          "requests": 10,
+          "toolCalls": 20,
+          "corrections": 3,
+          "input": 603049,
+          "hit": 532992,
+          "miss": 70057,
+          "output": 48394,
+          "reasoning": 22803,
+          "hitRate": 0.8838286772716645
+        },
+        "jobs": [
+          {
+            "category": "盒装抽纸",
+            "phase": "family-seed",
+            "status": "program_pass_pending_human",
+            "code": null,
+            "requests": 5,
+            "toolCalls": 10,
+            "corrections": 2,
+            "input": 312916,
+            "hit": 255232,
+            "miss": 57684,
+            "output": 28380,
+            "reasoning": 13395,
+            "hitRate": 0.8156565979368265,
+            "perRequest": [
+              {
+                "key": "073bf1ccb3365731bc81cf65719e4709506fe8bdb6047212fdc5417010881c7e",
+                "input": 50495,
+                "hit": 0,
+                "output": 651
+              },
+              {
+                "key": "f45f9acfa15eb709f3407b0dd5e6e35f7696207f87ca56ab6a5a022f83666a74",
+                "input": 52388,
+                "hit": 51072,
+                "output": 4481
+              },
+              {
+                "key": "66133a106eb77c2abfb93f73994432dbe38eceeb2c614f08a1fed70201721ce3",
+                "input": 60133,
+                "hit": 55168,
+                "output": 9953
+              },
+              {
+                "key": "a1af824a7f051b98bd71b30dcb0e90876ce411b4a0bf985736433f145cfc8bb2",
+                "input": 70358,
+                "hit": 70016,
+                "output": 8683
+              },
+              {
+                "key": "2a49fd60abc8fcba154fe65a4e3d7cffe1219ddaab35bc1f63d3009a5ae8e54c",
+                "input": 79542,
+                "hit": 78976,
+                "output": 4612
+              }
+            ]
+          },
+          {
+            "category": "洗脸巾",
+            "phase": "leaf",
+            "status": "program_pass_pending_human",
+            "code": null,
+            "requests": 5,
+            "toolCalls": 10,
+            "corrections": 1,
+            "input": 290133,
+            "hit": 277760,
+            "miss": 12373,
+            "output": 20014,
+            "reasoning": 9408,
+            "hitRate": 0.9573540410777126,
+            "perRequest": [
+              {
+                "key": "6c79db06731c966add9f9eff970bda2442ac71116d0ff851211bce80337cd041",
+                "input": 50306,
+                "hit": 49024,
+                "output": 3366
+              },
+              {
+                "key": "ca8cf7f34e4c4bd148cbbf6be65945c35113436813176d935f9108306f48c285",
+                "input": 54541,
+                "hit": 53632,
+                "output": 1562
+              },
+              {
+                "key": "0802449e3cba072792f085fc312b8f0ebc0f9fe25fbdb2421e7cff9d01b02ac6",
+                "input": 56593,
+                "hit": 56064,
+                "output": 576
+              },
+              {
+                "key": "fc23ef75218161351c9bca04e430a00efaead590776d29bba15cb2f192e36e8d",
+                "input": 59572,
+                "hit": 57088,
+                "output": 9431
+              },
+              {
+                "key": "be31a48b9277edfcf5be5625d06361afe8b31a9008e93805d141f0d5fc94d8fa",
+                "input": 69121,
+                "hit": 61952,
+                "output": 5079
+              }
+            ]
+          },
+          {
+            "category": "盒装抽纸",
+            "phase": "leaf",
+            "status": "program_blocked",
+            "code": "context_budget",
+            "requests": 0,
+            "toolCalls": 0,
+            "corrections": 0,
+            "input": 0,
+            "hit": 0,
+            "miss": 0,
+            "output": 0,
+            "reasoning": 0,
+            "hitRate": null,
+            "perRequest": []
+          },
+          {
+            "category": "软包抽纸",
+            "phase": "leaf",
+            "status": "program_blocked",
+            "code": "context_budget",
+            "requests": 0,
+            "toolCalls": 0,
+            "corrections": 0,
+            "input": 0,
+            "hit": 0,
+            "miss": 0,
+            "output": 0,
+            "reasoning": 0,
+            "hitRate": null,
+            "perRequest": []
+          }
+        ]
+      }
+    ],
+    "cacheHitDefinition": "provider cached input tokens / input tokens; CLI cacheHits counts local complete-response replay instead",
+    "reasoningOutputIsSubset": true
+  },
+  "quality": {
+    "sharedDefinitionIdentity": "consistent_in_executed_outputs",
+    "requiredness": "optional_no_observed_conflict",
+    "quantityResponsibilities": "structured_mapping_present; actual_SKU_conditions_unverified",
+    "admissionBasis": "business_need_separated_from_value_evidence",
+    "remainingGap": "cross-category professional applicability can remain explicitly unresolved while readiness is marked defined",
+    "businessApproved": false,
+    "tissueLeafBusinessOutputsAvailable": false
+  },
+  "budget": {
+    "path": "outputs/product-governance-v3/clean-paper-batch-20261023/budget.json",
+    "fileSha256": "3214a5611bc85a9b0ebd6c3fad2e16a09344fbc326e4bbfb438d94ebc63bd324",
+    "canonicalContentHash": "a270bf1047fe1b01bfade7b03635d2133a545802bd5ac2d5540108ad0e599062",
+    "historicalRequests": 149,
+    "roundRequests": 10,
+    "roundReservedCny": 13,
+    "originalLimitCny": 200,
+    "effectiveLimitCny": 280.7,
+    "reservedCny": 193.7,
+    "remainingCny": 87.0,
+    "accounting": "conservative reservations; not invoice",
+    "changedByAudit": false
+  },
+  "offlineValidation": {
+    "bunTests": {
+      "pass": 243,
+      "fail": 0,
+      "files": 16
+    },
+    "typecheck": "passed",
+    "constructedAcceptance": {
+      "stages": 5,
+      "externalNetworkCalls": 0,
+      "paidModelCalls": 0,
+      "businessAccuracyEvaluated": false
+    },
+    "realFixture": "fixtures/pilot-quality-cache-20261026.json",
+    "regression": "context-budget-regression.test.ts",
+    "tissueLeafFollowups": "synthetic mock responses, not real DeepSeek proposals"
+  },
+  "paidModelCallsByAudit": 0,
+  "productionWritesByAudit": 0,
+  "historicalArtifactsChanged": false,
+  "excelRegenerated": false,
+  "nextPriorities": [
+    "target-category applicability for reused definitions",
+    "clarify quantity owner keys and binding fields using recorded corrections",
+    "explicit same-scope new round after offline fixes; retain original cumulative budget"
+  ]
+}

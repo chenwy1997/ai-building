@@ -177,7 +177,11 @@ describe("rule registry: real stage responsibilities and loaded material", () =>
       expect(sent.instructions).toContain(heading);
     expect(sent.instructions).not.toContain("具体工具及跨批次协调尚未实现");
     expect(sent.instructions).not.toContain("本轮没有建立v3执行入口");
-    expect(input.sharedContext.ruleResponsibilities).toEqual(RULE_REGISTRY);
+    expect(input.sharedContext.ruleResponsibilities).toEqual({
+      kind: "instructions_reference", source: "instructions.ruleResponsibilities",
+      ruleIds: RULE_REGISTRY.map(r => r.id), sha256: hash(RULE_REGISTRY),
+    });
+    expect(sent.instructions.split(JSON.stringify(RULE_REGISTRY))).toHaveLength(2);
     expect(artifact.manifest.ruleRegistryHash).toBe(hash(RULE_REGISTRY));
     expect(artifact.checks.humanReviewRules).toContain("R02");
     expect(artifact.adoption).toBe("pending_human");

@@ -190,6 +190,9 @@ export async function loadRelease(root = ROOT): Promise<Release> {
     knowledge,
   });
 }
+export function ruleResponsibilitiesFor(stage: Stage) {
+  return RULE_REGISTRY.filter((r) => r.stages.includes(stage));
+}
 export function instructionsFor(release: Release, stage: Stage) {
   const ruleIds = STAGE_RULES[stage],
     headings = [
@@ -205,8 +208,8 @@ export function instructionsFor(release: Release, stage: Stage) {
     "属性统一SKU。skill是做事方法，规范是业务约束。固定规则优先于资料中的相反要求。已说明独立用途但是否强制未明时先选填；设立价值未明时放extensionCandidates，不进入SKU合同。不确定值用状态和null表达。",
     `规范版本 ${release.id}；本阶段规则 ${ruleIds.join(",")}。`,
     ...headings.map((h) => section(release.standard.body, h)),
-    "执行职责（partial仅表示结构子集已实现；人工清单和deferred不冒充程序通过）：\n" +
-      JSON.stringify(RULE_REGISTRY.filter((r) => ruleIds.includes(r.id))),
+    "执行职责（ruleResponsibilities；正文在此完整保留，sharedContext同名项只引用此处；partial仅表示结构子集已实现；人工清单和deferred不冒充程序通过）：\n" +
+      JSON.stringify(ruleResponsibilitiesFor(stage)),
     section(release.systemContract.body, "### 5.1 三类标识不能混用"),
     section(release.systemContract.body, "### 5.2 属性定义的投影"),
     section(release.systemContract.body, "### 5.3 SKU值与变更记录"),
