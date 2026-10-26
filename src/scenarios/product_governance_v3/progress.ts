@@ -16,7 +16,7 @@ export function progressLogger(format: LogFormat,
       : failed ? "阻断" : event.proposalReadiness === "no_admitted_attributes"
         ? "零属性，建模缺口待审" : "已有方案，待人工审阅";
     const line = format === "json" ? JSON.stringify(event) :
-      `[${label}] ${phase} · ${name}${event.code ? " · " + event.code : ""}`;
+      `[${label}] ${phase} · ${name}${event.code ? " · " + event.code : ""}${event.code === "budget_exhausted" ? "（本地预留额度触顶，不代表账号余额不足）" : ""}`;
     (failed ? err : out)(line + (format === "human" && event.round ? " · 第" + event.round + "轮" : "") +
       (format === "human" && event.model ? " · " + event.model + " / 思考=" + event.reasoningEffort : ""));
   };

@@ -1,10 +1,12 @@
 # 商品治理v3：类目属性提案与审阅
 
-v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认离线，`batch --execute`、`batch-rerun --execute`、`batch-continue --execute`或指定失败末级的`batch-recover --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
+v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认离线，`batch --execute`、`batch-rerun --execute`、`batch-continue --execute`、`batch-resume --execute`或指定失败末级的`batch-recover --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
 
-**当前：保留成功基线，只续跑两个抽纸末级**，见[完整上下文容量、离线验收与续跑命令](docs/context-continuation-20261026.md)。真实基线上下文200664字节，完整首请求234956字节；按既有350000字节请求上限检查并预留历史空间，正文、工具和纠错历史不裁剪。`batch-continue`复核并复用原基线，保持low、并发2与原累计预算；洗脸巾结果留在原轮次。默认仅预检，用户加`--execute`才请求模型。
+**当前：恢复清洁纸品全量轮次的预算/游标中断**，见[公共重放组件、真实预检与命令](docs/full-batch-resume-20261026.md)。`batch-resume`按原结果动态选择可恢复失败，保持成功结果与原基线，重放已付费响应后接续剩余轮数；没有写死类目ID或任务数。全量轮次实际为11个本地预算中断、1个游标错误，另9个程序通过（其中2个零属性仍待补研究）。保持low与并发32，原累计预留上限已获授权设为1000元。默认只离线核验，用户加`--execute`才发新请求。
 
-此前的[JSON错误定位与纠错反馈修复](docs/json-feedback-repair-20261026.md)已由用户执行：抽纸基线程序通过，两个末级在发送前容量阻断。该文保留当时命令和验收记录；当前入口见上行，不再生成一次基线。
+此前的[完整上下文容量与抽纸续跑](docs/context-continuation-20261026.md)已由用户执行并审阅。`batch-continue`仍适用于发送前context_budget的原场景；其成功基线和小范围原件保留。
+
+此前的[JSON错误定位与纠错反馈修复](docs/json-feedback-repair-20261026.md)记录当时的抽纸基线通过及末级容量阻断；后续已经完成上述小范围续跑，不再使用历史命令重生成基线。
 
 此前的[核心清单核实与三类接线](docs/core-pilot-20261026.md)已由用户执行。三个纸张定义可原样用于盒装/软包抽纸的待审建模，洗脸巾保持自己的对象范围；数量按真实字段承载建立条件来源计划。核心遗漏和扩展越界进入检查，授权离线核实不冒充人工专业签名或SKU填写许可。该文保留当时三类命令，当前补跑见上行。
 
@@ -40,7 +42,7 @@ bun src/scenarios/product_governance_v3/cli.ts batch-rerun \
 
 该轮覆盖21个末级及2个共同方案，结果在原目录`reruns/rules-20261023/`，请求与累计预算仍在原根目录。同版规则下同名命令只恢复该轮，可调并发；规则、范围和输入固定，普通失败不要换名。详见[全量重跑及验收](docs/full-rerun-20261023.md)。
 
-2026-10-23新增[配置说明一致性修复](docs/configuration-explanations-20261023.md)：当前设置由程序从冻结合同生成，接入DeepSeek上下文、R08检查和审阅导出。新规范/skill/检查器已升级，**历史付费批次的跨版本续跑仍阻断，勿换目录整批重跑**。查看原纠正结果的新版专项复审表，只需离线重导出：
+2026-10-23新增[配置说明一致性修复](docs/configuration-explanations-20261023.md)：当前设置由程序从冻结合同生成，接入DeepSeek上下文、R08检查和审阅导出。业务规范/skill/检查器变更仍阻断自动跨版本续跑；兼容宿主修复按当前恢复入口离线核验。查看原纠正结果的新版专项复审表，只需离线重导出：
 
 ```sh
 bun src/scenarios/product_governance_v3/cli.ts batch-export \
@@ -93,7 +95,7 @@ bun src/scenarios/product_governance_v3/cli.ts plan --snapshot /绝对路径/sna
 
 `sku-filling`、`fact-extraction`另需`--product-id`；`review-assistance`另需`--candidate` JSON文件，包含`stage`（family-modeling或sku-filling）和`result`（候选结果）。审核SKU取值时需带对应`--product-id`读取证据。候选程序错误直接进入审核上下文，并继续阻断结果，模型不能靠空意见列表把错误抹掉。参数严格校验，错命令/未知参数报错。`batch`调用相同`runStage`，共享全批预算和冻结依赖，不接受商品试填阶段；没有`apply`入口。
 
-小卷纸的只读采集、准备、录制回放、工作簿与初次事实意见导入，见[样板运行说明](docs/roll-pilot-runbook.md)。只有显式`capture-roll-pilot`联网读取供应链及其密钥；固定两类各最多3件，不自动翻页/重试。模型密钥仅由`batch --execute`、`batch-rerun --execute`、`batch-continue --execute`和指定失败末级的`batch-recover --execute`读取。
+小卷纸的只读采集、准备、录制回放、工作簿与初次事实意见导入，见[样板运行说明](docs/roll-pilot-runbook.md)。只有显式`capture-roll-pilot`联网读取供应链及其密钥；固定两类各最多3件，不自动翻页/重试。模型密钥仅由`batch --execute`、`batch-rerun --execute`、`batch-continue --execute`、`batch-resume --execute`和指定失败末级的`batch-recover --execute`读取。
 
 ## 资料怎样真正进入DeepSeek
 

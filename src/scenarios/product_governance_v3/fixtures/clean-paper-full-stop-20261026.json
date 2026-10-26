@@ -1,0 +1,306 @@
+{
+  "provenance": {
+    "round": "clean-paper-full-20261026",
+    "releaseId": "a0931341ac14d0f88a33ad2ebc8298e0c714be7f79d4fd0e6fc8af8bce9cd39f",
+    "batchId": "db86e8384d9c57e088a18f2fa2c73a4c580bd4521ecaefff52163f21a8f48f80",
+    "requestKey": "1d2ad11d3eca0d29546ec28dc08b4fdfee04108fde194c6cbc567ba97d52c1db",
+    "responseHash": "649eccc204fc12c81d00c11b06c3e5c6be721b8122421ef5c50ef4a8f8d25fd8",
+    "meaning": "实际函数调用、终止状态和预算数值；无模型推理文本，无密钥。测试注入模拟HTTP，不代表新一轮质量通过。"
+  },
+  "cursorCalls": [
+    {
+      "type": "function_call",
+      "id": "ef689e23-a105-409f-b6c5-f86d8e691e4a",
+      "status": "completed",
+      "arguments": "{\"query\": \"擦手纸 纸张 层数 尺寸 原料\", \"categoryId\": \"f75eeeb3-decf-4376-91a7-3ab44bb14345\", \"limit\": 50, \"cursor\": \"null\"}",
+      "call_id": "call_00_SfxuModFZMcrgwB4Q0fw9668",
+      "name": "search_attribute_pool"
+    },
+    {
+      "type": "function_call",
+      "id": "700678de-84af-4a3b-ac59-349517c13c30",
+      "status": "completed",
+      "arguments": "{\"query\": \"层数\", \"categoryId\": null, \"limit\": 50, \"cursor\": \"null\"}",
+      "call_id": "call_01_laWtXlLpwR6bOVYqqZd66928",
+      "name": "search_attribute_pool"
+    },
+    {
+      "type": "function_call",
+      "id": "cfdec9bf-5de9-47c0-8276-cb3383ba897f",
+      "status": "completed",
+      "arguments": "{\"id\": \"small-roll-paper-research-20261022\", \"offset\": 0, \"length\": 8000}",
+      "call_id": "call_02_RykohgEvzQZeJOD4EyOL4688",
+      "name": "knowledge_read"
+    }
+  ],
+  "groups": [
+    {
+      "id": "small-toilet-roll",
+      "members": [
+        "15216d47-17c6-4b18-9391-83097f6f7447",
+        "67adeef9-8c1f-47e2-ad72-462ad35a5a75"
+      ],
+      "reason": "已审阅的小卷卫生纸方案；纸芯结构是差异维度，其余共同定义复用，SKU值不由类目名推定",
+      "seedCategoryId": "15216d47-17c6-4b18-9391-83097f6f7447",
+      "needsSeed": false
+    },
+    {
+      "id": "jumbo-toilet-roll",
+      "members": [
+        "e30ca09a-3e86-4223-b618-d6581ad1489e",
+        "3360395b-3790-41f3-8e8c-6c682c53e8da"
+      ],
+      "reason": "暂按公用卷筒卫生纸共同对象建基线；出纸方式及分配器适配要核实差异，不照搬普通小卷的尺寸准入取舍",
+      "seedCategoryId": "e30ca09a-3e86-4223-b618-d6581ad1489e",
+      "needsSeed": true
+    },
+    {
+      "id": "facial-tissue",
+      "members": [
+        "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "ce3a9f67-613c-4707-bf3a-95193edb8a2d"
+      ],
+      "reason": "暂按抽取式面巾纸共同对象建模；包装形态分为末级，不据此任意改变共同参数名称和计数口径",
+      "seedCategoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "needsSeed": true
+    }
+  ],
+  "leaves": [
+    {
+      "phase": "leaf",
+      "categoryId": "74bb6e57-7174-4a23-a1f3-397aa5d63781",
+      "familyId": null,
+      "status": "program_pass_pending_human",
+      "code": null,
+      "error": null,
+      "category": "一次性日杂",
+      "paidRequestCount": 2,
+      "admittedAttributeCount": 0
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "3360395b-3790-41f3-8e8c-6c682c53e8da",
+      "familyId": "jumbo-toilet-roll",
+      "status": "program_pass_pending_human",
+      "code": null,
+      "error": null,
+      "category": "中心抽大卷纸",
+      "paidRequestCount": 1,
+      "admittedAttributeCount": 4
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "8db9ebc8-9bd2-4d72-b183-819a8451c8ff",
+      "familyId": null,
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "厨房纸巾",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "f4bb18c7-b736-4fe6-91d1-60c4d05fcee6",
+      "familyId": null,
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "坐垫纸",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "e30ca09a-3e86-4223-b618-d6581ad1489e",
+      "familyId": "jumbo-toilet-roll",
+      "status": "program_pass_pending_human",
+      "code": null,
+      "error": null,
+      "category": "大卷纸",
+      "paidRequestCount": 2,
+      "admittedAttributeCount": 4
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "836e7b4a-a753-4f21-8a7d-f2a895c478d8",
+      "familyId": null,
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "平板卫生纸",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "b532a368-d0d3-4889-84bb-27e6aacdd5aa",
+      "familyId": null,
+      "status": "program_pass_pending_human",
+      "code": null,
+      "error": null,
+      "category": "手帕纸",
+      "paidRequestCount": 3,
+      "admittedAttributeCount": 0
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "familyId": "small-toilet-roll",
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "无芯小卷纸",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "15216d47-17c6-4b18-9391-83097f6f7447",
+      "familyId": "small-toilet-roll",
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "有芯小卷纸",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "135495fc-f11a-4322-9ab2-1901925bd417",
+      "familyId": null,
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "枕巾",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "familyId": null,
+      "status": "program_pass_pending_human",
+      "code": null,
+      "error": null,
+      "category": "洗脸巾",
+      "paidRequestCount": 2,
+      "admittedAttributeCount": 3
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "86dd8e65-1a82-4d0c-a35e-a2ebe6c1f2c7",
+      "familyId": null,
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "湿纸巾",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "88071483-d24d-46e1-a9a2-32b380276fd8",
+      "familyId": null,
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "生活用纸",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "familyId": "facial-tissue",
+      "status": "program_pass_pending_human",
+      "code": null,
+      "error": null,
+      "category": "盒装抽纸",
+      "paidRequestCount": 1,
+      "admittedAttributeCount": 4
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+      "familyId": "facial-tissue",
+      "status": "program_pass_pending_human",
+      "code": null,
+      "error": null,
+      "category": "软包抽纸",
+      "paidRequestCount": 3,
+      "admittedAttributeCount": 4
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "68eb60f4-0f78-44bb-bb6a-4e0af938449d",
+      "familyId": null,
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "餐巾纸",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "99279fb3-7d0e-45fa-9bb2-1ec401c68e2a",
+      "familyId": null,
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "大卷擦手纸",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "f75eeeb3-decf-4376-91a7-3ab44bb14345",
+      "familyId": null,
+      "status": "program_blocked",
+      "code": "stage_error",
+      "error": "Error: cursor does not match query/version",
+      "category": "抽式擦手纸",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "ab796486-0d0d-466a-87c1-6a2115b3b079",
+      "familyId": null,
+      "status": "program_pass_pending_human",
+      "code": null,
+      "error": null,
+      "category": "卷纸配件",
+      "paidRequestCount": 1,
+      "admittedAttributeCount": 3
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "9bdbab21-78f8-407d-aa30-eebd889c205c",
+      "familyId": null,
+      "status": "program_blocked",
+      "code": "budget_exhausted",
+      "error": "Blocked: batch cumulative reservation exceeds limit",
+      "category": "擦手纸配件",
+      "paidRequestCount": null,
+      "admittedAttributeCount": null
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "f00be7ff-9f41-4ea2-b032-60c6d7bdcf4b",
+      "familyId": null,
+      "status": "program_pass_pending_human",
+      "code": null,
+      "error": null,
+      "category": "纸巾盒",
+      "paidRequestCount": 2,
+      "admittedAttributeCount": 1
+    }
+  ],
+  "budget": {
+    "limitCny": 280.7,
+    "reservedCny": 279.5,
+    "perRequestCny": 1.3
+  }
+}

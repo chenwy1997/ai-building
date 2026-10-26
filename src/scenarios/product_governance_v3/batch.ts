@@ -18,6 +18,7 @@ import { modelingReviewSignals } from "./modeling-review.ts";
 import { MODELING_PROPOSAL_VERSION } from "./modeling-proposal.ts";
 import { attachPilotKnowledge } from "./pilot-knowledge.ts";
 import { assertContinuationSource } from "./batch-continuation.ts";
+import { familyCoverage } from "./family-coverage.ts";
 
 export const CLEAN_PAPER_ID = "77e31cf2-8331-4c73-ab10-823d2d1d7ab0";
 export const DEFAULT_TREE = resolve(ROOT, "../../../outputs/category-id-refresh-20261021/mapped-tree.updated.json");
@@ -263,6 +264,7 @@ export function planSummary(plan: BatchPlan) {
     inputFile: join(plan.outDir, "batch.identity.json"), networkCalls: 0,
     leafCount: plan.categoryIds.length,
     familiesToPrepare: plan.groups.filter((g) => g.needsSeed).map((g) => g.id),
+    familyCoverage: familyCoverage(plan),
     accounting: "保守预留额度，不是预计账单；实际收费以DeepSeek为准",
     next: "确认范围后原命令加 --execute；成功结果仍待人工审阅" };
 }
@@ -470,6 +472,7 @@ export function buildBatchReview(plan: BatchPlan, jobs: BatchJob[], snapshot: Da
     adoption: "pending_human", productionWrites: 0, categoryCount: jobs.length,
     ...proposalCounts(jobs),
     modelingReview: { automaticSemanticApproval: false, signals },
+    familyCoverage: familyCoverage(plan, snapshot),
     modelingDecisions: jobs.filter(j => j.status === "program_pass_pending_human" && j.artifact).map(j => ({
       categoryId: j.categoryId, decisions: (j.artifact!.result as any).decisions ?? [],
     })),

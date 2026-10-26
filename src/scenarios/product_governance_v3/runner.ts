@@ -19,6 +19,7 @@ import { parseResultJson, responseText, ResultJsonSyntaxError } from "./result-j
 import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
 import { runtimeState } from "./request-layout.ts";
 import { materializeModelResult } from "./modeling-proposal.ts";
+import { correctableToolError } from "./runtime-errors.ts";
 
 export interface Limits {
   maxRounds: number;
@@ -44,16 +45,24 @@ export const DEFAULT_MODEL: ModelOptions = {
 };
 export interface CorrectionPolicy { maxCorrections: number; converge: boolean }
 export const BATCH_CORRECTIONS: CorrectionPolicy = Object.freeze({ maxCorrections: 2, converge: true });
+// A read-only replay client can verify a stopped transcript without reserving or
+// sending another request. Normal execution still uses ResponsesClient.
+export type StageClient = Pick<ResponsesClient, "mode" | "transportId" | "request"> & {
+  budget: Pick<ResponsesClient["budget"], "init">;
+};
 export async function runStage(options: {
   release: Release;
   snapshot: DataSnapshot;
   task: Task;
-  client: ResponsesClient;
+  client: StageClient;
   outDir: string;
   limits?: Partial<Limits>;
   model?: ModelOptions;
   corrections?: CorrectionPolicy;
   onProgress?: (event: Record<string, unknown>) => void;
+  // Host-only recovery keeps the frozen business version on the wire so paid
+  // requests can replay exactly; record the actual host release separately.
+  hostResume?: { hostReleaseId: string; sourceBatchId: string; sourceFingerprint: string };
 }) {
   const { release, snapshot, task, client, outDir } = options,
     limits = { ...DEFAULT_LIMITS, ...options.limits },
@@ -95,6 +104,7 @@ export async function runStage(options: {
     limits,
     model,
     corrections,
+    ...(options.hostResume ? { hostResume: options.hostResume } : {}),
     mode: client.mode,
   });
   try {
@@ -171,9 +181,11 @@ export async function runStage(options: {
           let value: unknown;
           try { value = await plan.tools.call(call.name, args); }
           catch (error) {
-            // Scope errors may be corrected; unavailable sources, unknown tools and other boundary violations remain fatal.
-            if (!corrections.maxCorrections || !(error instanceof Blocked) || error.code !== "pool_scope") throw error;
-            failures.push({ code: error.code, message: String(error), callId: call.call_id });
+            // A cursor is a model argument, not an infrastructure failure. Keep
+            // source/permission/unknown-tool failures fatal; never drop a page.
+            const correctable = correctableToolError(error);
+            if (!corrections.maxCorrections || !correctable) throw error;
+            failures.push({ code: correctable.code, message: correctable.message, callId: call.call_id });
             returned.set(call.call_id, canonical({ ok: false, error: failures.at(-1) }));
             continue;
           }
@@ -248,6 +260,7 @@ export async function runStage(options: {
         mode: client.mode,
         snapshotKind: snapshot.data.kind,
         releaseId: release.id,
+        ...(options.hostResume ? { hostResume: options.hostResume } : {}),
         manifest: plan.manifest,
         requestKeys,
         toolCount,
@@ -292,6 +305,7 @@ export async function runStage(options: {
     await save(runPath + ".blocked.json", {
       runKey,
       releaseId: release.id,
+      ...(options.hostResume ? { hostResume: options.hostResume } : {}),
       requestKeys,
       toolCount,
       toolEvents: plan.tools.events,

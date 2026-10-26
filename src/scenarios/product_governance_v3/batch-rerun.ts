@@ -10,6 +10,7 @@ import { batchTask, validateBatchOptions, type BatchPlan } from "./batch.ts";
 import type { ModelOptions } from "./runner.ts";
 import { MODELING_PROPOSAL_VERSION } from "./modeling-proposal.ts";
 import { attachPilotKnowledge } from "./pilot-knowledge.ts";
+import { familyCoverage } from "./family-coverage.ts";
 
 export interface RerunOptions {
   directory: string;
@@ -104,6 +105,7 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
       categoryId: options.categoryIds ? null : categoryId, categoryIds,
       categories: categoryIds.map((id) => ({ id, name: snapshot.tree.get(id).name })), model: plan.model,
       leafCount: categoryIds.length, familySeeds: groups.filter((g) => g.needsSeed).map((g) => g.id),
+      familyCoverage: familyCoverage(plan),
       concurrency: plan.concurrency, preflight: plan.preflight, sourceProposalsReused: 0,
       preservedReviewedBaselineFamilies: groups.filter((g) => !g.needsSeed).map((g) => g.id),
       originalRequestCount: keys.length, cumulativeReservedCny: reserved, budgetLimitCny: effectiveBudgetLimit(ledger),

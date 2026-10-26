@@ -17,6 +17,7 @@ import { runStage, BATCH_CORRECTIONS } from "./runner.ts";
 import type { ResponsesClient } from "./responses.ts";
 import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
 import { matchesContextLayout } from "./request-layout.ts";
+import { readCompletedRequest as durable } from "./request-journal.ts";
 
 // A historical response may be checked under a newer host only if the actual business
 // materials, schema, validator and read tools are unchanged. This is not a release-ID bypass.
@@ -30,20 +31,6 @@ function compatible(manifest: any, release: Release, task: Task) {
       throw new Blocked("recovery_contract_drift", "historical business/check/read material changed: " + path);
   if (!manifest.engineFiles?.["checks.ts"] || !manifest.engineFiles?.["tools.ts"])
     throw new Blocked("recovery_contract_drift", "historical checker/read fingerprints missing");
-}
-async function durable(dir: string, key: string) {
-  if (!/^[a-f0-9]{64}$/.test(key)) throw Error("invalid historical request key");
-  const base = join(dir, "requests", key), request = await read(base + ".request.json"),
-    { key: storedKey, ...requestIdentity } = request;
-  if (storedKey !== key || hash(requestIdentity) !== key)
-    throw new Blocked("cache_corrupt", "historical request integrity mismatch: " + key);
-  if (!await exists(base + ".response.json"))
-    throw new Blocked("outcome_unknown", "historical request has no durable response; never resend automatically: " + key);
-  const record = await read(base + ".response.json"), receipt = await read(base + ".receipt.json");
-  if (record.key !== key || hash(record.response) !== record.sha256 || record.response.status !== "completed" ||
-      receipt.key !== key || receipt.status !== "completed" || receipt.responseHash !== record.sha256)
-    throw new Blocked("cache_corrupt", "historical response/receipt integrity mismatch: " + key);
-  return { request, response: record.response, responseHash: record.sha256 };
 }
 
 export async function recheckBatch(dir: string, release: Release) {
@@ -79,6 +66,7 @@ export async function recheckUnlocked(dir: string, release: Release) {
       budgetBefore.limitCny !== execution.budgetCny || budgetBefore.pricingId !== execution.pricingId)
     throw new Blocked("cache_corrupt", "historical batch/snapshot/execution/budget identities disagree");
   const originalBudget = originalResults.budget;
+  const originalRequestIds = new Set(originalBudget.entries.map((e: any) => e.id));
   for (const entry of originalBudget.entries) {
     const current = budgetBefore.entries.find((e: any) => e.id === entry.id);
     if (!current || current.reservedCny !== entry.reservedCny)
@@ -105,16 +93,19 @@ export async function recheckUnlocked(dir: string, release: Release) {
     const target = job.phase === "leaf" ? jobs : seeds,
       record = records.get(job.phase + ":" + job.categoryId);
     if (!record) {
-      if (job.code === "context_budget" && job.phase === "leaf" && job.status === "program_blocked" && !job.artifact) {
+      if (["context_budget", "budget_exhausted", "batch_stopped"].includes(job.code ?? "") && job.phase === "leaf" && job.status === "program_blocked" && !job.artifact) {
         // A pre-transport block is resumable, not a missing paid outcome. Inspect
         // the authoritative ledger even if someone removed a run artifact.
         for (const entry of budgetBefore.entries) {
+          // Later resumptions share runId/rule version by design. Only requests
+          // reserved by the source stop belong to its original transcript.
+          if (!originalRequestIds.has(entry.id)) continue;
           const paid = await durable(accountingDir, entry.id),
             paidTask = JSON.parse(paid.request.body.input[0].content).task;
           if (paid.request.identity.releaseId === original.releaseId &&
               paidTask.runId === original.runId && paidTask.categoryId === job.categoryId &&
               paidTask.candidate?.phase === job.phase)
-            throw new Blocked("recovery_incomplete", "context-blocked job has an existing paid transcript; inspect before continuation");
+            throw new Blocked("recovery_incomplete", "pre-request blocked job has an existing paid transcript; inspect before continuation");
         }
       } else if (job.code !== "family_dependency" && job.code !== "batch_stopped")
         throw new Blocked("recovery_incomplete", "missing original run for " + job.categoryId);
@@ -179,7 +170,7 @@ export async function recheckUnlocked(dir: string, release: Release) {
         manifest, requestKeys: run.requestKeys, toolCount: run.toolCount, result, checks,
         modelProposal: assembly ? modelProposal : null, assembly,
         configurationReview: checks.executedChecks.includes("configuration-explanations") ? modelConfigurationReview(result) : null,
-        outputParsing: parsing, feedback: [], factPreparation: null,
+        outputParsing: parsing, feedback: run.feedback ?? [], factPreparation: null,
         nativeProjections: checks.errors.length ? [] : modeled.attributes.map((a: any) =>
           projectNative(a, modeled.bindings.find((b: any) => b.attributeId === a.id))),
         toolEvents: tools.events, actualReads: {

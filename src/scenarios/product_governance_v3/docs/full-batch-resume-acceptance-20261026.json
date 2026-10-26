@@ -1,0 +1,238 @@
+{
+  "format": 1,
+  "scope": "offline host repair, no provider or production calls",
+  "hostReleaseId": "4ff820ab062f2d4383778632c1e0cf3f86dfa1bf859acfba77b286078d972047",
+  "sourceRound": "clean-paper-full-20261026",
+  "tests": {
+    "passed": 306,
+    "failed": 0,
+    "files": 22,
+    "typecheck": "passed",
+    "diffCheck": "passed"
+  },
+  "realReplay": {
+    "ready": true,
+    "targets": [
+      {
+        "categoryId": "8db9ebc8-9bd2-4d72-b183-819a8451c8ff",
+        "category": "厨房纸巾",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 1,
+        "maximumNewRequests": 5,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "f4bb18c7-b736-4fe6-91d1-60c4d05fcee6",
+        "category": "坐垫纸",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 1,
+        "maximumNewRequests": 5,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "836e7b4a-a753-4f21-8a7d-f2a895c478d8",
+        "category": "平板卫生纸",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 2,
+        "maximumNewRequests": 4,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+        "category": "无芯小卷纸",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 2,
+        "maximumNewRequests": 4,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "15216d47-17c6-4b18-9391-83097f6f7447",
+        "category": "有芯小卷纸",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 1,
+        "maximumNewRequests": 5,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "135495fc-f11a-4322-9ab2-1901925bd417",
+        "category": "枕巾",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 1,
+        "maximumNewRequests": 5,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "86dd8e65-1a82-4d0c-a35e-a2ebe6c1f2c7",
+        "category": "湿纸巾",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 1,
+        "maximumNewRequests": 5,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "88071483-d24d-46e1-a9a2-32b380276fd8",
+        "category": "生活用纸",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 2,
+        "maximumNewRequests": 4,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "68eb60f4-0f78-44bb-bb6a-4e0af938449d",
+        "category": "餐巾纸",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 3,
+        "maximumNewRequests": 3,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "99279fb3-7d0e-45fa-9bb2-1ec401c68e2a",
+        "category": "大卷擦手纸",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 2,
+        "maximumNewRequests": 4,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "f75eeeb3-decf-4376-91a7-3ab44bb14345",
+        "category": "抽式擦手纸",
+        "originalCode": "stage_error",
+        "paidRequestsReplayed": 1,
+        "maximumNewRequests": 5,
+        "code": null,
+        "error": null
+      },
+      {
+        "categoryId": "9bdbab21-78f8-407d-aa30-eebd889c205c",
+        "category": "擦手纸配件",
+        "originalCode": "budget_exhausted",
+        "paidRequestsReplayed": 1,
+        "maximumNewRequests": 5,
+        "code": null,
+        "error": null
+      }
+    ],
+    "paidRequestsReplayed": 18,
+    "maximumAdditionalRequests": 54,
+    "maximumAdditionalReservationCny": 70.2,
+    "preservedLeaves": [
+      {
+        "categoryId": "74bb6e57-7174-4a23-a1f3-397aa5d63781",
+        "category": "一次性日杂",
+        "status": "program_pass_pending_human",
+        "readiness": "no_admitted_attributes"
+      },
+      {
+        "categoryId": "3360395b-3790-41f3-8e8c-6c682c53e8da",
+        "category": "中心抽大卷纸",
+        "status": "program_pass_pending_human",
+        "readiness": "proposal_pending_human"
+      },
+      {
+        "categoryId": "e30ca09a-3e86-4223-b618-d6581ad1489e",
+        "category": "大卷纸",
+        "status": "program_pass_pending_human",
+        "readiness": "proposal_pending_human"
+      },
+      {
+        "categoryId": "b532a368-d0d3-4889-84bb-27e6aacdd5aa",
+        "category": "手帕纸",
+        "status": "program_pass_pending_human",
+        "readiness": "no_admitted_attributes"
+      },
+      {
+        "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+        "category": "洗脸巾",
+        "status": "program_pass_pending_human",
+        "readiness": "proposal_pending_human"
+      },
+      {
+        "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "category": "盒装抽纸",
+        "status": "program_pass_pending_human",
+        "readiness": "proposal_pending_human"
+      },
+      {
+        "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+        "category": "软包抽纸",
+        "status": "program_pass_pending_human",
+        "readiness": "proposal_pending_human"
+      },
+      {
+        "categoryId": "ab796486-0d0d-466a-87c1-6a2115b3b079",
+        "category": "卷纸配件",
+        "status": "program_pass_pending_human",
+        "readiness": "proposal_pending_human"
+      },
+      {
+        "categoryId": "f00be7ff-9f41-4ea2-b032-60c6d7bdcf4b",
+        "category": "纸巾盒",
+        "status": "program_pass_pending_human",
+        "readiness": "proposal_pending_human"
+      }
+    ],
+    "reusedBaselines": [
+      {
+        "id": "small-toilet-roll",
+        "version": "9f672545509f6a99770a1b0b445e44f05496f459b2f151d2c3cb17d9aaad42e5",
+        "status": "candidate"
+      },
+      {
+        "id": "jumbo-toilet-roll",
+        "version": "0b0322b2b7ec8a05098a96664f3a3ef207911c53443c4bfbbbf554ef1c9e5595",
+        "status": "candidate"
+      },
+      {
+        "id": "facial-tissue",
+        "version": "c464b81db446ac698ce075a4ab473f242be23ba1f002a26d807a65a90f5e01c3",
+        "status": "candidate"
+      }
+    ],
+    "familySeedsToRun": []
+  },
+  "accounting": {
+    "originalLimitCny": 200,
+    "effectiveLimitCny": 1000,
+    "cumulativeReservedCny": 279.5,
+    "remainingReservationCny": 720.5,
+    "entryCount": 215,
+    "latestAuthorizationId": "user-20261026-total-1000",
+    "entriesHash": "3d17af7896623e12cdd7e7b0bf524f80301748fad0c2e536beeab45818f5d3f6",
+    "meaning": "local conservative reservations, not provider balance or invoice"
+  },
+  "integrity": {
+    "sourceAndBudgetUnchangedDuringReplay": true,
+    "hashes": {
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/clean-paper-full-20261026/batch.identity.json": "e7a587f09348832bfa0fe53ea7fd0158435ea9481fb3af52942367ceb66dcf85",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/clean-paper-full-20261026/batch.results.json": "15c71eafbe3e9864109bf8e70da51460ac38e8a2127291df0513c34884ddf0c2",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/clean-paper-full-20261026/batch.shared-snapshot.json": "fe824f72739379cef4dc883774de293e0a795ab4e51e24330aea94be29472b51",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/budget.json": "352e23e898ecb4cc848f0175cc0ddd476f790e415a5d780318e82ec3e7e3f103"
+    }
+  },
+  "familyCoverage": {
+    "configuredFamilies": 3,
+    "groupedLeaves": 6,
+    "ungroupedLeaves": 15,
+    "semanticGroupingComplete": false,
+    "automaticGrouping": false
+  },
+  "newModelRequests": 0,
+  "productionWrites": 0,
+  "remaining": [
+    "15 leaves have no confirmed family assignment; lexical matches do not authorize inheritance",
+    "2 zero-attribute proposals remain business modeling gaps",
+    "human Excel decisions are not automatically published as cross-run family baselines",
+    "model quality after continuation remains to be reviewed"
+  ],
+  "finalPreviewHostVerified": true
+}

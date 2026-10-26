@@ -1,6 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { exists, read, hash, Blocked } from "./core.ts";
+import { readCompletedRequest } from "./request-journal.ts";
 
 // Caller holds the original root execution lock. No writes, keys, or HTTP.
 export async function validateBatchAccounting(directory: string) {
@@ -18,15 +19,12 @@ export async function validateBatchAccounting(directory: string) {
   for (const entry of ledger.entries) {
     if (!/^[a-f0-9]{64}$/.test(entry.id) || !Number.isFinite(entry.reservedCny) || entry.reservedCny < 0)
       throw new Blocked("budget_change", "invalid historical request reservation");
-    const base = join(directory, "requests", entry.id), req = await read(base + ".request.json"), { key, ...requestIdentity } = req;
-    if (key !== entry.id || hash(requestIdentity) !== key || req.mode !== execution.mode || req.transportId !== execution.transportId)
-      throw new Blocked("cache_corrupt", "historical request identity changed");
+    const base = join(directory, "requests", entry.id);
     if (entry.status !== "completed" || !await exists(base + ".response.json"))
       throw new Blocked("outcome_unknown", "unresolved paid outcome must be inspected before a new round; no implicit resend: " + entry.id);
-    const response = await read(base + ".response.json"), receipt = await read(base + ".receipt.json");
-    if (response.key !== key || hash(response.response) !== response.sha256 || response.response.status !== "completed" ||
-        receipt.key !== key || receipt.status !== "completed" || receipt.responseHash !== response.sha256)
-      throw new Blocked("cache_corrupt", "historical response/receipt integrity mismatch");
+    const { request } = await readCompletedRequest(directory, entry.id);
+    if (request.mode !== execution.mode || request.transportId !== execution.transportId)
+      throw new Blocked("cache_corrupt", "historical request identity changed");
   }
   return { source, sourceId, execution, ledger, keys };
 }
