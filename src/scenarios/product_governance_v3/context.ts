@@ -1,4 +1,5 @@
 import { QUANTITY_RESPONSIBILITY } from "./modeling-contract.ts";
+import { modelingTargets } from "./attribute-applicability.ts";
 import { canonical, hash, type Task, Blocked } from "./core.ts";
 import { REQUEST_LAYOUT_VERSION, serializeContextInput } from "./request-layout.ts";
 import { outputSchemas } from "./contracts.ts";
@@ -179,6 +180,7 @@ export async function assemble(
         sha256: hash(responsibilities),
       },
       ...prefetched,
+      modelingTargetCategoryIds: modelingTargets(task, snapshot.data),
       knowledge,
       knowledgeRequirements: snapshot.knowledgeRequirements(task),
       knowledgeGaps: tools.knowledgeGaps(),

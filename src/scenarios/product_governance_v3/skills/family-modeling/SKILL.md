@@ -9,6 +9,8 @@ description: 为商品治理候选类目建立同族共同属性和有理由的�
    以sharedContext.modelingMode区分任务：family_seed设计所列成员共同适用的定义，categoryId只是schema锚点；inherited_leaf消费已完成的冻结基线，再提出有理由的末级绑定差异；independent_proposal没有适用基线，按对象、业务用途及知识提出独立待审方案，baselineVersion和baselineAttributeId为null。缺少基线本身不是不建属性的理由，也不能伪造继承关系。phase=leaf只是调度阶段，不表示一定有同族基线。失败或在途的已登记依赖不能降级为独立生成。
    批次family成员和归组理由是待核实范围，不是已确认专业结论。锚点专有参数不能变成全族共性，共同性疑点写unresolved。程序仅将检查通过且非空的同族种子登记为本批候选模板，不自动发布；不可把他批候选当作可用。
 2. attributes只描述共同定义；bindings逐项引用attributeId并绑定当前末级categoryId，承载requiredness、用途、关键规格、公开、搜索、标题/列表和排序。继承关系baselineAttributeId及differenceReason位于绑定。共同名称、概念、类型、单位、口径、枚举和约束不能在本叶静默修改；必填性等绑定确需不同，写清requirednessReason和differenceReason，仍待人工核实。是否无芯在有芯/无芯两类共同保留。
+   每个属性池查询同时返回reuseApplicability，按宿主modelingTargetCategoryIds核对，不按查询的categoryId判断许可。reusable=false表示原定义没有覆盖本次全部目标：保持原ID或专业就绪自述都不能使其准入。先判断计量对象、展开/折叠/包装状态和术语边界是否相同；无目标范围核实记录时保留extensionCandidates及待核实问题。同族种子检查所有成员，不能只看锚点。登记范围与定义指纹来自冻结输入，不能由你补造。
+   真正不同的目标对象可以按业务必要性建立独立、范围明确的定义；不要为了过检查仅改ID/名称或scope标签、复制原定义全文。共用概念应先提出共享范围修订，不能强行套用，也不能为凑数量制造重复属性。专业意义未明时按候选处理，不能在unresolved写“不应外推”却仍准入。
 3. 对照systemFields排除已由基础字段负责的概念；统一SKU。固定数量和计量单位合为一个定义，检查与已出属性的交叉；只有独立选择、适配、比较或计算用途才细分。
    每项rationale说明具体场景和改变的业务判断，并评估填写维护成本。设立价值未明确的放extensionCandidates，填写potentialUse、deferReason、activationCriteria和已读references，不建立binding或类型配置。新族无可准入属性时允许attributes/bindings为空，候选或unresolved写明原因，不凑造字段。复述冻结基线中的扩展候选，启用或改动先另提共享修订。不要因技术页或电商有字段就默认纳入，也不要因样本没值而删除必要参数。
 4. 必填性只用required/optional，尚未弄清是否应强制填写先optional。按输出schema填写与类型相符的numberConfig/textConfig/optionConfig，其他配置置null；未确定的范围、精度等用null，不猜专业阈值。文本format只能用原生预设枚举，不能填正则。defaultValue必须null。枚举不得用“其他”掩盖没研究的范围，多值须为同SKU同口径同时成立。
@@ -23,4 +25,4 @@ description: 为商品治理候选类目建立同族共同属性和有理由的�
 7. 数量按sharedContext.quantityResponsibility核对计数对象、分母、计数词与原生unitMin职责（unitMin及unitMinQua）。在decisions.quantity写measure、countedObject、denominator、countTerms、systemFieldKeys、relation和reason。sales_unit_count归基础字段，用system_owned记录，不生成属性。包内数量通常与销售单位组合存在conditional关系：sameWhen写何时与基础字段同口径，differentWhen写何时是不同包装层级，overlapAction=reuse_system_field；不能默认销售单位恒为包。因基础字段职责而排除的数量概念也要有decisions.quantity，不能只在unresolved说已由系统承载。尚不能说明关系则作为扩展候选并列出待核实关系，不把样本缺值当作业务不需要。
    例如销售单位为提、最小单位为包且数量6时，200张/包是独立的包内参数；销售单位为包、最小单位为张且数量200时，200张/包应复用基础字段。抽≠张、节≠格，缺乏换算依据时保留原计数词。conditional是建模的来源计划，实际SKU仍需核对单位组合才能执行；本阶段不填写或计算SKU值。
 
-本阶段必须阅读[建模正反例](references/cases.md)。程序只能核查合同和基线一致性，业务必要性与同族归属仍交人工。
+本阶段必须阅读[建模正反例](references/cases.md)。程序核查合同、定义一致性及冻结目标范围；业务必要性、范围登记的专业依据与同族归属仍交人工。

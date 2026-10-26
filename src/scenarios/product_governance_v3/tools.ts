@@ -1,4 +1,5 @@
 import { uniqueDefinitions, usableDefinitions } from "./modeling-contract.ts";
+import { reuseApplicability } from "./attribute-applicability.ts";
 import {
   object,
   text,
@@ -49,7 +50,7 @@ const definitions = {
   },
   search_attribute_pool: {
     description:
-      "检索可复用属性定义；categoryId只接受已读类目ID或JSON null（不是字符串null），query与categoryId至少一个非空。相同名称不等于同义。",
+      "检索属性候选及reuseApplicability目标范围；命中不等于可用于本次类目。categoryId只接受树中ID或JSON null，query与categoryId至少一个非空。",
     parameters: object({
       query: nullable(text()),
       categoryId: nullable(text()),
@@ -227,7 +228,7 @@ export class ToolRegistry {
     this.validateCall(name, args);
     const tree = this.snapshot.tree;
     let result: unknown;
-    const paginate = (items: unknown[], key: unknown) =>
+    const paginate = <T>(items: T[], key: unknown) =>
       tree.page(
         items,
         { snapshot: this.snapshot.version, runId: this.task.runId, key },
@@ -324,11 +325,13 @@ export class ToolRegistry {
         // Inspect all versions of matched IDs; unrelated conflicts do not poison a targeted search.
         uniqueDefinitions(usableDefinitions(this.snapshot.data, this.task.runId).filter(a => candidateIds.has(a.id)));
         const items = uniqueDefinitions(matched);
-        result = paginate(items, {
+        const found = paginate(items, {
           name,
           query: args.query,
           categoryId: args.categoryId ?? null,
         });
+        // Assessment always concerns the host task, not a query-selected foreign category.
+        result = { ...found, reuseApplicability: found.items.map(a => reuseApplicability(a, this.snapshot.data, this.task)) };
         break;
       }
       case "knowledge_list": {

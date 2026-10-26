@@ -1,0 +1,190 @@
+{
+  "kind": "offline_target_applicability_acceptance",
+  "date": "2026-10-26",
+  "releaseId": "31ab39aed3fed17eb897207b56c709369441bdd2ab1b4686ec77eebc3d4e3e49",
+  "scope": "block unregistered cross-category reuse independently of unchanged definition identity",
+  "tests": {
+    "pass": 253,
+    "fail": 0,
+    "files": 17,
+    "typecheck": "passed",
+    "skillMetadataAndReferences": "Bun YAML + path validation passed; Python quick_validate unavailable due to missing PyYAML"
+  },
+  "recordedFixture": {
+    "path": "src/scenarios/product_governance_v3/fixtures/pilot-quality-cache-20261026.json",
+    "fileSha256": "aef10e78ebf62d145c97a808f25ba3e0e35039ac06377ff2caec1bcf0ebdada2",
+    "source": {
+      "round": "pilot-wash-tissue-quality-cache-20261026",
+      "releaseId": "6aba8c8be9a5fdff81744b895e0e35e9b40338a50ec981078ea0e0a188db8e2f",
+      "runId": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023/rerun/pilot-wash-tissue-quality-cache-20261026",
+      "sourceResultHash": "2ec8734228d4a9e56ecb043e317943f544a244e9e182e394273ca0c6654d675d",
+      "note": "Recorded model final outputs and generated baseline only; no SKU records, credentials or reasoning text. Leaf follow-ups in tests are explicitly synthetic."
+    },
+    "modified": false
+  },
+  "realCounterexamples": [
+    {
+      "phase": "family-seed",
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "definitionIdentity": "unchanged",
+      "blockedAttributeIds": [
+        "roll.fragrance",
+        "roll.layers",
+        "roll.sheet_size"
+      ]
+    },
+    {
+      "phase": "leaf",
+      "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "definitionIdentity": "unchanged",
+      "blockedAttributeIds": [
+        "facial.pack_count",
+        "roll.sheet_size"
+      ]
+    }
+  ],
+  "checks": [
+    "all family members not just anchor",
+    "frozen definition fingerprint and exact targets",
+    "pending/not-applicable overrides prior coverage",
+    "no foreign-run/failed/in-progress grants",
+    "ID/label/scope-only copies cannot bypass",
+    "model cannot create review records",
+    "actual pool tool returns target assessment",
+    "actual correction loop rechecks",
+    "review assistance cannot erase errors",
+    "SKU contract refuses pending target"
+  ],
+  "validationBoundary": "scope/identity/record consistency, not professional semantic truth; synthetic successful corrections and fixture reviews are not business approval",
+  "newRealSupportedReviewRecords": 0,
+  "newPaidModelCalls": 0,
+  "productionWrites": 0,
+  "reasoningEffortChanged": false,
+  "acceptance": {
+    "stages": [
+      {
+        "stage": "family-modeling",
+        "status": "program_pass_pending_human",
+        "requests": 2,
+        "modelToolCalls": 1
+      },
+      {
+        "stage": "sku-filling",
+        "status": "program_pass_pending_human",
+        "requests": 2,
+        "modelToolCalls": 1
+      },
+      {
+        "stage": "review-assistance",
+        "status": "program_pass_pending_human",
+        "requests": 2,
+        "modelToolCalls": 1
+      },
+      {
+        "stage": "fact-extraction",
+        "status": "program_pass_pending_human",
+        "requests": 2,
+        "modelToolCalls": 1
+      },
+      {
+        "stage": "domain-research",
+        "status": "program_pass_pending_human",
+        "requests": 2,
+        "modelToolCalls": 1
+      }
+    ],
+    "transport": "injected_http_mock",
+    "paidModelCalls": 0,
+    "externalNetworkCalls": 0,
+    "businessAccuracyEvaluated": false,
+    "outputDirectory": "outputs/product-governance-v3/offline-applicability-fix-20261026"
+  },
+  "contextRegression": {
+    "snapshot": "previous real generated family; no truncation or cap increase",
+    "bytes": [
+      {
+        "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+        "category": "洗脸巾",
+        "totalBytes": 156915,
+        "limitBytes": 200000
+      },
+      {
+        "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "category": "盒装抽纸",
+        "totalBytes": 196634,
+        "limitBytes": 200000
+      },
+      {
+        "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+        "category": "软包抽纸",
+        "totalBytes": 196634,
+        "limitBytes": 200000
+      }
+    ]
+  },
+  "nextRoundPreview": {
+    "mode": "new_round_preview",
+    "ready": true,
+    "originalDirectory": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023",
+    "outDir": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-applicability-20261026",
+    "roundName": "pilot-wash-tissue-applicability-20261026",
+    "roundId": "6dd10c978ff5f9ac5d63dc02da8be239adf47c01a1ff370f1531ecbb4df2e73c",
+    "releaseId": "31ab39aed3fed17eb897207b56c709369441bdd2ab1b4686ec77eebc3d4e3e49",
+    "originalReleaseId": "826ed2544800ecdf01ceb96ce3c6cdbacffef6e57670bf5f2a1e8b6f99b6eaab",
+    "categoryId": null,
+    "categoryIds": [
+      "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "ce3a9f67-613c-4707-bf3a-95193edb8a2d"
+    ],
+    "categories": [
+      {
+        "id": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+        "name": "洗脸巾"
+      },
+      {
+        "id": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "name": "盒装抽纸"
+      },
+      {
+        "id": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+        "name": "软包抽纸"
+      }
+    ],
+    "model": {
+      "model": "deepseek-flash",
+      "reasoningEffort": "low"
+    },
+    "leafCount": 3,
+    "familySeeds": [
+      "facial-tissue"
+    ],
+    "concurrency": 3,
+    "preflight": [],
+    "sourceProposalsReused": 0,
+    "preservedReviewedBaselineFamilies": [],
+    "originalRequestCount": 149,
+    "cumulativeReservedCny": 193.7,
+    "budgetLimitCny": 280.7,
+    "remainingReservationCny": 87,
+    "maximumAdditionalRequests": 24,
+    "maximumAdditionalReservationCny": 31.2,
+    "fullWorstCaseFitsRemainingBudget": true,
+    "accounting": "沿用原费用台账，数值为保守预留，不是实际账单；触顶停止，不自动提额",
+    "networkCalls": 0,
+    "productionWrites": 0,
+    "adoption": "pending_human",
+    "next": "同名同范围命令加--execute才付费；重复执行只恢复这一轮，可调并发；不换round名处理普通失败"
+  },
+  "budget": {
+    "beforeFileSha256": "3214a5611bc85a9b0ebd6c3fad2e16a09344fbc326e4bbfb438d94ebc63bd324",
+    "afterFileSha256": "3214a5611bc85a9b0ebd6c3fad2e16a09344fbc326e4bbfb438d94ebc63bd324",
+    "unchanged": true,
+    "historicalRequests": 149,
+    "reservedCny": 193.7,
+    "effectiveLimitCny": 280.7,
+    "remainingReservationCny": 87,
+    "maximumAdditionalReservationCny": 31.2,
+    "accounting": "conservative reservations; not an invoice"
+  }
+}

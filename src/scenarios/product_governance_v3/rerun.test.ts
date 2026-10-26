@@ -41,7 +41,9 @@ function mock(options: { tool?: boolean; reject?: boolean; badExplanationOnce?: 
     }
     const family = input.sharedContext.family.flatMap((p: any) => p.items).find((f: any) => f.usable);
     const attributes = family ? jsonClone(family.attributes) : [attribute({ id: "test.rerun." + (scope.family?.id ?? task.categoryId),
-      name: "构造验收参数", conceptKey: "test.rerun." + (scope.family?.id ?? task.categoryId), fieldType: "text" })];
+      name: "构造验收参数", conceptKey: "test.rerun." + (scope.family?.id ?? task.categoryId), fieldType: "text",
+      scope: "test.rerun." + (scope.family?.id ?? task.categoryId),
+      definition: "离线构造：仅对象" + (scope.family?.id ?? task.categoryId) + "适用的独立参数；不复用其他对象口径" })];
     const bindings = attributes.map((a: any) => ({
       ...(family?.bindings.find((b: any) => b.attributeId === a.id && b.categoryId === task.categoryId) ??
         family?.bindings.find((b: any) => b.attributeId === a.id && b.categoryId === null) ?? binding(a.id)),

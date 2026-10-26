@@ -329,6 +329,8 @@ describe("modeling invariants and the accepted sibling-category correction", () 
         name: "适配分配器型号",
         conceptKey: "fit.dispenser",
         fieldType: "text",
+        definition: "当前纸卷可适配的分配器型号原文，不代表纸卷是否无芯",
+        scope: "dispenser-compatibility",
       }),
     );
     output.bindings.push(

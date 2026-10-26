@@ -21,6 +21,7 @@ import {
 } from "./native-contract.ts";
 import { sharedDefinitionErrors, modelingDecisionErrors, DEFINITION_FIELDS } from "./modeling-contract.ts";
 import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
+import { attributeApplicabilityErrors } from "./attribute-applicability.ts";
 
 // These checks establish structural consistency and provenance, not the truth of domain judgments.
 export function checkResult(
@@ -118,6 +119,8 @@ export function checkResult(
     checkDefinitions(attributes, bindings);
     executed.add("shared-definition-identity");
     errors.push(...sharedDefinitionErrors(attributes, snapshot.data, task.runId));
+    executed.add("target-category-applicability");
+    errors.push(...attributeApplicabilityErrors(attributes, snapshot.data, task));
     executed.add("modeling-decisions");
     errors.push(...modelingDecisionErrors(value, snapshot.data));
     executed.add("configuration-explanations");

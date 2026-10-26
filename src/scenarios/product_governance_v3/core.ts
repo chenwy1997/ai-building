@@ -335,6 +335,9 @@ export interface Snapshot {
   families: Family[];
   attributes: AttributeDefinition[];
   sources: Source[];
+  // Optional frozen human reviews for reuse outside registered family membership.
+  // Absent records never imply global applicability.
+  attributeApplicability?: import("./attribute-applicability.ts").AttributeApplicabilityReview[];
   products: Product[];
   knowledgeIds: string[];
   knowledgeRequirements: {

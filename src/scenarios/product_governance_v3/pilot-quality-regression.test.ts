@@ -46,14 +46,15 @@ test("both real arms retain result provenance; missing decision contracts cannot
   expect(Object.hasOwn(s.result, "decisions")).toBe(false);
 });
 
-test("cross-family shared identity catches all four real low collisions and preserves high reuse", async () => {
+test("cross-family shared identity catches four real low collisions; identical high definitions still need target applicability", async () => {
   const {snapshot, task, plan} = await context();
   const low = sample("low").result, high = sample("high").result;
   expect(sharedDefinitionErrors(low.attributes as any, snapshot.data, task.runId).map(e => e.objectId).sort()).toEqual([
     "roll.fragrance", "roll.layers", "roll.raw_material", "roll.sheet_size",
   ]);
-  expect(checkResult(task, withFixtureDecisions(low), plan.tools).errors.filter(e => e.ruleId === "R03")).toHaveLength(4);
+  expect(checkResult(task, withFixtureDecisions(low), plan.tools).errors.filter(e => e.ruleId === "R03" && e.message.includes("existing shared ID"))).toHaveLength(4);
   expect(sharedDefinitionErrors(high.attributes as any, snapshot.data, task.runId)).toEqual([]);
+  expect(checkResult(task, withFixtureDecisions(high), plan.tools).errors.some(e => e.message.includes("target-category applicability"))).toBe(true);
   const copied = jsonClone(high.attributes as any[]); copied[0].rationale += " 补充业务用途"; copied[0].references = [];
   expect(sharedDefinitionErrors(copied, snapshot.data, task.runId)).toEqual([]);
   expect(definitionFingerprint(copied[0])).toBe(definitionFingerprint(high.attributes[0] as any));

@@ -27,6 +27,8 @@ import {
   valueSchema,
 } from "./contracts.ts";
 import { CategoryIndex } from "./catalog.ts";
+import { attributeApplicabilityErrors, knownDefinitions, modelingTargets } from "./attribute-applicability.ts";
+import { definitionFingerprint } from "./modeling-contract.ts";
 
 const strings = list(text()),
   sourceSchema = object(
@@ -122,6 +124,11 @@ const snapshotSchema = object({
     ),
   ),
   attributes: list(attributeSchema),
+  attributeApplicability: list(object({
+    id: text(), attributeId: text(), definitionHash: text(), targetCategoryIds: list(text(), 1),
+    status: text("supported", "pending", "not_applicable"), reviewKind: text("human", "fixture"),
+    reviewRecordId: text(), reason: text(),
+  })),
   sources: list(sourceSchema),
   products: list(
     object({
@@ -166,7 +173,7 @@ const snapshotSchema = object({
       resultKind: text("count", "measurement"),
     }),
   ),
-});
+}, ["format", "version", "kind", "tree", "systemFields", "systemFieldCoverage", "families", "attributes", "sources", "products", "knowledgeIds", "knowledgeRequirements", "derivationPolicies"]);
 function ids(items: { id: string }[], label: string) {
   if (new Set(items.map((i) => i.id)).size !== items.length)
     throw new Error("duplicate " + label);
@@ -185,6 +192,17 @@ export class DataSnapshot {
     ids(data.products, "products");
     ids(data.derivationPolicies, "derivation policies");
     ids(data.knowledgeRequirements, "knowledge requirements");
+    ids(data.attributeApplicability ?? [], "attribute applicability reviews");
+    for (const r of data.attributeApplicability ?? []) {
+      if (r.reviewKind === "fixture" && data.kind !== "fixture")
+        throw new Blocked("attribute_applicability", "fixture applicability review cannot authorize local business reuse");
+      if (!r.reviewRecordId.trim() || !r.reason.trim() || new Set(r.targetCategoryIds).size !== r.targetCategoryIds.length)
+        throw new Blocked("attribute_applicability", "applicability review requires a record, reason and distinct targets");
+      for (const id of r.targetCategoryIds) if (!this.tree.get(id).isLeaf)
+        throw new Blocked("attribute_applicability", "applicability must name exact leaf categories; ancestor coverage is not implicit");
+      if (!knownDefinitions(data).some(a => a.id === r.attributeId && definitionFingerprint(a) === r.definitionHash))
+        throw new Blocked("attribute_applicability", "applicability review has an unknown attribute or stale definition fingerprint");
+    }
     if (
       new Set(data.systemFields.map((f) => f.key)).size !==
       data.systemFields.length
@@ -419,6 +437,9 @@ export class DataSnapshot {
         "missing_contract",
         "SKU filling/calculation requires an applicable fixed family contract; the global pool is not a contract",
       );
+    const applicabilityErrors = attributeApplicabilityErrors(baseline.attributes, this.data, task);
+    if (applicabilityErrors.length)
+      throw new Blocked("attribute_applicability", applicabilityErrors.map(e => e.objectId + ": " + e.message).join("; "));
     return baseline.attributes.map((a) => ({
       ...a,
       binding: {
@@ -450,6 +471,8 @@ export class DataSnapshot {
     if (!task.runId || !task.question)
       throw Error("task runId/question required");
     const node = this.tree.get(task.categoryId);
+    for (const id of modelingTargets(task, this.data)) if (!this.tree.get(id).isLeaf)
+      throw new Blocked("modeling_scope", "modeling targets must be leaves");
     if (!node.isLeaf)
       throw new Blocked(
         "leaf_required",

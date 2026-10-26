@@ -57,7 +57,8 @@ function mock(options: {
     const baseline = input.sharedContext.family.flatMap((p: any) => p.items).find((f: any) => f.usable);
     const attrs = baseline ? jsonClone(baseline.attributes) : [attribute({
       id: "mock." + (scope.family?.id ?? task.categoryId), name: "模拟验收参数", conceptKey: "mock." + (scope.family?.id ?? task.categoryId),
-      definition: "离线构造参数，仅验收工具及批次依赖，不是业务定义", scope: "offline-mock-only", fieldType: "text",
+      definition: "离线构造：对象为" + (scope.family?.id ?? task.categoryId) + "，仅验证本对象的独立参数和批次依赖，非业务定义",
+      scope: "offline-mock-only." + (scope.family?.id ?? task.categoryId), fieldType: "text",
     })];
     const bindings = attrs.map((a: any) => ({
       ...(baseline?.bindings.find((b: any) => b.attributeId === a.id && b.categoryId === task.categoryId) ??

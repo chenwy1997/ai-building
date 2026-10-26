@@ -118,6 +118,7 @@ export const RULE_REGISTRY: Rule[] = [
         "recorded-batch-regression.test.ts:recorded coreless response loses false binding errors",
       ),
       check("shared-definition-identity", "modeling-contract.ts:sharedDefinitionErrors", "pilot-quality-regression.test.ts:cross-family shared identity"),
+      check("target-category-applicability", "attribute-applicability.ts:attributeApplicabilityErrors", "attribute-applicability.test.ts:recorded cross-category reuse"),
     ],
     ["同族的共同定义和有理由的末级差异是否合理？"],
     ["真实同族共同方案生成与共享修订"],

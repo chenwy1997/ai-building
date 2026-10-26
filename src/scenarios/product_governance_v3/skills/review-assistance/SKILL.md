@@ -16,3 +16,5 @@ description: 对商品治理候选提供按规则定位的审核线索，适用�
 核对decisions与attributes、bindings、extensionCandidates的对应；businessNeed、professionalReadiness和valueEvidence不能混为一谈。程序检查requiredNecessity与必填的冲突，以及数量字段同/异/条件重合的职责计划；这些声明是否真实合理仍需人审。跨族已有ID也须保持同一完整定义。包内数量不能默认与销售单位数量相同或独立，conditional须有明确的两种条件及重合时复用基础字段的措施。
 
 本阶段必须阅读[审核正反例](references/cases.md)。专业问题交有相应知识的人裁定，并扩查共同模板、同族和依赖结果。
+
+跨类复用分开检查定义指纹与目标范围：查询返回的reuseApplicability和candidateProgramChecks中的target-category-applicability来自宿主，不能用“定义没变”或空findings覆盖。共同基线要覆盖全部成员，范围待核实的属性不能因为选填或professionalReadiness=defined就准入。核实记录本身的专业依据仍需人审，程序通过不证明语义正确。

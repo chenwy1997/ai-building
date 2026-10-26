@@ -13,6 +13,8 @@ import { fixtureSnapshot, fixtureTask, finalMessage, functionCall, scriptedFetch
 import { ResponsesClient } from "./responses.ts";
 import { Budget } from "./budget.ts";
 import { runStage, BATCH_CORRECTIONS } from "./runner.ts";
+import { attributeApplicabilityErrors } from "./attribute-applicability.ts";
+import { definitionFingerprint } from "./modeling-contract.ts";
 
 let release: Release, temp: string, plan: BatchPlan, serial = 0;
 const next = () => join(temp, String(serial++));
@@ -65,19 +67,28 @@ test("the recorded generated tissue baseline fits both leaves with every definit
   }
 });
 
-test("real seed output flows through pendingFamily and both actual HTTP/tool loops without increasing any limit", async () => {
-  const dir = next(), seedTask = batchTask(plan, seed.categoryId, "family-seed"),
+test("recorded seed with explicit synthetic target reviews flows through both mock leaf loops without increasing limits", async () => {
+  const seedTask = batchTask(plan, seed.categoryId, "family-seed"), group = plan.groups.find(g => g.id === "facial-tissue")!,
+    input = jsonClone(plan.snapshot), rejectedIds = new Set(attributeApplicabilityErrors(seed.result.attributes as any, input, seedTask).map(e => e.objectId));
+  // The unmodified real result now correctly fails applicability. Only this constructed
+  // integration scenario supplies fixture reviews; it does not approve the real proposal.
+  input.kind = "fixture";
+  input.attributeApplicability = seed.result.attributes.filter(a => rejectedIds.has(a.id)).map(a => ({
+    id: "fixture-" + a.id, attributeId: a.id, definitionHash: definitionFingerprint(a as any), targetCategoryIds: group.members,
+    status: "supported", reviewKind: "fixture", reviewRecordId: "constructed-context-test", reason: "仅构造验证装配体积与工具循环，不是真实核实结论",
+  }));
+  const dir = next(),
     seedMock = scriptedFetch([
       [functionCall("knowledge_read", { id: "small-roll-paper-research-20261022", offset: 0, length: 8000 }, "seed-source")],
       [finalMessage(seed.result)],
     ]),
     client = new ResponsesClient({ mode: "offline", transportId: "recorded-context-seed", fetch: seedMock.fetch },
       dir, new Budget(dir, 0, "offline-zero")),
-    artifact = await runStage({ release, snapshot: new DataSnapshot(plan.snapshot), task: seedTask, client,
+    artifact = await runStage({ release, snapshot: new DataSnapshot(input), task: seedTask, client,
       outDir: dir, corrections: BATCH_CORRECTIONS, model: plan.model, limits: plan.limits });
   expect(artifact.result).toEqual(seed.result);
   expect(artifact.checks.errors).toEqual([]);
-  const group = plan.groups.find(g => g.id === "facial-tissue")!, data = jsonClone(plan.snapshot),
+  const data = jsonClone(input),
     family = pendingFamily(group, artifact, plan.runId);
   data.families.push(family);
   const snapshot = new DataSnapshot(data);
