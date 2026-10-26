@@ -7,7 +7,7 @@ import {
 import { ROOT, type Release } from "./release.ts";
 import { CategoryIndex } from "./catalog.ts";
 import { DataSnapshot } from "./snapshot.ts";
-import { assemble } from "./context.ts";
+import { assembleStageContext } from "./stage-context.ts";
 import { runStage, DEFAULT_LIMITS, BATCH_CORRECTIONS, type ModelOptions } from "./runner.ts";
 import { ResponsesClient } from "./responses.ts";
 import { systemFieldsFromInventory } from "./scm-field-inventory.ts";
@@ -17,6 +17,7 @@ import { proposalReadiness, proposalCounts } from "./proposal-readiness.ts";
 import { modelingReviewSignals } from "./modeling-review.ts";
 import { MODELING_PROPOSAL_VERSION } from "./modeling-proposal.ts";
 import { attachPilotKnowledge } from "./pilot-knowledge.ts";
+import { assertContinuationSource } from "./batch-continuation.ts";
 
 export const CLEAN_PAPER_ID = "77e31cf2-8331-4c73-ab10-823d2d1d7ab0";
 export const DEFAULT_TREE = resolve(ROOT, "../../../outputs/category-id-refresh-20261021/mapped-tree.updated.json");
@@ -83,7 +84,7 @@ export interface BatchPlan {
   maximumReservationCny: number;
   productionWrites: 0;
   adoption: "pending_human";
-  accounting?: { directory: string; originalBatchId: string; roundName: string; roundId: string };
+  accounting?: { directory: string; originalBatchId: string; roundName: string; roundId: string; kind?: "continuation" };
 }
 type StageArtifact = Awaited<ReturnType<typeof runStage>>;
 export interface BatchJob {
@@ -241,7 +242,7 @@ export async function prepareBatch(options: BatchOptions, release: Release): Pro
   plan.maximumReservationCny = Math.round(plan.maximumRequests * plan.reserveCny * 100) / 100;
   for (const categoryId of categoryIds) {
     try {
-      const context = await assemble(release, snapshot, batchTask(plan, categoryId, "leaf"));
+      const context = await assembleStageContext({ release, snapshot, task: batchTask(plan, categoryId, "leaf"), model: plan.model, limits: plan.limits, corrections: BATCH_CORRECTIONS });
       if (options.snapshotPath && snapshot.families(categoryId, plan.runId).some((f) => !f.usable))
         throw new Blocked("family_dependency", "explicit snapshot contains an unavailable family; do not replace another batch's pending baseline by independently modeling the leaf");
       const gaps = context.tools.knowledgeGaps();
@@ -311,18 +312,20 @@ export async function executeBatch(
     throw Error("network client reservation/budget differs from the frozen batch");
   return lock(join(accountingDir, "execution.lock"), async () => {
     if (plan.accounting) {
+      const continuing = plan.accounting.kind === "continuation";
       const source = await read(join(accountingDir, "batch.identity.json")), { id: sourceId, ...sourceIdentity } = source,
-        round = await read(join(plan.outDir, "rerun.identity.json")), { id: roundId, ...roundIdentity } = round,
+        round = await read(join(plan.outDir, continuing ? "continuation.identity.json" : "rerun.identity.json")), { id: roundId, ...roundIdentity } = round,
         execution = await read(join(accountingDir, "execution.identity.json"));
       if (sourceId !== hash(sourceIdentity) || sourceId !== plan.accounting.originalBatchId ||
           roundId !== hash(roundIdentity) || roundId !== plan.accounting.roundId || round.sourceBatchId !== sourceId ||
           round.releaseId !== plan.releaseId || round.roundName !== plan.accounting.roundName ||
-          plan.outDir !== join(accountingDir, "reruns", plan.accounting.roundName) ||
+          plan.outDir !== join(accountingDir, continuing ? "continuations" : "reruns", plan.accounting.roundName) ||
           round.snapshotVersion !== plan.inputVersion || hash(round.categoryIds) !== hash(plan.categoryIds) ||
           hash(round.model) !== hash(plan.model) || hash(round.limits) !== hash(plan.limits) ||
           execution.batchId !== sourceId || execution.mode !== client.mode || execution.transportId !== client.transportId ||
           execution.budgetCny !== client.budget.limitCny || execution.pricingId !== client.budget.pricingId)
         throw new Blocked("rerun_identity_drift", "rerun scope, release or shared accounting differs from its frozen identity");
+      if (continuing) await assertContinuationSource(plan, release, round);
     }
     await freezeFile(join(plan.outDir, "batch.identity.json"), { ...identity, id: plan.id });
     const initialCalls = client.calls, initialCacheHits = client.cacheHits;
@@ -380,11 +383,31 @@ export async function executeBatch(
       failedFamilies: [...failed].map(([id, error]) => ({ id, error })),
       adoption: "pending_human", productionWrites: 0,
     });
+    // Recheck the actual generated baseline at the barrier. The initial preview
+    // cannot know its size. Persist every leaf's complete-request capacity before
+    // dispatching any leaf, keeping successful seeds available for continuation.
+    const leafPreflight: { categoryId: string; status: string; capacity: unknown; code: string | null; error: string | null }[] = [];
+    for (const categoryId of plan.categoryIds) {
+      const group = groupFor(plan, categoryId);
+      if (group && failed.has(group.id)) continue;
+      try {
+        const context = await assembleStageContext({ release, snapshot, task: batchTask(plan, categoryId, "leaf"),
+          model: plan.model, limits: plan.limits, corrections: BATCH_CORRECTIONS });
+        leafPreflight.push({ categoryId, status: "ready", capacity: context.manifest.requestCapacity, code: null, error: null });
+      } catch (error) {
+        leafPreflight.push({ categoryId, status: "blocked", capacity: null,
+          code: error instanceof Blocked ? error.code : "preflight_error", error: String(error) });
+      }
+    }
+    await save(join(plan.outDir, "batch.leaf-preflight.json"), { batchId: plan.id, sharedSnapshotVersion: snapshot.version,
+      source: "actual_completed_baselines", leaves: leafPreflight, newModelRequests: 0 });
     const leaves = await mapConcurrent(plan.categoryIds, plan.concurrency, async (categoryId): Promise<BatchJob> => {
-      const group = groupFor(plan, categoryId), reason = group ? failed.get(group.id) : undefined;
-      if (!reason) return perform(categoryId, "leaf", snapshot);
-      const blocked: BatchJob = { phase: "leaf", categoryId, familyId: group!.id,
-        status: "program_blocked", code: "family_dependency", error: reason, artifact: null };
+      const group = groupFor(plan, categoryId), reason = group ? failed.get(group.id) : undefined,
+        capacityBlock = leafPreflight.find(p => p.categoryId === categoryId && p.status === "blocked");
+      if (!reason && !capacityBlock) return perform(categoryId, "leaf", snapshot);
+      const blocked: BatchJob = { phase: "leaf", categoryId, familyId: group?.id ?? null,
+        status: "program_blocked", code: reason ? "family_dependency" : capacityBlock!.code,
+        error: reason ?? capacityBlock!.error, artifact: null };
       await save(join(plan.outDir, "jobs", "leaf-" + hash(categoryId).slice(0, 20) + ".json"), { batchId: plan.id, ...blocked, artifactHash: null });
       progress({ event: "finished", phase: "leaf", categoryId, category: snapshot.tree.get(categoryId).name, status: blocked.status, code: blocked.code });
       return blocked;

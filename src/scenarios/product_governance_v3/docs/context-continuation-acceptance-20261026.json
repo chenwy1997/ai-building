@@ -1,0 +1,161 @@
+{
+  "format": 1,
+  "date": "2026-10-26",
+  "releaseId": "a0931341ac14d0f88a33ad2ebc8298e0c714be7f79d4fd0e6fc8af8bce9cd39f",
+  "scope": "complete context capacity and continuation of exactly two tissue leaves; offline only",
+  "validation": {
+    "testsPassed": 300,
+    "testsFailed": 0,
+    "testCommand": "bun --no-env-file test src/scenarios/product_governance_v3",
+    "testLogSha256": "89ff9cc56dd4e15979a3c7f540367b73922d81664b28dafd039f86de9894477a",
+    "typecheck": "tsc -p src/scenarios/product_governance_v3/tsconfig.json --noEmit: passed",
+    "realCliPreviewReady": true,
+    "newProviderRequests": 0,
+    "productionWrites": 0
+  },
+  "realCase": {
+    "sourceRound": "pilot-tissue-json-feedback-20261026",
+    "sourceContextBytes": 200664,
+    "oldContextLimitBytes": 200000,
+    "excessBytes": 664,
+    "sourceFingerprint": "9e9d6a72fe431ba112e283776698647e985665c69573d9d11763bb2bb1e97410",
+    "preservedBaselines": [
+      {
+        "id": "facial-tissue",
+        "version": "031a299668e8873f0b2453f60e0e864d8f0ce13d67a26ba496c3e43e4afac2a7",
+        "status": "candidate",
+        "runId": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023/rerun/pilot-tissue-json-feedback-20261026",
+        "sourceRunKey": "d257602c3c5d0300774dd0041419498e12c3187ac39f7163f3fe8e95dfc735ee",
+        "requestKeys": [
+          "6fe10a30eb48454a373a724b14ac0f3634aca75f6d47b81e165fbdf01449648b",
+          "0cbfa7d49cf53ba647cc2b3c2b9f912dfa8cc9d000b50c864613e7e81f864409",
+          "25881f3692f3962b4d86300ab9106fd9f49db93d77335404bd4983b4e50fa176",
+          "706da048ed472aa011e32258661f9be32e9ecd1daf016b5dfa41fb40a6d15f27"
+        ],
+        "familyHash": "d5d11eddd29d334d224588a56b62ee6286b3a53f6c7a1f5e3769c1aba99cca2e"
+      }
+    ],
+    "capacities": [
+      {
+        "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "contextUsage": {
+          "totalBytes": 200664,
+          "limitBytes": 350000,
+          "instructionsBytes": 58298,
+          "inputBytes": 142366,
+          "sharedComponents": {
+            "releaseId": 66,
+            "snapshotVersion": 66,
+            "snapshotKind": 7,
+            "systemFields": 9097,
+            "quantityResponsibility": 1902,
+            "coreScope": 1907,
+            "systemFieldCoverage": 1525,
+            "ruleResponsibilities": 250,
+            "category": 858,
+            "related": 421,
+            "family": 18228,
+            "attributePool": 6609,
+            "knowledgeInventory": 2280,
+            "modelingTargetCategoryIds": 40,
+            "knowledge": 88883,
+            "knowledgeRequirements": 1289,
+            "knowledgeGaps": 2,
+            "knowledgeCoverage": 26,
+            "baselineStatus": 11,
+            "baselineReferenceDependencies": 1981,
+            "modelingMode": 16,
+            "modelingProposal": 2023,
+            "currentBaselineConfiguration": 2969
+          }
+        },
+        "initialRequestBytes": 234956,
+        "maxRequestBytes": 350000,
+        "historyReserveBytes": 64000,
+        "initialLimitBytes": 286000,
+        "availableHistoryBytes": 115044,
+        "contextBytes": 200664,
+        "envelopeBytes": 34292
+      },
+      {
+        "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+        "contextUsage": {
+          "totalBytes": 200664,
+          "limitBytes": 350000,
+          "instructionsBytes": 58298,
+          "inputBytes": 142366,
+          "sharedComponents": {
+            "releaseId": 66,
+            "snapshotVersion": 66,
+            "snapshotKind": 7,
+            "systemFields": 9097,
+            "quantityResponsibility": 1902,
+            "coreScope": 1907,
+            "systemFieldCoverage": 1525,
+            "ruleResponsibilities": 250,
+            "category": 858,
+            "related": 421,
+            "family": 18228,
+            "attributePool": 6609,
+            "knowledgeInventory": 2280,
+            "modelingTargetCategoryIds": 40,
+            "knowledge": 88883,
+            "knowledgeRequirements": 1289,
+            "knowledgeGaps": 2,
+            "knowledgeCoverage": 26,
+            "baselineStatus": 11,
+            "baselineReferenceDependencies": 1981,
+            "modelingMode": 16,
+            "modelingProposal": 2023,
+            "currentBaselineConfiguration": 2969
+          }
+        },
+        "initialRequestBytes": 234956,
+        "maxRequestBytes": 350000,
+        "historyReserveBytes": 64000,
+        "initialLimitBytes": 286000,
+        "availableHistoryBytes": 115044,
+        "contextBytes": 200664,
+        "envelopeBytes": 34292
+      }
+    ]
+  },
+  "continuation": {
+    "directory": "outputs/product-governance-v3/clean-paper-batch-20261023/continuations/pilot-tissue-json-feedback-20261026",
+    "categoryIds": [
+      "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "ce3a9f67-613c-4707-bf3a-95193edb8a2d"
+    ],
+    "model": {
+      "model": "deepseek-flash",
+      "reasoningEffort": "low"
+    },
+    "concurrency": 2,
+    "maximumAdditionalRequests": 12,
+    "maximumAdditionalReservationCny": 15.6,
+    "familySeedRequests": 0,
+    "washCategoryRequested": false,
+    "sourceBatchId": "cee05935ec56585b45de529be4272611ef857f5b24c1dab84bf3589f8d4838bd",
+    "id": "1e1fbe49361ba7f59a0324d90cc5059f68133d7f97497448f3a0d38d87bc9036"
+  },
+  "accounting": {
+    "historicalRequestCount": 172,
+    "cumulativeReservedCny": 223.6,
+    "effectiveBudgetLimitCny": 280.7,
+    "remainingReservationCny": 57.1,
+    "worstCaseFits": true,
+    "budgetFileSha256": "176fcd5e7fed7cf72d8ae8a69632d6f2d46ac454f2288f15eb37582df8554a37",
+    "unit": "CNY conservative reservations, not an invoice"
+  },
+  "preservation": {
+    "checkedExistingFiles": 738,
+    "changedExistingFiles": [],
+    "beforeAggregateSha256": "f60f00d5eea8310907f5d5aa9b5e974280d2ba8fb4181fe2511ecbdd57662b24",
+    "afterAggregateSha256": "f60f00d5eea8310907f5d5aa9b5e974280d2ba8fb4181fe2511ecbdd57662b24",
+    "scope": "root budget/identity, all historical request artifacts, all existing source-round and wash-round files",
+    "sourceResultSha256": "215c2411366ea298f81c4eaf6b4eddb5fad7c9c3a7466c1c17a080a509d7546e",
+    "sourceSharedSnapshotSha256": "e5c56e061ac00eb1f21d7d88db18f99a56023245ed8d3385bfbf37d578a9fc73",
+    "washResultSha256": "5c80f50fda38cce0d8cb4e03b49f443554e7d32f59153986a9cf199c51b3cd32"
+  },
+  "limits": "Mock leaf proposals validate engineering only; actual leaf quality, correction count, usage and provider cache hit rate await user execution. Historical source jobs remain context_budget; their status is not overwritten."
+}

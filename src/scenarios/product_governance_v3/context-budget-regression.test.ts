@@ -52,7 +52,7 @@ for (const stage of STAGES) test(stage + ": one complete responsibility registry
   expect(p.serializedInput).not.toContain(canonical(rules));
   expect(p.manifest.ruleIds).toEqual(ref.ruleIds);
   expect(p.manifest.contextUsage.totalBytes).toBe(Buffer.byteLength(p.instructions + p.serializedInput));
-  expect(p.manifest.contextUsage.limitBytes).toBe(200000);
+  expect(p.manifest.contextUsage.limitBytes).toBe(350000);
 });
 
 test("the recorded generated tissue baseline fits both leaves with every definition, decision and citation intact", async () => {
@@ -154,10 +154,10 @@ test("recorded seed with explicit synthetic target reviews flows through both mo
 
 test("an actually oversized dynamic context still blocks and reports component bytes before any HTTP request", async () => {
   const dir = next(), snapshot = new DataSnapshot(plan.snapshot), task = {
-    ...batchTask(plan, seed.categoryId, "family-seed"), question: "x".repeat(200001),
+    ...batchTask(plan, seed.categoryId, "family-seed"), question: "x".repeat(350001),
   }, client = new ResponsesClient({ mode: "offline", transportId: "oversized-context",
     fetch: async () => { throw Error("must not send oversized or truncated context"); } }, dir, new Budget(dir, 0, "offline-zero"));
-  await expect(runStage({ release, snapshot, task, client, outDir: dir })).rejects.toThrow('"limitBytes":200000');
+  await expect(runStage({ release, snapshot, task, client, outDir: dir })).rejects.toThrow('"limitBytes":350000');
   await expect(assemble(release, snapshot, task)).rejects.toThrow("no content was truncated and no request was sent");
   expect(client.calls).toBe(0);
 });

@@ -2,7 +2,7 @@
 
 2026-10-23新增。只设计类目属性，不试填SKU值、不采集商品、不改类目树或线上数据。结果均待人工审阅，没有自动采用。
 
-**全量轮次已执行；当前只验证洗脸巾、盒装抽纸和软包抽纸，见[精确范围与思考档位命令](small-scope-reasoning-pilot-20261023.md)。** 保留原`--out`及累计预算，显式指定新轮次与`--category-ids`。同合同的局部纠正仍可用下文`batch-recover`；下列`batch`命令用于初次建立批次。
+**当前只续跑盒装抽纸和软包抽纸，见[保留基线的续跑命令](context-continuation-20261026.md)。** 使用`batch-continue --from-round pilot-tissue-json-feedback-20261026`，复用已通过的真实基线、保留洗脸巾，保持low和原`--out`累计预算。此前[三类精确范围与思考档位命令](small-scope-reasoning-pilot-20261023.md)为历史记录。下列`batch`命令用于初次建立批次。
 
 ## 直接执行
 

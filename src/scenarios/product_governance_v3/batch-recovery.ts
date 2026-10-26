@@ -1,3 +1,5 @@
+import { assemble } from "./context.ts";
+import { validateBatchAccounting } from "./batch-accounting.ts";
 import { effectiveBudgetLimit } from "./budget.ts";
 import { readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
@@ -18,8 +20,8 @@ import { matchesContextLayout } from "./request-layout.ts";
 
 // A historical response may be checked under a newer host only if the actual business
 // materials, schema, validator and read tools are unchanged. This is not a release-ID bypass.
-const HOST_FILES = new Set(["runner.ts", "cli.ts", "batch.ts", "responses.ts", "batch-export.ts",
-  "result-json.ts", "json-diagnostics.ts", "progress.ts", "batch-recovery.ts", "scripts/export-batch-review.mjs"]);
+const HOST_FILES = new Set(["runner.ts", "cli.ts", "batch.ts", "batch-rerun.ts", "responses.ts", "batch-export.ts",
+  "result-json.ts", "json-diagnostics.ts", "context.ts", "stage-context.ts", "batch-accounting.ts", "batch-continuation.ts", "progress.ts", "batch-recovery.ts", "scripts/export-batch-review.mjs"]);
 function compatible(manifest: any, release: Release, task: Task) {
   if (manifest.outputSchemaHash !== hash(modelOutputSchema(task)))
     throw new Blocked("recovery_contract_drift", "historical output schema changed; manual migration required");
@@ -47,16 +49,30 @@ async function durable(dir: string, key: string) {
 export async function recheckBatch(dir: string, release: Release) {
   dir = resolve(dir);
   // Uses the same lock as paid execution; never takes a partial view of an in-flight batch.
-  return lock(join(dir, "execution.lock"), () => recheckUnlocked(dir, release));
+  const input = await read(join(dir, "batch.identity.json"));
+  return lock(join(input.accounting?.directory ?? dir, "execution.lock"), () => recheckUnlocked(dir, release));
 }
-async function recheckUnlocked(dir: string, release: Release) {
+// Caller must hold the original accounting root execution lock.
+export async function recheckUnlocked(dir: string, release: Release) {
   const original = await read(join(dir, "batch.identity.json")), { id, ...identity } = original;
   if (original.format !== 1 || id !== hash(identity) || hash(original.snapshot) !== original.inputVersion)
     throw new Blocked("cache_corrupt", "historical batch input integrity mismatch");
+  const accountingDir = original.accounting?.directory ?? dir;
+  if (original.accounting) {
+    const root = await validateBatchAccounting(accountingDir), round = await read(join(dir, "rerun.identity.json")),
+      { id: roundId, ...roundIdentity } = round;
+    if (root.sourceId !== original.accounting.originalBatchId || roundId !== hash(roundIdentity) ||
+        roundId !== original.accounting.roundId || round.sourceBatchId !== root.sourceId ||
+        dir !== join(accountingDir, "reruns", original.accounting.roundName) ||
+        round.releaseId !== original.releaseId || round.snapshotVersion !== original.inputVersion ||
+        hash(round.categoryIds) !== hash(original.categoryIds) || hash(round.model) !== hash(original.model) ||
+        hash(round.limits) !== hash(original.limits))
+      throw new Blocked("recovery_identity_drift", "rerun source/accounting identity mismatch");
+  }
   const originalResults = await read(join(dir, "batch.results.json")),
     sharedRecord = await read(join(dir, "batch.shared-snapshot.json")),
     execution = await read(join(dir, "execution.identity.json")),
-    budgetBefore = await read(join(dir, "budget.json"));
+    budgetBefore = await read(join(accountingDir, "budget.json"));
   if (originalResults.batchId !== id || sharedRecord.batchId !== id || execution.batchId !== id ||
       sharedRecord.version !== hash(sharedRecord.snapshot) || originalResults.sharedSnapshotVersion !== sharedRecord.version ||
       originalResults.releaseId !== original.releaseId || originalResults.mode !== execution.mode ||
@@ -73,7 +89,7 @@ async function recheckUnlocked(dir: string, release: Release) {
   for (const file of (await readdir(join(dir, "runs"))).filter((f) => /\.(blocked|result)\.json$/.test(f))) {
     const run = await read(join(dir, "runs", file));
     if (run.releaseId !== original.releaseId || !run.requestKeys?.length) continue;
-    const first = await durable(dir, run.requestKeys[0]), task = JSON.parse(first.request.body.input[0].content).task;
+    const first = await durable(accountingDir, run.requestKeys[0]), task = JSON.parse(first.request.body.input[0].content).task;
     if (task.runId !== original.runId || task.candidate?.kind !== "batch_modeling_scope") continue;
     const mapKey = task.candidate.phase + ":" + task.categoryId;
     // A current runner can save both a checked result and a later block. Refuse ambiguous histories.
@@ -89,7 +105,18 @@ async function recheckUnlocked(dir: string, release: Release) {
     const target = job.phase === "leaf" ? jobs : seeds,
       record = records.get(job.phase + ":" + job.categoryId);
     if (!record) {
-      if (job.code !== "family_dependency" && job.code !== "batch_stopped")
+      if (job.code === "context_budget" && job.phase === "leaf" && job.status === "program_blocked" && !job.artifact) {
+        // A pre-transport block is resumable, not a missing paid outcome. Inspect
+        // the authoritative ledger even if someone removed a run artifact.
+        for (const entry of budgetBefore.entries) {
+          const paid = await durable(accountingDir, entry.id),
+            paidTask = JSON.parse(paid.request.body.input[0].content).task;
+          if (paid.request.identity.releaseId === original.releaseId &&
+              paidTask.runId === original.runId && paidTask.categoryId === job.categoryId &&
+              paidTask.candidate?.phase === job.phase)
+            throw new Blocked("recovery_incomplete", "context-blocked job has an existing paid transcript; inspect before continuation");
+        }
+      } else if (job.code !== "family_dependency" && job.code !== "batch_stopped")
         throw new Blocked("recovery_incomplete", "missing original run for " + job.categoryId);
       target.push(jsonClone(job));
       traces.push({ phase: job.phase, categoryId: job.categoryId, originalCode: job.code,
@@ -101,12 +128,22 @@ async function recheckUnlocked(dir: string, release: Release) {
     if (manifest.runKey !== run.runKey || manifest.releaseId !== original.releaseId || manifest.snapshotVersion !== snapshot.version)
       throw new Blocked("cache_corrupt", "historical manifest identity mismatch");
     compatible(manifest, release, task);
+    // Context capacity changes are allowed only after rebuilding the COMPLETE
+    // historical input and matching its original semantic and wire fingerprints.
+    // This does not license dropping, rewriting or adding business context.
+    if (manifest.engineFiles["context.ts"] !== release.files["context.ts"]) {
+      const rebuilt = await assemble({ ...release, id: original.releaseId }, snapshot, task, Number.MAX_SAFE_INTEGER);
+      if (rebuilt.manifest.inputHash !== manifest.inputHash ||
+          !matchesContextLayout(rebuilt.serializedInput, manifest.requestLayout) ||
+          rebuilt.manifest.prefetchHash !== manifest.prefetchHash || rebuilt.manifest.toolsHash !== manifest.toolsHash)
+        throw new Blocked("recovery_contract_drift", "complete historical context/read fingerprint changed");
+    }
     const historicalInstructions = instructionsFor({ ...release, id: original.releaseId }, task.stage);
     if (manifest.instructionsHash !== hash(historicalInstructions))
       throw new Blocked("recovery_contract_drift", "historical instruction/material fingerprint mismatch");
     const responses = [];
     for (const key of run.requestKeys) {
-      const response = await durable(dir, key);
+      const response = await durable(accountingDir, key);
       if (response.request.identity.releaseId !== original.releaseId ||
           response.request.identity.snapshotVersion !== snapshot.version ||
           response.request.transportId !== execution.transportId || response.request.mode !== execution.mode ||
@@ -194,7 +231,7 @@ async function recheckUnlocked(dir: string, release: Release) {
       if (artifact.releaseId !== release.id || artifact.manifest.snapshotVersion !== snapshot.version ||
           hash(artifact.manifest.engineFiles) !== hash(release.files) || !artifact.requestKeys.length)
         throw new Blocked("cache_corrupt", "saved correction identity changed");
-      const first = await durable(dir, artifact.requestKeys[0]!),
+      const first = await durable(accountingDir, artifact.requestKeys[0]!),
         task = JSON.parse(first.request.body.input[0].content).task as Task;
       if (task.categoryId !== job.categoryId || task.runId !== original.runId ||
           (task.candidate as any)?.phase !== job.phase || first.request.identity.releaseId !== release.id ||
@@ -204,7 +241,7 @@ async function recheckUnlocked(dir: string, release: Release) {
         throw new Blocked("cache_corrupt", "saved correction task/manifest changed");
       let last: Awaited<ReturnType<typeof durable>> | null = null;
       for (const key of artifact.requestKeys) {
-        last = await durable(dir, key);
+        last = await durable(accountingDir, key);
         if (last.request.identity.releaseId !== release.id || last.request.identity.snapshotVersion !== snapshot.version ||
             last.request.transportId !== execution.transportId || last.request.mode !== execution.mode ||
             hash(JSON.parse(last.request.body.input[0].content)) !== artifact.manifest.inputHash ||
@@ -273,7 +310,7 @@ async function recheckUnlocked(dir: string, release: Release) {
     newModelRequests: 0, originalArtifactsModified: false, businessRepairs: 0, productionWrites: 0,
     adoption: "pending_human",
   };
-  if (hash(await read(join(dir, "budget.json"))) !== hash(budgetBefore))
+  if (hash(await read(join(accountingDir, "budget.json"))) !== hash(budgetBefore))
     throw new Blocked("budget_change", "budget changed during offline recheck");
   await save(join(outDir, "recheck.report.json"), report);
   await save(join(outDir, "recheck.results.json"), { recoveryId, familySeeds: seeds, leaves: jobs });
@@ -289,6 +326,8 @@ async function recheckUnlocked(dir: string, release: Release) {
 export async function correctBatchLeaf(dir: string, release: Release, categoryId: string,
   client: ResponsesClient, progress: (event: Record<string, unknown>) => void = () => {}) {
   dir = resolve(dir);
+  if ((await read(join(dir, "batch.identity.json"))).accounting)
+    throw new Blocked("recovery_scope", "use batch-continue for pre-transport blocks in a rerun; preserve its original root accounting");
   if (resolve(client.dir) !== dir || resolve(client.budget.path) !== join(dir, "budget.json"))
     throw Error("recovery must share the original request directory and cumulative budget");
   return lock(join(dir, "execution.lock"), async () => {

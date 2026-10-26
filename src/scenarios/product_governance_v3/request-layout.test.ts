@@ -138,7 +138,7 @@ test("unchanged context/request byte caps block before transport, with no trunca
   const dir = next(), client = new ResponsesClient({ mode: "offline", transportId: "cache-byte-cap",
     fetch: async () => { throw Error("must not send truncated context"); } }, dir, new Budget(dir, 0, "offline-zero"));
   await expect(runStage({ release, snapshot, task, client, outDir: dir, corrections: BATCH_CORRECTIONS,
-    limits: { maxRequestBytes: bytes } })).rejects.toThrow("request/history exceeds byte budget");
+    limits: { maxRequestBytes: bytes } })).rejects.toThrow("insufficient history capacity");
   expect(client.calls).toBe(0);
-  expect((await client.budget.status()).entries).toHaveLength(0);
+  expect(await Bun.file(join(dir, "budget.json")).exists()).toBe(false);
 });

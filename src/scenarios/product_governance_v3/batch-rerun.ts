@@ -1,10 +1,11 @@
 import { effectiveBudgetLimit } from "./budget.ts";
-import { readdir } from "node:fs/promises";
+import { validateBatchAccounting } from "./batch-accounting.ts";
 import { join, resolve } from "node:path";
 import { read, save, exists, hash, lock, jsonClone, Blocked } from "./core.ts";
 import type { Release } from "./release.ts";
 import { DataSnapshot } from "./snapshot.ts";
-import { assemble } from "./context.ts";
+import { assembleStageContext } from "./stage-context.ts";
+import { BATCH_CORRECTIONS } from "./runner.ts";
 import { batchTask, validateBatchOptions, type BatchPlan } from "./batch.ts";
 import type { ModelOptions } from "./runner.ts";
 import { MODELING_PROPOSAL_VERSION } from "./modeling-proposal.ts";
@@ -48,30 +49,7 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
       new Set(options.categoryIds).size !== options.categoryIds.length))
     throw new Blocked("rerun_scope", "--category-ids须为非空、无重复的末级ID列表");
   return lock(join(directory, "execution.lock"), async () => {
-    for (const name of ["batch.identity.json", "execution.identity.json", "budget.json"])
-      if (!await exists(join(directory, name))) throw new Blocked("rerun_root", "--out请指定已执行批次的原始根目录，不能传review、corrections或新目录：" + directory);
-    const source = await read(join(directory, "batch.identity.json")), { id: sourceId, ...sourceIdentity } = source,
-      execution = await read(join(directory, "execution.identity.json")), ledger = await read(join(directory, "budget.json"));
-    if (source.format !== 1 || source.accounting || sourceId !== hash(sourceIdentity) || hash(source.snapshot) !== source.inputVersion ||
-        execution.batchId !== sourceId || ledger.format !== 1 || ledger.limitCny !== execution.budgetCny || ledger.pricingId !== execution.pricingId)
-      throw new Blocked("rerun_source_corrupt", "use the original batch root with intact input, execution and cumulative budget identities");
-    const keys = (await readdir(join(directory, "requests"))).filter((f) => f.endsWith(".request.json")).map((f) => f.slice(0, -13)),
-      entryIds = ledger.entries.map((e: any) => e.id);
-    if (new Set(entryIds).size !== entryIds.length || hash([...keys].sort()) !== hash([...entryIds].sort()))
-      throw new Blocked("budget_change", "request inventory differs from cumulative reservations");
-    for (const entry of ledger.entries) {
-      if (!/^[a-f0-9]{64}$/.test(entry.id) || !Number.isFinite(entry.reservedCny) || entry.reservedCny < 0)
-        throw new Blocked("budget_change", "invalid historical request reservation");
-      const base = join(directory, "requests", entry.id), req = await read(base + ".request.json"), { key, ...requestIdentity } = req;
-      if (key !== entry.id || hash(requestIdentity) !== key || req.mode !== execution.mode || req.transportId !== execution.transportId)
-        throw new Blocked("cache_corrupt", "historical request identity changed");
-      if (entry.status !== "completed" || !await exists(base + ".response.json"))
-        throw new Blocked("outcome_unknown", "unresolved paid outcome must be inspected before a new round; no implicit resend: " + entry.id);
-      const response = await read(base + ".response.json"), receipt = await read(base + ".receipt.json");
-      if (response.key !== key || hash(response.response) !== response.sha256 || response.response.status !== "completed" ||
-          receipt.key !== key || receipt.status !== "completed" || receipt.responseHash !== response.sha256)
-        throw new Blocked("cache_corrupt", "historical response/receipt integrity mismatch");
-    }
+    const { source, sourceId, execution, ledger, keys } = await validateBatchAccounting(directory);
     const originalSnapshot = new DataSnapshot(source.snapshot), categoryId = options.categoryId ?? source.root.id;
     if (options.categoryIds?.some((id) => !source.categoryIds.includes(id) || !originalSnapshot.tree.get(id).isLeaf))
       throw new Blocked("rerun_scope", "--category-ids只能包含原批次范围内的真实末级ID，不展开上级类目");
@@ -108,7 +86,7 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
     plan.maximumRequests = plan.maximumStageTasks * plan.limits.maxRounds;
     plan.maximumReservationCny = Number((plan.maximumRequests * (execution.mode === "network" ? plan.reserveCny : 0)).toFixed(2));
     for (const id of categoryIds) try {
-      const context = await assemble(release, snapshot, batchTask(plan, id, "leaf"));
+      const context = await assembleStageContext({ release, snapshot, task: batchTask(plan, id, "leaf"), model: plan.model, limits: plan.limits, corrections: BATCH_CORRECTIONS });
       if (snapshot.families(id, runId).some((f) => !f.usable)) throw new Blocked("family_dependency", "unavailable original input family");
       const gaps = context.tools.knowledgeGaps();
       if (gaps.length) throw new Blocked("knowledge_dependency", gaps.join("; "));

@@ -42,7 +42,7 @@ export async function assemble(
   release: Release,
   snapshot: DataSnapshot,
   task: Task,
-  maxContextBytes = 200000,
+  maxContextBytes = 350000,
 ) {
   snapshot.assertTask(task);
   const baseline = snapshot.baseline(task);

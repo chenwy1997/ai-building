@@ -8,7 +8,7 @@ import {
   type AttributeDefinition,
   type AttributeBinding,
 } from "./core.ts";
-import { assemble } from "./context.ts";
+import { assembleStageContext, stageRequest } from "./stage-context.ts";
 import type { Release } from "./release.ts";
 import type { DataSnapshot } from "./snapshot.ts";
 import type { ResponsesClient, InputItem } from "./responses.ts";
@@ -17,7 +17,7 @@ import { projectNative } from "./native-contract.ts";
 import { preparationBundle, type FactExtraction } from "./fact-preparation.ts";
 import { parseResultJson, responseText, ResultJsonSyntaxError } from "./result-json.ts";
 import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
-import { RUNTIME_PROTOCOL, runtimeState } from "./request-layout.ts";
+import { runtimeState } from "./request-layout.ts";
 import { materializeModelResult } from "./modeling-proposal.ts";
 
 export interface Limits {
@@ -69,7 +69,7 @@ export async function runStage(options: {
       throw Error("invalid limit " + key);
   if (client.mode === "network" && snapshot.data.kind === "fixture")
     throw new Blocked("fixture_network", "fixture cannot enter paid transport");
-  const plan = await assemble(release, snapshot, task),
+  const plan = await assembleStageContext({ release, snapshot, task, limits, model, corrections }),
     runKey = hash({
       manifest: plan.manifest,
       task,
@@ -84,8 +84,7 @@ export async function runStage(options: {
     ],
     requestKeys: string[] = [],
     callIds = new Set<string>();
-  const withRuntimeState = Boolean(corrections.maxCorrections || corrections.converge),
-    instructions = plan.instructions + (withRuntimeState ? RUNTIME_PROTOCOL : "");
+  const withRuntimeState = Boolean(corrections.maxCorrections || corrections.converge);
   let toolCount = 0,
     toolBytes = 0, forceFinal = false;
   const feedback: { round: number; code: string; details: unknown }[] = [];
@@ -115,23 +114,7 @@ export async function runStage(options: {
       // Never rewrite earlier states: the previous request remains an exact input prefix.
       if (withRuntimeState) history.push(runtimeState({ round: round + 1, maxRounds: limits.maxRounds,
         toolCallsRemaining: limits.maxToolCalls - toolCount, finalOnly }));
-      const body = {
-        model: model.model,
-        instructions,
-        input: history,
-        tools: plan.tools.definitions,
-        reasoning: { effort: model.reasoningEffort },
-        max_output_tokens: limits.maxOutputTokens,
-        ...(finalOnly ? { tool_choice: "none" } : {}),
-        text: {
-          format: {
-            type: "json_schema",
-            name: task.stage.replaceAll("-", "_"),
-            strict: true,
-            schema: plan.schema,
-          },
-        },
-      };
+      const body = stageRequest(plan, task, model, limits, corrections, history, finalOnly);
       if (Buffer.byteLength(canonical(body)) > limits.maxRequestBytes)
         throw new Blocked(
           "request_budget",

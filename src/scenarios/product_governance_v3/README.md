@@ -1,8 +1,10 @@
 # 商品治理v3：类目属性提案与审阅
 
-v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认离线，`batch --execute`、`batch-rerun --execute`或指定失败末级的`batch-recover --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
+v3承载已确认的新合同。当前完成“规则/后台合同 → 阶段skill → 必要知识预取 → DeepSeek Responses工具循环 → 程序检查 → 留痕/恢复”，并提供用户手动触发的类目属性提案批处理。默认离线，`batch --execute`、`batch-rerun --execute`、`batch-continue --execute`或指定失败末级的`batch-recover --execute`才调用付费DeepSeek；结果待人工采用，没有生产写入。
 
-**2026-10-26：抽纸基线JSON错误定位与纠错反馈已修复**，见[真实失败回归、离线验收与抽纸补跑命令](docs/json-feedback-repair-20261026.md)。精确位置/路径/原文片段进入模型反馈，最多两次纠错且不自动改JSON。新固定轮次只补1个抽纸共同基线和2个末级，low档、并发2、原累计预算；洗脸巾已有结果留在原轮次。当前仅离线验收及预检，付费执行仍由用户触发。
+**当前：保留成功基线，只续跑两个抽纸末级**，见[完整上下文容量、离线验收与续跑命令](docs/context-continuation-20261026.md)。真实基线上下文200664字节，完整首请求234956字节；按既有350000字节请求上限检查并预留历史空间，正文、工具和纠错历史不裁剪。`batch-continue`复核并复用原基线，保持low、并发2与原累计预算；洗脸巾结果留在原轮次。默认仅预检，用户加`--execute`才请求模型。
+
+此前的[JSON错误定位与纠错反馈修复](docs/json-feedback-repair-20261026.md)已由用户执行：抽纸基线程序通过，两个末级在发送前容量阻断。该文保留当时命令和验收记录；当前入口见上行，不再生成一次基线。
 
 此前的[核心清单核实与三类接线](docs/core-pilot-20261026.md)已由用户执行。三个纸张定义可原样用于盒装/软包抽纸的待审建模，洗脸巾保持自己的对象范围；数量按真实字段承载建立条件来源计划。核心遗漏和扩展越界进入检查，授权离线核实不冒充人工专业签名或SKU填写许可。该文保留当时三类命令，当前补跑见上行。
 
@@ -91,7 +93,7 @@ bun src/scenarios/product_governance_v3/cli.ts plan --snapshot /绝对路径/sna
 
 `sku-filling`、`fact-extraction`另需`--product-id`；`review-assistance`另需`--candidate` JSON文件，包含`stage`（family-modeling或sku-filling）和`result`（候选结果）。审核SKU取值时需带对应`--product-id`读取证据。候选程序错误直接进入审核上下文，并继续阻断结果，模型不能靠空意见列表把错误抹掉。参数严格校验，错命令/未知参数报错。`batch`调用相同`runStage`，共享全批预算和冻结依赖，不接受商品试填阶段；没有`apply`入口。
 
-小卷纸的只读采集、准备、录制回放、工作簿与初次事实意见导入，见[样板运行说明](docs/roll-pilot-runbook.md)。只有显式`capture-roll-pilot`联网读取供应链及其密钥；固定两类各最多3件，不自动翻页/重试。模型密钥仅由`batch --execute`、`batch-rerun --execute`和指定失败末级的`batch-recover --execute`读取。
+小卷纸的只读采集、准备、录制回放、工作簿与初次事实意见导入，见[样板运行说明](docs/roll-pilot-runbook.md)。只有显式`capture-roll-pilot`联网读取供应链及其密钥；固定两类各最多3件，不自动翻页/重试。模型密钥仅由`batch --execute`、`batch-rerun --execute`、`batch-continue --execute`和指定失败末级的`batch-recover --execute`读取。
 
 ## 资料怎样真正进入DeepSeek
 
