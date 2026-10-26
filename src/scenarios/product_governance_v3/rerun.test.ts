@@ -1,4 +1,4 @@
-import { withFixtureDecisions } from "./fixtures.ts";
+import { withFixtureDecisions, fixtureWireResult } from "./fixtures.ts";
 import { test, expect, beforeAll, afterAll } from "bun:test";
 import { mkdtemp, rm, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -25,12 +25,19 @@ function earlierRelease() {
 }
 const client = (directory: string, fetch: FetchLike, budget = new Budget(directory, 0, "offline-zero")) =>
   new ResponsesClient({ mode: "offline", transportId: "rerun-regression", fetch }, directory, budget);
-function mock(options: { tool?: boolean; reject?: boolean; badExplanationOnce?: boolean; changedDefinition?: boolean } = {}) {
+function mock(options: { tool?: boolean; reject?: boolean; badExplanationOnce?: boolean; changedDefinition?: boolean; pairFirstRequests?: boolean } = {}) {
   const requests: any[] = [], seeds = new Set<string>();
   let active = 0, maximum = 0;
+  let releasePair!: () => void;
+  const firstPair = new Promise<void>(resolve => { releasePair = resolve; });
   const fetch: FetchLike = async (_url, init) => {
     const body = JSON.parse(init.body), input = JSON.parse(body.input[0].content), task = input.task;
-    requests.push(body); active++; maximum = Math.max(maximum, active); await Bun.sleep(2); active--;
+    requests.push(body); active++; maximum = Math.max(maximum, active);
+    if (options.pairFirstRequests && requests.length <= 2) {
+      if (requests.length === 2) releasePair();
+      await firstPair;
+    } else await Bun.sleep(2);
+    active--;
     const scope = task.candidate, seed = scope.phase === "family-seed";
     if (!seed && scope.family && scope.family.id !== "small-toilet-roll") expect(seeds.has(scope.family.id)).toBe(true);
     if (options.tool && body.input.length === 2)
@@ -56,9 +63,9 @@ function mock(options: { tool?: boolean; reject?: boolean; badExplanationOnce?: 
       if (!badExplanation) expect(JSON.parse(body.input.at(-2).content).errors.some((e: any) => e.ruleId === "R08")).toBe(true);
     }
     if (seed) seeds.add(scope.family.id);
-    return Response.json({ status: "completed", output: [finalMessage(withFixtureDecisions({ categoryId: task.categoryId,
+    return Response.json({ status: "completed", output: [finalMessage(fixtureWireResult(withFixtureDecisions({ categoryId: task.categoryId,
       baselineVersion: family?.version ?? null, attributes, bindings, extensionCandidates: family?.extensionCandidates ?? [],
-      unresolved: [badExplanation ? "单卷重量精度均留null" : "构造验收，非真实DeepSeek业务结果；精度依据仍待核实"] }))] });
+      unresolved: [badExplanation ? "单卷重量精度均留null" : "构造验收，非真实DeepSeek业务结果；精度依据仍待核实"] }), body))] });
   };
   return { fetch, requests, get maximum() { return maximum; } };
 }
@@ -86,7 +93,7 @@ test("full rerun previews all 21 leaves and two seeds without reusing historical
 });
 
 test("new round really regenerates passed leaves with current context, tools, seed barrier and requested concurrency", async () => {
-  const { dir } = await original(CLEAN_PAPER_ID), r = await prepare(dir), m = mock({ tool: true });
+  const { dir } = await original(CLEAN_PAPER_ID), r = await prepare(dir), m = mock({ tool: true, pairFirstRequests: true });
   const result = await executeBatch(r.plan, release, client(dir, m.fetch));
   expect(result.total).toBe(21); expect(result.passed).toBe(21); expect(result.familySeeds).toHaveLength(2);
   expect(result.mockCallsThisExecution).toBe(46); expect(result.networkCallsThisExecution).toBe(0);
@@ -128,11 +135,12 @@ test("the current R08 feedback corrects explanations without changing the frozen
   expect((result.leaves[0]!.artifact!.result as any).attributes.find((a: any) => a.id === "roll.declared_mass").numberConfig.precision).toBe(3);
 });
 
-test("full rerun does not weaken R03 when a model changes a reviewed shared definition", async () => {
+test("delta rerun rejects a copied frozen definition before assembly and remains bounded", async () => {
   const { dir } = await original(ROLL), r = await prepare(dir), m = mock({ changedDefinition: true });
   const result = await executeBatch(r.plan, release, client(dir, m.fetch));
   expect(result.blocked).toBe(1); expect(m.requests).toHaveLength(3);
-  expect(result.leaves[0]!.artifact!.checks.errors.some((e) => e.ruleId === "R03")).toBe(true);
+  expect(result.leaves[0]!.code).toBe("proposal_contract");
+  expect(result.leaves[0]!.error).toContain("inherited object");
 });
 
 test("same round freezes release and selected scope but permits concurrency changes", async () => {

@@ -3,7 +3,7 @@ import { readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { read, save, exists, hash, lock, jsonClone, Blocked, type Task } from "./core.ts";
 import { instructionsFor, type Release } from "./release.ts";
-import { outputSchemas } from "./contracts.ts";
+import { modelOutputSchema, materializeModelResult } from "./modeling-proposal.ts";
 import { DataSnapshot } from "./snapshot.ts";
 import { ToolRegistry } from "./tools.ts";
 import { checkResult } from "./checks.ts";
@@ -21,7 +21,7 @@ import { matchesContextLayout } from "./request-layout.ts";
 const HOST_FILES = new Set(["runner.ts", "cli.ts", "batch.ts", "responses.ts", "batch-export.ts",
   "result-json.ts", "progress.ts", "batch-recovery.ts", "scripts/export-batch-review.mjs"]);
 function compatible(manifest: any, release: Release, task: Task) {
-  if (manifest.outputSchemaHash !== hash(outputSchemas[task.stage]))
+  if (manifest.outputSchemaHash !== hash(modelOutputSchema(task)))
     throw new Blocked("recovery_contract_drift", "historical output schema changed; manual migration required");
   for (const [path, sha] of Object.entries(manifest.engineFiles ?? {}))
     if (!HOST_FILES.has(path) && release.files[path] !== sha)
@@ -127,9 +127,12 @@ async function recheckUnlocked(dir: string, release: Release) {
     let recovered: BatchJob = { ...jsonClone(job), artifact: null }, normalization: unknown = null;
     const last = responses.at(-1)!;
     if (job.artifact || run.code === "final_json" || run.code === "final_output") try {
-      const parsed = parseResultJson(responseText(last.response.output)), { result, ...parsing } = parsed,
+      const parsed = parseResultJson(responseText(last.response.output)), { result: modelProposal, ...parsing } = parsed,
+        { result, assembly } = materializeModelResult(snapshot, task, modelProposal),
         checks = checkResult(task, result, tools);
-      if (job.artifact && hash(job.artifact.result) !== hash(result))
+      if (job.artifact && (hash(job.artifact.result) !== hash(result) ||
+          hash(job.artifact.assembly ?? null) !== hash(assembly) ||
+          (assembly && hash(job.artifact.modelProposal) !== hash(modelProposal))))
         throw new Blocked("cache_corrupt", "stored job result differs from durable model output");
       normalization = parsing;
       const modeled = result as any;
@@ -137,6 +140,7 @@ async function recheckUnlocked(dir: string, release: Release) {
         runKey: hash({ historicalRunKey: run.runKey, responseHash: last.responseHash, checkerRelease: release.id }),
         mode: execution.mode, snapshotKind: snapshot.data.kind, releaseId: original.releaseId,
         manifest, requestKeys: run.requestKeys, toolCount: run.toolCount, result, checks,
+        modelProposal: assembly ? modelProposal : null, assembly,
         configurationReview: checks.executedChecks.includes("configuration-explanations") ? modelConfigurationReview(result) : null,
         outputParsing: parsing, feedback: [], factPreparation: null,
         nativeProjections: checks.errors.length ? [] : modeled.attributes.map((a: any) =>
@@ -209,7 +213,11 @@ async function recheckUnlocked(dir: string, release: Release) {
             !last.request.body.instructions.startsWith(instructionsFor(release, task.stage)))
           throw new Blocked("cache_corrupt", "saved correction request context changed");
       }
-      if (hash(parseResultJson(responseText(last!.response.output)).result) !== hash(artifact.result))
+      const raw = parseResultJson(responseText(last!.response.output)).result,
+        materialized = materializeModelResult(snapshot, task, raw);
+      if (hash(materialized.result) !== hash(artifact.result) ||
+          hash(materialized.assembly) !== hash(artifact.assembly ?? null) ||
+          (materialized.assembly && hash(raw) !== hash(artifact.modelProposal)))
         throw new Blocked("cache_corrupt", "saved correction differs from durable model output");
       const tools = new ToolRegistry(snapshot, release, task);
       for (const event of events)

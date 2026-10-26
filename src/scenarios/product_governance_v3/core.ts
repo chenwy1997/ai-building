@@ -310,6 +310,7 @@ export interface Family {
   // Optional for reading previously frozen format=2 snapshots.
   extensionCandidates?: ExtensionCandidate[];
   decisions?: import("./modeling-contract.ts").ModelingDecision[];
+  reviewIssues?: string[];
 }
 // Minimum known responsibilities, established by the approved supply-chain contract.
 // This is not a complete production field inventory; snapshots must supply and review the rest.

@@ -18,6 +18,7 @@ import { preparationBundle, type FactExtraction } from "./fact-preparation.ts";
 import { parseResultJson, responseText } from "./result-json.ts";
 import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
 import { RUNTIME_PROTOCOL, runtimeState } from "./request-layout.ts";
+import { materializeModelResult } from "./modeling-proposal.ts";
 
 export interface Limits {
   maxRounds: number;
@@ -223,7 +224,19 @@ export async function runStage(options: {
           instruction: "请返回一个完整合法的最终JSON对象。程序不修复业务字段或JSON语法；所有业务规则保持不变。" }) });
         continue;
       }
-      const { result, ...outputParsing } = parsedResult;
+      const { result: modelProposal, ...outputParsing } = parsedResult;
+      let materialized: ReturnType<typeof materializeModelResult>;
+      try { materialized = materializeModelResult(snapshot, task, modelProposal); }
+      catch (error) {
+        if (!(error instanceof Blocked) || error.code !== "proposal_contract" ||
+            round + 1 === limits.maxRounds || feedback.length >= corrections.maxCorrections) throw error;
+        feedback.push({ round: round + 1, code: error.code, details: error.message });
+        history.push(...response.output, { role: "user", content: canonical({
+          kind: "host_contract_feedback", code: error.code, errors: [error.message],
+          instruction: "按本次schema返回增量提案；冻结对象只引用版本，修改写revisionRequests。程序不会代改业务判断。" }) });
+        continue;
+      }
+      const { result, assembly } = materialized;
       const checks = checkResult(task, result, plan.tools);
       if (checks.errors.length && round + 1 < limits.maxRounds && feedback.length < corrections.maxCorrections) {
         feedback.push({ round: round + 1, code: "program_checks", details: checks.errors });
@@ -254,6 +267,8 @@ export async function runStage(options: {
         requestKeys,
         toolCount,
         result,
+        modelProposal: assembly ? modelProposal : null,
+        assembly,
         checks,
         configurationReview: checks.executedChecks.includes("configuration-explanations") ? modelConfigurationReview(result) : null,
         outputParsing,

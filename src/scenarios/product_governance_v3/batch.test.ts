@@ -1,4 +1,4 @@
-import { withFixtureDecisions } from "./fixtures.ts";
+import { withFixtureDecisions, fixtureWireResult } from "./fixtures.ts";
 import { beforeAll, afterAll, test, expect } from "bun:test";
 import { mkdtemp, rm, readFile, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -72,7 +72,7 @@ function mock(options: {
       attributes: empty ? [] : attrs, bindings: empty ? [] : bindings,
       extensionCandidates: baseline?.extensionCandidates ?? [], unresolved: ["模拟验收，非DeepSeek真实产出或业务质量评估"] };
     if (isSeed) completedSeeds.add(scope.family.id);
-    return Response.json({ status: "completed", output: [finalMessage(withFixtureDecisions(result))], usage: { input_tokens: 100, output_tokens: 100 } });
+    return Response.json({ status: "completed", output: [finalMessage(fixtureWireResult(withFixtureDecisions(result), body))], usage: { input_tokens: 100, output_tokens: 100 } });
   };
   return { fetch, requests, completedSeeds, get maxActive() { return maxActive; } };
 }
@@ -275,7 +275,7 @@ test("actual CLI execute branch reaches Responses, tool loop, checks and exit co
   const dir = next(), preload = join(dir, "mock-http.mjs"), out = join(dir, "batch");
   await save(join(dir, "synthetic-marker.json"), { onlyForTesting: true, liveNetworkCalls: 0 });
   await writeFile(preload, `
-    import {attribute,binding,functionCall,finalMessage,withFixtureDecisions} from ${JSON.stringify(join(ROOT, "fixtures.ts"))};
+    import {attribute,binding,functionCall,finalMessage,withFixtureDecisions,fixtureWireResult} from ${JSON.stringify(join(ROOT, "fixtures.ts"))};
     globalThis.fetch=async (url,init)=>{
       if(url!=="https://api.deepseek.com/responses" || init.headers.authorization!=="Bearer offline-synthetic-credential") throw Error("unexpected transport/credential");
       if(process.env.PGV3_SYNTHETIC_FAILURE==="401")return new Response("synthetic unauthorized",{status:401});
@@ -283,7 +283,7 @@ test("actual CLI execute branch reaches Responses, tool loop, checks and exit co
       if(body.input.length===2)return Response.json({status:"completed",output:[functionCall("categories_get",{id},"cli-call")]});
       if(body.input.at(-2).call_id!=="cli-call")throw Error("tool result not paired");
       const a=attribute({id:"synthetic.cli",name:"模拟CLI验收参数",conceptKey:"synthetic.cli",scope:"synthetic-only",fieldType:"text"});
-      return Response.json({status:"completed",output:[finalMessage(withFixtureDecisions({categoryId:id,baselineVersion:null,attributes:[a],bindings:[binding(a.id,{categoryId:id})],extensionCandidates:[],unresolved:["仅模拟CLI验收，无真实模型或业务结论"]}))],usage:{input_tokens:1,output_tokens:1}});
+      return Response.json({status:"completed",output:[finalMessage(fixtureWireResult(withFixtureDecisions({categoryId:id,baselineVersion:null,attributes:[a],bindings:[binding(a.id,{categoryId:id})],extensionCandidates:[],unresolved:["仅模拟CLI验收，无真实模型或业务结论"]}),body))],usage:{input_tokens:1,output_tokens:1}});
     };
   `);
   const child = Bun.spawn([process.execPath, "--preload", preload, join(ROOT, "cli.ts"), "batch",

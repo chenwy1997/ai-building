@@ -17,6 +17,12 @@ export { RULES, STAGE_RULES, RULE_REGISTRY } from "./rules.ts";
 import { STAGE_RULES, RULE_REGISTRY } from "./rules.ts";
 export const KNOWLEDGE = [
   {
+    id: "wash-tissue-research-20261026",
+    file: "knowledge/wash-tissue-research-20261026.md",
+    hints: ["洗脸巾", "盒装抽纸", "软包抽纸"],
+    kind: "research_pending_professional_review",
+  },
+  {
     id: "clean-paper-admission-20261023",
     file: "knowledge/clean-paper-admission-20261023.md",
     hints: ["清洁纸品"],

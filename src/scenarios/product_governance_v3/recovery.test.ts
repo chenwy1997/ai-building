@@ -1,4 +1,4 @@
-import { withFixtureDecisions } from "./fixtures.ts";
+import { withFixtureDecisions, fixtureWireResult } from "./fixtures.ts";
 import { test, expect, beforeAll, afterAll } from "bun:test";
 import { mkdtemp, rm, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -149,9 +149,11 @@ const good = (id = LEAF) => {
 async function legacy(code: "final_json" | "tool_arguments" = "final_json") {
   const dir = next(), plan = await prepareBatch({ categoryId: LEAF, outDir: dir, runId: "legacy-mock", concurrency: 1,
     treePath: join(ROOT, "profiles/clean-paper-tree.json") }, release);
-  const wrapped = finalMessage(good());
-  wrapped.content[0].text = "```json\n" + JSON.stringify(good()) + "\n```";
-  const mock = scriptedFetch([[wrapped]]), client = new ResponsesClient({
+  const mock = scriptedFetch([(request) => {
+    const wire = fixtureWireResult(good(), request), wrapped = finalMessage(wire);
+    wrapped.content[0].text = "```json\n" + JSON.stringify(wire) + "\n```";
+    return [wrapped];
+  }]), client = new ResponsesClient({
     mode: "offline", transportId: "historical-regression", fetch: mock.fetch,
   }, dir, new Budget(dir, 0, "offline-zero"));
   const result = await executeBatch(plan, release, client), artifact = result.leaves[0]!.artifact!;
@@ -201,7 +203,7 @@ test("a failed target uses a new recorded correction and replay makes zero addit
     expect(input.task.candidate.recovery.originalCode).toBe("tool_arguments");
     expect(input.sharedContext.category.node.id).toBe(LEAF);
     expect(body.instructions).toContain("剩余模型工具调用");
-    return Response.json({ status: "completed", output: [finalMessage(good())] });
+    return Response.json({ status: "completed", output: [finalMessage(fixtureWireResult(good(), body))] });
   };
   const client = new ResponsesClient({ mode: "offline", transportId: "historical-regression", fetch },
     dir, new Budget(dir, 0, "offline-zero"));
@@ -258,7 +260,7 @@ test("targeted recovery creates the failed common baseline first and never dispa
       result.baselineVersion = baseline.version;
       result.bindings = baseline.bindings.map((b: any) => ({ ...b, categoryId: id, baselineAttributeId: b.attributeId }));
     }
-    return Response.json({ status: "completed", output: [finalMessage(withFixtureDecisions(result))] });
+    return Response.json({ status: "completed", output: [finalMessage(fixtureWireResult(withFixtureDecisions(result), body))] });
   };
   const client = new ResponsesClient({ mode: "offline", transportId: "family-recovery", fetch }, dir, budget);
   const result = await correctBatchLeaf(dir, release, id, client);
@@ -274,7 +276,7 @@ test("targeted recovery creates the failed common baseline first and never dispa
 test("an unknown correction outcome keeps its receipt and never sends the same request again", async () => {
   const { dir } = await legacy("tool_arguments"), budget = new Budget(dir, 0, "offline-zero");
   let calls = 0;
-  const client = new ResponsesClient({ mode: "offline", transportId: "historical-regression", fetch: async () => {
+  const client = new ResponsesClient({ mode: "offline", transportId: "historical-regression", fetch: async (_url, init) => {
     calls++; throw Error("synthetic dropped response");
   } }, dir, budget);
   const first = await correctBatchLeaf(dir, release, LEAF, client);
@@ -289,10 +291,10 @@ test("an unknown correction outcome keeps its receipt and never sends the same r
 test("a rejected correction does not silently buy another correction loop when executed again", async () => {
   const { dir } = await legacy("tool_arguments");
   let calls = 0;
-  const client = new ResponsesClient({ mode: "offline", transportId: "historical-regression", fetch: async () => {
+  const client = new ResponsesClient({ mode: "offline", transportId: "historical-regression", fetch: async (_url, init) => {
     calls++;
     const bad = good(); bad.attributes[0]!.name = "品牌";
-    return Response.json({ status: "completed", output: [finalMessage(bad)] });
+    return Response.json({ status: "completed", output: [finalMessage(fixtureWireResult(bad, JSON.parse(init.body)))] });
   } }, dir, new Budget(dir, 0, "offline-zero"));
   const first = await correctBatchLeaf(dir, release, LEAF, client);
   expect(first.blocked).toBe(1); expect(calls).toBe(3);

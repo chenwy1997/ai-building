@@ -1,0 +1,86 @@
+{
+  "kind": "bounded_pilot_offline_engineering_acceptance",
+  "date": "2026-10-26",
+  "releaseId": "ae6153608b86ae71b7f71f2b94f96c65058b4ee7dd04c99a05f5d45c5fbdd0f7",
+  "tests": {
+    "passed": 264,
+    "failed": 0,
+    "files": 18,
+    "newFocusedTests": 11,
+    "log": "/tmp/pgv3-all-delta-tests.log"
+  },
+  "typescript": "passed",
+  "skillValidation": "quick_validate.py passed with existing PyYAML 6.0.3",
+  "modelingContractVersion": "modeling-proposal-v1",
+  "threeCategoryMock": {
+    "leaves": 3,
+    "familySeeds": 1,
+    "requests": 8,
+    "feedback": 0,
+    "checks": "passed",
+    "recovery": "passed without new mock calls",
+    "businessAccuracyEvaluated": false
+  },
+  "historicalContextReadOnlyProbe": {
+    "sourceRound": "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-applicability-20261026",
+    "sourceSnapshotHash": "4607a2542bcbbce0b7d726b5945e543cc853bf13c468ad26e2d744c4a47976ba",
+    "note": "New release plus newly routed knowledge, assembled in memory only. No new round created, no claims that old proposals pass new business checks.",
+    "categories": [
+      {
+        "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+        "name": "洗脸巾",
+        "contextBytes": 163059,
+        "limit": 200000,
+        "knowledgeIds": [
+          "scm-field-responsibilities-20261022",
+          "clean-paper-admission-20261023",
+          "wash-tissue-research-20261026"
+        ],
+        "referenceCount": 0
+      },
+      {
+        "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "name": "盒装抽纸",
+        "contextBytes": 189177,
+        "limit": 200000,
+        "knowledgeIds": [
+          "scm-field-responsibilities-20261022",
+          "clean-paper-admission-20261023",
+          "wash-tissue-research-20261026"
+        ],
+        "referenceCount": 4
+      },
+      {
+        "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+        "name": "软包抽纸",
+        "contextBytes": 189177,
+        "limit": 200000,
+        "knowledgeIds": [
+          "scm-field-responsibilities-20261022",
+          "clean-paper-admission-20261023",
+          "wash-tissue-research-20261026"
+        ],
+        "referenceCount": 4
+      }
+    ]
+  },
+  "fiveStageMock": {
+    "reportHash": "adb9403ea052bf3e1ac78d89a8d185e5da58f1a746e2cf9bf982b4565c5b1d02",
+    "report": "outputs/product-governance-v3/bounded-pilot-offline-20261026/acceptance.json",
+    "allPassed": true
+  },
+  "originalBudget": {
+    "path": "outputs/product-governance-v3/clean-paper-batch-20261023/budget.json",
+    "unchangedHash": "5f4d3f929bb3662a9cd6652044a79ad5d6190673d96a298a81caf41f270bf05b",
+    "entries": 162,
+    "reservedCny": 210.6,
+    "effectiveLimitCny": 280.7,
+    "remainingCny": 70.1
+  },
+  "paidModelCalls": 0,
+  "productionWrites": 0,
+  "reasoningEffort": "low unchanged",
+  "newPaidRoundCreated": false,
+  "professionalReview": "pending; three finite question groups in bounded-pilot-20261026.md",
+  "providerCacheImprovementMeasured": false
+}

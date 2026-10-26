@@ -1,5 +1,6 @@
-import { uniqueDefinitions, usableDefinitions } from "./modeling-contract.ts";
+import { definitionFingerprint, uniqueDefinitions, usableDefinitions } from "./modeling-contract.ts";
 import { reuseApplicability } from "./attribute-applicability.ts";
+import { attributeSearchMatch } from "./attribute-retrieval.ts";
 import {
   object,
   text,
@@ -319,8 +320,7 @@ export class ToolRegistry {
           ...(!relatedIds ? this.snapshot.data.attributes : []),
           ...families.flatMap((f) => f.attributes),
         ];
-        const matched = candidates.filter(a => !q ||
-          [a.name, a.conceptKey, a.definition, a.scope].some(s => s.normalize("NFKC").toLowerCase().includes(q)));
+        const matched = candidates.filter(a => attributeSearchMatch(a, q));
         const candidateIds = new Set(matched.map(a => a.id));
         // Inspect all versions of matched IDs; unrelated conflicts do not poison a targeted search.
         uniqueDefinitions(usableDefinitions(this.snapshot.data, this.task.runId).filter(a => candidateIds.has(a.id)));
@@ -331,7 +331,9 @@ export class ToolRegistry {
           categoryId: args.categoryId ?? null,
         });
         // Assessment always concerns the host task, not a query-selected foreign category.
-        result = { ...found, reuseApplicability: found.items.map(a => reuseApplicability(a, this.snapshot.data, this.task)) };
+        result = { ...found,
+          searchMatches: found.items.map(a => ({ attributeId: a.id, ...attributeSearchMatch(a, q), definitionHash: definitionFingerprint(a) })),
+          reuseApplicability: found.items.map(a => reuseApplicability(a, this.snapshot.data, this.task)) };
         break;
       }
       case "knowledge_list": {

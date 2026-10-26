@@ -1,8 +1,8 @@
-import { QUANTITY_RESPONSIBILITY } from "./modeling-contract.ts";
+import { definitionFingerprint, QUANTITY_RESPONSIBILITY } from "./modeling-contract.ts";
 import { modelingTargets } from "./attribute-applicability.ts";
 import { canonical, hash, type Task, Blocked } from "./core.ts";
 import { REQUEST_LAYOUT_VERSION, serializeContextInput } from "./request-layout.ts";
-import { outputSchemas } from "./contracts.ts";
+import { modelOutputSchema, modelingProposalContext } from "./modeling-proposal.ts";
 import {
   instructionsFor,
   ruleResponsibilitiesFor,
@@ -64,6 +64,20 @@ export async function assemble(
     { query: null, categoryId: task.categoryId, limit: 20, cursor: null },
     "prefetch",
   );
+  // A full definition must occur once in the prompt. The read event keeps the
+  // original tool result; only byte-identical copies in the pool become explicit
+  // references to the complete family object already present in this request.
+  const familyCopies = new Map<string, { source: string; sha256: string }>();
+  (prefetched.family as any[]).forEach((page, p) => page.items.forEach((family: any, f: number) =>
+    family.attributes.forEach((a: any, i: number) => familyCopies.set(hash(a), {
+      source: `sharedContext.family[${p}].items[${f}].attributes[${i}]`, sha256: hash(a),
+    }))));
+  const pool = prefetched.attributePool as any;
+  prefetched.attributePool = { ...pool, items: pool.items.map((a: any) => {
+    const copy = familyCopies.get(hash(a));
+    return copy ? { kind: "context_definition_reference", id: a.id, name: a.name,
+      definitionHash: definitionFingerprint(a), ...copy } : a;
+  }) };
   prefetched.knowledgeInventory = await allPages("knowledge_list", {
     query: null,
   });
@@ -192,6 +206,7 @@ export async function assemble(
       baselineReferenceDependencies: baselineReferences,
       modelingMode: task.stage === "family-modeling"
         ? (task.candidate as any)?.modelingMode ?? (baseline ? "inherited_leaf" : "independent_proposal") : null,
+      modelingProposal: modelingProposalContext(snapshot, task),
       // Derived from the same frozen baseline; configured values are not claims of professional verification.
       currentBaselineConfiguration: {
         version: CONFIGURATION_REVIEW_VERSION,
@@ -261,7 +276,7 @@ export async function assemble(
     inputHash: hash(input),
     requestLayout: { version: REQUEST_LAYOUT_VERSION, inputWireHash: hash(serializedInput) },
     contextUsage,
-    outputSchemaHash: hash(outputSchemas[task.stage]),
+    outputSchemaHash: hash(modelOutputSchema(task)),
     prefetchHash: hash(tools.events),
   };
   return {
@@ -270,6 +285,6 @@ export async function assemble(
     serializedInput,
     tools,
     manifest,
-    schema: outputSchemas[task.stage],
+    schema: modelOutputSchema(task),
   };
 }

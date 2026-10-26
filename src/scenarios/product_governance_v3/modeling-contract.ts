@@ -74,9 +74,21 @@ export function needsQuantityMapping(item: { name: string; conceptKey: string })
   return /每(?:包|卷|提|箱).*(?:数量|张数|抽数|节数|格数|卷数)|销售总(?:数量|卷数)|包装.*数量/.test(item.name) || /(?:package|pack)[._-]?(?:count|quantity)|total_rolls/.test(item.conceptKey);
 }
 
-export function modelingDecisionErrors(value: { attributes: AttributeDefinition[]; bindings: AttributeBinding[]; extensionCandidates: {id: string; name: string; conceptKey: string}[]; decisions: ModelingDecision[]; unresolved?: string[] }, data: Snapshot): Finding[] {
+// Deliberately narrow: these are explicit gate statements observed in real runs,
+// not an attempt to certify arbitrary natural-language reasoning.
+export function activationGateConflicts(criteria: string) {
+  return criteria.split(/[。；;\n]/).filter(clause => {
+    if (/(?:不|不能|不应|不得)(?:作为|成为|要求|依赖|以)|与.{0,12}无关/.test(clause)) return false;
+    return /(?:确认|核实|明确).{0,12}(?:必填必要性|是否必填)|必填必要性.{0,12}(?:确认|核实)/.test(clause) ||
+      /(?:包装标注|商品资料|SKU资料|样本|数据|取值).{0,14}(?:可稳定取得|稳定可得|齐全后|完整后)|(?:稳定取得|稳定获取).{0,12}(?:数据|取值|标注)/.test(clause);
+  });
+}
+
+export function modelingDecisionErrors(value: { attributes: AttributeDefinition[]; bindings: AttributeBinding[]; extensionCandidates: {id: string; name: string; conceptKey: string; activationCriteria?: string}[]; decisions: ModelingDecision[]; unresolved?: string[] }, data: Snapshot): Finding[] {
   const errors: Finding[] = [], add = (ruleId: string, objectId: string, message: string) => errors.push({ruleId, objectId, message});
   const items = [...value.attributes, ...value.extensionCandidates];
+  for (const c of value.extensionCandidates) if (activationGateConflicts(c.activationCriteria ?? "").length)
+    add("R07", c.id, "extension activation explicitly depends on requiredness confirmation or stable SKU value availability; separate those from business/professional admission");
   // A stated exclusion on native-quantity grounds still needs a decision, not just free-text omission.
   // This is a narrow coverage check for explicit statements; it is not a semantic completeness proof.
   if ((value.unresolved ?? []).some(s => /(?:最小计量单位|unitMin)/.test(s) && /每(?:包|卷|提|箱)/.test(s)) &&

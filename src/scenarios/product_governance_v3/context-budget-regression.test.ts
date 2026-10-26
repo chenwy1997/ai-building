@@ -57,6 +57,12 @@ test("the recorded generated tissue baseline fits both leaves with every definit
     expect(supplied.decisions).toEqual(seed.result.decisions);
     expect(supplied.extensionCandidates).toEqual(seed.result.extensionCandidates);
     expect(supplied.bindings).toEqual(family.bindings);
+    for (const a of (p.input.sharedContext as any).attributePool.items) {
+      if (a.kind !== "context_definition_reference") continue;
+      const [page, f, index] = [...a.source.matchAll(/\[(\d+)\]/g)].map(m => Number(m[1]));
+      const full = (p.input.sharedContext as any).family[page!].items[f!].attributes[index!];
+      expect(hash(full)).toBe(a.sha256); expect(full.id).toBe(a.id);
+    }
     for (const ref of p.input.sharedContext.baselineReferenceDependencies)
       expect(p.tools.referenceError(ref)).toBeNull();
     const knowledgeId = "small-roll-paper-research-20261022",
@@ -70,6 +76,8 @@ test("the recorded generated tissue baseline fits both leaves with every definit
 test("recorded seed with explicit synthetic target reviews flows through both mock leaf loops without increasing limits", async () => {
   const seedTask = batchTask(plan, seed.categoryId, "family-seed"), group = plan.groups.find(g => g.id === "facial-tissue")!,
     input = jsonClone(plan.snapshot), rejectedIds = new Set(attributeApplicabilityErrors(seed.result.attributes as any, input, seedTask).map(e => e.objectId));
+  // Preserve this recording's full-output protocol. New delta loops have their own tests.
+  delete (seedTask.candidate as any).modelingContractVersion;
   // The unmodified real result now correctly fails applicability. Only this constructed
   // integration scenario supplies fixture reviews; it does not approve the real proposal.
   input.kind = "fixture";
@@ -107,8 +115,9 @@ test("recorded seed with explicit synthetic target reviews flows through both mo
         },
       ]),
       leafClient = new ResponsesClient({ mode: "offline", transportId: "generated-context-leaf", fetch: mock.fetch },
-        leafDir, new Budget(leafDir, 0, "offline-zero")),
-      leaf = await runStage({ release, snapshot, task, client: leafClient, outDir: leafDir,
+        leafDir, new Budget(leafDir, 0, "offline-zero"));
+    delete (task.candidate as any).modelingContractVersion;
+    const leaf = await runStage({ release, snapshot, task, client: leafClient, outDir: leafDir,
         corrections: BATCH_CORRECTIONS, model: plan.model, limits: plan.limits });
     expect(leaf.checks.errors).toEqual([]);
     expect(leaf.manifest.contextUsage.totalBytes).toBeLessThanOrEqual(200000);

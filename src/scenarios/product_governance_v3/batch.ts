@@ -15,6 +15,8 @@ import { rollDefinitions, rollBindings, rollExtensionCandidates } from "./roll-p
 import { CONFIGURATION_REVIEW_VERSION } from "./scripts/configuration-review.mjs";
 import { proposalReadiness, proposalCounts } from "./proposal-readiness.ts";
 import { modelingReviewSignals } from "./modeling-review.ts";
+import { MODELING_PROPOSAL_VERSION } from "./modeling-proposal.ts";
+import { attachPilotKnowledge } from "./pilot-knowledge.ts";
 
 export const CLEAN_PAPER_ID = "77e31cf2-8331-4c73-ab10-823d2d1d7ab0";
 export const DEFAULT_TREE = resolve(ROOT, "../../../outputs/category-id-refresh-20261021/mapped-tree.updated.json");
@@ -58,6 +60,7 @@ interface Profile {
 }
 export interface BatchPlan {
   format: 1;
+  modelingContractVersion?: typeof MODELING_PROPOSAL_VERSION;
   releaseId: string;
   id: string;
   runId: string;
@@ -127,6 +130,7 @@ export function batchTask(plan: BatchPlan, categoryId: string, phase: BatchJob["
     candidate: {
       kind: "batch_modeling_scope",
       phase,
+      ...(plan.modelingContractVersion ? { modelingContractVersion: plan.modelingContractVersion } : {}),
       modelingMode: phase === "family-seed" ? "family_seed" : group ? "inherited_leaf" : "independent_proposal",
       family: group ? {
         id: group.id,
@@ -206,6 +210,9 @@ export async function prepareBatch(options: BatchOptions, release: Release): Pro
         reason: "按商品对象核对业务准入、系统职责和专业知识边界；文件读完不等于专业问题已核实",
       })),
     });
+    const enriched = jsonClone(snapshot.data);
+    attachPilotKnowledge(enriched, scope.filter(n => n.isLeaf).map(n => n.id));
+    snapshot = new DataSnapshot(enriched);
   }
   const root = snapshot.tree.get(options.categoryId),
     categoryIds = snapshot.tree.descendants(root.id, true).map((n) => n.id);
@@ -219,7 +226,7 @@ export async function prepareBatch(options: BatchOptions, release: Release): Pro
   if (new Set(groups.flatMap((g) => g.members)).size !== groups.flatMap((g) => g.members).length)
     throw new Blocked("ambiguous_baseline", "batch members overlap multiple family groups");
   const plan: BatchPlan = {
-    format: 1, releaseId: release.id, id: "", runId: options.runId,
+    format: 1, modelingContractVersion: MODELING_PROPOSAL_VERSION, releaseId: release.id, id: "", runId: options.runId,
     root: { id: root.id, name: root.name, path: root.path }, categoryIds, groups,
     snapshot: snapshot.data, inputVersion: snapshot.version, profileVersion,
     model: BATCH_MODEL, limits: BATCH_LIMITS,
@@ -276,13 +283,15 @@ export async function mapConcurrent<T, R>(items: T[], concurrency: number, work:
 }
 export function pendingFamily(group: Group, artifact: StageArtifact, runId: string): Family {
   const result = artifact.result as {
-    attributes: AttributeDefinition[]; bindings: AttributeBinding[]; extensionCandidates: ExtensionCandidate[]; decisions: import("./modeling-contract.ts").ModelingDecision[];
+    attributes: AttributeDefinition[]; bindings: AttributeBinding[]; extensionCandidates: ExtensionCandidate[]; decisions: import("./modeling-contract.ts").ModelingDecision[]; unresolved: string[];
   };
   const bindings = result.bindings.map((b) => ({ ...b, categoryId: null, baselineAttributeId: null, differenceReason: null }));
+  const review = artifact.assembly ? { reviewIssues: result.unresolved } : {};
   return {
     id: group.id, members: group.members, status: "candidate", runId,
-    version: hash({ attributes: result.attributes, bindings, extensionCandidates: result.extensionCandidates, decisions: result.decisions }),
+    version: hash({ attributes: result.attributes, bindings, extensionCandidates: result.extensionCandidates, decisions: result.decisions, ...review }),
     attributes: result.attributes, bindings, extensionCandidates: result.extensionCandidates, decisions: result.decisions,
+    ...review,
   };
 }
 export async function executeBatch(

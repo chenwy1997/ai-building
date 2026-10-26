@@ -119,6 +119,7 @@ const snapshotSchema = object({
         bindings: list(bindingSchema),
         extensionCandidates: list(extensionCandidateSchema),
         decisions: list(modelingDecisionSchema),
+        reviewIssues: strings,
       },
       ["id", "version", "members", "status", "runId", "attributes", "bindings"],
     ),

@@ -7,6 +7,8 @@ import { DataSnapshot } from "./snapshot.ts";
 import { assemble } from "./context.ts";
 import { batchTask, validateBatchOptions, type BatchPlan } from "./batch.ts";
 import type { ModelOptions } from "./runner.ts";
+import { MODELING_PROPOSAL_VERSION } from "./modeling-proposal.ts";
+import { attachPilotKnowledge } from "./pilot-knowledge.ts";
 
 export interface RerunOptions {
   directory: string;
@@ -86,15 +88,17 @@ export async function prepareRerun(options: RerunOptions, release: Release) {
     // Only rebind this original batch's candidate input. Foreign/in-flight baselines retain their status.
     for (const family of data.families) if (family.status === "candidate" && family.runId === source.runId) family.runId = runId;
     data.families = data.families.filter((f: any) => !groups.some((g) => g.id === f.id && g.needsSeed));
+    const knowledgeUpdate = source.profileVersion
+      ? attachPilotKnowledge(data, [...new Set([...categoryIds, ...groups.flatMap(g => g.members)])]) : null;
     const snapshot = new DataSnapshot(data), node = snapshot.tree.get(categoryId), outDir = join(directory, "reruns", options.roundName);
     const model: ModelOptions = { ...source.model, reasoningEffort: reasoningEffort ?? source.model.reasoningEffort };
-    const roundIdentity = { format: 1, roundName: options.roundName, sourceBatchId: sourceId, sourceReleaseId: source.releaseId,
-      sourceInputVersion: source.inputVersion, releaseId: release.id, snapshotVersion: snapshot.version, categoryIds,
+    const roundIdentity = { format: 1, modelingContractVersion: MODELING_PROPOSAL_VERSION, roundName: options.roundName, sourceBatchId: sourceId, sourceReleaseId: source.releaseId,
+      sourceInputVersion: source.inputVersion, releaseId: release.id, snapshotVersion: snapshot.version, categoryIds, knowledgeUpdate,
       model, limits: source.limits, budgetLimitCny: execution.budgetCny, pricingId: execution.pricingId,
       reserveCny: source.reserveCny, transportId: execution.transportId, mode: execution.mode };
     const roundId = hash(roundIdentity);
     const plan: BatchPlan = {
-      ...source, id: "", releaseId: release.id, runId, snapshot: snapshot.data, inputVersion: snapshot.version,
+      ...source, modelingContractVersion: MODELING_PROPOSAL_VERSION, id: "", releaseId: release.id, runId, snapshot: snapshot.data, inputVersion: snapshot.version,
       root: { id: node.id, name: node.name, path: node.path }, categoryIds, groups, model,
       budgetCny: execution.budgetCny, pricingId: execution.pricingId, outDir, concurrency: options.concurrency, preflight: [],
       accounting: { directory, originalBatchId: sourceId, roundName: options.roundName, roundId },

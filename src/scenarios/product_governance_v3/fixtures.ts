@@ -1,4 +1,5 @@
 import { needsQuantityMapping, type ModelingDecision } from "./modeling-contract.ts";
+import { MODELING_PROPOSAL_VERSION } from "./modeling-proposal.ts";
 import {
   jsonClone,
   hash,
@@ -612,4 +613,32 @@ export function withFixtureDecisions<T extends {attributes: any[]; bindings: any
       } : null,
     } as ModelingDecision;
   })};
+}
+
+// Test-author convenience only: encode explicitly synthetic expected output as
+// the requested wire shape. Not used by runtime or for migrating recorded results.
+export function fixtureWireResult(full: any, request: any) {
+  const input = JSON.parse(request.input[0].content);
+  if (input.task.candidate?.modelingContractVersion !== MODELING_PROPOSAL_VERSION) return full;
+  const base = input.sharedContext.family.flatMap((p: any) => p.items).find((f: any) => f.usable);
+  const inherited = new Set((base?.attributes ?? []).map((a: any) => a.id));
+  const omit = (value: any, keys: string[]) => Object.fromEntries(Object.entries(value).filter(([k]) => !keys.includes(k)));
+  return {
+    contractVersion: MODELING_PROPOSAL_VERSION, baselineVersion: full.baselineVersion,
+    reuse: [],
+    newAttributes: full.attributes.filter((a: any) => !inherited.has(a.id) ||
+      hash(a) !== hash(base.attributes.find((b: any) => b.id === a.id)))
+      .map((a: any) => omit(a, ["valueLevel", "defaultValue"])),
+    newBindings: full.bindings.filter((b: any) => !inherited.has(b.attributeId))
+      .map((b: any) => omit(b, ["categoryId", "baselineAttributeId"])),
+    newExtensionCandidates: full.extensionCandidates.filter((c: any) =>
+      !base?.extensionCandidates?.some((e: any) => hash(e) === hash(c))).map((c: any) => ({
+        ...omit(c, ["activationCriteria"]), activationRequirements: [{ kind: "professional_definition", question: c.activationCriteria }],
+      })),
+    decisions: full.decisions.filter((d: any) => !base?.decisions?.some((b: any) => b.objectId === d.objectId)).map((d: any) => ({
+      ...omit(d, ["admissionBasis", "requirednessBasis", "quantity"]), quantity: d.quantity
+        ? omit(d.quantity, ["systemFieldKeys", "denominator", "sameWhen", "differentWhen", "overlapAction"]) : null,
+    })),
+    revisionRequests: [], unresolved: full.unresolved,
+  };
 }

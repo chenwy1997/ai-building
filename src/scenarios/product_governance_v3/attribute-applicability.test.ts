@@ -29,6 +29,8 @@ afterAll(async () => { await rm(temp, { recursive: true, force: true }); });
 
 async function recordedContext(which: typeof seed) {
   const data = jsonClone(plan.snapshot), task = batchTask(plan, which.categoryId, which.phase as "family-seed" | "leaf");
+  // This recording uses the historical full-result wire schema.
+  delete (task.candidate as any).modelingContractVersion;
   if (which.phase === "leaf") {
     // Historical generated input only; not a claim that the old seed passes the new gate.
     data.families.push(pendingFamily(plan.groups.find(g => g.id === "facial-tissue")!, { result: seed.result } as any, plan.runId));

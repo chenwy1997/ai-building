@@ -26,6 +26,10 @@ async function plan(categoryId: string) {
     concurrency: 2, treePath: join(ROOT, "profiles/clean-paper-tree.json") }, release);
 }
 async function replay(snapshot: DataSnapshot, task: Task, script: Parameters<typeof scriptedFetch>[0]) {
+  // These recordings predate the delta wire protocol. Exercise their original
+  // full-output contract explicitly; no runtime conversion of historical values.
+  const candidate = { ...(task.candidate as any) }; delete candidate.modelingContractVersion;
+  task = { ...task, candidate };
   const dir = next(), mock = scriptedFetch(script), client = new ResponsesClient({
     mode: "offline", transportId: "recorded-rules-20261023", fetch: mock.fetch,
   }, dir, new Budget(dir, 0, "offline-zero"));
