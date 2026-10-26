@@ -19,7 +19,7 @@ import { matchesContextLayout } from "./request-layout.ts";
 // A historical response may be checked under a newer host only if the actual business
 // materials, schema, validator and read tools are unchanged. This is not a release-ID bypass.
 const HOST_FILES = new Set(["runner.ts", "cli.ts", "batch.ts", "responses.ts", "batch-export.ts",
-  "result-json.ts", "progress.ts", "batch-recovery.ts", "scripts/export-batch-review.mjs"]);
+  "result-json.ts", "json-diagnostics.ts", "progress.ts", "batch-recovery.ts", "scripts/export-batch-review.mjs"]);
 function compatible(manifest: any, release: Release, task: Task) {
   if (manifest.outputSchemaHash !== hash(modelOutputSchema(task)))
     throw new Blocked("recovery_contract_drift", "historical output schema changed; manual migration required");

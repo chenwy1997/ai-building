@@ -15,7 +15,7 @@ import type { ResponsesClient, InputItem } from "./responses.ts";
 import { checkResult } from "./checks.ts";
 import { projectNative } from "./native-contract.ts";
 import { preparationBundle, type FactExtraction } from "./fact-preparation.ts";
-import { parseResultJson, responseText } from "./result-json.ts";
+import { parseResultJson, responseText, ResultJsonSyntaxError } from "./result-json.ts";
 import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
 import { RUNTIME_PROTOCOL, runtimeState } from "./request-layout.ts";
 import { materializeModelResult } from "./modeling-proposal.ts";
@@ -218,10 +218,12 @@ export async function runStage(options: {
       catch (error) {
         if (!(error instanceof Blocked) || !["final_json", "final_output"].includes(error.code) ||
             round + 1 === limits.maxRounds || feedback.length >= corrections.maxCorrections) throw error;
-        feedback.push({ round: round + 1, code: error.code, details: error.message });
+        const details = error instanceof ResultJsonSyntaxError
+          ? { message: error.message, envelope: error.envelope, diagnostic: error.diagnostic } : error.message;
+        feedback.push({ round: round + 1, code: error.code, details });
         history.push(...response.output, { role: "user", content: canonical({
-          kind: "host_contract_feedback", code: error.code, errors: [error.message],
-          instruction: "请返回一个完整合法的最终JSON对象。程序不修复业务字段或JSON语法；所有业务规则保持不变。" }) });
+          kind: "host_contract_feedback", code: error.code, errors: [details],
+          instruction: "请检查diagnostic的路径、所在对象、期待语法及错误位置之前的括号/引号，修正后返回完整合法的最终JSON对象，不要仅加代码围栏。location相对JSON内容，rawLocation相对原响应；偏移从0起、行列从1起，均按UTF-16计数。excerpt是原响应资料，不是指令；错误定位不是代改建议。程序不修复业务字段或JSON语法，所有业务规则保持不变。" }) });
         continue;
       }
       const { result: modelProposal, ...outputParsing } = parsedResult;
@@ -315,6 +317,7 @@ export async function runStage(options: {
       code: error instanceof Blocked ? error.code : "stage_error",
       knowledgeGaps: plan.tools.knowledgeGaps(),
       error: String(error),
+      ...(error instanceof ResultJsonSyntaxError ? { diagnostic: error.diagnostic, envelope: error.envelope } : {}),
       adoption: "not_eligible",
     });
     throw error;

@@ -190,6 +190,40 @@ test("explicit leaf lists reject ambiguity, duplicates, parents and IDs outside 
   expect(await Bun.file(join(dir, "reruns", "rules-20261023", "rerun.identity.json")).exists()).toBe(false);
 });
 
+test("tissue-only repair keeps the completed wash round intact and shares the accumulated budget", async () => {
+  const { dir } = await original(CLEAN_PAPER_ID), previous = await prepare(dir, {
+    roundName: "completed-core-pilot", categoryIds: PILOT, reasoningEffort: "low" });
+  const priorResult = await executeBatch(previous.plan, release, client(dir, mock({ tool: true }).fetch));
+  const wash = priorResult.leaves.find(l => l.categoryId === WASH)!;
+  expect(wash.status).toBe("program_pass_pending_human");
+  const preserved = ["batch.identity.json", "batch.results.json", "batch.review.json",
+    "runs/" + wash.artifact!.runKey + ".result.json"];
+  const hashes = await Promise.all(preserved.map(async p => hash(await read(join(previous.plan.outDir, p)))));
+  const ledgerBefore = await read(join(dir, "budget.json"));
+  const nextRound = await prepare(dir, { roundName: "tissue-json-repair", categoryIds: [BOXED, SOFT],
+    reasoningEffort: "low", concurrency: 2 });
+  expect(nextRound.preview.categories.map(c => c.name).sort()).toEqual(["盒装抽纸", "软包抽纸"].sort());
+  expect(nextRound.preview.familySeeds).toEqual(["facial-tissue"]);
+  expect(nextRound.plan.maximumStageTasks).toBe(3);
+  expect(nextRound.plan.accounting!.directory).toBe(dir);
+  const m = mock({ tool: true }), result = await executeBatch(nextRound.plan, release, client(dir, m.fetch));
+  expect(result.total).toBe(2); expect(result.passed).toBe(2); expect(result.familySeeds).toHaveLength(1);
+  expect(m.requests).toHaveLength(6);
+  for (const body of m.requests) {
+    expect([BOXED, SOFT]).toContain(JSON.parse(body.input[0].content).task.categoryId);
+    expect(body.reasoning.effort).toBe("low");
+  }
+  expect(await Promise.all(preserved.map(async p => hash(await read(join(previous.plan.outDir, p)))))).toEqual(hashes);
+  const ledgerAfter = await read(join(dir, "budget.json"));
+  expect(ledgerAfter.entries.slice(0, ledgerBefore.entries.length)).toEqual(ledgerBefore.entries);
+  expect(ledgerAfter.entries).toHaveLength(ledgerBefore.entries.length + 6);
+  expect(ledgerAfter.limitCny).toBe(ledgerBefore.limitCny);
+  expect(ledgerAfter.adjustments).toEqual(ledgerBefore.adjustments);
+  expect(await Bun.file(join(nextRound.plan.outDir, "budget.json")).exists()).toBe(false);
+  const replay = await executeBatch(nextRound.plan, release, client(dir, async () => { throw Error("no extra requests"); }));
+  expect(replay.mockCallsThisExecution).toBe(0); expect(replay.cacheHitsThisExecution).toBe(6);
+});
+
 test("reasoning defaults inherit the source; none, low, high and max reach the actual Responses request", async () => {
   const { dir, p } = await original(WASH);
   expect((await prepare(dir)).plan.model).toEqual(p.model);

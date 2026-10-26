@@ -1,0 +1,174 @@
+{
+  "date": "2026-10-26",
+  "releaseId": "9d729f621742d0b1ab61b5b57f6ed7294055da2132510ea6261255119e818efe",
+  "scope": "Offline host JSON diagnostics and bounded correction feedback only; no model execution or online writes.",
+  "tests": {
+    "command": "bun --no-env-file test src/scenarios/product_governance_v3",
+    "passed": 294,
+    "failed": 0,
+    "files": 20,
+    "assertions": 4699,
+    "typecheck": "./node_modules/.bin/tsc -p src/scenarios/product_governance_v3/tsconfig.json --noEmit",
+    "typecheckExitCode": 0,
+    "newTests": 22
+  },
+  "regressions": {
+    "recordedSourceRound": "pilot-wash-tissue-core-verified-20261026",
+    "sourceReleaseId": "0d50d852bd82b7974239637156dbfeb1c7676bc72092b7f54a133e87f5ad0e60",
+    "recordings": [
+      {
+        "turn": 2,
+        "requestKey": "ec778e440575ad05e267e6b963c7aa19f256a652ece402289d67bbd6b5282e80",
+        "rawTextSha256": "bd731844963f087968f436b70a9240300c3ed8fa5cf0841895dcd7c441e7f735"
+      },
+      {
+        "turn": 3,
+        "requestKey": "8822de64f4646c534cfc5c039a5be791df24f0c95f3d1b220c474f4ed8b5c167",
+        "rawTextSha256": "80e374e407f4489860e9d62f6484590cbb1ba8ccc814b277682929d369987f8b"
+      },
+      {
+        "turn": 4,
+        "requestKey": "ec16c5da9c5a22db5dfa30099f85cb75249c778b31df97a90481c05f203f61ed",
+        "rawTextSha256": "e1358ee66c5cc6a26784d3c3086cb106ed43f35f3f3fcb5d3a471321e7e62dc2"
+      }
+    ],
+    "diagnostic": {
+      "path": "$.decisions[3]",
+      "objectId": "facial.contents_per_package",
+      "lastCompletedPath": "$.decisions[3].quantity",
+      "jsonOffsets": [
+        8261,
+        8263,
+        8263
+      ],
+      "rawOffsets": [
+        8261,
+        8263,
+        8271
+      ],
+      "offsetUnit": "utf16_code_unit",
+      "found": "{",
+      "expected": "quoted property name after object comma"
+    },
+    "pipeline": [
+      "Actual tool call and paired return before final JSON failure",
+      "Precise diagnostics appended to actual outgoing request without rewriting previous items",
+      "Three raw failures stop after two correction feedback messages; final block retains diagnostic",
+      "Durable malformed responses replay with no additional mock HTTP or budget entries",
+      "Constructed subsequent valid JSON with frozen-definition violation remains blocked by R03 until corrected by the mock model"
+    ],
+    "businessAccuracyClaim": false,
+    "syntaxAutoRepair": false,
+    "businessAutoRepair": false
+  },
+  "partialRerunRegression": {
+    "selection": [
+      "盒装抽纸",
+      "软包抽纸"
+    ],
+    "familySeeds": [
+      "facial-tissue"
+    ],
+    "model": "deepseek-flash",
+    "reasoningEffort": "low",
+    "concurrency": 2,
+    "mockStages": 3,
+    "mockRequestsWithToolRound": 6,
+    "successfulLeaves": 2,
+    "originalWashAndRoundUnchanged": true,
+    "originalLedgerRetained": true,
+    "replayNewRequests": 0,
+    "newChildBudget": false
+  },
+  "actualPreview": {
+    "mode": "new_round_preview",
+    "ready": true,
+    "originalDirectory": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023",
+    "outDir": "/Users/sanheng/Project/cwy/ai-building/outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-tissue-json-feedback-20261026",
+    "roundName": "pilot-tissue-json-feedback-20261026",
+    "roundId": "2862b88a16ccb4f4e61d8b6390b1d7c33e356db7acc7d914514a25b098189380",
+    "releaseId": "9d729f621742d0b1ab61b5b57f6ed7294055da2132510ea6261255119e818efe",
+    "originalReleaseId": "826ed2544800ecdf01ceb96ce3c6cdbacffef6e57670bf5f2a1e8b6f99b6eaab",
+    "categoryId": null,
+    "categoryIds": [
+      "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "ce3a9f67-613c-4707-bf3a-95193edb8a2d"
+    ],
+    "categories": [
+      {
+        "id": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "name": "盒装抽纸"
+      },
+      {
+        "id": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+        "name": "软包抽纸"
+      }
+    ],
+    "model": {
+      "model": "deepseek-flash",
+      "reasoningEffort": "low"
+    },
+    "leafCount": 2,
+    "familySeeds": [
+      "facial-tissue"
+    ],
+    "concurrency": 2,
+    "preflight": [],
+    "sourceProposalsReused": 0,
+    "preservedReviewedBaselineFamilies": [],
+    "originalRequestCount": 168,
+    "cumulativeReservedCny": 218.4,
+    "budgetLimitCny": 280.7,
+    "remainingReservationCny": 62.3,
+    "maximumAdditionalRequests": 18,
+    "maximumAdditionalReservationCny": 23.4,
+    "fullWorstCaseFitsRemainingBudget": true,
+    "accounting": "沿用原费用台账，数值为保守预留，不是实际账单；触顶停止，不自动提额",
+    "networkCalls": 0,
+    "productionWrites": 0,
+    "adoption": "pending_human",
+    "next": "同名同范围命令加--execute才付费；重复执行只恢复这一轮，可调并发；不换round名处理普通失败"
+  },
+  "preservation": {
+    "previousRound": "pilot-wash-tissue-core-verified-20261026",
+    "checkedFiles": 28,
+    "allHashesUnchanged": true,
+    "requestCountBefore": 168,
+    "requestCountAfter": 168,
+    "budgetFileSha256": "fa697b33982a6525f9bbd6d670a2357c49019aa92a5247d20708ff9f7c2a4261",
+    "checkedFileHashes": {
+      "outputs/product-governance-v3/clean-paper-batch-20261023/budget.json": "fa697b33982a6525f9bbd6d670a2357c49019aa92a5247d20708ff9f7c2a4261",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/batch.identity.json": "78f85510fca990dfadccab414611bf1ad2f5f76c58dd9d8b90c399d26d5ec072",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/execution.identity.json": "ddeb853e66c04f04b86249072f2d585a7776e5b1713d45dd91dcd219035df46b",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/analysis/offline-review-comparison-20261026.json": "be26038969f10361327e75dfbcfdda08101d439d0ce01aab3989dc9b9cd0f1da",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/batch.identity.json": "3106c799c7a3dd05c6865cf478ee9f115ffceec23b95bbe3c0ec5b2e91f53f5d",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/batch.results.json": "5c80f50fda38cce0d8cb4e03b49f443554e7d32f59153986a9cf199c51b3cd32",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/batch.review.json": "f6f86d2f4593142772bedd9f1d492cb09ca3b0b8997570f242cd83ae14e4bee8",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/batch.shared-snapshot.json": "14a937d004da7a07a64f7a6443b22c87afcc54f93f64b8c8e083eca122975b35",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/batch.summary.json": "c966725431b2089eba31fef5245b0e3b6fc3f2bfb69bfe7d6c631e59930fe551",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/execution.identity.json": "f395b86ca70ab412e335f2fe815f2e7d2b06b8be6d4c8804aed4ae2c0d76eef0",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/jobs/family-seed-18f161be522f0b274f86.json": "fde1c34dd34955f4a748cf68b74aee609dbc1d514b6b06fa71ca2fe0feff4f8d",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/jobs/leaf-18f161be522f0b274f86.json": "c31aea10f261605bbc20860f584b5a3fb0ea0f7b51c6011080c4a4a8b0805b73",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/jobs/leaf-6eb15d64ca1deb54ee61.json": "a1b83b9f830df4168e55a0cc29ef564226bbae84023328ea7f13b835f99f4bc9",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/jobs/leaf-bce2eecc9a98bfef6251.json": "1b9d4213ff874075dfaa0d7e8228d848102b7f8a9b6f84b316a0a490aa27346b",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/rerun.identity.json": "4a493c0d36d7eb95702616f9c3b06e44846d6e25dba7868e8679b7c998876b3d",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/rerun.plan.json": "718b628e3550389977656edce305d50ab275596a7391021e23161baf29135eb5",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/review/configuration-audit-d9a16327866f.json": "4b1057de0929d36add73ff19213ada71b19666044e73d6ef2c351f6bb34f0bb3",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/review/verification-d9a16327866f.json": "6a4bf8d4d4bc60b592c10cd8da0f7d5d74bd9df38f595a220d3ed15ab5d6f3ed",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/review/属性方案-d9a16327866f.png": "0a838f22bb31410c62496c74a52f8c8e89e4181ed9c6c11c7f33924b13894f28",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/review/扩展候选-d9a16327866f.png": "69354ecaa453de46379ff2b23fffd6ed372b1dba0fee873506deaf91c83b07b8",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/review/清洁纸品_类目属性方案_d9a16327866f.xlsx": "3b0a693dc96c14dc440eabbe7b28247568e8f16394c68e4de8792af72b08f190",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/review/清洁纸品_类目属性方案_d9a16327866f.xlsx.inspect.ndjson": "f564c9c466c4f374f79f08727bcca7ee2e31d46d82bede9a2b18d84c29fa2495",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/review/说明核对-d9a16327866f.png": "d09117a36ed7319ef7be85cb3d60b32c4b664f844ed529e4f84a254aa1ce1538",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/review/进度与问题-d9a16327866f.png": "95b311b55ec6e560429ad2df152760cdfbb2b233396994bf944cb9b48e6f69b7",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/runs/6c3e2d7023a2ed3d5786ac8ba705f99b76c18a37ef62e049702bc4bf8bfbfe57.blocked.json": "b58fbf9c1da9cbd722beca21ff41ba526bfa4f408996f9c854c6a7fe8c1d7f96",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/runs/6c3e2d7023a2ed3d5786ac8ba705f99b76c18a37ef62e049702bc4bf8bfbfe57.manifest.json": "5929b440b4d86bbaaddb4de95899800cdc887d926f99d6a530e958dd4463814b",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/runs/9b09145ba5950ecf96600c17b7e6b08b1e00093ffa4c8404c69dce803b13776b.manifest.json": "6b297ddd2548b32ad324f807aaa149673040ad37c5ad2f0c630748b78f2b3c94",
+      "outputs/product-governance-v3/clean-paper-batch-20261023/reruns/pilot-wash-tissue-core-verified-20261026/runs/9b09145ba5950ecf96600c17b7e6b08b1e00093ffa4c8404c69dce803b13776b.result.json": "0c8c974396797f5464198e771138c5a3c8f9cebe2e025da8f1e43a46d9ca032e"
+    }
+  },
+  "newPaidRequests": 0,
+  "productionWrites": 0,
+  "adoption": "pending_human",
+  "limits": "The real provider correction outcome remains to be verified by the user-run round. Successful wash output stays in its original round and is not relabeled or automatically merged into the new release."
+}
