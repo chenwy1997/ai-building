@@ -319,6 +319,12 @@ export class ToolRegistry {
         const candidates = [
           ...(!relatedIds ? this.snapshot.data.attributes : []),
           ...families.flatMap((f) => f.attributes),
+          // Explicit target reviews also make cross-family definitions discoverable
+          // in scoped prefetch. Recall includes pending/negative records; permission
+          // still comes solely from reuseApplicability for the host's real targets.
+          ...(relatedIds ? usableDefinitions(this.snapshot.data, this.task.runId).filter(a =>
+            (this.snapshot.data.attributeApplicability ?? []).some(r => r.attributeId === a.id &&
+              r.targetCategoryIds.some(id => relatedIds.has(id)))) : []),
         ];
         const matched = candidates.filter(a => attributeSearchMatch(a, q));
         const candidateIds = new Set(matched.map(a => a.id));

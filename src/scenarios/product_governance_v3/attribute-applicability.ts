@@ -8,7 +8,7 @@ export interface AttributeApplicabilityReview {
   definitionHash: string;
   targetCategoryIds: string[];
   status: "supported" | "pending" | "not_applicable";
-  reviewKind: "human" | "fixture";
+  reviewKind: "human" | "fixture" | "authorized_offline";
   reviewRecordId: string;
   reason: string;
 }
@@ -43,10 +43,13 @@ export function reuseApplicability(a: AttributeDefinition, data: Snapshot, task:
     .map(f => ({ id: f.id, version: f.version, members: f.members,
       usable: f.status === "confirmed" || (f.status === "candidate" && f.runId === task.runId) }));
   const reviews = (data.attributeApplicability ?? []).filter(r => r.attributeId === a.id && r.definitionHash === definitionHash);
-  const blockedCategoryIds = targetCategoryIds.filter(id => reviews.some(r => r.targetCategoryIds.includes(id) && r.status !== "supported"));
+  const applicableReview = (r: AttributeApplicabilityReview) => r.reviewKind !== "authorized_offline" ||
+    task.stage === "family-modeling" || (task.stage === "review-assistance" && (task.candidate as any)?.stage === "family-modeling");
+  const blockedCategoryIds = targetCategoryIds.filter(id => reviews.some(r => r.targetCategoryIds.includes(id) &&
+    (r.status !== "supported" || !applicableReview(r))));
   const coveredCategoryIds = targetCategoryIds.filter(id => !blockedCategoryIds.includes(id) &&
     (families.some(f => f.usable && f.members.includes(id)) ||
-      reviews.some(r => r.status === "supported" && r.targetCategoryIds.includes(id))));
+      reviews.some(r => r.status === "supported" && applicableReview(r) && r.targetCategoryIds.includes(id))));
   return { attributeId: a.id, definitionHash, targetCategoryIds, coveredCategoryIds,
     missingCategoryIds: targetCategoryIds.filter(id => !coveredCategoryIds.includes(id)),
     reusable: coveredCategoryIds.length === targetCategoryIds.length,

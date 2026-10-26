@@ -1,4 +1,4 @@
-import { withFixtureDecisions, fixtureWireResult } from "./fixtures.ts";
+import { withFixtureDecisions, fixtureWireResult, fixtureCoreAttributes } from "./fixtures.ts";
 import { beforeAll, afterAll, test, expect } from "bun:test";
 import { mkdtemp, rm, readFile, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -55,7 +55,7 @@ function mock(options: {
       expect(JSON.parse(body.input.at(-2).output).node.id).toBe(task.categoryId);
     } else expect(JSON.parse(body.input.at(-2).content).kind).toBe("host_contract_feedback");
     const baseline = input.sharedContext.family.flatMap((p: any) => p.items).find((f: any) => f.usable);
-    const attrs = baseline ? jsonClone(baseline.attributes) : [attribute({
+    const attrs = baseline ? jsonClone(baseline.attributes) : fixtureCoreAttributes(input) ?? [attribute({
       id: "mock." + (scope.family?.id ?? task.categoryId), name: "模拟验收参数", conceptKey: "mock." + (scope.family?.id ?? task.categoryId),
       definition: "离线构造：对象为" + (scope.family?.id ?? task.categoryId) + "，仅验证本对象的独立参数和批次依赖，非业务定义",
       scope: "offline-mock-only." + (scope.family?.id ?? task.categoryId), fieldType: "text",
@@ -170,7 +170,7 @@ test("23 mocked tasks use actual context, tool execution and checks; all leaves 
   expect(shared.snapshot.families.every((f: any) => f.status === "candidate")).toBe(true);
   const view = await read(join(out, "batch.review.json"));
   expect(view.issues.length).toBe(21);
-  expect(view.attributes.length).toBe(33); // Seven each for the two roll leaves; one constructed field for the other 19.
+  expect(view.attributes.length).toBe(41); // 2 rolls × 7, 2 tissues × 4, wash × 3, and 16 other constructed fields.
   expect(view.attributes.every((r: any[]) => r[5] === "" && r[6] === "")).toBe(true);
   expect(view.mode).toBe("offline");
   expect(result.productionWrites).toBe(0); expect(result.skuFillingRequests).toBe(0);

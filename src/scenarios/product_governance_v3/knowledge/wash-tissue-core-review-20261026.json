@@ -1,0 +1,320 @@
+{
+  "id": "wash-tissue-core-review-20261026",
+  "status": "user_confirmed_core_scope_offline_verified_proposal_only",
+  "authorization": {
+    "recordId": "user-core-list-20261026",
+    "scope": "用户在当前会话确认两组核心清单，并授权核实跨类复用和数量字段职责、离线验收后由用户执行；不等于采用模型结果或确认任何SKU值。",
+    "quote": "可以，就按这份核心清单来。你先把跨类复用和数量字段职责核实好，补齐离线验收"
+  },
+  "verification": {
+    "kind": "authorized_offline_agent_review",
+    "adoption": "pending_human",
+    "method": "比较冻结定义的对象、状态、单位及配置，结合一手产品参数与已确认类目范围；不是行业标准认证，也不是模型运行时自行确认。",
+    "sources": [
+      {
+        "id": "V1",
+        "url": "https://professional.vinda.com/product/VD2288.html",
+        "observed": "抽取式纸面巾；原生木浆、3层、133×195 mm、102抽/包；包装层级另列。",
+        "limit": "仅证明该型号参数存在；不按此替其他SKU赋值或声称全行业统一。"
+      },
+      {
+        "id": "P2",
+        "url": "https://www.purcotton.com/mianroujin/224.html",
+        "observed": "纯棉柔巾；200×200 mm、100片/包、6包/袋。",
+        "limit": "纸与柔巾对象不同；片与抽不可默认换算；不推断干湿测量条件。"
+      }
+    ]
+  },
+  "sourceDefinitions": {
+    "sourceBatchId": "e9d4161405ba72ce191a45d1d27cdc23f31e3a7378854a01d0f463c40fff9083",
+    "sourceInputVersion": "1269975248c3a179041bf1c3fb3a219911c7aad464a6c53b6f5926f1bc86327c",
+    "familyId": "small-toilet-roll",
+    "definitions": [
+      {
+        "id": "roll.layers",
+        "name": "层数",
+        "conceptKey": "paper.layers",
+        "definition": "成品纸张叠层数量，不是包装或托盘层数",
+        "scope": "finished-paper-ply",
+        "fieldType": "number",
+        "unit": "层",
+        "enumValues": [],
+        "multi": false,
+        "valueLevel": "SKU",
+        "numberConfig": {
+          "isInt": true,
+          "precision": null,
+          "min": 1,
+          "max": null
+        },
+        "textConfig": null,
+        "optionConfig": null,
+        "defaultValue": null,
+        "rationale": "对照成品纸张叠层；不以层数推定质量",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "层数是成品纸张叠层；不能与托盘层数、包装层级混淆。"
+          }
+        ]
+      },
+      {
+        "id": "roll.raw_material",
+        "name": "原料",
+        "conceptKey": "paper.raw_material",
+        "definition": "商家对原料的原文描述，不能由品牌推定",
+        "scope": "finished-paper-material",
+        "fieldType": "text",
+        "unit": null,
+        "enumValues": [],
+        "multi": false,
+        "valueLevel": "SKU",
+        "numberConfig": null,
+        "textConfig": {
+          "format": "ANY",
+          "minLength": 1,
+          "maxLength": 300,
+          "displayMethod": null,
+          "trim": true
+        },
+        "optionConfig": null,
+        "defaultValue": null,
+        "rationale": "按原料声明检索；保留厂商措辞，不推断检测结论",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "原料保留商家确切措辞"
+          }
+        ]
+      },
+      {
+        "id": "roll.sheet_size",
+        "name": "纸张尺寸",
+        "conceptKey": "paper.sheet_size",
+        "definition": "单张纸尺寸完整文本；不猜轴向或包装尺寸",
+        "scope": "finished-paper-sheet-size",
+        "fieldType": "text",
+        "unit": null,
+        "enumValues": [],
+        "multi": false,
+        "valueLevel": "SKU",
+        "numberConfig": null,
+        "textConfig": {
+          "format": "ANY",
+          "minLength": 1,
+          "maxLength": 300,
+          "displayMethod": null,
+          "trim": true
+        },
+        "optionConfig": null,
+        "defaultValue": null,
+        "rationale": "比较单张纸尺寸，避免误用包装尺寸",
+        "references": [
+          {
+            "kind": "knowledge",
+            "id": "small-roll-paper-research-20261022",
+            "version": "df125eba0fa816879dbea0ab67a14c452384750360ca3993c28f54e34335f4f7",
+            "quote": "纸张尺寸与纸卷尺寸、包装尺寸分开"
+          }
+        ]
+      }
+    ]
+  },
+  "applicabilityReviews": [
+    {
+      "id": "wash-tissue-core-review-20261026:roll.layers",
+      "attributeId": "roll.layers",
+      "definitionHash": "225d57e5a9d35bfd728ea4eb89eab6a465f17e4c0b7837244f34c3ec784f58b5",
+      "targetCategoryIds": [
+        "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "ce3a9f67-613c-4707-bf3a-95193edb8a2d"
+      ],
+      "status": "supported",
+      "reviewKind": "authorized_offline",
+      "reviewRecordId": "wash-tissue-core-review-20261026",
+      "reason": "成品纸张叠层数量，不是卷数/包装层数；原定义不限定纸卷，维达面巾纸给出层数参数，盒与软包仅包装不同。保持原数值配置，不新增层数副本。 本次为用户授权的离线提案范围核实，最终采用仍待人工。"
+    },
+    {
+      "id": "wash-tissue-core-review-20261026:wash-exclusion:roll.layers",
+      "attributeId": "roll.layers",
+      "definitionHash": "225d57e5a9d35bfd728ea4eb89eab6a465f17e4c0b7837244f34c3ec784f58b5",
+      "targetCategoryIds": [
+        "7a1ea510-8777-46ba-bfa0-955b472a0d61"
+      ],
+      "status": "not_applicable",
+      "reviewKind": "authorized_offline",
+      "reviewRecordId": "wash-tissue-core-review-20261026",
+      "reason": "冻结定义的对象为成品纸张；洗脸巾基材及单张柔巾对象不同。本轮不外推纸张定义，层数不在洗脸巾核心清单。"
+    },
+    {
+      "id": "wash-tissue-core-review-20261026:roll.raw_material",
+      "attributeId": "roll.raw_material",
+      "definitionHash": "0fa5e1d2dfb20c50b07a8ca39b3cbf02294fbbbbf04bd66028797260a70fa15b",
+      "targetCategoryIds": [
+        "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "ce3a9f67-613c-4707-bf3a-95193edb8a2d"
+      ],
+      "status": "supported",
+      "reviewKind": "authorized_offline",
+      "reviewRecordId": "wash-tissue-core-review-20261026",
+      "reason": "原定义为成品纸张的原料原文，不限卷状；两抽纸类同为纸张，保持原文文本及不得品牌推定的限制。 本次为用户授权的离线提案范围核实，最终采用仍待人工。"
+    },
+    {
+      "id": "wash-tissue-core-review-20261026:wash-exclusion:roll.raw_material",
+      "attributeId": "roll.raw_material",
+      "definitionHash": "0fa5e1d2dfb20c50b07a8ca39b3cbf02294fbbbbf04bd66028797260a70fa15b",
+      "targetCategoryIds": [
+        "7a1ea510-8777-46ba-bfa0-955b472a0d61"
+      ],
+      "status": "not_applicable",
+      "reviewKind": "authorized_offline",
+      "reviewRecordId": "wash-tissue-core-review-20261026",
+      "reason": "冻结定义的对象为成品纸张；洗脸巾基材及单张柔巾对象不同。本轮不外推纸张定义，层数不在洗脸巾核心清单。"
+    },
+    {
+      "id": "wash-tissue-core-review-20261026:roll.sheet_size",
+      "attributeId": "roll.sheet_size",
+      "definitionHash": "da397b42bb8a4fa28c857b4b06ef83b6635700e28f0a71697f221046f3375e21",
+      "targetCategoryIds": [
+        "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "ce3a9f67-613c-4707-bf3a-95193edb8a2d"
+      ],
+      "status": "supported",
+      "reviewKind": "authorized_offline",
+      "reviewRecordId": "wash-tissue-core-review-20261026",
+      "reason": "原定义为单张纸的组合尺寸，排除轴向和包装尺寸，适用于两类抽纸；不解释为折叠包装/纸盒尺寸，不添加干湿条件或抽张换算。 本次为用户授权的离线提案范围核实，最终采用仍待人工。"
+    },
+    {
+      "id": "wash-tissue-core-review-20261026:wash-exclusion:roll.sheet_size",
+      "attributeId": "roll.sheet_size",
+      "definitionHash": "da397b42bb8a4fa28c857b4b06ef83b6635700e28f0a71697f221046f3375e21",
+      "targetCategoryIds": [
+        "7a1ea510-8777-46ba-bfa0-955b472a0d61"
+      ],
+      "status": "not_applicable",
+      "reviewKind": "authorized_offline",
+      "reviewRecordId": "wash-tissue-core-review-20261026",
+      "reason": "冻结定义的对象为成品纸张；洗脸巾基材及单张柔巾对象不同。本轮不外推纸张定义，层数不在洗脸巾核心清单。"
+    }
+  ],
+  "coreGroups": [
+    {
+      "id": "facial-tissue",
+      "categoryIds": [
+        "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "ce3a9f67-613c-4707-bf3a-95193edb8a2d"
+      ],
+      "core": [
+        {
+          "conceptKey": "paper.raw_material",
+          "name": "原料",
+          "fieldType": "text",
+          "scope": "finished-paper-material",
+          "sharedAttributeId": "roll.raw_material",
+          "requiredness": "optional"
+        },
+        {
+          "conceptKey": "paper.layers",
+          "name": "层数",
+          "fieldType": "number",
+          "scope": "finished-paper-ply",
+          "sharedAttributeId": "roll.layers",
+          "requiredness": "optional"
+        },
+        {
+          "conceptKey": "paper.sheet_size",
+          "name": "单张尺寸（复用名称：纸张尺寸）",
+          "fieldType": "text",
+          "scope": "finished-paper-sheet-size",
+          "sharedAttributeId": "roll.sheet_size",
+          "requiredness": "optional"
+        },
+        {
+          "conceptKey": "facial.contents_per_package",
+          "name": "内装数量",
+          "fieldType": "text",
+          "scope": "inner-facial-tissue-package",
+          "sharedAttributeId": null,
+          "requiredness": "optional"
+        }
+      ],
+      "extensionsOnly": [
+        "香型",
+        "印花",
+        "压花",
+        "湿强",
+        "折叠/适配尺寸"
+      ],
+      "quantity": {
+        "measure": "contents_per_package",
+        "relation": "conditional",
+        "countedObject": "一盒或一包中的抽取次数/原文标注的成品纸张数量",
+        "countTerms": [
+          "抽",
+          "张"
+        ],
+        "denominatorTerms": [
+          "盒",
+          "包"
+        ],
+        "rule": "保留原文数量+计数词+内包装分母，盒与包不强行互换；不乘层数；不换算抽/张。"
+      }
+    },
+    {
+      "id": "wash-towel",
+      "categoryIds": [
+        "7a1ea510-8777-46ba-bfa0-955b472a0d61"
+      ],
+      "core": [
+        {
+          "conceptKey": "wash_towel.material",
+          "name": "材质",
+          "fieldType": "text",
+          "scope": "finished-wash-towel-material",
+          "sharedAttributeId": null,
+          "requiredness": "optional"
+        },
+        {
+          "conceptKey": "wash_towel.sheet_size",
+          "name": "单张尺寸",
+          "fieldType": "text",
+          "scope": "single-wash-towel-sheet-size",
+          "sharedAttributeId": null,
+          "requiredness": "optional"
+        },
+        {
+          "conceptKey": "wash_towel.pack_quantity",
+          "name": "内装数量",
+          "fieldType": "text",
+          "scope": "inner-wash-towel-package",
+          "sharedAttributeId": null,
+          "requiredness": "optional"
+        }
+      ],
+      "extensionsOnly": [
+        "克重",
+        "纹理",
+        "使用次数"
+      ],
+      "quantity": {
+        "measure": "contents_per_package",
+        "relation": "conditional",
+        "countedObject": "一包内成品洗脸巾片数或来源明确的原计数对象",
+        "countTerms": [
+          "片",
+          "张",
+          "抽"
+        ],
+        "denominatorTerms": [
+          "包",
+          "盒"
+        ],
+        "rule": "片、张、抽按来源保留，不默认相等；使用次数不合并为一次性/可重复使用互斥枚举。"
+      }
+    }
+  ]
+}

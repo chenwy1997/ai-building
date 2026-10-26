@@ -12,7 +12,7 @@ import { activationGateConflicts, definitionFingerprint } from "./modeling-contr
 import { materializeModelResult, modelOutputSchema, MODELING_PROPOSAL_VERSION } from "./modeling-proposal.ts";
 import { attributeSearchMatch } from "./attribute-retrieval.ts";
 import { prepareBatch, batchTask, pendingFamily, executeBatch, type BatchPlan } from "./batch.ts";
-import { fixtureSnapshot, fixtureTask, fixtureOutput, attribute, binding, withFixtureDecisions, fixtureWireResult, scriptedFetch, finalMessage, functionCall } from "./fixtures.ts";
+import { fixtureSnapshot, fixtureTask, fixtureOutput, attribute, binding, withFixtureDecisions, fixtureWireResult, fixtureCoreAttributes, scriptedFetch, finalMessage, functionCall, preCoreReplaySnapshot } from "./fixtures.ts";
 import { PILOT_CATEGORIES, PILOT_KNOWLEDGE_ID } from "./pilot-knowledge.ts";
 import { runStage, BATCH_CORRECTIONS } from "./runner.ts";
 import { ResponsesClient } from "./responses.ts";
@@ -107,7 +107,7 @@ test("real conditional quantity is rendered by the host without model-supplied f
   const { result, assembly } = materializeModelResult(snapshot, task, p), mapped = result.decisions.at(-1).quantity;
   expect(mapped.systemFieldKeys).toEqual(["unitMin"]);
   expect(mapped.sameWhen).toContain("由unitMinQua读取数量");
-  expect(mapped.sameWhen).toContain("销售单位salesUnit");
+  expect(mapped.sameWhen).toContain("销售单位saleUnit");
   expect(mapped.differentWhen).toContain("待核实");
   expect(mapped.overlapAction).toBe("reuse_system_field");
   expect(assembly.quantityMappings[0].execution).toBe("planning_only_requires_verified_sku_units");
@@ -121,7 +121,7 @@ test("recorded shared-copy failures are eliminated by reference without silently
   expect(soft.feedback.some(f => JSON.stringify(f).includes("R03"))).toBe(true);
   const plan = await prepareBatch({ categoryId: PILOT_CATEGORIES[1].id, outDir: next(), runId: "recorded-negative-review",
     concurrency: 1, treePath: join(ROOT, "profiles/clean-paper-tree.json") }, release);
-  const family = pendingFamily(plan.groups[0]!, { result: seed.result } as any, plan.runId), data = jsonClone(plan.snapshot);
+  const family = pendingFamily(plan.groups[0]!, { result: seed.result } as any, plan.runId), data = preCoreReplaySnapshot(plan.snapshot);
   data.families.push(family);
   const snapshot = new DataSnapshot(data), task = batchTask(plan, PILOT_CATEGORIES[2].id, "leaf"), raw = empty(family.version),
     { result } = materializeModelResult(snapshot, task, raw), context = await assemble(release, snapshot, task), checks = checkResult(task, result, context.tools);
@@ -197,8 +197,9 @@ test("three real category IDs receive the dedicated frozen knowledge in actual r
     if (!base) {
       const a = attribute({ id: "synthetic." + task.categoryId, name: "模拟独立参数", conceptKey: "synthetic." + task.categoryId,
         definition: "仅为" + task.categoryId + "构造的测试定义", scope: "synthetic." + task.categoryId, fieldType: "text" });
-      raw = fixtureWireResult(withFixtureDecisions({ categoryId: task.categoryId, baselineVersion: null, attributes: [a],
-        bindings: [binding(a.id, { categoryId: task.categoryId })], extensionCandidates: [], unresolved: ["模拟接线，非业务质量结论"] }), body);
+      const attributes = fixtureCoreAttributes(input) ?? [a];
+      raw = fixtureWireResult(withFixtureDecisions({ categoryId: task.categoryId, baselineVersion: null, attributes,
+        bindings: attributes.map(a => binding(a.id, { categoryId: task.categoryId })), extensionCandidates: [], unresolved: ["模拟接线，非业务质量结论"] }), body);
     }
     return Response.json({ status: "completed", output: [finalMessage(raw)] });
   };

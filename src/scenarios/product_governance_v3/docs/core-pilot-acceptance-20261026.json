@@ -1,0 +1,84 @@
+{
+  "kind": "user_confirmed_core_offline_engineering_acceptance",
+  "date": "2026-10-26",
+  "releaseId": "0d50d852bd82b7974239637156dbfeb1c7676bc72092b7f54a133e87f5ad0e60",
+  "coreReview": "knowledge/wash-tissue-core-review-20261026.json",
+  "nativeQuantityReview": "knowledge/native-quantity-carrier-20261026.json",
+  "authorizationBoundary": "User-authorized offline assessment of this finite three-category proposal scope. No expert sign-off, SKU value verification or production adoption claimed.",
+  "tests": {
+    "passed": 272,
+    "failed": 0,
+    "files": 19,
+    "newTests": 8,
+    "log": "/tmp/pgv3-core-all.log"
+  },
+  "typescript": "passed",
+  "skillValidation": "quick_validate.py passed",
+  "threeCategoryMock": {
+    "leaves": 3,
+    "familySeeds": 1,
+    "requests": 8,
+    "feedback": 0,
+    "checks": "passed",
+    "recovery": "passed without new mock calls",
+    "businessAccuracyEvaluated": false
+  },
+  "newRoundSnapshotContextProbe": {
+    "report": "outputs/product-governance-v3/core-pilot-offline-20261026/verified/three-category-context.json",
+    "note": "Read actual new-round input and add a constructed common baseline in memory only. No model-generated result or paid accuracy measurement.",
+    "sourceInputUnchanged": true,
+    "contextByteLimit": 200000,
+    "familySeedBytes": 178785,
+    "washTowelLeafBytes": 178394,
+    "boxedTissueLeafBytes": 190296,
+    "softTissueLeafBytes": 190296,
+    "knowledgeGaps": []
+  },
+  "fiveStageMock": {
+    "report": "outputs/product-governance-v3/core-pilot-offline-20261026/verified/acceptance.json",
+    "reportHash": "286540b02a6fe6cf9423526a658fd61e4e3ef5b645518a3522047ab7410f8570",
+    "allPassed": true,
+    "contextIntegrity": true,
+    "appendOnlyToolHistory": true
+  },
+  "historicalEvidence": {
+    "originalScmKnowledgeVersion": "affcf4095798cbb58ba3e80b1431ed821e74e3b6e1bba640a72630c279185319",
+    "originalVersionPreserved": true,
+    "compactCopySemanticallyEqual": true,
+    "fieldsRetained": 233,
+    "responsibilityRecordsRetained": 86,
+    "recordedFailuresReplayedWithoutNewAuthorization": true,
+    "rawToolReadsRetained": true
+  },
+  "originalBudget": {
+    "path": "outputs/product-governance-v3/clean-paper-batch-20261023/budget.json",
+    "unchangedHash": "5f4d3f929bb3662a9cd6652044a79ad5d6190673d96a298a81caf41f270bf05b",
+    "entries": 162,
+    "reservedCny": 210.6,
+    "effectiveLimitCny": 280.7,
+    "remainingCny": 70.1,
+    "accounting": "conservative reservations, not an invoice"
+  },
+  "newRoundPreview": {
+    "roundName": "pilot-wash-tissue-core-verified-20261026",
+    "ready": true,
+    "preflight": [],
+    "leaves": 3,
+    "familySeeds": 1,
+    "model": "deepseek-flash",
+    "reasoningEffort": "low",
+    "concurrency": 3,
+    "maximumRequests": 24,
+    "maximumReservationCny": 31.2,
+    "fitsRemainingBudget": true,
+    "executeRequested": false
+  },
+  "paidModelCalls": 0,
+  "productionWrites": 0,
+  "providerCacheImprovementMeasured": false,
+  "remaining": [
+    "User executes the fixed three-category paid round to evaluate real model behavior and review the proposals.",
+    "Actual CategoryKeyConfig and per-SKU count objects/units must be verified before any quantity mapping is executed.",
+    "Broader category applicability and deferred professional candidates are outside this confirmed core scope."
+  ]
+}

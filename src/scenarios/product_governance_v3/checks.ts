@@ -22,6 +22,7 @@ import {
 import { sharedDefinitionErrors, modelingDecisionErrors, DEFINITION_FIELDS } from "./modeling-contract.ts";
 import { modelConfigurationReview } from "./scripts/configuration-review.mjs";
 import { attributeApplicabilityErrors } from "./attribute-applicability.ts";
+import { pilotCoreErrors } from "./pilot-core.ts";
 
 // These checks establish structural consistency and provenance, not the truth of domain judgments.
 export function checkResult(
@@ -123,6 +124,8 @@ export function checkResult(
     errors.push(...attributeApplicabilityErrors(attributes, snapshot.data, task));
     executed.add("modeling-decisions");
     errors.push(...modelingDecisionErrors(value, snapshot.data));
+    executed.add("confirmed-core-coverage");
+    errors.push(...pilotCoreErrors(value, snapshot.data, task));
     executed.add("configuration-explanations");
     for (const conflict of modelConfigurationReview(value).conflicts)
       add("R08", conflict.attributeId,

@@ -1,4 +1,5 @@
 import { hash, type Snapshot } from "./core.ts";
+import { attachPilotCoreReview } from "./pilot-core.ts";
 
 export const PILOT_KNOWLEDGE_ID = "wash-tissue-research-20261026";
 export const PILOT_CATEGORIES = [
@@ -8,7 +9,8 @@ export const PILOT_CATEGORIES = [
 ] as const;
 
 // Called only while creating a NEW default-profile input/round. Never rewrite a
-// historical snapshot, grant applicability, or enrich an explicit custom snapshot.
+// historical snapshot or enrich an explicit custom snapshot. The separately
+// released offline core review supplies exact proposal-only applicability.
 export function attachPilotKnowledge(data: Snapshot, selectedIds: string[]) {
   const targets = PILOT_CATEGORIES.filter(c => selectedIds.includes(c.id) &&
     data.tree.nodes.some(n => (n as { id: string; name: string }).id === c.id && (n as { id: string; name: string }).name === c.name));
@@ -23,5 +25,6 @@ export function attachPilotKnowledge(data: Snapshot, selectedIds: string[]) {
   };
   data.knowledgeRequirements = data.knowledgeRequirements.filter(r => r.id !== requirement.id);
   data.knowledgeRequirements.push({ ...requirement, stages: [...requirement.stages] });
-  return { knowledgeId: PILOT_KNOWLEDGE_ID, targetCategoryIds: targets.map(c => c.id), requirementHash: hash(requirement) };
+  const coreReview = attachPilotCoreReview(data, targets.map(c => c.id));
+  return { knowledgeId: PILOT_KNOWLEDGE_ID, targetCategoryIds: targets.map(c => c.id), requirementHash: hash(requirement), coreReview };
 }

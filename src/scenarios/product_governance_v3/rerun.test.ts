@@ -1,4 +1,4 @@
-import { withFixtureDecisions, fixtureWireResult } from "./fixtures.ts";
+import { withFixtureDecisions, fixtureWireResult, fixtureCoreAttributes } from "./fixtures.ts";
 import { test, expect, beforeAll, afterAll } from "bun:test";
 import { mkdtemp, rm, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -47,7 +47,7 @@ function mock(options: { tool?: boolean; reject?: boolean; badExplanationOnce?: 
       expect(JSON.parse(body.input.at(-2).output).node.id).toBe(task.categoryId);
     }
     const family = input.sharedContext.family.flatMap((p: any) => p.items).find((f: any) => f.usable);
-    const attributes = family ? jsonClone(family.attributes) : [attribute({ id: "test.rerun." + (scope.family?.id ?? task.categoryId),
+    const attributes = family ? jsonClone(family.attributes) : fixtureCoreAttributes(input) ?? [attribute({ id: "test.rerun." + (scope.family?.id ?? task.categoryId),
       name: "构造验收参数", conceptKey: "test.rerun." + (scope.family?.id ?? task.categoryId), fieldType: "text",
       scope: "test.rerun." + (scope.family?.id ?? task.categoryId),
       definition: "离线构造：仅对象" + (scope.family?.id ?? task.categoryId) + "适用的独立参数；不复用其他对象口径" })];

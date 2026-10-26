@@ -16,6 +16,12 @@ export const SYSTEM_CONTRACT = "docs/governance-design-v1-20261022.md";
 export { RULES, STAGE_RULES, RULE_REGISTRY } from "./rules.ts";
 import { STAGE_RULES, RULE_REGISTRY } from "./rules.ts";
 export const KNOWLEDGE = [
+  { id: "wash-tissue-core-review-20261026", file: "knowledge/wash-tissue-core-review-20261026.json",
+    hints: ["洗脸巾", "盒装抽纸", "软包抽纸"], kind: "user_authorized_offline_proposal_review" },
+  { id: "native-quantity-carrier-20261026", file: "knowledge/native-quantity-carrier-20261026.json",
+    hints: ["洗脸巾", "盒装抽纸", "软包抽纸"], kind: "local_source_verified_planning_only" },
+  { id: "scm-field-responsibilities-compact-20261026", file: "knowledge/scm-field-responsibilities-compact-20261026.json",
+    hints: ["洗脸巾", "盒装抽纸", "软包抽纸"], kind: "source_verified_pending_business_review" },
   {
     id: "wash-tissue-research-20261026",
     file: "knowledge/wash-tissue-research-20261026.md",

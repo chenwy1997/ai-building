@@ -1,4 +1,5 @@
 import { hash, Blocked, type AttributeDefinition, type Snapshot, type Finding, type AttributeBinding } from "./core.ts";
+import nativeQuantity from "./knowledge/native-quantity-carrier-20261026.json";
 
 export const DEFINITION_FIELDS = ["name", "conceptKey", "definition", "scope", "fieldType", "unit", "enumValues", "multi", "valueLevel", "numberConfig", "textConfig", "optionConfig", "defaultValue"] as const;
 export function definitionFingerprint(a: AttributeDefinition) {
@@ -55,23 +56,24 @@ export interface ModelingDecision {
 
 // Host-owned semantic responsibility, always supplied in context. Values are not SKU evidence.
 export const QUANTITY_RESPONSIBILITY = {
-  version: "quantity-responsibility-1",
+  version: "quantity-responsibility-2",
   nativeOwnerKey: "unitMin",
-  nativeFields: { unitMin: "最小计量单位", unitMinQua: "一个销售单位包含的最小计量单位数量", salesUnit: "销售单位" },
-  relation: "unitMinQua × unitMin / salesUnit",
+  nativeFields: { unitMin: "最小计量单位", unitMinQua: "一个销售单位包含的最小计量单位数量", saleUnit: "销售单位默认属性键；salesUnit只是治理职责别名" },
+  nativeCarrier: nativeQuantity.mapping,
+  relation: "unitMinQua × unitMin / saleUnit（均须按CategoryKeyConfig解析实际键）",
   businessAdmission: "按业务必要性决定，不要求已挂商品有值；职责映射按计数对象、分母和计数词比较。",
   packageCount: "包内数量不能一概视为基础字段或一概认为独立。销售单位与最小单位可变时用conditional，重合时reuse_system_field，避免二次填写。",
   examples: [
-    { salesUnit: "提", unitMin: "包", unitMinQua: 6, proposal: "200张/包", overlap: false },
-    { salesUnit: "包", unitMin: "张", unitMinQua: 200, proposal: "200张/包", overlap: true },
+    { saleUnit: "提", unitMin: "包", unitMinQua: 6, proposal: "200张/包", overlap: false },
+    { saleUnit: "包", unitMin: "张", unitMinQua: 200, proposal: "200张/包", overlap: true },
   ],
-  countTerms: "抽、张、节、格不默认等价；一包、一个销售单位、一个物流箱不能默认等价。",
+  countTerms: "抽、张、片、节、格不默认等价；一包、一盒、一个销售单位、一个物流箱不能默认等价。",
   unresolved: "职责关系尚不能描述时放扩展候选，并记录需要核实的关系；不得用商品样本缺值代替业务准入判断。",
   executionBoundary: "这是建模与填写来源计划。实际SKU原生单位组合尚未读取/核实时不能执行条件映射或生成重复值。",
 } as const;
 
 export function needsQuantityMapping(item: { name: string; conceptKey: string }) {
-  return /每(?:包|卷|提|箱).*(?:数量|张数|抽数|节数|格数|卷数)|销售总(?:数量|卷数)|包装.*数量/.test(item.name) || /(?:package|pack)[._-]?(?:count|quantity)|total_rolls/.test(item.conceptKey);
+  return /每(?:包|盒|卷|提|箱).*(?:数量|张数|抽数|片数|节数|格数|卷数)|销售总(?:数量|卷数)|(?:包装|内装).*数量/.test(item.name) || /(?:package|pack)[._-]?(?:count|quantity)|contents_per_package|inner[._-]?(?:count|quantity)|total_rolls/.test(item.conceptKey);
 }
 
 // Deliberately narrow: these are explicit gate statements observed in real runs,

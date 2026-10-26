@@ -14,6 +14,7 @@
 - 2026-10-24：family-modeling输出必须有逐项decisions，业务必要性、专业定义及SKU取值资料分开；数量按对象/分母/计数词对照unitMin职责，同ID跨族也不能改定义。历史响应缺新字段应明确报告合同不兼容，禁止运行时自动补成“confirmed”；fixtures注释只供离线测试。
 - 预算提额只能通过用户明确授权的budget-set-remaining追加记录，保持原limitCny身份及所有历史预留；同授权ID重复不补余额。有效额度读取adjustments，不得直接改原始limit或自动清零/提额。
 - 请求布局使用request-layout.ts：规则/skill及已选共享资料置前，类目与任务数据后置，运行状态只在完整工具回传/纠错反馈后追加；不得改写历史、截断资料或为缓存加载无关知识。模型状态、纠错和工具预算仍由程序检查；离线前缀指标不冒充provider token命中率。
-- 跨类复用分别检查定义指纹与目标范围；属性池命中不授予范围。attributeApplicability是冻结人工核实输入，模型不能生成supported记录；缺省不表示全局适用。共同基线检查全部成员，真实未核实记录保持为负例；构造核实记录仅在fixture中使用，不得写入真实快照或伪装成专业确认。
+- 跨类复用分别检查定义指纹与目标范围；属性池命中不授予范围。attributeApplicability是冻结核实输入，模型不能生成supported记录；缺省不表示全局适用。用户2026-10-26明确确认三类核心清单并授权离线核实，其authorized_offline记录只能与release登记全文完全匹配、仅用于待审建模，不冒充人工专业签认或授权SKU填写。共同基线检查全部成员，历史未核实记录保持为负例；构造核实记录仅在fixture中使用。
 - 新批次/显式新轮次采用modeling-proposal-v1。模型只产增量和修订建议，宿主按冻结版本展开共同定义/绑定/决策并重跑原检查；不静默迁移历史完整输出。保留modelProposal、assembly及结果指纹，恢复时从原响应重建并比对。revisionRequests不应用；缺历史决策不得自动补confirmed。数量字段映射归程序，业务关系仍待审；专业包的样本不授予适用性记录。
 - 三类试点以docs/bounded-pilot-20261026.md为本轮工程验收边界。人工未裁定的专业议题显式暂缓，不用反复付费重跑解决；不把模拟三类通过率说成真实DeepSeek准确率或全21类可用。
+- 当前三类核心范围及离线核实见docs/core-pilot-20261026.md。coreScope与检查器同源，真实SCM键由CategoryKeyConfig确定；salesUnit为职责别名，默认键saleUnit。unitMin及unitMinQua来自属性承载而非StdProduct列。字段清单只做无损JSON排版压紧，禁止因上下文预算删字段。新轮次仍复用原账本，由用户执行。

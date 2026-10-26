@@ -8,7 +8,7 @@ import { loadRelease, ROOT, type Release } from "./release.ts";
 import { prepareBatch, batchTask, pendingFamily, CLEAN_PAPER_ID, type BatchPlan } from "./batch.ts";
 import { attributeApplicabilityErrors, modelingTargets, reuseApplicability, type AttributeApplicabilityReview } from "./attribute-applicability.ts";
 import { definitionFingerprint, sharedDefinitionErrors } from "./modeling-contract.ts";
-import { fixtureSnapshot, fixtureTask, scriptedFetch, finalMessage, functionCall } from "./fixtures.ts";
+import { fixtureSnapshot, fixtureTask, scriptedFetch, finalMessage, functionCall, preCoreReplaySnapshot } from "./fixtures.ts";
 import { DataSnapshot } from "./snapshot.ts";
 import { assemble } from "./context.ts";
 import { checkResult } from "./checks.ts";
@@ -28,7 +28,7 @@ beforeAll(async () => {
 afterAll(async () => { await rm(temp, { recursive: true, force: true }); });
 
 async function recordedContext(which: typeof seed) {
-  const data = jsonClone(plan.snapshot), task = batchTask(plan, which.categoryId, which.phase as "family-seed" | "leaf");
+  const data = preCoreReplaySnapshot(plan.snapshot), task = batchTask(plan, which.categoryId, which.phase as "family-seed" | "leaf");
   // This recording uses the historical full-result wire schema.
   delete (task.candidate as any).modelingContractVersion;
   if (which.phase === "leaf") {

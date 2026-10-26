@@ -5,11 +5,11 @@ import { join } from "node:path";
 import recorded from "./fixtures/pilot-quality-cache-20261026.json";
 import { canonical, hash, jsonClone, STAGES } from "./core.ts";
 import { ROOT, loadRelease, ruleResponsibilitiesFor, type Release } from "./release.ts";
-import { assemble } from "./context.ts";
+import { assemble, joinKnowledgePrefetch } from "./context.ts";
 import { serializeContextInput } from "./request-layout.ts";
 import { DataSnapshot } from "./snapshot.ts";
 import { prepareBatch, pendingFamily, batchTask, CLEAN_PAPER_ID, type BatchPlan } from "./batch.ts";
-import { fixtureSnapshot, fixtureTask, finalMessage, functionCall, scriptedFetch } from "./fixtures.ts";
+import { fixtureSnapshot, fixtureTask, finalMessage, functionCall, scriptedFetch, preCoreReplaySnapshot } from "./fixtures.ts";
 import { ResponsesClient } from "./responses.ts";
 import { Budget } from "./budget.ts";
 import { runStage, BATCH_CORRECTIONS } from "./runner.ts";
@@ -25,8 +25,23 @@ beforeAll(async () => {
   plan = await prepareBatch({ categoryId: CLEAN_PAPER_ID, outDir: next(),
     runId: recorded.provenance.runId, concurrency: 3,
     treePath: join(ROOT, "profiles/clean-paper-tree.json") }, release);
+  plan = { ...plan, snapshot: preCoreReplaySnapshot(plan.snapshot) };
 });
 afterAll(async () => { await rm(temp, { recursive: true, force: true }); });
+
+test("prefetch joining preserves exact text and rejects gaps, overlaps, partial reads and changed versions", () => {
+  const body = "一段原文\n  保留空格与换行", sha256 = hash(body);
+  const pages = [0, 5].map((offset, i) => ({ id: "recorded", kind: "source", version: sha256, sha256,
+    offset, end: i ? body.length : 5, totalCharacters: body.length, text: body.slice(offset, i ? body.length : 5),
+    truncated: i === 0, nextOffset: i ? null : 5 }));
+  const original = hash(pages), merged = joinKnowledgePrefetch(pages);
+  expect(merged).toHaveLength(1); expect(merged[0].text).toBe(body); expect(hash(pages)).toBe(original);
+  for (const mutate of [
+    (p: any[]) => { p[1].offset++; }, (p: any[]) => { p[1].offset--; },
+    (p: any[]) => { p.pop(); }, (p: any[]) => { p[1].version = "other"; },
+    (p: any[]) => { p[1].text = p[1].text.replace("保留", "改写"); },
+  ]) { const p = jsonClone(pages); mutate(p); expect(() => joinKnowledgePrefetch(p)).toThrow(); }
+});
 
 for (const stage of STAGES) test(stage + ": one complete responsibility registry remains in instructions with a verifiable reference", async () => {
   const p = await assemble(release, new DataSnapshot(fixtureSnapshot()), fixtureTask(stage)),
@@ -68,6 +83,14 @@ test("the recorded generated tissue baseline fits both leaves with every definit
     const knowledgeId = "small-roll-paper-research-20261022",
       chunks = p.input.sharedContext.knowledge.filter(k => k.id === knowledgeId);
     expect(chunks.map(k => k.text).join("")).toBe(release.knowledge[knowledgeId]!.body);
+    expect(chunks).toHaveLength(1);
+    for (const k of p.input.sharedContext.knowledge) {
+      expect(k.text).toBe(release.knowledge[k.id]!.body);
+      expect(k.version).toBe(release.knowledge[k.id]!.sha256);
+      const reads = p.tools.events.filter(e => e.name === "knowledge_read" && (e.result as any).id === k.id);
+      expect(reads.map(e => (e.result as any).text).join("")).toBe(k.text);
+      expect(p.manifest.knowledge.filter(m => m.id === k.id)).toHaveLength(reads.length);
+    }
     const toolCopy = await p.tools.call("get_family_context", { categoryId, cursor: null, limit: 10 });
     expect(toolCopy.items.find((f: any) => f.id === group.id).decisions).toEqual(seed.result.decisions);
   }

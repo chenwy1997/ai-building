@@ -11,7 +11,7 @@ import {DataSnapshot} from "./snapshot.ts";
 import {assemble} from "./context.ts";
 import {checkResult} from "./checks.ts";
 import {sharedDefinitionErrors, modelingDecisionErrors, uniqueDefinitions, definitionFingerprint, QUANTITY_RESPONSIBILITY} from "./modeling-contract.ts";
-import {attribute, binding, fixtureSnapshot, fixtureTask, fixtureOutput, withFixtureDecisions, scriptedFetch, finalMessage, functionCall} from "./fixtures.ts";
+import {attribute, binding, fixtureSnapshot, fixtureTask, fixtureOutput, withFixtureDecisions, scriptedFetch, finalMessage, functionCall, preCoreReplaySnapshot} from "./fixtures.ts";
 import {Budget} from "./budget.ts";
 import {ResponsesClient} from "./responses.ts";
 import {runStage, BATCH_CORRECTIONS} from "./runner.ts";
@@ -24,7 +24,7 @@ const sample = (arm: string, phase = "family-seed", prefix = "640") => jsonClone
 async function context(s = sample("high")) {
   const p = await prepareBatch({categoryId: s.categoryId, outDir: next(), runId: "offline-ab-replay", concurrency: 1,
     treePath: join(ROOT, "profiles/clean-paper-tree.json")}, release);
-  const data = jsonClone(p.snapshot);
+  const data = preCoreReplaySnapshot(p.snapshot);
   const registered = jsonClone(recordings.registryFamily) as any; registered.runId = p.runId;
   if (!data.families.some(f => f.id === registered.id)) data.families.push(registered);
   const snapshot = new DataSnapshot(data), task = batchTask(p, s.categoryId, s.phase as "family-seed" | "leaf"), plan = await assemble(release, snapshot, task);

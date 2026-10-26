@@ -2,11 +2,12 @@ import { Blocked, hash, jsonClone, list, nullable, object, text, validate, type 
 import { attributeSchema, bindingSchema, extensionCandidateSchema, modelingDecisionSchema, outputSchemas } from "./contracts.ts";
 import { definitionFingerprint, uniqueDefinitions, usableDefinitions, type ModelingDecision } from "./modeling-contract.ts";
 import type { DataSnapshot } from "./snapshot.ts";
+import nativeQuantity from "./knowledge/native-quantity-carrier-20261026.json";
 
 // A model proposes deltas. Only this host module may expand references into the
 // existing, fully checked internal contract. Historical full outputs stay historical.
 export const MODELING_PROPOSAL_VERSION = "modeling-proposal-v1";
-export const QUANTITY_MAPPING_VERSION = "native-quantity-plan-v1";
+export const QUANTITY_MAPPING_VERSION = "native-quantity-plan-v2";
 function without(schema: Schema, keys: string[]) {
   return object(Object.fromEntries(Object.entries(schema.properties!).filter(([key]) => !keys.includes(key))));
 }
@@ -58,7 +59,7 @@ export function modelingProposalContext(snapshot: DataSnapshot, task: Task) {
     assessmentNeededIds: [...(base?.attributes ?? []), ...(base?.extensionCandidates ?? [])]
       .filter(a => !decisions.some(d => d.objectId === a.id)).map(a => a.id),
     instructions: "只输出增量合同。baselineVersion准确引用后，宿主自动继承全部共同定义、绑定、扩展候选和已有决策。不要在new*或decisions复述已继承对象。缺历史决策的assessmentNeededIds须明确评估，不能假装已经批准。修改共同定义或绑定只写revisionRequests，程序不应用。复用池中非基线定义用reuse及definitionHash，仍须通过目标范围检查；只为新增/池引用填写newBindings。所有结果待人工采用。",
-    quantityMapping: { version: QUANTITY_MAPPING_VERSION, ownerKey: "unitMin", quantityField: "unitMinQua", unitField: "unitMin", salesUnitField: "salesUnit",
+    quantityMapping: { version: QUANTITY_MAPPING_VERSION, ...nativeQuantity.mapping,
       instructions: "只判断数量对象、计数词、measure和relation；后台字段名、分母、重合时复用动作和比较条件由宿主生成。包内数量不默认独立于原生单位组合。不能把unitMin说成数量值。" },
     activation: "扩展启用只列业务用途、专业定义或目标适用性问题；是否强制填写另由requiredNecessity表达，SKU资料可得性只写valueEvidence/unresolved。两者不能作为扩展启用条件。",
   };
@@ -68,16 +69,18 @@ function quantityPlan(d: any) {
   const q = d.quantity;
   if (!q) return null;
   const denominator = q.measure === "contents_per_package" ? "package" : q.measure === "sales_unit_count" ? "sales_unit" : "other";
-  const comparison = "核实销售单位salesUnit与候选分母相同、最小计量单位unitMin与候选计数对象和计数词相同，并有明确同口径依据";
+  const comparison = "先按CategoryKeyConfig解析实际键；核实销售单位saleUnit（职责别名salesUnit）与候选分母相同、最小计量单位unitMin与候选计数对象和计数词相同，并有明确同口径依据";
   return {
     version: QUANTITY_MAPPING_VERSION, objectId: d.objectId, ownerKey: "unitMin",
-    quantityField: "unitMinQua", unitField: "unitMin", salesUnitField: "salesUnit",
+    quantityField: "unitMinQua", unitField: "unitMin", salesUnitField: "saleUnit", salesUnitOwnerKey: "salesUnit",
+    nativeCarrier: nativeQuantity.mapping,
+    bindingStatus: "unresolved_until_category_key_config_and_sku_units_are_read",
     denominator, relation: q.relation,
     overlapRule: "same_denominator_and_counted_object_and_count_term_with_verified_basis",
     execution: "planning_only_requires_verified_sku_units",
     quantity: { ...q, denominator, systemFieldKeys: ["unitMin"],
       sameWhen: ["same", "conditional"].includes(q.relation) ? comparison + "时，由unitMinQua读取数量，复用基础字段" : null,
-      differentWhen: q.relation === "conditional" ? "核实salesUnit与候选分母是不同包装层级，或unitMin与候选计数对象/计数词不同，且不存在未经核实的单位换算时，才按独立包内参数处理；单位或层级不明则待核实" : null,
+      differentWhen: q.relation === "conditional" ? "核实saleUnit与候选分母是不同包装层级，或unitMin与候选计数对象/计数词不同，且不存在未经核实的单位换算时，才按独立包内参数处理；单位或层级不明则待核实，不用层数乘除抽/张/片" : null,
       overlapAction: ["same", "conditional"].includes(q.relation) ? "reuse_system_field" : "not_applicable" },
   };
 }
@@ -124,7 +127,10 @@ export function materializeModelResult(snapshot: DataSnapshot, task: Task, raw: 
     if (inheritedIds.has(b.attributeId)) fail("inherited binding changes belong in revisionRequests: " + b.attributeId);
     bindings.push({ ...b, categoryId: task.categoryId, baselineAttributeId: null });
   }
-  const quantityMappings: any[] = [];
+  const quantityMappings: any[] = decisions.flatMap(d => {
+    const mapping = quantityPlan(d);
+    return mapping ? [{ ...mapping, inherited: true }] : [];
+  });
   for (const d of p.decisions) {
     if (decisions.some(existing => existing.objectId === d.objectId)) fail("frozen/duplicate decision cannot be replaced: " + d.objectId);
     const mapping = quantityPlan(d);

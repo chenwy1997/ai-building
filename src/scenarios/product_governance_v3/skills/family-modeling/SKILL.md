@@ -19,11 +19,13 @@ description: 为商品治理候选类目建立共同属性与差异提案，按�
 ## 判断顺序
 
 1. 看预取的类目、同族、属性池、字段职责、knowledgeRequirements和knowledgeGaps。检索不足时调用categories_search、find_related_categories、get_family_context、search_attribute_pool及knowledge_read。按概念和对象查，不只搜完整类目名。相关词检索只是召回，不能据此认定同义或适用。
-2. 对命中的定义比较对象、计量状态、术语和用途。查看reuseApplicability，目标以宿主modelingTargetCategoryIds为准；reusable=false时不能自行补造supported。跨类复用既要同ID定义不变，也要冻结适用范围覆盖全部目标。真正不同对象可提出理由明确的新定义，不靠换ID或改scope标签复制旧参数来绕过检查。
+2. 对命中的定义比较对象、计量状态、术语和用途。查看reuseApplicability，目标以宿主modelingTargetCategoryIds为准；reusable=false时不能自行补造supported。跨类复用既要同ID定义不变，也要冻结适用范围覆盖全部目标。authorized_offline是宿主载入的已授权离线核实记录，只允许待审建模，不授权SKU填写。真正不同对象可提出理由明确的新定义，不靠换ID或改scope标签复制旧参数来绕过检查。
 3. 每个新增属性写具体用途、影响的采购判断及维护成本。必要性未明放扩展候选；不能把所有技术参数设为选填。独立长宽等拆分要有独立筛选、计算或适配需求，展开尺寸不证明装载适配。名称用不歧义的短称，细节放定义，保留净/毛、内/外等必要限定。香型可为一个稳定文本字段；工艺共存、抽/张/节/格换算先核实。
-4. 排除系统字段已承担的品牌、供应商、销售单位等。数量与固定单位合为同一参数。数量提案只判断measure、countedObject、countTerms、relation及业务reason；后台字段名和条件动作由宿主生成。unitMin是单位，unitMinQua是数量，salesUnit是销售单位。销售单位与候选分母不同不代表冲突；同口径时复用系统值，单位未知时不推断。sales_unit_count归系统；包内数量通常为conditional，不能声称始终独立。
+4. 排除系统字段已承担的品牌、供应商、销售单位等。数量与固定单位合为同一参数。数量提案只判断measure、countedObject、countTerms、relation及业务reason；后台字段名和条件动作由宿主生成。unitMin是单位，unitMinQua是数量，saleUnit是销售单位默认属性键，salesUnit只是治理职责别名。真实键须按CategoryKeyConfig解析；unitMin及unitMinQua不能假装是StdProduct列。销售单位与候选分母不同不代表冲突；同口径时复用系统值，单位未知时不推断。sales_unit_count归系统；内装数量通常为conditional，不能声称始终独立或整类已由系统承载。
 5. 新增对象各有一条decisions，分别说明businessNeed、professionalReadiness和valueEvidence。准入及必填按业务用途，不能用sample_availability。SKU有无值不决定设不设属性；“包装标注可稳定取得”是资料准备问题。扩展启用只列business_use、professional_definition或target_applicability；确认是否必填不是启用条件。必填必要性未定则requiredNecessity=pending且选填，不能以optional代替准入判断。
 6. 新定义按类型填写配置，不猜范围、精度或枚举。未知专业约束用null；文本format仅原生支持的预设，多值需同SKU同口径同时成立。现有冻结配置有疑问只能提共享修订。unresolved写业务问题，不重复概括配置；“依据待核实”不能写成“当前配置都是null”。
 7. 引用知识用实际读到的id、version、quote；引用只证明读过材料，不证明全类适用。品牌例子不能冒充行业标准，通用准入文档不能冒充专业研究。缺少SKU取值证据不妨碍属性提案，但不能凭类目名填写SKU值。对照本次已载入的专业包，范围外的问题明确暂缓，不为追求属性全集不断扩张任务。
 
 必读[建模正反例](references/cases.md)。提交前核对：共同定义只有一份；系统职责无重复；每项有具体用途或暂缓理由；目标范围未偷换；引用真实；待审事项有限且明确。本阶段不写线上、不自动采用。
+
+存在sharedContext.coreScope时，它是用户已裁定的本轮有限业务范围：用给定conceptKey覆盖各核心项，引用sharedAttributeId，不另造同义字段。coreScope没有出现在本次请求时，不套用其他类目的清单。扩展项保持候选；遗漏核心、独立拆长宽或重新把已确认核心降为候选，不属于普通措辞建议。输入核心范围已确定仍不等于最终定义、配置或SKU值被采用。

@@ -1,4 +1,4 @@
-import { withFixtureDecisions } from "./fixtures.ts";
+import { withFixtureDecisions, preCoreReplaySnapshot } from "./fixtures.ts";
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -22,8 +22,9 @@ beforeAll(async () => { release = await loadRelease(); temp = await mkdtemp(join
 afterAll(async () => { await rm(temp, { recursive: true, force: true }); });
 const next = () => join(temp, String(serial++));
 async function plan(categoryId: string) {
-  return prepareBatch({ categoryId, outDir: next(), runId: recordings.provenance.runId,
+  const p = await prepareBatch({ categoryId, outDir: next(), runId: recordings.provenance.runId,
     concurrency: 2, treePath: join(ROOT, "profiles/clean-paper-tree.json") }, release);
+  return { ...p, snapshot: preCoreReplaySnapshot(p.snapshot) };
 }
 async function replay(snapshot: DataSnapshot, task: Task, script: Parameters<typeof scriptedFetch>[0]) {
   // These recordings predate the delta wire protocol. Exercise their original

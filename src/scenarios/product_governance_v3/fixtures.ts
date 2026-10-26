@@ -1,4 +1,4 @@
-import { needsQuantityMapping, type ModelingDecision } from "./modeling-contract.ts";
+import { needsQuantityMapping, definitionFingerprint, type ModelingDecision } from "./modeling-contract.ts";
 import { MODELING_PROPOSAL_VERSION } from "./modeling-proposal.ts";
 import {
   jsonClone,
@@ -14,6 +14,25 @@ import {
 } from "./core.ts";
 import type { FilledValue } from "./contracts.ts";
 import type { FetchLike, InputItem } from "./responses.ts";
+
+// Historical regression setup only. prepareBatch builds today's default input;
+// these recordings predate the user's core approval and must retain their old
+// permission/evidence boundary. Never call this when preparing a real round.
+export function preCoreReplaySnapshot(snapshot: Snapshot): Snapshot {
+  const data = jsonClone(snapshot);
+  const added = new Set(["wash-tissue-core-review-20261026", "native-quantity-carrier-20261026",
+    "scm-field-responsibilities-compact-20261026"]);
+  data.knowledgeIds = data.knowledgeIds.filter(id => !added.has(id));
+  data.knowledgeRequirements = data.knowledgeRequirements
+    .filter(r => r.id !== "wash-tissue-core-review-20261026")
+    .map(r => ({ ...r, knowledgeIds: r.knowledgeIds.map(id => id === "scm-field-responsibilities-compact-20261026"
+      ? "scm-field-responsibilities-20261022" : id) }));
+  data.attributeApplicability = data.attributeApplicability?.filter(r => r.reviewKind !== "authorized_offline");
+  // Before this review the default profile supplied definitions through families,
+  // not standalone copies injected for selected categories outside those families.
+  data.attributes = data.attributes.filter(a => !["roll.layers", "roll.raw_material", "roll.sheet_size"].includes(a.id));
+  return data;
+}
 
 // Constructed integration cases only. These are not published business definitions or real SKU IDs.
 export function attribute(
@@ -622,12 +641,15 @@ export function fixtureWireResult(full: any, request: any) {
   if (input.task.candidate?.modelingContractVersion !== MODELING_PROPOSAL_VERSION) return full;
   const base = input.sharedContext.family.flatMap((p: any) => p.items).find((f: any) => f.usable);
   const inherited = new Set((base?.attributes ?? []).map((a: any) => a.id));
+  const pool = input.sharedContext.attributePool.items.filter((a: any) => a.kind !== "context_definition_reference");
+  const reused = full.attributes.filter((a: any) => !inherited.has(a.id) &&
+    pool.some((p: any) => p.id === a.id && definitionFingerprint(p) === definitionFingerprint(a)));
   const omit = (value: any, keys: string[]) => Object.fromEntries(Object.entries(value).filter(([k]) => !keys.includes(k)));
   return {
     contractVersion: MODELING_PROPOSAL_VERSION, baselineVersion: full.baselineVersion,
-    reuse: [],
-    newAttributes: full.attributes.filter((a: any) => !inherited.has(a.id) ||
-      hash(a) !== hash(base.attributes.find((b: any) => b.id === a.id)))
+    reuse: reused.map((a: any) => ({ attributeId: a.id, definitionHash: definitionFingerprint(a) })),
+    newAttributes: full.attributes.filter((a: any) => !reused.some((p: any) => p.id === a.id) && (!inherited.has(a.id) ||
+      hash(a) !== hash(base.attributes.find((b: any) => b.id === a.id))))
       .map((a: any) => omit(a, ["valueLevel", "defaultValue"])),
     newBindings: full.bindings.filter((b: any) => !inherited.has(b.attributeId))
       .map((b: any) => omit(b, ["categoryId", "baselineAttributeId"])),
@@ -641,4 +663,25 @@ export function fixtureWireResult(full: any, request: any) {
     })),
     revisionRequests: [], unresolved: full.unresolved,
   };
+}
+
+// Synthetic output for the approved *coverage*, not a real model or adopted definitions.
+// Test callers use this explicitly; raw recorded results must never pass through it.
+export function fixtureCoreAttributes(input: any): AttributeDefinition[] | null {
+  const core = input.sharedContext.coreScope?.groups.flatMap((g: any) => g.core);
+  if (!core) return null;
+  return core.map((c: any) => {
+    if (c.sharedAttributeId) {
+      const a = input.sharedContext.attributePool.items.find((a: any) => a.id === c.sharedAttributeId && !a.kind);
+      if (!a) throw Error("reviewed shared definition not present in actual input: " + c.sharedAttributeId);
+      return jsonClone(a);
+    }
+    return attribute({ id: "constructed." + c.conceptKey, name: c.name, conceptKey: c.conceptKey,
+      fieldType: c.fieldType, scope: c.scope,
+      definition: c.name === "内装数量" ? (c.conceptKey.startsWith("facial.") ? "一盒或一包抽取式面巾纸的抽取次数或成品纸张数，保留抽/张及分母，不乘层数；同原生口径时复用基础字段" :
+        "一包或一盒成品洗脸巾的片数或原计数数量，保留来源片/张/抽及分母；不把片数换算为纸张抽数；同原生口径时复用基础字段") :
+        c.name === "单张尺寸" ? "单片成品洗脸巾的组合尺寸原文，保留单位与来源状态，不改为纸张或包装尺寸" :
+        "成品洗脸巾与皮肤接触基材的原文，不把纸浆定义用于非织造柔巾；仅构造验收",
+      rationale: "用户确认核心范围内的构造模型回答，仅供离线检查，非已采用定义" });
+  });
 }

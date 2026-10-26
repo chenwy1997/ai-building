@@ -3,6 +3,7 @@ import { modelingTargets } from "./attribute-applicability.ts";
 import { canonical, hash, type Task, Blocked } from "./core.ts";
 import { REQUEST_LAYOUT_VERSION, serializeContextInput } from "./request-layout.ts";
 import { modelOutputSchema, modelingProposalContext } from "./modeling-proposal.ts";
+import { pilotCoreContext } from "./pilot-core.ts";
 import {
   instructionsFor,
   ruleResponsibilitiesFor,
@@ -14,6 +15,28 @@ import { ToolRegistry } from "./tools.ts";
 import type { DataSnapshot } from "./snapshot.ts";
 import { checkResult } from "./checks.ts";
 import { CONFIGURATION_REVIEW_VERSION, configurationFacts, configurationSummary, configurationBasisNotes } from "./scripts/configuration-review.mjs";
+
+// Prompt presentation only: keep the entire original text and version once per
+// material. Tool events and the manifest retain every actual paginated read.
+export function joinKnowledgePrefetch(parts: any[]) {
+  const grouped = new Map<string, any[]>();
+  for (const part of parts) grouped.set(part.id, [...(grouped.get(part.id) ?? []), part]);
+  return [...grouped.values()].map(pages => {
+    const first = pages[0]; let end = 0, text = "";
+    for (const part of pages) {
+      if (part.offset !== end || part.end !== part.offset + part.text.length ||
+          part.id !== first.id || part.sha256 !== first.sha256 || part.version !== first.version ||
+          part.kind !== first.kind || part.totalCharacters !== first.totalCharacters ||
+          part.nextOffset !== (part.end < part.totalCharacters ? part.end : null) ||
+          part.truncated !== (part.end < part.totalCharacters))
+        throw new Blocked("context_integrity", "knowledge prefetch has a gap, overlap or mixed version: " + first.id);
+      text += part.text; end = part.end;
+    }
+    if (end !== first.totalCharacters || hash(text) !== first.sha256 || first.version !== first.sha256)
+      throw new Blocked("context_integrity", "knowledge prefetch is incomplete or changed: " + first.id);
+    return { ...first, offset: 0, end, text, truncated: false, nextOffset: null };
+  });
+}
 
 export async function assemble(
   release: Release,
@@ -184,6 +207,9 @@ export async function assemble(
       quantityResponsibility: task.stage === "family-modeling" ||
         (task.stage === "review-assistance" && (task.candidate as any)?.stage === "family-modeling")
         ? QUANTITY_RESPONSIBILITY : null,
+      coreScope: task.stage === "family-modeling" ||
+        (task.stage === "review-assistance" && (task.candidate as any)?.stage === "family-modeling")
+        ? pilotCoreContext(snapshot.data, task) : null,
       systemFieldCoverage: snapshot.data.systemFieldCoverage,
       // The same complete registry already lives in instructions at higher priority.
       // Keep its location, full rule coverage and content fingerprint, not a second 12 KB copy.
@@ -195,7 +221,7 @@ export async function assemble(
       },
       ...prefetched,
       modelingTargetCategoryIds: modelingTargets(task, snapshot.data),
-      knowledge,
+      knowledge: joinKnowledgePrefetch(knowledge),
       knowledgeRequirements: snapshot.knowledgeRequirements(task),
       knowledgeGaps: tools.knowledgeGaps(),
       knowledgeCoverage: tools.knowledgeGaps().length

@@ -1,0 +1,36 @@
+{
+  "id": "native-quantity-carrier-20261026",
+  "kind": "local_source_verification",
+  "sourceRoot": "/Users/sanheng/Project/sanheng/uece-base",
+  "sources": [
+    {
+      "path": "prisma/schema.prisma",
+      "sha256": "9810106dcbee64c3779a3868d2f611e3995cd183fa3a23ac8d503785f4a0b38f"
+    },
+    {
+      "path": "tools/server/productTools/sync/field-map.ts",
+      "sha256": "dc0b15ef1c7deec95d996f5727ea7316d4147fa1256a953a3f1b4228d8df2de9"
+    },
+    {
+      "path": "tools/server/productTools/sync/forward/mapper.ts",
+      "sha256": "e99639b180c9e8412c935ec0f6a7f712cc13726b0ee18e36b7040555de51d26f"
+    }
+  ],
+  "mapping": {
+    "ownerKey": "unitMin",
+    "salesUnitOwnerKey": "salesUnit",
+    "categoryKeyConfig": {
+      "quantityField": "unitMinQuaKey",
+      "unitField": "unitMinKey",
+      "salesUnitField": "saleUnitKey"
+    },
+    "defaultPropertyKeys": {
+      "quantityField": "unitMinQua",
+      "unitField": "unitMin",
+      "salesUnitField": "saleUnit"
+    },
+    "carrier": "PropertyInstance.key及关联PropertyValueInstance，通过ProductInstance关联；实际key先读CategoryKeyConfig，默认键不等于所有目录当前配置。",
+    "stdProduct": "saleUnit存在，unitMin和unitMinQua在MISSING_PROPERTY_KEYS；不能假装有这两个StdProduct列或已同步。"
+  },
+  "boundary": "只生成建模来源计划；未读取具体SKU单位组合与类目键配置时不执行取值、不覆盖、不推导总量。"
+}

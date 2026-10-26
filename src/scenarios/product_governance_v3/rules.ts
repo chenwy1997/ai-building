@@ -202,6 +202,7 @@ export const RULE_REGISTRY: Rule[] = [
         "attribute-admission.test.ts:extensions travel through actual context and function return",
       ),
       check("modeling-decisions", "modeling-contract.ts:modelingDecisionErrors", "pilot-quality-regression.test.ts:sample-coverage admission basis"),
+      check("confirmed-core-coverage", "pilot-core.ts:pilotCoreErrors", "pilot-core.test.ts:confirmed core omissions and extensions"),
     ],
     [
       "属性具体改变哪个业务判断，收益是否值得填写维护？仅因有技术字段就准入了吗？",

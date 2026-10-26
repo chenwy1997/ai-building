@@ -29,6 +29,7 @@ import {
 import { CategoryIndex } from "./catalog.ts";
 import { attributeApplicabilityErrors, knownDefinitions, modelingTargets } from "./attribute-applicability.ts";
 import { definitionFingerprint } from "./modeling-contract.ts";
+import { isReleasedOfflineReview } from "./pilot-core.ts";
 
 const strings = list(text()),
   sourceSchema = object(
@@ -127,7 +128,7 @@ const snapshotSchema = object({
   attributes: list(attributeSchema),
   attributeApplicability: list(object({
     id: text(), attributeId: text(), definitionHash: text(), targetCategoryIds: list(text(), 1),
-    status: text("supported", "pending", "not_applicable"), reviewKind: text("human", "fixture"),
+    status: text("supported", "pending", "not_applicable"), reviewKind: text("human", "fixture", "authorized_offline"),
     reviewRecordId: text(), reason: text(),
   })),
   sources: list(sourceSchema),
@@ -195,6 +196,8 @@ export class DataSnapshot {
     ids(data.knowledgeRequirements, "knowledge requirements");
     ids(data.attributeApplicability ?? [], "attribute applicability reviews");
     for (const r of data.attributeApplicability ?? []) {
+      if (r.reviewKind === "authorized_offline" && !isReleasedOfflineReview(r))
+        throw new Blocked("attribute_applicability", "offline review must exactly match its released authorization/evidence record");
       if (r.reviewKind === "fixture" && data.kind !== "fixture")
         throw new Blocked("attribute_applicability", "fixture applicability review cannot authorize local business reuse");
       if (!r.reviewRecordId.trim() || !r.reason.trim() || new Set(r.targetCategoryIds).size !== r.targetCategoryIds.length)
