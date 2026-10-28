@@ -48,6 +48,12 @@ node src/scenarios/product_governance_v3/scripts/export-market-review.mjs <本�
 
 `raw-review.json`核对provider回执和原文、两阶段完整前缀及usage。Excel遵循统一10pt/22px布局，左侧冻结可用`--freeze-left`或`--freeze-through`配置。原型采样暂调用outputs中已验证的配置驱动VOP采集器和字面提取器；尚未合成任意大类一键采样跑批入口，也未自动发现同族专业包。
 
+## 本轮人工修订（2026-10-28）
+
+用户审阅后明确要求：袋长、袋宽合为尺寸；适配垃圾桶容量使用短称容量；删除型号。人工修订版保留7项，沿用其余模型内容及原填写要求，不把未点评项视为同意。尺寸采用含单位的组合文本，原文不明确顺序时不强拆长宽；容量只改显示名，原专业口径及疑点继续待核。
+
+修订依据和前后内容旁存于本次输出的`human-review-20261028`目录，不覆盖模型原稿或伪装成DeepSeek新输出。未调用模型，新增用量为0。规范第6节及market-sample-modeling、family-modeling已沉淀常用名称优先、拆分须有明确业务需求、厂商身份标识不纳入治理属性三条通用规则；后续新请求通过现有材料装配加载，历史付费轮次继续使用原冻结材料。
+
 ## 验证
 
 ```bash
