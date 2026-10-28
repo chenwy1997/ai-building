@@ -1,0 +1,312 @@
+{
+  "version": 4,
+  "migrated": [
+    {
+      "source": "src/scenarios/product_governance_v3/docs/governance-standard-draft.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-governance-standard.md",
+      "sha256": "12d62369bbf3a87dda40310fff8dc995f2cab4e3de2346e13b2019a6c9ebf545",
+      "role": "historical_reference"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/governance-design-v1-20261022.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-governance-design.md",
+      "sha256": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7",
+      "role": "historical_reference"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/deepseek-context-skill-tool-wiring.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-context-wiring.md",
+      "sha256": "59f71f9b514ac87ae13ff737b92b3a2363dc4e8e434c017154d9a040adf47e17",
+      "role": "historical_reference"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/excel-review-layout.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-excel-layout.md",
+      "sha256": "2928c30ba0182aef61af2908abe75a478079e126044b606bf937057ab4b17c46",
+      "role": "historical_reference"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/GLOSSARY.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-glossary.md",
+      "sha256": "e48a4271929c8e450c2a0a748067a5cf625198946897114ab1f5653b4b303103",
+      "role": "historical_reference"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/knowledge/scm-field-responsibilities-compact-20261026.json",
+      "target": "src/scenarios/product_governance_v4/knowledge/scm-inventory-v3.json",
+      "sha256": "fd02a078777be49a7f24a057e20d0920826a38ba18ed47432b2749d821fb70a1",
+      "role": "reused_helper_or_evidence"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/knowledge/native-quantity-carrier-20261026.json",
+      "target": "src/scenarios/product_governance_v4/knowledge/native-quantity-carrier.json",
+      "sha256": "f4b56b859f391502c5d3b6406485188a47fee81f4bc749289eeae479ef893583",
+      "role": "reused_helper_or_evidence"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/scripts/review-layout.defaults.json",
+      "target": "src/scenarios/product_governance_v4/scripts/review-layout.defaults.json",
+      "sha256": "c1817a1c59b843bbee2ef632b111df8db25ad84d36dd90dfb54e8a75a6b1be76",
+      "role": "reused_helper_or_evidence"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/scripts/review-workbook-layout.mjs",
+      "target": "src/scenarios/product_governance_v4/scripts/review-workbook-layout.mjs",
+      "sha256": "a43d82321d99ead4653d5c7c8ee6fa43384e950860ec481bb78f77a61a5246e0",
+      "role": "reused_helper_or_evidence"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/implementation-phase3-20261022.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/implementation-phase3-20261022.md",
+      "sha256": "0f6615ac494012260d354db393db63be8a60a5161f9b782b84e276421a252c40",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/pilot-quality-fixes-20261024.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/pilot-quality-fixes-20261024.md",
+      "sha256": "e76a19084804b7f8e5bd5741c4cd16d063729622a7e0b9637dd66d65399ff4d0",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/full-batch-resume-20261026.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/full-batch-resume-20261026.md",
+      "sha256": "03453f6cbd718e57faa0777d4f8c14ecb281d1014ac137b6b338b041c50e0473",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/governance-design-session-20261021.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/governance-design-session-20261021.md",
+      "sha256": "a3248caee809dcbb26b56b4d394c557de9ed91a5e84a55edb01c166c405b647b",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/full-rerun-20261023.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/full-rerun-20261023.md",
+      "sha256": "3cae5d1af2e2409a31e1d768927e31cd4b62f6c482b099523fb5957a15e43184",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/cache-layout-20261026.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/cache-layout-20261026.md",
+      "sha256": "6f9a83cf61961a6467dcb45994d596cfd8719e566f6be47317500012f188d4b6",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/market-sample-pilot.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/market-sample-pilot.md",
+      "sha256": "e687ec89bfb169a6ef012d9d65f25c9438778ee4aa47fae0de1c604896943f93",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/json-feedback-repair-20261026.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/json-feedback-repair-20261026.md",
+      "sha256": "63f9286a852685a4e5bcdf0c96a582357584df9d76f734a906b67b40177bafe3",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/batch-recovery-20261023.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/batch-recovery-20261023.md",
+      "sha256": "f14323e921ac6752b66fd8eb05079870879ae052c4170d20c266541796c57af6",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/configuration-explanations-20261023.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/configuration-explanations-20261023.md",
+      "sha256": "b692f600782f20148bed4d68b33616be79bd823ee2d6af050539f41b57bfd958",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/offline-acceptance.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/offline-acceptance.md",
+      "sha256": "05f4dfb5ecbd69ab0730e4f90d2c9600736a38bd571e4c18a0a710df0bef306c",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/small-scope-reasoning-pilot-20261023.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/small-scope-reasoning-pilot-20261023.md",
+      "sha256": "197b94ba8ae51692dabce22723d3331a0fc6ebe76f6cfd03a50190d7d10fd47c",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/implementation-phase12-20261022.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/implementation-phase12-20261022.md",
+      "sha256": "b12e7a9b0b6556f3ef885971b8be1cfc8fea131af7cd6f73fe5b72c9ab4846ad",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/family-context-tools-and-concurrency-proposal.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/family-context-tools-and-concurrency-proposal.md",
+      "sha256": "2f204c7c313cf7cba01e054e7ab901cdc2860e5c7ea38b92d65b16a636d37200",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/implementation-audit-20261022.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/implementation-audit-20261022.md",
+      "sha256": "ac6dc64aa795ee6510b4173818cc0c02efb9a67e60bc0a590aa67f1ddc271767",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/README.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/README.md",
+      "sha256": "6461a976d0ecf23d866237ff3a315b276d94a711215bba234c2451caeab56684",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/context-continuation-20261026.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/context-continuation-20261026.md",
+      "sha256": "ae0e6f9c6f575ec90661de8b97f443b7d4be7db7b14ffd6a4cf42877cb688712",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/rerun-repair-20261023.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/rerun-repair-20261023.md",
+      "sha256": "00b441176dc3e6bb0febb9f5927ef3ddc4072289a9bc5948695ec7044f9ebed4",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/attribute-admission-refinement-20261023.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/attribute-admission-refinement-20261023.md",
+      "sha256": "8307d3d1e784c055f36e709bb957c86fb03d8653e463c3c6dea32ba853b2f45d",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/review-object-correction-20261023.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/review-object-correction-20261023.md",
+      "sha256": "0d66af1feca18c1f19bfbad3f2bb15ba50642e46767259f2b55ae04388f0d4cc",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/output-truncation-recovery-20261026.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/output-truncation-recovery-20261026.md",
+      "sha256": "b5a513352269bc889687f84ad5966cc7d22db8d7841196c67a277dd5ad299bb7",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/target-applicability-20261026.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/target-applicability-20261026.md",
+      "sha256": "1fee319fc0b5d14cb9cae4e5ec8d616220a8982ec9a0445318c83137bc2e072c",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/quality-cache-run-review-20261026.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/quality-cache-run-review-20261026.md",
+      "sha256": "2a14f4a28de3786ecd32eaf2175a57ce9b1f9e22ec6dd341e94bbc908b0e934a",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/roll-pilot-runbook.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/roll-pilot-runbook.md",
+      "sha256": "5cb3737e1d9afdce49a022e7d4fa3ac11a36c8cce329f6a33a262cc2c20b0555",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/batch-runbook.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/batch-runbook.md",
+      "sha256": "8bfface7edd7a196cfa05d979800c2a0ffcce53e479435ebc19b9f343bcc4348",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/core-pilot-20261026.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/core-pilot-20261026.md",
+      "sha256": "c8e87649f2b2b6f8c84fb958cdb76744bcae757d9fc04ff508de9579be758fd3",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/bounded-pilot-20261026.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/bounded-pilot-20261026.md",
+      "sha256": "eca36d555b3f772ffae6be599c73fb4df8959f80120aedda5d70c6df4042533e",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/adr/0001-current-supply-chain-contract.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/adr/0001-current-supply-chain-contract.md",
+      "sha256": "af68c2427106fe8afd6092fdbc5a3ca042d0ab45ca03ca5a90979cbcd7b2dab6",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/adr/0004-sku-only-governed-attributes.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/adr/0004-sku-only-governed-attributes.md",
+      "sha256": "fa981bb49643b8929a1f34e47fd926ef663a6c6c6120c6c237605a4944069e88",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/adr/0002-family-baseline-before-category-variants.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/adr/0002-family-baseline-before-category-variants.md",
+      "sha256": "bf79ec4db873f1c7b34c10c370adf1aeae3891abddfb67e1890edfcdaeed50a5",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/adr/0003-candidate-baselines-for-scoped-drafts.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/adr/0003-candidate-baselines-for-scoped-drafts.md",
+      "sha256": "1ebc1e686d02235db77ff32aaa372b40b7cdc280f25dd61a498c1d0ccd10f938",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "src/scenarios/product_governance_v3/docs/adr/0005-v3-contract-with-selected-v2-reuse.md",
+      "target": "src/scenarios/product_governance_v4/docs/reference/v3-docs/adr/0005-v3-contract-with-selected-v2-reuse.md",
+      "sha256": "c8034c815e30f765512829f8cb20c3efe5188d664982f4f88e4e5cfbb5f6f708",
+      "role": "historical_reference_not_active_instruction"
+    },
+    {
+      "source": "outputs/product-governance-v3/jd-vop-clean-paper-21-20261027/collect-samples.ts",
+      "target": "src/scenarios/product_governance_v4/scripts/collect-vop.ts",
+      "sourceSha256": "6efbe64b9168e7fdb3c8da932a76a3f66f58f2081429aba575051866cd6e5453",
+      "targetSha256": "96cab5a47077cbd385092adc54bfd454756b1fe22492036658e3bf56272c92cc",
+      "role": "adapted_generic_implementation",
+      "changes": "移除轮次/类目硬编码，按v4合同核职责和人工认可；只读或离线；详见README"
+    },
+    {
+      "source": "outputs/product-governance-v3/jd-vop-clean-paper-21-20261027/extract-candidates.py",
+      "target": "src/scenarios/product_governance_v4/scripts/extract-candidates.py",
+      "sourceSha256": "f4534a8144f5a8422c8451f7e556b1693165ec6b59d4ec996c6965c5f0dbb1d8",
+      "targetSha256": "9a08978319e0940e863ac23f8ca9a2fe2daefec0f0f533699855bf43667fc2e6",
+      "role": "adapted_generic_implementation",
+      "changes": "移除轮次/类目硬编码，按v4合同核职责和人工认可；只读或离线；详见README"
+    },
+    {
+      "source": "outputs/product-governance-v3/jd-vop-clean-paper-21-20261027/broad-scope-revision/read-own-source.py",
+      "target": "src/scenarios/product_governance_v4/scripts/read-own-source.py",
+      "sourceSha256": "21ddeeb2d1ff0e3d7b061307d000a1feb5548f6ee1c88499ad9de7037449b07a",
+      "targetSha256": "9cac6be6f57069acd592df698c698da7ff1becf5a3187c31aebcc2dd78d962ce",
+      "role": "adapted_generic_implementation",
+      "changes": "移除轮次/类目硬编码，按v4合同核职责和人工认可；只读或离线；详见README"
+    },
+    {
+      "source": "outputs/product-governance-v3/cleaning-supplies-terra-max-20261028/build-review.mjs",
+      "target": "src/scenarios/product_governance_v4/scripts/build-review.mjs",
+      "sourceSha256": "ee56b90acf9041461b7ecb5506b6a6cbf316cd5f9bdbf7500f75d8e244a6986f",
+      "targetSha256": "2565c8b166b06918710ed33d4ae2feedf55b7d34dcc19cd014434bb672add8b9",
+      "role": "adapted_generic_implementation",
+      "changes": "移除轮次/类目硬编码，按v4合同核职责和人工认可；只读或离线；详见README"
+    },
+    {
+      "source": "outputs/product-governance-v3/cleaning-supplies-terra-max-20261028/assemble-review.mjs",
+      "target": "src/scenarios/product_governance_v4/core.ts",
+      "sourceSha256": "ae1fa2b76f13d8cb7ef623d9acc1c3ad0102e8c3568dcd21cce4d3c85956f89f",
+      "targetSha256": "c57be53d49841626976ef2d340c4dfed9da6866fcd406704a8bd72925504e870",
+      "role": "adapted_generic_implementation",
+      "changes": "移除轮次/类目硬编码，按v4合同核职责和人工认可；只读或离线；详见README"
+    },
+    {
+      "source": "outputs/product-governance-v3/cleaning-supplies-terra-max-20261028/read-enabled-catalog.ts",
+      "target": "src/scenarios/product_governance_v4/scripts/read-enabled-catalog.ts",
+      "role": "adapted_read_only_catalog",
+      "sourceSha256": "a47ce911c845c00307426bae810fc58b8f1aa8b5bec196d9f90bc8bdf6d30b5f",
+      "targetSha256": "191ba72d0702830ca9eb48b880326384c9bcce5d39d9aa62b3affac6e2e5ee96"
+    }
+  ],
+  "notMigrated": [
+    {
+      "component": "v3 DeepSeek付费跑批、账本和恢复循环",
+      "reason": "当前v4使用Codex代理，历史付费回放留v3避免混用；不宣称已接Codex独立API"
+    },
+    {
+      "component": "v3 SKU填值/生产投影/试点硬冻结适用范围",
+      "reason": "本轮仅类目提案，不移植已造成过严准入的试点开关；线上承接另验收"
+    },
+    {
+      "component": "历史运行验收JSON与单轮补丁脚本",
+      "reason": "原证据保留v3；当前可复用入口与规范已迁移并参数化，不把特定纸品修补逻辑移入v4"
+    }
+  ]
+}

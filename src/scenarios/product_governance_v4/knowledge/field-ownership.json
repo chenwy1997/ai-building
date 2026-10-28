@@ -1,0 +1,1514 @@
+{
+  "version": 4,
+  "historicalMappings": 86,
+  "businessGroups": 20,
+  "inventoryFieldCount": 233,
+  "explicitExcludedNames": [
+    "品牌",
+    "品牌ID",
+    "供应商",
+    "销售单位",
+    "规格名称",
+    "商品名称",
+    "商品标题",
+    "主标题",
+    "成本价",
+    "零售价",
+    "市场价",
+    "出厂价",
+    "京东价",
+    "型号",
+    "制造商型号",
+    "货号",
+    "商品编码",
+    "厂商货号",
+    "供应商SKU编码",
+    "供应商SPU编码",
+    "上游SKU",
+    "上游SPU",
+    "起订数量",
+    "最小追加数量",
+    "限购数量"
+  ],
+  "dynamicReviewNames": [
+    "保质期",
+    "保修期",
+    "质保期",
+    "重量",
+    "净重",
+    "毛重",
+    "商品重量",
+    "商品毛重",
+    "商品长宽高",
+    "包装长度",
+    "包装宽度",
+    "包装高度",
+    "产地",
+    "适用场景",
+    "场景标签",
+    "行业标签",
+    "净含量",
+    "容量",
+    "每包数量",
+    "每卷数量"
+  ],
+  "rules": [
+    {
+      "key": "brandId",
+      "names": [
+        "品牌",
+        "brandId",
+        "品牌ID"
+      ],
+      "conceptKeys": [
+        "common.brand"
+      ],
+      "index": 1,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "supplierId",
+      "names": [
+        "供应商"
+      ],
+      "conceptKeys": [
+        "common.supplier"
+      ],
+      "index": 2,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "salesUnit",
+      "names": [
+        "销售单位"
+      ],
+      "conceptKeys": [
+        "sales.unit"
+      ],
+      "index": 3,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "specName",
+      "names": [
+        "规格名称"
+      ],
+      "conceptKeys": [
+        "sales.spec"
+      ],
+      "index": 4,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "title",
+      "names": [
+        "商品名称",
+        "主标题",
+        "商品标题"
+      ],
+      "conceptKeys": [
+        "product.title"
+      ],
+      "index": 5,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "priceCost",
+      "names": [
+        "成本价",
+        "成本价-不含运费",
+        "零售价",
+        "市场价",
+        "出厂价",
+        "京东价"
+      ],
+      "conceptKeys": [
+        "product.price"
+      ],
+      "index": 6,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "unitMin",
+      "names": [
+        "最小计量单位",
+        "销售单位中含最小计量单位数量",
+        "销售总卷数",
+        "销售总数量"
+      ],
+      "conceptKeys": [
+        "sales.min_unit",
+        "sales.total_quantity",
+        "paper.total_rolls"
+      ],
+      "index": 7,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "按计数对象/分母/单位与实际saleUnit、unitMin、unitMinQua比较，映射可能部分重合。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "weight",
+      "names": [
+        "商品重量",
+        "物流重量"
+      ],
+      "conceptKeys": [
+        "product.shipping_weight"
+      ],
+      "index": 8,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "区分物流包装与商品本体；同名字段/数据库列不足以全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "packageSize",
+      "names": [
+        "包装长度",
+        "包装宽度",
+        "包装高度"
+      ],
+      "conceptKeys": [
+        "product.shipping_size"
+      ],
+      "index": 9,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "区分物流包装与商品本体；同名字段/数据库列不足以全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "quantityMin",
+      "names": [
+        "起订数量",
+        "最小追加数量",
+        "限购数量",
+        "最小起订量"
+      ],
+      "conceptKeys": [
+        "sales.order_quantity"
+      ],
+      "index": 10,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "upc",
+      "names": [
+        "条形码",
+        "UPC码",
+        "UPC条形码",
+        "国际条码"
+      ],
+      "conceptKeys": [
+        "product.upc"
+      ],
+      "index": 11,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "vendorSkuId",
+      "names": [
+        "供应商SKU编码",
+        "供应商SPU编码",
+        "上游SKU",
+        "上游SPU",
+        "供应商skuId 用于商品映射",
+        "供应商SKU ID"
+      ],
+      "conceptKeys": [
+        "product.upstream_identity"
+      ],
+      "index": 12,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "originPlace",
+      "names": [
+        "产地"
+      ],
+      "conceptKeys": [
+        "product.origin"
+      ],
+      "index": 13,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "需要目标目录/版本和入口证据；既有认可保留，新增先核职责。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "warranty",
+      "names": [
+        "质保期",
+        "质保说明",
+        "保质期或保修期"
+      ],
+      "conceptKeys": [
+        "product.warranty"
+      ],
+      "index": 14,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "attribute_candidate_allowed",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "用户本次只批准恢复保质期为选填候选；保修期、质保期仍待用户选择。两者含义分开，实际目录入口另核。",
+      "policyLabel": "仅保质期允许选填；保修期待选",
+      "restorationStatus": "仅保质期获准恢复"
+    },
+    {
+      "key": "deliveryType",
+      "names": [
+        "配送类型",
+        "货期",
+        "支持的发货方式",
+        "售后服务信息"
+      ],
+      "conceptKeys": [
+        "product.fulfillment"
+      ],
+      "index": 15,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "mainImages",
+      "names": [
+        "主图",
+        "详情图",
+        "规格图",
+        "商品附件",
+        "商品主图列表"
+      ],
+      "conceptKeys": [
+        "product.media"
+      ],
+      "index": 16,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "status",
+      "names": [
+        "SPU档案状态",
+        "SKU档案状态",
+        "SPU销售状态",
+        "SKU销售状态"
+      ],
+      "conceptKeys": [
+        "product.lifecycle"
+      ],
+      "index": 17,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "taxCode",
+      "names": [
+        "税收分类编码",
+        "税率"
+      ],
+      "conceptKeys": [
+        "product.tax"
+      ],
+      "index": 18,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "明确业务政策仍有效；实际carrier与默认key需按目录确认。"
+    },
+    {
+      "key": "isCustomProduct",
+      "names": [
+        "是否定制品",
+        "是否包含安装服务",
+        "专属客户商品",
+        "是否为定制商品"
+      ],
+      "conceptKeys": [
+        "product.service"
+      ],
+      "index": 19,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "tags",
+      "names": [
+        "商品标签",
+        "场景标签",
+        "行业标签"
+      ],
+      "conceptKeys": [
+        "product.tags"
+      ],
+      "index": 20,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "需要目标目录/版本和入口证据；既有认可保留，新增先核职责。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "upstreamId",
+      "names": [
+        "上游ID"
+      ],
+      "conceptKeys": [
+        "system.field.upstreamId"
+      ],
+      "index": 21,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第12组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 12
+    },
+    {
+      "key": "isAllowUpstreamPush",
+      "names": [
+        "是否接收上游数据"
+      ],
+      "conceptKeys": [
+        "system.field.isAllowUpstreamPush"
+      ],
+      "index": 22,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "upstreamSpu",
+      "names": [
+        "上游SPU"
+      ],
+      "conceptKeys": [
+        "system.field.upstreamSpu"
+      ],
+      "index": 23,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第12组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 12
+    },
+    {
+      "key": "upstreamSku",
+      "names": [
+        "上游SKU"
+      ],
+      "conceptKeys": [
+        "system.field.upstreamSku"
+      ],
+      "index": 24,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第12组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 12
+    },
+    {
+      "key": "vendorSpuId",
+      "names": [
+        "供应商spuId 用于商品映射",
+        "供应商SPU ID"
+      ],
+      "conceptKeys": [
+        "system.field.vendorSpuId"
+      ],
+      "index": 25,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第12组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 12
+    },
+    {
+      "key": "spuSaleStatus",
+      "names": [
+        "spuSaleStatus",
+        "SPU销售状态"
+      ],
+      "conceptKeys": [
+        "system.field.spuSaleStatus"
+      ],
+      "index": 26,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第17组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 17
+    },
+    {
+      "key": "skuSaleStatus",
+      "names": [
+        "skuSaleStatus",
+        "SKU销售状态"
+      ],
+      "conceptKeys": [
+        "system.field.skuSaleStatus"
+      ],
+      "index": 27,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第17组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 17
+    },
+    {
+      "key": "isSpuEnable",
+      "names": [
+        "同步实例的最新状态",
+        "表示该商品是否有效",
+        "SPU档案状态"
+      ],
+      "conceptKeys": [
+        "system.field.isSpuEnable"
+      ],
+      "index": 28,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第17组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 17
+    },
+    {
+      "key": "isSkuEnable",
+      "names": [
+        "同步实例的最新状态",
+        "表示该规格是否有效",
+        "SKU档案状态"
+      ],
+      "conceptKeys": [
+        "system.field.isSkuEnable"
+      ],
+      "index": 29,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第17组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 17
+    },
+    {
+      "key": "supplyRelevanceRule",
+      "names": [
+        "如果没有规则"
+      ],
+      "conceptKeys": [
+        "system.field.supplyRelevanceRule"
+      ],
+      "index": 30,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "vendorId",
+      "names": [
+        "vendorId",
+        "供应商ID"
+      ],
+      "conceptKeys": [
+        "system.field.vendorId"
+      ],
+      "index": 31,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第2组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 2
+    },
+    {
+      "key": "stdCategoryId",
+      "names": [
+        "标准类目ID"
+      ],
+      "conceptKeys": [
+        "system.field.stdCategoryId"
+      ],
+      "index": 32,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "targetCustomerIds",
+      "names": [
+        "定向客户ID列表"
+      ],
+      "conceptKeys": [
+        "system.field.targetCustomerIds"
+      ],
+      "index": 33,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "isTargetedProduct",
+      "names": [
+        "是否为定向商品"
+      ],
+      "conceptKeys": [
+        "system.field.isTargetedProduct"
+      ],
+      "index": 34,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "costPrice",
+      "names": [
+        "成本价"
+      ],
+      "conceptKeys": [
+        "system.field.costPrice"
+      ],
+      "index": 35,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第6组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 6
+    },
+    {
+      "key": "retailPrice",
+      "names": [
+        "零售价"
+      ],
+      "conceptKeys": [
+        "system.field.retailPrice"
+      ],
+      "index": 36,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第6组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 6
+    },
+    {
+      "key": "earningsRate",
+      "names": [
+        "利润率"
+      ],
+      "conceptKeys": [
+        "system.field.earningsRate"
+      ],
+      "index": 37,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "freightTemplateId",
+      "names": [
+        "运费模板"
+      ],
+      "conceptKeys": [
+        "system.field.freightTemplateId"
+      ],
+      "index": 38,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "vendorFreightTemplateId",
+      "names": [
+        "运费模板"
+      ],
+      "conceptKeys": [
+        "system.field.vendorFreightTemplateId"
+      ],
+      "index": 39,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "categoryInstanceId",
+      "names": [
+        "如果没有原型, 则必须指定分类"
+      ],
+      "conceptKeys": [
+        "system.field.categoryInstanceId"
+      ],
+      "index": 40,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "categoryIds",
+      "names": [
+        "强化搜索字段"
+      ],
+      "conceptKeys": [
+        "system.field.categoryIds"
+      ],
+      "index": 41,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "afterSaleTypes",
+      "names": [
+        "afterSaleTypes"
+      ],
+      "conceptKeys": [
+        "system.field.afterSaleTypes"
+      ],
+      "index": 42,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "sku",
+      "names": [
+        "业务端使用的商品ID"
+      ],
+      "conceptKeys": [
+        "system.field.sku"
+      ],
+      "index": 43,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "spu",
+      "names": [
+        "业务端使用的商品SPU ID"
+      ],
+      "conceptKeys": [
+        "system.field.spu"
+      ],
+      "index": 44,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "isDisabled",
+      "names": [
+        "[已废弃"
+      ],
+      "conceptKeys": [
+        "system.field.isDisabled"
+      ],
+      "index": 45,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "stdCategoryIdPath",
+      "names": [
+        "标准类目全路径"
+      ],
+      "conceptKeys": [
+        "system.field.stdCategoryIdPath"
+      ],
+      "index": 46,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "vendorName",
+      "names": [
+        "供应商名称"
+      ],
+      "conceptKeys": [
+        "system.field.vendorName"
+      ],
+      "index": 47,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第2组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 2
+    },
+    {
+      "key": "vendorSkuCode",
+      "names": [
+        "供应商编码"
+      ],
+      "conceptKeys": [
+        "system.field.vendorSkuCode"
+      ],
+      "index": 48,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第12组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 12
+    },
+    {
+      "key": "vendorSpuCode",
+      "names": [
+        "供应商编码"
+      ],
+      "conceptKeys": [
+        "system.field.vendorSpuCode"
+      ],
+      "index": 49,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第12组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 12
+    },
+    {
+      "key": "vendorIsOnSale",
+      "names": [
+        "供应商商品是否在售"
+      ],
+      "conceptKeys": [
+        "system.field.vendorIsOnSale"
+      ],
+      "index": 50,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第17组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 17
+    },
+    {
+      "key": "vendorRelevantSkus",
+      "names": [
+        "供应商相关SKU列表"
+      ],
+      "conceptKeys": [
+        "system.field.vendorRelevantSkus"
+      ],
+      "index": 51,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "sourceLinks",
+      "names": [
+        "货源链接"
+      ],
+      "conceptKeys": [
+        "system.field.sourceLinks"
+      ],
+      "index": 52,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "upstreamSkuId",
+      "names": [
+        "上游SKU ID"
+      ],
+      "conceptKeys": [
+        "system.field.upstreamSkuId"
+      ],
+      "index": 53,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第12组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 12
+    },
+    {
+      "key": "upstreamSpuId",
+      "names": [
+        "上游SPU ID"
+      ],
+      "conceptKeys": [
+        "system.field.upstreamSpuId"
+      ],
+      "index": 54,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第12组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 12
+    },
+    {
+      "key": "subTitle",
+      "names": [
+        "商品副标题"
+      ],
+      "conceptKeys": [
+        "system.field.subTitle"
+      ],
+      "index": 55,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第5组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 5
+    },
+    {
+      "key": "saleSpec",
+      "names": [
+        "商品合并销售规格名"
+      ],
+      "conceptKeys": [
+        "system.field.saleSpec"
+      ],
+      "index": 56,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第4组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 4
+    },
+    {
+      "key": "saleSpecRaw",
+      "names": [
+        "原始销售属性"
+      ],
+      "conceptKeys": [
+        "system.field.saleSpecRaw"
+      ],
+      "index": 57,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "taxRate",
+      "names": [
+        "税率"
+      ],
+      "conceptKeys": [
+        "system.field.taxRate"
+      ],
+      "index": 58,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第18组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 18
+    },
+    {
+      "key": "specImage",
+      "names": [
+        "商品销售属性图片"
+      ],
+      "conceptKeys": [
+        "system.field.specImage"
+      ],
+      "index": 59,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第16组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 16
+    },
+    {
+      "key": "detailImages",
+      "names": [
+        "商品详情图片列表"
+      ],
+      "conceptKeys": [
+        "system.field.detailImages"
+      ],
+      "index": 60,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第16组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 16
+    },
+    {
+      "key": "saleUnit",
+      "names": [
+        "销售单位"
+      ],
+      "conceptKeys": [
+        "system.field.saleUnit"
+      ],
+      "index": 61,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第3组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 3
+    },
+    {
+      "key": "height",
+      "names": [
+        "商品高度"
+      ],
+      "conceptKeys": [
+        "system.field.height"
+      ],
+      "index": 62,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "区分物流包装与商品本体；同名字段/数据库列不足以全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "width",
+      "names": [
+        "商品宽度"
+      ],
+      "conceptKeys": [
+        "system.field.width"
+      ],
+      "index": 63,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "区分物流包装与商品本体；同名字段/数据库列不足以全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "length",
+      "names": [
+        "商品长度"
+      ],
+      "conceptKeys": [
+        "system.field.length"
+      ],
+      "index": 64,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "区分物流包装与商品本体；同名字段/数据库列不足以全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "packingList",
+      "names": [
+        "包装清单"
+      ],
+      "conceptKeys": [
+        "system.field.packingList"
+      ],
+      "index": 65,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "priceBareCost",
+      "names": [
+        "裸成本价"
+      ],
+      "conceptKeys": [
+        "system.field.priceBareCost"
+      ],
+      "index": 66,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第6组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 6
+    },
+    {
+      "key": "priceRetail",
+      "names": [
+        "零售价"
+      ],
+      "conceptKeys": [
+        "system.field.priceRetail"
+      ],
+      "index": 67,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第6组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 6
+    },
+    {
+      "key": "priceFactory",
+      "names": [
+        "出厂价"
+      ],
+      "conceptKeys": [
+        "system.field.priceFactory"
+      ],
+      "index": 68,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第6组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 6
+    },
+    {
+      "key": "priceJd",
+      "names": [
+        "京东价"
+      ],
+      "conceptKeys": [
+        "system.field.priceJd"
+      ],
+      "index": 69,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第6组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 6
+    },
+    {
+      "key": "priceMarket",
+      "names": [
+        "市场价"
+      ],
+      "conceptKeys": [
+        "system.field.priceMarket"
+      ],
+      "index": 70,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第6组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 6
+    },
+    {
+      "key": "profitRate",
+      "names": [
+        "毛利率"
+      ],
+      "conceptKeys": [
+        "system.field.profitRate"
+      ],
+      "index": 71,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "supplierShippingTemplateId",
+      "names": [
+        "供应商发货模版ID"
+      ],
+      "conceptKeys": [
+        "system.field.supplierShippingTemplateId"
+      ],
+      "index": 72,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "platformShippingTemplateId",
+      "names": [
+        "平台发货模版ID"
+      ],
+      "conceptKeys": [
+        "system.field.platformShippingTemplateId"
+      ],
+      "index": 73,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "supportedShippingMethods",
+      "names": [
+        "支持的配送方式"
+      ],
+      "conceptKeys": [
+        "system.field.supportedShippingMethods"
+      ],
+      "index": 74,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "shippingTimeNote",
+      "names": [
+        "货期"
+      ],
+      "conceptKeys": [
+        "system.field.shippingTimeNote"
+      ],
+      "index": 75,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "shippingFrom",
+      "names": [
+        "发货地"
+      ],
+      "conceptKeys": [
+        "system.field.shippingFrom"
+      ],
+      "index": 76,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "quantityMax",
+      "names": [
+        "最大购买量"
+      ],
+      "conceptKeys": [
+        "system.field.quantityMax"
+      ],
+      "index": 77,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第10组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 10
+    },
+    {
+      "key": "quantityStep",
+      "names": [
+        "购买步长"
+      ],
+      "conceptKeys": [
+        "system.field.quantityStep"
+      ],
+      "index": 78,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "explicit_business_exclusion",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "归入第10组既定业务职责；底层别名不另建候选。动态展示不能取消既定业务去重政策。",
+      "businessGroup": 10
+    },
+    {
+      "key": "tagIds",
+      "names": [
+        "商品标签id值"
+      ],
+      "conceptKeys": [
+        "system.field.tagIds"
+      ],
+      "index": 79,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "specialManagementCategoryCode",
+      "names": [
+        "特殊经营类别, 可用代码"
+      ],
+      "conceptKeys": [
+        "system.field.specialManagementCategoryCode"
+      ],
+      "index": 80,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "supportedAfterSalesServiceTypes",
+      "names": [
+        "支持的售后服务类型"
+      ],
+      "conceptKeys": [
+        "system.field.supportedAfterSalesServiceTypes"
+      ],
+      "index": 81,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "afterSalesServiceInformation",
+      "names": [
+        "售后服务信息说明"
+      ],
+      "conceptKeys": [
+        "system.field.afterSalesServiceInformation"
+      ],
+      "index": 82,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "returnPolicies",
+      "names": [
+        "业务上控制"
+      ],
+      "conceptKeys": [
+        "system.field.returnPolicies"
+      ],
+      "index": 83,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    },
+    {
+      "key": "includesInstallationService",
+      "names": [
+        "是否包含安装服务"
+      ],
+      "conceptKeys": [
+        "system.field.includesInstallationService"
+      ],
+      "index": 84,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "isExclusiveCustomerProduct",
+      "names": [
+        "是否为专属客户商品"
+      ],
+      "conceptKeys": [
+        "system.field.isExclusiveCustomerProduct"
+      ],
+      "index": 85,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "scope_verification_required",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
+      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+    },
+    {
+      "key": "remark",
+      "names": [
+        "备注"
+      ],
+      "conceptKeys": [
+        "system.field.remark"
+      ],
+      "index": 86,
+      "historicalPolicy": "旧规范原生职责匹配，不等于全类目已配置",
+      "currentPolicy": "technical_inventory_only",
+      "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
+      "humanDecision": "",
+      "explanation": "系统关联、状态或交易元数据盘点，不是商品特性候选；保留原记录供字段职责核对。"
+    }
+  ],
+  "observation": {
+    "date": "2026-10-28",
+    "url": "https://sc.sanheng.com/manage/product",
+    "uiVersion": "2.3.11.1",
+    "observed": "已打开商品SPU/SKU表单有多项配置，无该实例保质期；未选择目录的新增表单只有基本信息。该观察不能代表全部目录。",
+    "userEvidence": "用户指出重量有些SKU有、有些无。",
+    "codeEvidence": [
+      {
+        "path": "app/manage/product/(list)/components/SpuDetail.tsx",
+        "line": 465,
+        "finding": "state.modal.propertyInstances，按!asSpec渲染SPU"
+      },
+      {
+        "path": "app/manage/product/(list)/components/SkuDetail.tsx",
+        "line": 190,
+        "finding": "state.modal.propertyInstances，按asSpec及非*HIDE*渲染SKU"
+      },
+      {
+        "path": "app/manage/product/(list)/actions.tsx",
+        "line": 875,
+        "finding": "目录选择加载inheritPropertyInstances"
+      },
+      {
+        "path": "prisma/schema.prisma",
+        "line": 8309,
+        "finding": "StdProduct.warranty为String?，注释保质期或保修期；不等于商品表单字段"
+      },
+      {
+        "path": "prisma/schema.prisma",
+        "line": 8446,
+        "finding": "CategoryKeyConfig.warrantyKey默认warranty；是映射键，不是有效属性实例"
+      }
+    ]
+  },
+  "requiredScopeEvidence": [
+    "categoryInstanceId",
+    "propertyInstanceId",
+    "effectiveVersion",
+    "sameMeaning",
+    "visibleInput",
+    "verifiedAt",
+    "source"
+  ],
+  "restorationPolicy": {
+    "date": "2026-10-28",
+    "allowedOptionalNames": [
+      "保质期"
+    ],
+    "otherHistoricallyExcludedFields": "pending_user_selection",
+    "scope": "只控制历史因原生字段职责而排除的候选恢复；既有认可属性保留，新概念仍按业务用途和来源审阅",
+    "userInstruction": "先恢复保质期，别的罗列后由用户斟酌是否恢复为可选候选",
+    "doesNotApprove": [
+      "保修期",
+      "质保期",
+      "其他历史原生职责排除字段"
+    ]
+  },
+  "historicalCarrierReasonKeys": [
+    "sceneTagsKey",
+    "industryTagsKey"
+  ]
+}

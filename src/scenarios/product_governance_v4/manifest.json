@@ -1,0 +1,13 @@
+{
+  "version": 4,
+  "fixedContext": ["docs/standard.md", "knowledge/field-ownership.json", "knowledge/native-quantity-carrier.json"],
+  "stages": {
+    "research": "skills/candidate-research/SKILL.md",
+    "model": "skills/family-modeling/SKILL.md",
+    "review": "skills/independent-review/SKILL.md"
+  },
+  "dynamicContext": ["scope", "baseline", "candidatePool", "supplementalSources", "familyMatrix", "previousReview"],
+  "tools": ["query category", "query candidates", "query family", "query evidence", "collect-vop", "read-own-source"],
+  "runtime": "Codex delegation; CLI handles data preparation, inspection, validation, assembly and export",
+  "productionWrites": false
+}
