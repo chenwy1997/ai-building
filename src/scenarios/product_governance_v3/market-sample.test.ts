@@ -4,11 +4,11 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {Budget} from './budget.ts';
 import {ResponsesClient} from './responses.ts';
-import {save,read,hash} from './core.ts';
+import {save,read,hash,canonical} from './core.ts';
 import {inspectMarketPilot} from './market-sample-inspect.ts';
 import {candidateContext,marketRequest,providerUsage,runMarketStages,checkMarketResult} from './market-sample.ts';
 
-const category={id:'target',name:'独立目标',path:'根>独立目标',products:[{sku:'1',title:'原文标题',unknownField:0}],stats:{skuCount:1},
+const category={id:'target',name:'独立目标',path:'根>独立目标',scope:'offline_fixture',scopeNote:'构造样例，不是业务批准',products:[{sku:'1',title:'原文标题',unknownField:0}],stats:{skuCount:1},
   evidence:[{id:'e1',name:'参数',value:'原始值',sku:'1'}],pool:[{name:'参数',values:[{value:'原始值',spuCount:1}],evidenceIds:['e1']}]};
 const selection={stage:'selection',categoryId:'target',scopeAssessment:'范围待人工复核',decisions:[
   {sourceName:'参数',action:'keep',attributeName:'参数原名',reason:'原样理由',businessUse:'具体业务',professionalBasis:'模型提案',valueEvidence:'原文',evidenceIds:['e1'],nativeOwnerKey:null,applicability:'本类'}],attributes:[],openQuestions:[]};
@@ -83,4 +83,26 @@ test('actual failure pattern: missing nullable unit remains absent in offline re
     expect(review.prefix.every((x:any)=>x.exactInputPrefix)).toBe(true);
     expect((await read<any>(join(dir,'definition.raw.json'))).rawText).toBe(JSON.stringify(broken));
   } finally {await rm(dir,{recursive:true,force:true});}
+});
+test('offline inspection detects omitted candidate from actual wire input without inventing a decision',async()=>{
+  const dir=await mkdtemp(join(tmpdir(),'market-coverage-'));
+  try {
+    const budget=new Budget(dir,0,'offline');await budget.init();
+    const omitted=structuredClone(selection);omitted.decisions=[];
+    let calls=0;
+    const client=new ResponsesClient({mode:'offline',transportId:'coverage-test',fetch:async()=>{
+      calls++;return new Response(JSON.stringify({status:'completed',output:[message(calls===1?omitted:definition)],
+        usage:{input_tokens:1000,input_tokens_details:{cached_tokens:0},output_tokens:100}}));
+    }},dir,budget);
+    const identity={releaseId:'offline',snapshotVersion:'frozen'};
+    await save(join(dir,'market-run.manifest.json'),{identity,category:{id:category.id},model:'deepseek-flash',reasoningEffort:'low'});
+    await runMarketStages({instructions:'规则',initialInput:[{role:'user',content:canonical(candidateContext(category))}],category,client,identity,
+      tool:async()=>[],record:(n,v)=>save(join(dir,n+'.json'),v)});
+    const review=await inspectMarketPilot(dir);
+    expect(review.candidateCoverage?.missing).toEqual(['参数']);
+    expect(review.stages.selection.result.decisions).toEqual([]);
+    expect(review.checks.some(x=>x.kind==='candidate_coverage')).toBe(true);
+    expect(review.stages.selection.parsedHash).toBe(hash(omitted));
+    expect(calls).toBe(2);
+  }finally{await rm(dir,{recursive:true,force:true});}
 });

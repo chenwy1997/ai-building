@@ -45,15 +45,19 @@ sheet('属性方案',category.name+'：DeepSeek原始属性方案',[
 ],['属性','类型/单位','填写要求','原文例值','填写要点','审阅结论','审阅意见','完整定义','选择用途','适用对象','必填理由','数量职责','枚举值','平台原字段','模型待核问题','单位字段返回'],mainRows,[118,92,78,170,250,90,170,410,330,300,350,380,180,180,460,170],[5,6]);
 const evidence=new Map(category.evidence.map(e=>[e.id,e]));
 const sourceFor=ids=>ids.map(id=>{const e=evidence.get(id);return e?`${id}：${e.name}=${e.value}；SKU ${e.sku}；${e.path}`:`${id}（引用不存在）`;}).join('\n');
+const displayedDecisionKeys=['sourceName','action','attributeName','reason','businessUse','professionalBasis','valueEvidence','evidenceIds','nativeOwnerKey','applicability'];
+const decisionExtras=d=>Object.fromEntries(Object.entries(d).filter(([key])=>!displayedDecisionKeys.includes(key)));
+const hasDecisionExtras=s.decisions.some(d=>Object.keys(decisionExtras(d)).length>0);
 sheet('候选取舍',category.name+'：DeepSeek候选取舍',[
   '每个来源字段一行，包含保留、归并、排除和待核项；“归并”可能转交系统字段，请看原生职责与理由。',
   '平台频次仅说明本次样本覆盖，不能代表市场份额、正确率或必填必要性。',
   '右侧保留模型对业务用途、专业依据、取值证据的原始说明。',
-],['平台原字段','取舍','归入属性','原值分布','理由','审阅结论','审阅意见','观察款','品牌数','业务用途','专业口径','取值证据','适用对象','原生职责','引用证据'],
+],['平台原字段','取舍','归入属性','原值分布','理由','审阅结论','审阅意见','观察款','品牌数','业务用途','专业口径','取值证据','适用对象','原生职责','引用证据',...(hasDecisionExtras?['模型补充字段']:[])],
   s.decisions.map(d=>{const p=category.pool.find(x=>x.name===d.sourceName);return[
     d.sourceName,actions[d.action],d.attributeName,p?.values.map(v=>`${v.value}（${v.spuCount}款）`).join('\n')??'',d.reason,'','',p?.spuCount??null,p?.brandCount??null,
     d.businessUse,d.professionalBasis,d.valueEvidence,d.applicability,d.nativeOwnerKey??'',sourceFor(d.evidenceIds),
-  ];}),[120,90,125,260,360,90,170,76,76,340,340,340,260,140,650],[5,6]);
+    ...(hasDecisionExtras?[Object.keys(decisionExtras(d)).length?JSON.stringify(decisionExtras(d),null,2):'']:[]),
+  ];}),[120,90,125,260,360,90,170,76,76,340,340,340,260,140,650,...(hasDecisionExtras?[480]:[])],[5,6]);
 sheet('商品样本',category.name+'：商品与原始参数',[
   `京东VOP搜索后，按标题初筛并轮换品牌选择${category.stats.skuCount}个SKU；SPU按商品详情去重计数。`,
   '标题符合平口垃圾袋，不代表所有平台字段都填写正确；样本原词保留，未人工修正。',
@@ -62,7 +66,7 @@ sheet('商品样本',category.name+'：商品与原始参数',[
   category.products.map(p=>[p.brand,p.title,category.evidence.filter(e=>e.sku===p.sku&&['平台参数','HTML参数'].includes(e.kind)).map(e=>`${e.name}：${e.value}（${e.path}）`).join('\n'),p.spec,p.size,p.sku,p.spu,p.url,p.fetchedAt]),
   [110,380,600,300,180,145,145,350,220]);
 const findings=[
-  ...review.checks.map(x=>[x.kind==='schema'?'程序结构检查':'阶段差异',x.stage,x.message,'待人工复核','']),
+  ...review.checks.map(x=>[x.kind==='schema'?'程序结构检查':x.kind==='candidate_coverage'?'候选覆盖检查':'阶段差异',x.stage,x.message,'待人工复核','']),
   ...s.openQuestions.map(x=>['DeepSeek待核问题','候选取舍',x,'待人工复核','']),
   ...a.openQuestions.map(x=>['DeepSeek待核问题','属性定义',x,'待人工复核','']),
 ];
@@ -77,7 +81,7 @@ run.getRange(`A${totalsRow}`).values=[['合计']];
 for(const col of ['C','D','E','F','G'])run.getRange(`${col}${totalsRow}`).formulas=[[`=SUM(${col}7:${col}${runRows.length+6})`]];
 run.getRange(`H${totalsRow}`).formulas=[[`=D${totalsRow}/C${totalsRow}`]];
 sheet('待核问题',category.name+'：原始输出待核问题',[
-  '程序只记录结构与阶段差异，不替模型修改。差异记录不一定等于业务错误，例如数量可能已转交系统字段。',
+  '程序记录结构、候选覆盖与阶段差异，不替模型修改；例如数量可能已转交系统字段，阶段差异仍需核实。',
   'DeepSeek待核问题逐字保留。黄色列可写意见，具体属性的采用请在属性方案中填写。',
   '模型自述与实际结构可能不一致，人工意见优先；本次没有自动采用或填写商品值。',
 ],['记录来源','阶段','问题原文','状态','人工意见'],findings,[135,110,620,120,280],[4]);

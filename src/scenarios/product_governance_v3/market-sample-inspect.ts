@@ -9,13 +9,23 @@ export async function inspectMarketPilot(dir:string) {
   const manifest=await read<any>(path.join(dir,'market-run.manifest.json'));
   const requests=await read<any[]>(path.join(dir,'request-summary.json'));
   const stages:Record<string,any>={},checks:any[]=[],prefix:any[]=[];
-  let previous:any;
+  let previous:any, frozenCandidateNames:string[]|null=null;
   for(const item of requests) {
     const record=await readCompletedRequest(dir,item.key);
     if(record.request.identity.releaseId!==manifest.identity.releaseId||record.request.identity.snapshotVersion!==manifest.identity.snapshotVersion)
       throw Error('request identity changed');
     if(hash(providerUsage(record.response.usage))!==hash(Object.fromEntries(Object.entries(item).filter(([k])=>Object.hasOwn(providerUsage(record.response.usage),k)))))
       throw Error('usage projection differs from provider receipt');
+    if(!previous)for(const input of record.request.body.input??[]) {
+      if(input.role!=='user'||typeof input.content!=='string')continue;
+      try {
+        const data=JSON.parse(input.content);
+        if(data.category?.id===manifest.category.id&&Array.isArray(data.candidates)) {
+          frozenCandidateNames=data.candidates.map((candidate:any)=>candidate.name);
+          break;
+        }
+      } catch { /* Ordinary task messages need not be JSON source packets. */ }
+    }
     if(previous) {
       const sameInstructions=record.request.body.instructions===previous.request.body.instructions;
       const sameTools=hash(record.request.body.tools)===hash(previous.request.body.tools);
@@ -39,6 +49,14 @@ export async function inspectMarketPilot(dir:string) {
     checks.push({stage:'definition',kind:'selection_difference',message:`第一阶段目标“${name}”未按同名输出定义；请核对是否拆分或转交原生字段。`});
   for(const a of stages.definition.result.attributes)if(!names.has(a.name))
     checks.push({stage:'definition',kind:'selection_difference',message:`定义名称“${a.name}”与第一阶段目标名称不同；仅记录，不修改。`});
+  const returnedNames=stages.selection.result.decisions.map((d:any)=>d.sourceName);
+  const candidateCoverage=frozenCandidateNames?{
+    expected:frozenCandidateNames,returned:returnedNames,
+    missing:frozenCandidateNames.filter(name=>!returnedNames.includes(name)),
+    duplicates:frozenCandidateNames.filter(name=>returnedNames.filter((n:string)=>n===name).length>1),
+  }:null;
+  for(const name of candidateCoverage?.missing??[])checks.push({stage:'selection',kind:'candidate_coverage',message:`候选“${name}”未返回取舍；已在真实模型请求的候选池中提供。`});
+  for(const name of candidateCoverage?.duplicates??[])checks.push({stage:'selection',kind:'candidate_coverage',message:`候选“${name}”返回了重复取舍；原文保留待核。`});
   const sum=(field:string)=>requests.reduce((s,r)=>s+(r[field]??0),0);
   const known=requests.every(r=>r.inputTokens!==null&&r.cacheHitTokens!==null);
   let previousLocalFailure:any=null;
@@ -52,7 +70,7 @@ export async function inspectMarketPilot(dir:string) {
     }
   }
   const summary={format:'market-raw-review-v1',category:manifest.category,model:manifest.model,reasoningEffort:manifest.reasoningEffort,
-    sourceDirectory:dir,stages,checks,prefix,requests,
+    sourceDirectory:dir,stages,checks,prefix,requests,candidateCoverage,
     tokenUsage:{inputTokens:sum('inputTokens'),cacheHitTokens:known?sum('cacheHitTokens'):null,
       cacheMissTokens:known?sum('cacheMissTokens'):null,outputTokens:sum('outputTokens'),reasoningTokens:sum('reasoningTokens'),
       cacheHitRate:known?sum('cacheHitTokens')/sum('inputTokens'):null},
