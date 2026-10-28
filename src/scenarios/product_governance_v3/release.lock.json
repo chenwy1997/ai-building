@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "id": "12f54d592989e22a831bbd7756531f6869cba00150efb13693c1f07e4f35498a",
+  "id": "37b2f65a2fa8283081b9eabd97f65ef58f601d5b0829f6db309c3357e76eb6bf",
   "files": {
     "../product_governance_v2/runtime/store.ts": "1e5fb3eb4aec0c8c449e49b3eda7501a9a178dad1213cdfe636b6016d0c78c02",
     "acceptance.ts": "c1f3f0bb95fc65bf77f38da68e2f0d2b078b50c797de81fc79817b215feba0af",
@@ -24,7 +24,7 @@
     "core.ts": "b0103c33a7626863b11e36e47fc940a9ab4c34989e6bd0ba6e253202fb7b330b",
     "docs/governance-design-v1-20261022.md": "2c2b69c546a69d3d98ed1a7308fb12990fc982ed01e004d1775857dae00212d7",
     "docs/governance-standard-draft.md": "12d62369bbf3a87dda40310fff8dc995f2cab4e3de2346e13b2019a6c9ebf545",
-    "docs/market-sample-pilot.md": "726a9b2d3f1f8489a3c45c24940207701de896969e303ccff8f298ab6d5e15ff",
+    "docs/market-sample-pilot.md": "e687ec89bfb169a6ef012d9d65f25c9438778ee4aa47fae0de1c604896943f93",
     "fact-preparation.ts": "5eaa29737aa372d2cc3e7f2f67d95bc24302e0f9a0145fd931b32711cc080485",
     "family-coverage.ts": "bd3b4700d1880ece4b601dcb89f104153218668ccb4013a579cb57af1a17e55d",
     "fixtures.ts": "aa451a493babed7d0ff678e5f632dee4a055714f294994ff3aaae9e78486000f",
