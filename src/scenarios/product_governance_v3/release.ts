@@ -112,6 +112,9 @@ async function collect(root = ROOT) {
     "scripts/configuration-review.mjs",
     "scripts/review-workbook-layout.mjs",
     "scripts/review-layout.defaults.json",
+    "scripts/export-market-review.mjs",
+    "skills/market-sample-modeling/SKILL.md",
+    "docs/market-sample-pilot.md",
     "../product_governance_v2/runtime/store.ts",
     ...STAGES.flatMap((s) => [
       `skills/${s}/SKILL.md`,

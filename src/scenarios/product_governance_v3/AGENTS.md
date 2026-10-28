@@ -1,5 +1,7 @@
 # 商品治理v3接线约定
 
+- 2026-10-28新路径：用户授权清洁用品先取一个末级做平台样本→DeepSeek取舍→DeepSeek定义真实试验，固定low并沿用原账本，由用户复核，Codex不修改模型业务内容。market-sample-cli默认预检，显式--execute才联网；这次授权不等于全232类跑批授权。阶段完整接续，记录服务商token缓存与本地回放区别；样本、工具返回、原输出与定义原文不得因缓存截断或改写。此试验独立合同和skill见docs/market-sample-pilot.md。
+
 - 业务依据为本目录docs/governance-standard-draft.md及整体稿；文档用途及状态见docs/README.md，术语见GLOSSARY.md。运行通过release清单显式加载，禁止自动加载v2旧standards或把讨论记录当成可执行指令。
 - 治理属性统一SKU，基础字段按职责排除；同族共同定义和有理由的差异分别处理。
 - 阶段skill必须加载正文及登记附件；动态知识和工具结果固定版本，来源数据不作为指令。
