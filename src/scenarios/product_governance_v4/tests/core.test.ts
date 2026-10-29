@@ -22,7 +22,7 @@ describe('真实v4回归', () => {
   test('数量复用不能使用其他目录或缺少目标类目', () => { const m={object:'纸张',denominator:'包',unit:'抽',relationship:'same',nativeKey:'unitMinQua',carrier:{...validCarrier,categoryId:'b'}};expect(validateQuantityMapping(m,'a')).toBe(false);expect(validateQuantityMapping(m)).toBe(false);expect(validateQuantityMapping(m,'b')).toBe(true); });
   test('纸品旧中文排除状态迁待核，保留旧原文及明确人工排除', () => { const d={categoryId:'a',sourceName:'商品重量',decision:'排除：原生职责',reason:'weight已有字段',humanReview:''};const moved=migrateLegacyDecision(d,policy);expect(moved.decision).toBe('defer');expect(moved.historicalReason).toBe(d.reason);expect(migrateLegacyDecision({...d,humanReview:'不要'},policy).decision).toBe(d.decision);expect(migrateLegacyDecision({...d,sourceName:'品牌'},policy).decision).toBe(d.decision); });
   test('归并目标与证据缺失均定位，不静默过滤', () => { const d = draft(); d.candidateDecisions[0]!.candidateName = '失效定义'; d.proposals[0]!.evidenceKeys = ['missing']; expect(validateDraft(d, pool, ['a'], policy).errors.map(e => e.kind)).toContain('decision_target'); expect(validateDraft(d, pool, ['a'], policy).errors.map(e => e.kind)).toContain('evidence'); });
-  test('最新人审范围只恢复保质期选填，不连带恢复重量或保修期', () => {
+  test('历史2026-10-28政策只恢复保质期，不连带放开其他组', () => {
     const p={...policy,restorationPolicy:{allowedOptionalNames:['保质期']}};
     const check=(name:string,required=false)=>checkRestorations({proposals:[],candidateDecisions:[{categoryId:'a',sourceName:name,decision:'exclude',reason:'原生职责已承载'}]},[{...proposal,name,required}],[{categoryId:'a',sourceName:name,candidateName:name,decision:'keep'}],p);
     expect(check('保质期').errors).toEqual([]);

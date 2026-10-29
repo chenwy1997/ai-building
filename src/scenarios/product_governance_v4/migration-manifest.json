@@ -275,7 +275,7 @@
       "source": "outputs/product-governance-v3/cleaning-supplies-terra-max-20261028/build-review.mjs",
       "target": "src/scenarios/product_governance_v4/scripts/build-review.mjs",
       "sourceSha256": "ee56b90acf9041461b7ecb5506b6a6cbf316cd5f9bdbf7500f75d8e244a6986f",
-      "targetSha256": "2565c8b166b06918710ed33d4ae2feedf55b7d34dcc19cd014434bb672add8b9",
+      "targetSha256": "af29de5de97ef048a6c96e4d0d3088950fb42160461ed744330c6ea9d4f743bf",
       "role": "adapted_generic_implementation",
       "changes": "移除轮次/类目硬编码，按v4合同核职责和人工认可；只读或离线；详见README"
     },
@@ -283,7 +283,7 @@
       "source": "outputs/product-governance-v3/cleaning-supplies-terra-max-20261028/assemble-review.mjs",
       "target": "src/scenarios/product_governance_v4/core.ts",
       "sourceSha256": "ae1fa2b76f13d8cb7ef623d9acc1c3ad0102e8c3568dcd21cce4d3c85956f89f",
-      "targetSha256": "c57be53d49841626976ef2d340c4dfed9da6866fcd406704a8bd72925504e870",
+      "targetSha256": "21b36e5d53f6a9a51bf0e708d75a525ba92a59bedbe3884aee799bb0cd87f1e9",
       "role": "adapted_generic_implementation",
       "changes": "移除轮次/类目硬编码，按v4合同核职责和人工认可；只读或离线；详见README"
     },

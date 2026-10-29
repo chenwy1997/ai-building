@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { normalizeRestorationName, restorationEligibility, optionalRestorationAllowed } from './restoration';
 
 export const readJson = async (file: string) => JSON.parse(await fs.readFile(file, 'utf8'));
 export const hash = (value: string | Uint8Array) => createHash('sha256').update(value).digest('hex');
@@ -35,7 +36,7 @@ export function validateQuantityMapping(m: any, categoryId?: string) {
   return m.relationship !== 'same' || (!!categoryId && carrierVerified(m.carrier, categoryId) && !!m.nativeKey);
 }
 
-const normalizeName = (name: string) => name.replace(/\s|【.*?】/g, '').replace(/^商品/, '');
+const normalizeName = normalizeRestorationName;
 export function dynamicFieldDecision(d: any, policy: any) {
   const explicit = [...policy.explicitExcludedNames, ...(policy.rules ?? []).filter((r: any) => r.currentPolicy === 'explicit_business_exclusion').flatMap((r: any) => [...r.names, r.key])].map(normalizeName);
   if ([d.sourceName, d.canonicalName].filter(Boolean).map(normalizeName).some(n => explicit.includes(n))) return false;
@@ -67,7 +68,7 @@ export function migrateLegacyDecision(d: any, policy: any) {
 // Reopening an unsupported exclusion for review is not approval to restore it as an attribute.
 export function checkRestorations(baseline: any, proposals: any[], decisions: any[], policy: any) {
   const approval = policy.restorationPolicy;
-  if (!approval) return { errors: [], decisions, restored: 0, pending: 0 };
+  if (!approval) return { errors: [], decisions, restored: 0, pending: 0, eligible: 0, excluded: 0 };
   const oldDecisions = new Map<string, any>(baseline.candidateDecisions.map((d: any) => [d.categoryId + ':' + d.sourceName, d]));
   const oldProposals = new Set(baseline.proposals.map(identity));
   const errors: any[] = [];
@@ -76,7 +77,7 @@ export function checkRestorations(baseline: any, proposals: any[], decisions: an
     if (blocked.has(identity(p))) return;
     blocked.add(identity(p));
     errors.push({ kind: 'restoration_not_approved', category: p.category, attribute: p.name,
-      message: '仅获准恢复指定的选填候选；其他历史职责排除项须等用户选择，不能自动纳入' });
+      message: '恢复需符合当前用户选择、选填要求及测量对象；包装/物流字段不得改名进入本体属性' });
   };
   const historicalConcepts = new Map<string, any[]>();
   for (const d of baseline.candidateDecisions.filter((d: any) => isHistoricalCarrierExclusion(d, policy))) {
@@ -88,28 +89,50 @@ export function checkRestorations(baseline: any, proposals: any[], decisions: an
   // A newly labelled web/family source cannot bypass an existing same-concept exclusion.
   // Do not equate e.g. net content with gross weight, or product size with shipping dimensions.
   for (const p of proposals.filter(p => !oldProposals.has(identity(p)))) {
+    const eligibility = restorationEligibility(p, policy);
+    if (eligibility.matched && eligibility.state === 'excluded_by_user') deny(p);
     const prior = [p.name, p.canonicalName].filter(Boolean).flatMap(n => historicalConcepts.get(p.categoryId + ':' + normalizeName(n)) ?? []);
-    if (prior.length && (prior.some(d => /不要|排除/.test(d.humanReview ?? '')) || !approval.allowedOptionalNames.includes(p.name) || p.required !== false)) deny(p);
+    if (prior.some(d => !optionalRestorationAllowed(p, d, policy))) deny(p);
   }
-  let restored = 0, pending = 0;
+  for (const d of decisions.filter(d => ['keep', 'merge'].includes(d.decision))) {
+    const p = proposals.find(p => p.categoryId === d.categoryId && p.name === d.candidateName);
+    if (!p) continue;
+    const old = oldDecisions.get(d.categoryId + ':' + d.sourceName);
+    const unchangedAcceptedEdge = oldProposals.has(identity(p)) && old?.candidateName === d.candidateName && old?.decision === d.decision &&
+      JSON.stringify(old?.restorationScope ?? null) === JSON.stringify(d.restorationScope ?? null) && (old?.humanReview ?? '') === (d.humanReview ?? '');
+    if (unchangedAcceptedEdge) continue;
+    const sourceChoice = restorationEligibility({ ...d, candidateName: undefined, canonicalName: undefined }, policy);
+    if (/不要|排除/.test(d.humanReview ?? '') || (sourceChoice.matched && sourceChoice.state === 'excluded_by_user')) deny(p);
+  }
+  let restored = 0, pending = 0, eligible = 0, excluded = 0;
   const reviewed = decisions.map(d => {
     const old = oldDecisions.get(d.categoryId + ':' + d.sourceName);
     if (!old || !isHistoricalCarrierExclusion(old, policy)) return d;
     if (d.decision === 'defer') {
-      pending++;
-      return { ...d, restorationState: 'pending_user', historicalDecision: old.decision, historicalReason: old.reason };
+      const choice = /不要|排除/.test((old.humanReview ?? '') + ' ' + (d.humanReview ?? ''))
+        ? { state: 'excluded_by_user', concept: null, reason: '保留该候选的明确人工排除意见；组级恢复不撤销逐项排除。' }
+        : restorationEligibility(d, policy);
+      if (choice.state === 'pending_user') pending++;
+      else if (choice.state === 'excluded_by_user') excluded++;
+      else eligible++;
+      return { ...d, decision: choice.state === 'excluded_by_user' ? 'exclude' : 'defer',
+        exclusionBasis: choice.state === 'excluded_by_user' ? 'explicit_policy' : d.exclusionBasis,
+        previousDecision: d.decision, previousReason: d.reason,
+        reason: choice.reason, restorationState: choice.state, restorationConcept: choice.concept,
+        historicalDecision: old.decision, historicalReason: old.reason };
     }
     if (!['keep', 'merge'].includes(d.decision)) return d;
     const p = proposals.find(p => p.categoryId === d.categoryId && p.name === d.candidateName);
     if (!p || oldProposals.has(identity(p))) return d;
-    if (/不要|排除/.test(old.humanReview ?? '') || !approval.allowedOptionalNames.includes(p.name) || p.required !== false) {
+    if (!optionalRestorationAllowed(p, { ...old, restorationScope: d.restorationScope ?? old.restorationScope,
+      humanReview: (old.humanReview ?? '') + ' ' + (d.humanReview ?? '') }, policy)) {
       deny(p);
       return d;
     }
     restored++;
     return { ...d, restorationState: 'allowed_optional_candidate', historicalDecision: old.decision, historicalReason: old.reason };
   });
-  return { errors, decisions: reviewed, restored, pending };
+  return { errors, decisions: reviewed, restored, pending, eligible, excluded };
 }
 
 export function validateDraft(draft: any, pool: any, expectedIds: string[], policy: any) {
@@ -133,7 +156,8 @@ export function validateDraft(draft: any, pool: any, expectedIds: string[], poli
       if (['keep', 'merge'].includes(d.decision) && !ps.some((p: any) => p.name === d.candidateName)) add('decision_target', c.category, d.sourceName, '保留/归并没有属性定义');
       if (d.decision === 'exclude' && dynamicFieldDecision(d, policy)) {
         const nativeReason = d.exclusionBasis === 'duplicate_carrier' || /原生|warranty|已有字段|标准商品|基础字段|数据库|默认.*映射|职责.*承载|native/i.test(d.reason);
-        if (nativeReason && !carrierVerified(d.carrierEvidence, c.categoryId)) add('unscoped_exclusion', c.category, d.sourceName, '动态字段不能仅凭原生映射或另一类目入口排除');
+        const explicitRestorationPolicy = policy.restorationPolicy && d.exclusionBasis === 'explicit_policy' && restorationEligibility(d, policy).state === 'excluded_by_user';
+        if (nativeReason && !explicitRestorationPolicy && !carrierVerified(d.carrierEvidence, c.categoryId)) add('unscoped_exclusion', c.category, d.sourceName, '动态字段不能仅凭原生映射或另一类目入口排除');
         if (!nativeReason && !['business_not_applicable', 'non_attribute', 'duplicate_candidate', 'explicit_policy'].includes(d.exclusionBasis)) warnings.push({ kind: 'legacy_exclusion_basis', category: c.category, attribute: d.sourceName, message: '历史排除理由待结构化归类；本次由独立审校核业务依据，不视为目录载体已核实' });
       }
       for (const key of d.evidenceKeys ?? []) if (!evidence.has(key)) add('evidence', c.category, d.sourceName, '证据ID不存在：' + key);
@@ -247,8 +271,9 @@ export async function assemble(manifestFile: string, out: string, policy: any) {
     attributeNames: merged.filter((p: any) => p.categoryId === c.categoryId).map((p: any) => p.name) })).sort(sort);
   const plan = { version: 4, categories: cats, proposals: merged.sort(sort), candidateDecisions: restoration.decisions.sort(sort),
     families, standaloneCategories, openQuestions, baselineDiff, lineage: files,
-    humanRecognition: config.humanRecognition, independentReview: review, programChecks: errors, warnings,
-    restorationReview: { policy: policy.restorationPolicy, restoredDecisions: restoration.restored, pendingUserDecisions: restoration.pending },
+    humanRecognition: config.humanRecognition, independentReview: review, policyRevision: config.policyRevision ?? null, programChecks: errors, warnings,
+    restorationReview: { policy: policy.restorationPolicy, restoredDecisions: restoration.restored, pendingUserDecisions: restoration.pending,
+      eligiblePendingDefinition: restoration.eligible, retainedExclusions: restoration.excluded },
     fieldOwnershipPolicyHash: hash(JSON.stringify(policy)),
     legacyVerification: { categoryIds: [...preserve], attributeContent: 'hash_compared_to_accepted_baseline',
       evidenceCounts: 'historical_summary_with_example_references; not recomputed from example keys',

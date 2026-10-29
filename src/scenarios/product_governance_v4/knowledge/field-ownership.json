@@ -170,8 +170,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "按计数对象/分母/单位与实际saleUnit、unitMin、unitMinQua比较，映射可能部分重合。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "weight",
@@ -187,8 +188,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "区分物流包装与商品本体；同名字段/数据库列不足以全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "单卷重量、整机重量属于商品本体重量，按业务对象命名。毛重、含包装和物流重量保持排除；不将原生weight默认等同本体净重。",
+      "restorationStatus": "商品本体重量恢复选填候选；原值对象待核",
+      "policyLabel": "本体重量选填；物流排除"
     },
     {
       "key": "packageSize",
@@ -205,8 +207,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "区分物流包装与商品本体；同名字段/数据库列不足以全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "用户明确包装长宽高不应归为商品尺寸。本体尺寸仍为选填候选，原始测量对象不明时待核，不转换包装值。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "包装长宽高保持排除"
     },
     {
       "key": "quantityMin",
@@ -277,8 +280,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "需要目标目录/版本和入口证据；既有认可保留，新增先核职责。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "warranty",
@@ -295,9 +299,9 @@
       "currentPolicy": "attribute_candidate_allowed",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "用户本次只批准恢复保质期为选填候选；保修期、质保期仍待用户选择。两者含义分开，实际目录入口另核。",
-      "policyLabel": "仅保质期允许选填；保修期待选",
-      "restorationStatus": "仅保质期获准恢复"
+      "explanation": "2026-10-29用户明确纠正：保修期不用，保质期要。保修期、质保期与质保说明保持排除；混合warranty键不能互换含义。",
+      "policyLabel": "保质期选填；保修期排除",
+      "restorationStatus": "仅保质期恢复选填候选"
     },
     {
       "key": "deliveryType",
@@ -315,8 +319,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "mainImages",
@@ -387,8 +392,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "tags",
@@ -405,8 +411,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "需要目标目录/版本和入口证据；既有认可保留，新增先核职责。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "upstreamId",
@@ -633,8 +640,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "costPrice",
@@ -756,8 +764,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "sku",
@@ -1069,8 +1078,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "区分物流包装与商品本体；同名字段/数据库列不足以全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "按来源核清本体/包装测量对象。优先以尺寸组合表达，保留维度顺序与单位；不因底层长宽高字段存在就自动拆出多个属性。",
+      "restorationStatus": "商品本体尺寸恢复选填候选；原值对象待核",
+      "policyLabel": "本体尺寸选填；包装排除"
     },
     {
       "key": "width",
@@ -1085,8 +1095,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "区分物流包装与商品本体；同名字段/数据库列不足以全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "按来源核清本体/包装测量对象。优先以尺寸组合表达，保留维度顺序与单位；不因底层长宽高字段存在就自动拆出多个属性。",
+      "restorationStatus": "商品本体尺寸恢复选填候选；原值对象待核",
+      "policyLabel": "本体尺寸选填；包装排除"
     },
     {
       "key": "length",
@@ -1101,8 +1112,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "区分物流包装与商品本体；同名字段/数据库列不足以全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "按来源核清本体/包装测量对象。优先以尺寸组合表达，保留维度顺序与单位；不因底层长宽高字段存在就自动拆出多个属性。",
+      "restorationStatus": "商品本体尺寸恢复选填候选；原值对象待核",
+      "policyLabel": "本体尺寸选填；包装排除"
     },
     {
       "key": "packingList",
@@ -1117,8 +1129,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "priceBareCost",
@@ -1258,8 +1271,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "shippingTimeNote",
@@ -1274,8 +1288,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "shippingFrom",
@@ -1290,8 +1305,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "quantityMax",
@@ -1368,8 +1384,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "afterSalesServiceInformation",
@@ -1384,8 +1401,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "returnPolicies",
@@ -1415,8 +1433,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "isExclusiveCustomerProduct",
@@ -1431,8 +1450,9 @@
       "currentPolicy": "scope_verification_required",
       "effectiveScope": "未对清洁用品232类逐一读取有效目录配置",
       "humanDecision": "",
-      "explanation": "历史底层字段记录；不能由存在推导出本轮属性全局排除。",
-      "restorationStatus": "待用户选择；暂不恢复为可选候选"
+      "explanation": "2026-10-29用户决定保持历史排除；该选择不是目标目录原生入口已核实的证明。既有认可属性保留。",
+      "restorationStatus": "用户已选择保持排除；不自动恢复",
+      "policyLabel": "保持历史排除"
     },
     {
       "key": "remark",
@@ -1494,18 +1514,100 @@
     "source"
   ],
   "restorationPolicy": {
-    "date": "2026-10-28",
+    "date": "2026-10-29",
     "allowedOptionalNames": [
       "保质期"
     ],
-    "otherHistoricallyExcludedFields": "pending_user_selection",
-    "scope": "只控制历史因原生字段职责而排除的候选恢复；既有认可属性保留，新概念仍按业务用途和来源审阅",
-    "userInstruction": "先恢复保质期，别的罗列后由用户斟酌是否恢复为可选候选",
+    "allowedScopedCandidates": [
+      {
+        "concept": "product_size",
+        "names": [
+          "尺寸",
+          "商品尺寸",
+          "本体尺寸",
+          "整机尺寸",
+          "商品长宽高",
+          "长宽高",
+          "商品长度",
+          "商品宽度",
+          "商品高度",
+          "单张尺寸",
+          "纸张尺寸"
+        ],
+        "object": "product_body",
+        "pendingReason": "允许商品本体尺寸作为选填候选；原始长宽高须先核测量对象，包装尺寸保持排除，不直接归并已有尺寸。",
+        "resolvedReason": "已声明商品本体测量对象和依据，允许选填候选；优先组合尺寸，属性采用和商品值仍待核。",
+        "excludedObjects": [
+          "packaging",
+          "shipping",
+          "gross_with_packaging"
+        ]
+      },
+      {
+        "concept": "product_weight",
+        "names": [
+          "重量",
+          "商品重量",
+          "净重",
+          "商品净重",
+          "本体重量",
+          "单卷重量",
+          "整机重量",
+          "单件重量",
+          "单张重量",
+          "单包净重"
+        ],
+        "object": "product_body",
+        "pendingReason": "允许商品本体重量作为选填候选，如单卷重量、整机重量；先核是否含包装及测量对象，毛重和物流重量保持排除。",
+        "resolvedReason": "已声明商品本体重量对象和依据，允许选填候选；单卷重量和整机重量保留必要限定，不合成同一口径。",
+        "excludedObjects": [
+          "packaging",
+          "shipping",
+          "gross_with_packaging"
+        ]
+      }
+    ],
+    "excludedNames": [
+      "包装长宽高",
+      "包装尺寸",
+      "包装长度",
+      "包装宽度",
+      "包装高度",
+      "包装长",
+      "包装宽",
+      "包装高",
+      "物流尺寸",
+      "运输尺寸",
+      "外箱尺寸",
+      "纸箱尺寸",
+      "包裹尺寸",
+      "毛重",
+      "商品毛重",
+      "物流重量",
+      "包装重量",
+      "含包装重量",
+      "运输重量",
+      "保修期",
+      "质保期",
+      "质保说明",
+      "保修说明"
+    ],
+    "excludedReason": "用户2026-10-29决定：除保质期、商品本体尺寸和重量外，其他历史职责排除项保持排除；既有认可属性保留。",
+    "otherHistoricallyExcludedFields": "keep_excluded",
+    "scope": "控制历史职责排除项的候选恢复；不重写既有认可属性，不把候选资格当作已完成定义或人工采用。",
+    "userInstruction": "尺寸和重量恢复为选填候选，尺寸不含包装长宽高；重量包括单卷重量、整机重量。用户随后明确纠正：保修期不用，保质期要。其他组保持排除。",
     "doesNotApprove": [
       "保修期",
       "质保期",
-      "其他历史原生职责排除字段"
-    ]
+      "包装长宽高",
+      "毛重及物流重量",
+      "其他历史职责排除项",
+      "自动增加属性或填写商品值"
+    ],
+    "requiredScopeDeclaration": {
+      "object": "product_body",
+      "basis": "说明商品本体的测量对象及已有来源依据；不是程序核实商品值的证明"
+    }
   },
   "historicalCarrierReasonKeys": [
     "sceneTagsKey",

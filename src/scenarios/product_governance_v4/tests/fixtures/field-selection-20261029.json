@@ -1,0 +1,106 @@
+{
+  "source": "outputs/product-governance-v3/cleaning-supplies-terra-max-20261028/attribute-proposals.json",
+  "sha256": "dc0b0413100deb9b8584ea2164a83c97aaab42868437c87aab5ca6aae8c03afe",
+  "records": [
+    {
+      "baseline": {
+        "categoryId": "7974e8ea-c029-43c6-ab62-24363f913e43",
+        "category": "公共垃圾桶",
+        "sourceName": "商品重量",
+        "candidateName": "",
+        "decision": "exclude",
+        "reason": "商品重量对应原生商品物流重量weight，不能视为实物净重，不重复生成类目属性。",
+        "humanReview": ""
+      },
+      "current": {
+        "categoryId": "7974e8ea-c029-43c6-ab62-24363f913e43",
+        "category": "公共垃圾桶",
+        "sourceName": "商品重量",
+        "candidateName": "",
+        "decision": "defer",
+        "reason": "平台字段可能指包装重量或商品本体重量；先核计量对象和单位，再按目标目录、版本及有效表单配置确认入口，不能仅凭数据库存在排除。",
+        "humanReview": ""
+      }
+    },
+    {
+      "baseline": {
+        "categoryId": "7974e8ea-c029-43c6-ab62-24363f913e43",
+        "category": "公共垃圾桶",
+        "sourceName": "商品长宽高",
+        "candidateName": "",
+        "decision": "exclude",
+        "reason": "商品长宽高对应原生包装/物流长宽高，非实物展开尺寸，不重复生成类目属性。",
+        "humanReview": ""
+      },
+      "current": {
+        "categoryId": "7974e8ea-c029-43c6-ab62-24363f913e43",
+        "category": "公共垃圾桶",
+        "sourceName": "商品长宽高",
+        "candidateName": "",
+        "decision": "defer",
+        "reason": "平台字段可能指物流包装尺寸，也可能是商品本体尺寸；按测量对象、目标目录、版本及有效表单配置待核，不能仅凭数据库存在排除。",
+        "humanReview": ""
+      }
+    },
+    {
+      "baseline": {
+        "categoryId": "a38d099e-a729-4bc0-8683-619c07c229d9",
+        "category": "厕板消毒机",
+        "sourceName": "商品毛重",
+        "candidateName": "",
+        "decision": "exclude",
+        "reason": "商品毛重对应原生商品或物流毛重weight，非单件净质量，不重复生成类目属性。",
+        "humanReview": ""
+      },
+      "current": {
+        "categoryId": "a38d099e-a729-4bc0-8683-619c07c229d9",
+        "category": "厕板消毒机",
+        "sourceName": "商品毛重",
+        "candidateName": "",
+        "decision": "defer",
+        "reason": "毛重可能包含包装；先核计量对象和单位，再按目标目录、版本及有效表单配置确认入口，不能把包装毛重当商品本体净重。",
+        "humanReview": ""
+      }
+    },
+    {
+      "baseline": {
+        "categoryId": "7974e8ea-c029-43c6-ab62-24363f913e43",
+        "category": "公共垃圾桶",
+        "sourceName": "产地",
+        "candidateName": "",
+        "decision": "exclude",
+        "reason": "产地对应产地originPlace，不重复生成类目属性。",
+        "humanReview": ""
+      },
+      "current": {
+        "categoryId": "7974e8ea-c029-43c6-ab62-24363f913e43",
+        "category": "公共垃圾桶",
+        "sourceName": "产地",
+        "candidateName": "",
+        "decision": "defer",
+        "reason": "旧稿仅据originPlace映射排除；应核目标目录、版本、有效属性实例及可维护入口，确认对象与原义后再决定映射或补充。",
+        "humanReview": ""
+      }
+    },
+    {
+      "baseline": {
+        "categoryId": "7974e8ea-c029-43c6-ab62-24363f913e43",
+        "category": "公共垃圾桶",
+        "sourceName": "质保期",
+        "candidateName": "",
+        "decision": "exclude",
+        "reason": "质保期对应原生质保warranty，不重复生成类目属性。",
+        "humanReview": ""
+      },
+      "current": {
+        "categoryId": "7974e8ea-c029-43c6-ab62-24363f913e43",
+        "category": "公共垃圾桶",
+        "sourceName": "质保期",
+        "candidateName": "",
+        "decision": "defer",
+        "reason": "平台名称是质保期，可能指售后保证，与保质期/有效期不同；现有数据库字段存在不证明目标目录可维护入口，按目录、版本与有效表单配置待核。不能把它自动当作保质期。",
+        "humanReview": ""
+      }
+    }
+  ]
+}

@@ -8,7 +8,7 @@
 
 - [治理规范](docs/standard.md)：候选来源与值证据分离、同族适用性、短名、组合尺寸、SKU/选填、用户认可范围。
 - [字段职责清单](docs/field-ownership-review.md)：全部 86 条历史映射；20 组业务归并、233 个底层字段盘点。表单按目录实例与继承配置动态产生，不能因数据库有列而全局排除。
-- [字段恢复待选](docs/field-restoration-selection.md)：当前只恢复保质期选填；其他历史职责排除项由用户决定，程序阻止未经选择的恢复。
+- [字段恢复选择](docs/field-restoration-selection.md)：保质期、本体尺寸与重量恢复选填候选；包装尺寸、毛重/物流重量、保修期及其他历史排除项保持排除。程序区分候选资格与对象待核，不自动新增属性。
 - [上下文清单](manifest.json)：固定规范和阶段 skill 在前，动态资料通过完整文件/分页工具检索。准备清单不等于模型实际阅读，作者另交 context-receipt。
 - [迁移记录](migration-manifest.json)：v3 设计与规范档案、共享字段资料、排版与采样工具的来源。reference 仅供溯源，当前规则以 standard 为准。
 

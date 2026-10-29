@@ -60,7 +60,7 @@ for(const c of plan.categories){
 table('属性方案','清洁用品：v4 类目属性方案',[
   `${plan.categories.length}个末级，${plan.proposals.length}项；${previous}项保留原认可内容，${plan.proposals.length-previous}项本轮新增待审。`,
   '可筛选“版本状态”只看新增；黄色列填意见。示例不等于已核实的SKU值，旧认可不等于线上配置已验证。',
-  '所有治理属性按SKU；短名及口径一起审。表单为动态目录配置，86条历史字段映射见“字段职责”。',
+  plan.policyRevision?.summary ?? '所有治理属性按SKU；短名及口径一起审。表单为动态目录配置，86条历史字段映射见“字段职责”。',
 ],['属性','末级类目','类型/单位','来源示例','填写要点','版本状态','审阅结论','审阅意见','完整定义','详细填写规则','业务用途','填写要求','本类观察款','原字段/候选名','完整类目路径','作者','类目ID','补充依据与适用范围'],mainRows,[106,132,96,150,220,110,90,160,430,500,330,80,90,210,420,190,290,700],[6,7]);
 const catName=id=>plan.categories.find(c=>c.categoryId===id)?.category??id;
 const familyRows=plan.families.flatMap(f=>f.concepts.flatMap(c=>c.assessments.map(a=>[f.name,c.name,catName(a.categoryId),({applicable:'适用',conditional:'局部适用',not_applicable:'不适用',unresolved:'待核'})[a.applicability],inline(a.proposalNames),a.reason,'',c.definition,a.categoryId])));
@@ -74,18 +74,18 @@ const nativeRows=policy.rules.map(r=>[r.index,inline(r.names),r.key,r.policyLabe
 table('字段职责','字段职责：历史映射完整清单',[
   '86条历史映射；前20组为业务归并规则，另有233个底层字段盘点。此表不是全类目黑名单。',
   '重量、保质期等按目录实例、版本、继承和同义性核入口；数值或下拉类型本身不决定是否排除。',
-  '只恢复保质期选填；其他历史职责排除项暂不恢复。保修期另待选择。黄色列可标你的取舍。',
+  '保质期、本体尺寸和重量可选；包装尺寸、毛重/物流重量、保修期及其他历史排除项保持排除。',
 ],['序号','字段/业务名称','历史映射键','当前处理','你的结论','你的意见','处理依据','已核范围','历史规则','概念键'],nativeRows,[55,210,160,170,120,230,570,430,400,260],[4,5]);
 const labels={keep:'保留',merge:'归并',exclude:'排除',defer:'候选待核'};
 const evidenceByCategory=new Map(sources.categories.map(c=>[c.id,new Map(c.evidence.map(e=>[e.id,e]))]));
 const split=value=>{const parts=[];let current='';for(const line of value.split('\n')){assert(line.length<=30000,'Single evidence exceeds cell limit');if(current.length+line.length+1>30000){parts.push(current);current='';}current+=(current?'\n':'')+line;}parts.push(current);return parts;};
-const refs=plan.candidateDecisions.map(d=>split((d.evidenceKeys??[]).map(k=>{const e=evidenceByCategory.get(d.categoryId)?.get(k);assert(e,'Missing '+k);return `${k}：${e.name}=${e.value}；SKU ${e.sku??''}；${e.path??''}；${e.sku?'https://item.jd.com/'+e.sku+'.html':''}`;}).join('\n')+'\n'+text(d.sourceReferences??[])));
+const refs=plan.candidateDecisions.map(d=>split((d.evidenceKeys??[]).map(k=>{const e=evidenceByCategory.get(d.categoryId)?.get(k);assert(e,'Missing '+k);return `${k}：${e.name}=${e.value}；SKU ${e.sku??''}；${e.path??''}；${e.sku?'https://item.jd.com/'+e.sku+'.html':''}`;}).join('\n')+'\n'+text(d.sourceReferences??[])+(d.historicalReason?'\n历史取舍：'+d.historicalDecision+'；历史理由：'+d.historicalReason:'')+(d.previousReason?'\n此前v4理由：'+d.previousReason:'')));
 const n=Math.max(1,...refs.map(r=>r.length));
 table('候选取舍','清洁用品：候选逐项取舍',[
   `${plan.candidateDecisions.length}项；VOP、厂家、其他电商、自有源、同族和常识分开溯源。`,
-  '保质期以外的历史职责排除项仅列“恢复待你选择”，未自动恢复。旧理由和明确人工排除保留。',
+  '本体尺寸/重量候选已开放，原始测量对象未明则待核；其他历史排除按用户选择保持。旧理由保留在右侧。',
   '原文及完整来源保留在右侧，黄色列填意见。',
-],['末级类目','来源候选','取舍','归入属性','原值示例','理由','观察款','审阅意见',...Array.from({length:n},(_,i)=>i?'证据续'+i:'证据'),'来源类型','类目ID'],plan.candidateDecisions.map((d,i)=>[d.category,d.sourceName,d.restorationState==='pending_user'?'恢复待你选择':labels[d.decision]??d.decision,d.candidateName??'',inline(d.values),d.reason,d.spuCount??0,'',...Array.from({length:n},(_,j)=>refs[i][j]??''),d.sourceKind??d.candidateOrigin??'原候选池',d.categoryId]),[132,180,115,120,260,500,80,220,...Array(n).fill(700),120,290],[7]);
+],['末级类目','来源候选','取舍','归入属性','原值示例','理由','观察款','审阅意见',...Array.from({length:n},(_,i)=>i?'证据续'+i:'证据'),'来源类型','类目ID'],plan.candidateDecisions.map((d,i)=>[d.category,d.sourceName,({pending_user:'恢复待你选择',allowed_scope_pending:'本体候选/对象待核',excluded_by_user:'保持排除'})[d.restorationState]??(d.restorationState==='allowed_optional_candidate'&&d.decision==='defer'?'选填候选待建模':labels[d.decision]??d.decision),d.candidateName??'',inline(d.values),d.reason,d.spuCount??0,'',...Array.from({length:n},(_,j)=>refs[i][j]??''),d.sourceKind??d.candidateOrigin??'原候选池',d.categoryId]),[132,180,145,120,260,500,80,220,...Array(n).fill(700),120,290],[7]);
 table('采样覆盖','清洁用品：范围及采样覆盖',[
   '样本沿用2026-10-27至28日已有只读回执，重点类目本轮补充厂家、跨平台及自有源。',
   '观察数量不是市场份额或属性全集；“本类观察款=0”不否认有用概念，补充依据与不确定性必须保留。',
