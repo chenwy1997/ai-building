@@ -1,5 +1,29 @@
 # 标准类目治理
 
+## 当前比赛交付
+
+类目属性模板采用 `workspace/output/v1/agent-delivery-v3/`，覆盖 11,796 个原末级类目。1000 个比赛商品的挂载与属性填写使用独立入口，默认复用已审阅的本地证据，不调用模型：
+
+```sh
+bun run category-governance:products
+bun run category-governance:products --serve --port=4322
+```
+
+输出在 `workspace/output/v1/product-delivery-v1/`，Excel 只有“商品挂载”“商品属性”两个结果工作表。具体命令、取证方式与填写边界见 [product_delivery/README.md](product_delivery/README.md)。
+
+## 当前离线属性编制入口
+
+本阶段保持三横原类目不变，由 Codex 整理属性知识及适用范围，使用已有类目、候选和京东采样资料生成可查看的初稿。以下入口不调用 DeepSeek 或京东接口：
+
+```sh
+bun run category-governance:offline
+bun run category-governance:preview
+```
+
+产物在 `workspace/output/v1/agent-draft-v1/`，打开 `view.html` 查询，`attributes.xlsx` 是单结果 sheet。编制范围与历史草稿分开显示。同版重复执行复用已校验结果，不产生新的语义判断。属性知识、压缩函数、脚本及工程交接说明见 [offline/README.md](offline/README.md)。后续类目治理的输出可作为独立属性流程的新版本输入。
+
+## 历史模型跑批能力
+
 这个场景把类目治理拆成四个可重复的步骤：导入类目、生成标准上下文、调用模型、合并多次结果。`toStdText`、`makeContextChunks`、`compactTemplates` 都是纯函数，可以被其他业务直接复用。
 
 ## 一次完整运行
@@ -216,3 +240,11 @@ bun run category-governance --retry-run=28 --retry-batch-size=4 --concurrency=12
 旧页面没有该接口时，脚本会回退到登录态 Next Server Action：action `5b7ad81b023bb2bae7938740d4aa3b662c2b0868`，请求体为 `[{"bucket":"source","fatherId":"<父类目实例 ID>"}]`，解析响应中 `1:` 行的 `data.data`；只继续请求 `children` 非空的节点即可避免对末级类目重复请求。
 
 可直接把 [browser-export.js](./browser-export.js) 粘贴到该页面的 DevTools Console 执行，下载 `sanheng-standard-category.raw.json` 后再运行上面的 `import` 命令。
+
+### 专家模板修订后刷新1000商品
+
+```sh
+bun run category-governance:products --template="属性模板-修订版.xlsx" --changes="改动类目清单.csv"
+```
+
+逐字段对比模板，只处理命中的商品属性；删除、新增、类型、单位和枚举变化均纳入，未受影响商品原样保留。离线复用原SKU缓存，不调用付费模型或京东。输出到 `workspace/output/v1/product-delivery-v2`，原 `product-delivery-v1` 保留。Excel只含两个结果sheet；差异和核验记录放在 `.repro`。这份测试集的人工语义修正绑定原文件和已审阅模板哈希；换模板时只自动适配通用字段，新语义决定仍需审阅。

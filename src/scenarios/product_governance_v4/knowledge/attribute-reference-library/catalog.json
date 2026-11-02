@@ -1,0 +1,211 @@
+{
+  "version": 1,
+  "registeredAt": "2026-10-29",
+  "purpose": "attribute_candidate_discovery",
+  "adoption": "reference_only_pending_target_applicability_and_review",
+  "sources": [
+    {
+      "id": "jd-vop",
+      "name": "京东 VOP 商品真实样本",
+      "sourceKind": "platform_product_sample",
+      "access": "existing_collector_and_run_receipts",
+      "entry": "scripts/collect-vop.ts + scripts/extract-candidates.py",
+      "lookup": "query --kind candidates|evidence --file 本轮候选池.json",
+      "trace": [
+        "sampling-manifest",
+        "receipt hash",
+        "SKU/SPU",
+        "参数原词与原值",
+        "采集时间"
+      ],
+      "note": "按本轮明确选择的回执取证；保留在各运行目录，不搬动或改写已治理候选池。"
+    },
+    {
+      "id": "zkh-template",
+      "name": "震坤行类目属性案例模板（用户提供）",
+      "sourceKind": "external_attribute_template",
+      "access": "local_template_index",
+      "originalFile": "originals/震坤行类目属性案例模板.xlsx",
+      "indexFile": "indexes/zkh-template.jsonl.gz",
+      "sheet": "1295分类模板",
+      "headerRow": 1,
+      "categoryHeaders": [
+        "一级名称",
+        "二级名称",
+        "三级名称",
+        "四级名称"
+      ],
+      "categoryCodeHeaders": [
+        "一级编码",
+        "二级编码",
+        "三级编码",
+        "四级编码"
+      ],
+      "attributeHeader": "属性",
+      "fieldHeaders": {
+        "templateIdRaw": "模板编号",
+        "typeRaw": "填写类型",
+        "requiredRaw": "是否必填",
+        "optionsRaw": "可枚举值"
+      },
+      "note": "概览仅作目录说明，原样归档；模板编号不保证类目唯一。出版时间和官方版本未核验。",
+      "sourceFamilyId": "zkh",
+      "candidatePriority": "high_for_industrial_products",
+      "authority": "platform_reference_not_industry_standard"
+    },
+    {
+      "id": "zkh-l5-specs",
+      "name": "震坤行五级类目规格与选项（用户提供的长宽 CSV）",
+      "sourceKind": "external_attribute_template",
+      "sourceFamilyId": "zkh",
+      "referenceRole": "platform_facet_candidates",
+      "candidatePriority": "high_for_industrial_products",
+      "authority": "platform_reference_not_industry_standard",
+      "access": "local_template_index",
+      "format": "csv",
+      "encoding": "utf-8-sig",
+      "delimiter": ",",
+      "originalFile": "originals/zkh_l5_specs_long.csv",
+      "indexFile": "indexes/zkh-l5-specs.jsonl.gz",
+      "headerRow": 1,
+      "categoryHeaders": [
+        "1级类目",
+        "2级类目",
+        "3级类目",
+        "4级类目",
+        "5级类目"
+      ],
+      "categoryCodeHeaders": [
+        "5级类目ID"
+      ],
+      "categoryIdHeader": "5级类目ID",
+      "attributeHeader": "规格名称",
+      "fieldHeaders": {
+        "optionsRaw": "可选规格值"
+      },
+      "supportingFiles": [
+        {
+          "originalFile": "originals/zkh_l5_specs_wide.csv",
+          "format": "csv",
+          "role": "same_source_wide_view",
+          "headerRow": 1
+        }
+      ],
+      "reconciliationFile": "indexes/zkh-l5-specs-reconciliation.json",
+      "optionPolicy": "Preserve raw platform options; no automatic split, normalization, valid-enum approval or application. Review meaning, dimension, unit, placeholder status and target applicability.",
+      "note": "长表为唯一属性检索视图，宽表为同源覆盖与逐项核对视图，不重复计为候选或独立证据。原值包含0L、无、复合量与可能混维度值，须专业判断后才能作为受控枚举；不得以平台选项替代行业标准。五级类目ID属于震坤行，非三横目录ID；空属性类仅表示资料未提供。用户提供来源，官方版本、采集时间与专业正确性未独立核验。"
+    },
+    {
+      "id": "ai-competition-2",
+      "name": "AI 比赛第 2 期赛题类目属性模板（用户提供）",
+      "sourceKind": "external_attribute_template",
+      "access": "local_template_index",
+      "originalFile": "originals/AI比赛第2期-赛题类目属性.xlsx",
+      "indexFile": "indexes/ai-competition-2.jsonl.gz",
+      "sheet": "Sheet1",
+      "headerRow": 1,
+      "categoryHeaders": [
+        "一级类目",
+        "二级类目",
+        "三级类目",
+        "品名（四级类目）"
+      ],
+      "categoryCodeHeaders": [],
+      "attributeHeader": "属性名称",
+      "fieldHeaders": {
+        "definitionRaw": "属性说明",
+        "typeRaw": "属性值类型",
+        "rulesRaw": "属性值填写要求",
+        "unitRaw": "属性值单位",
+        "optionsRaw": "属性值选项",
+        "formatRaw": "属性值格式",
+        "exampleRaw": "属性值示例"
+      },
+      "note": "赛题模板是建模参考，示例不是目标 SKU 实测值；出版时间和来源独立性未核验。"
+    },
+    {
+      "id": "luxshare-template",
+      "name": "立讯物料品类属性治理表（用户提供的领导参考稿）",
+      "sourceKind": "external_attribute_template",
+      "access": "local_template_index",
+      "originalFile": "originals/立讯物料品类属性治理表-2610.xlsx",
+      "indexFile": "indexes/luxshare-template.jsonl.gz",
+      "sheet": "04-品名属性长表",
+      "headerRow": 1,
+      "categoryHeaders": [
+        "一级分类",
+        "二级分类",
+        "三级分类",
+        "标准品名"
+      ],
+      "categoryCodeHeaders": [
+        "分类编码",
+        "品名编码"
+      ],
+      "attributeHeader": "属性名",
+      "fieldHeaders": {
+        "templateIdRaw": "品名编码",
+        "attributeCodeRaw": "属性代码",
+        "ordinalRaw": "属性序号",
+        "typeRaw": "属性类型",
+        "unitRaw": "单位",
+        "optionsRaw": "选项/取值域",
+        "requiredRaw": "是否必填",
+        "encodingRaw": "是否编码要素",
+        "rulesRaw": "规范说明（填写规则）",
+        "exampleRaw": "示例值"
+      },
+      "supportingSheets": {
+        "03-品名级属性表": "04 的同源宽表视图，不重复计为候选或独立证据；按品名编码与属性序号对照。",
+        "02-品名清单": "品名定义、边界及原细项归并；模板品名编码不等于三横类目 ID。",
+        "01-通用属性表": "该企业的字段职责参考，不能覆盖三横已确认的职责与恢复范围。",
+        "05-属性字典": "属性定义库及六个取值字典；完整原件保留，字典引用不自动展开为本项目允许值。"
+      },
+      "note": "按 04 原文索引，03/04 已逐条核对一致；定义库与类目绑定存在类型差异，外部必填、枚举、单位和字典均为待核参考。用户说明来源，官方发布与专业正确性未独立核验。"
+    },
+    {
+      "id": "web-reference",
+      "name": "网络与专业资料",
+      "sourceKind": "web_reference",
+      "access": "research_on_demand",
+      "trace": [
+        "URL",
+        "标题",
+        "访问时间",
+        "原文定位",
+        "全文或摘要",
+        "支持对象"
+      ],
+      "note": "按任务检索其他电商、厂家及专业资料；没有实际读取的网页不得写成已核验来源。"
+    },
+    {
+      "id": "model-prior",
+      "name": "模型已有知识与术语线索",
+      "sourceKind": "model_prior",
+      "access": "candidate_proposal_on_demand",
+      "trace": [
+        "模型与档位",
+        "任务时间",
+        "候选理由",
+        "待核含义与适用范围"
+      ],
+      "note": "可提出候选；不是可导出的完整词库、网页来源或真实样本，不生成伪造例值。"
+    },
+    {
+      "id": "sanheng-products",
+      "name": "三横自有商品源（原有补充来源保留）",
+      "sourceKind": "own_product_sample",
+      "access": "existing_readonly_collector",
+      "entry": "scripts/read-own-source.py",
+      "trace": [
+        "真实类目ID",
+        "商品ID",
+        "白名单原文",
+        "回执",
+        "采集时间"
+      ],
+      "note": "内部挂载关系仍需核对象；保留原有白名单和只读边界。"
+    }
+  ],
+  "updatedAt": "2026-10-30"
+}

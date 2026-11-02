@@ -1,0 +1,55 @@
+{
+  "leaves": [
+    {
+      "id": "2e6614ca-fd23-4392-b734-5c2b58312b22",
+      "name": "拉铆枪",
+      "path": ["标准类目", "五金工具", "电动工具", "电动铆接工具", "拉铆枪"],
+      "productCount": 120,
+      "samples": [
+        { "title": "气动拉铆枪 工业级 4.8mm", "brand": "波斯", "standardCategoryId": "2e6614ca-fd23-4392-b734-5c2b58312b22" },
+        { "title": "气动拉铆枪 工业级 6.4mm", "brand": "波斯", "standardCategoryId": "2e6614ca-fd23-4392-b734-5c2b58312b22" },
+        { "title": "气动拉铆枪 工业级 自吸式", "brand": null, "standardCategoryId": "2e6614ca-fd23-4392-b734-5c2b58312b22" },
+        { "title": "手动拉铆枪 双把 4.8mm", "brand": "波斯", "standardCategoryId": "2e6614ca-fd23-4392-b734-5c2b58312b22" },
+        { "title": "手动拉铆枪 双把 6.4mm", "brand": null, "standardCategoryId": "2e6614ca-fd23-4392-b734-5c2b58312b22" },
+        { "title": "手动拉铆枪 双把 省力", "brand": null, "standardCategoryId": "2e6614ca-fd23-4392-b734-5c2b58312b22" }
+      ]
+    },
+    {
+      "id": "6b0066ac-975a-4bb4-bd7c-486942ead94c",
+      "name": "插电式拉铆枪",
+      "path": ["标准类目", "五金工具", "电动工具", "电动铆接工具", "插电式拉铆枪"],
+      "productCount": 60,
+      "samples": [
+        { "title": "电动拉铆枪 插电式 4.8mm", "brand": null, "standardCategoryId": "6b0066ac-975a-4bb4-bd7c-486942ead94c" },
+        { "title": "电动拉铆枪 插电式 6.4mm", "brand": null, "standardCategoryId": "6b0066ac-975a-4bb4-bd7c-486942ead94c" },
+        { "title": "电动拉铆枪 插电式 自锁", "brand": null, "standardCategoryId": "6b0066ac-975a-4bb4-bd7c-486942ead94c" }
+      ]
+    },
+    {
+      "id": "933dda54-ec85-4e7c-a652-5a3982b548bd",
+      "name": "充电式拉铆枪",
+      "path": ["标准类目", "五金工具", "电动工具", "电动铆接工具", "充电式拉铆枪"],
+      "productCount": 90,
+      "samples": [
+        { "title": "电动拉铆枪 插电式 4.8mm", "brand": null, "standardCategoryId": "933dda54-ec85-4e7c-a652-5a3982b548bd" },
+        { "title": "电动拉铆枪 充电式 6.4mm", "brand": null, "standardCategoryId": "933dda54-ec85-4e7c-a652-5a3982b548bd" },
+        { "title": "电动拉铆枪 插电式 自锁", "brand": null, "standardCategoryId": "933dda54-ec85-4e7c-a652-5a3982b548bd" }
+      ]
+    },
+    {
+      "id": "7637e9dd-6778-4362-9eb7-72e95cc9145a",
+      "name": "充电式铆螺母枪",
+      "path": ["标准类目", "五金工具", "电动工具", "电动铆接工具", "充电式铆螺母枪"],
+      "productCount": 0,
+      "samples": []
+    }
+  ],
+  "scopeSamples": [
+    { "title": "不锈钢抽芯铆钉 4.8mm", "brand": null, "standardCategoryId": "FIXTURE-ORPHAN-RIVET" },
+    { "title": "不锈钢抽芯铆钉 4.0mm", "brand": null, "standardCategoryId": "FIXTURE-ORPHAN-RIVET" },
+    { "title": "不锈钢抽芯铆钉 6.4mm", "brand": null, "standardCategoryId": "FIXTURE-ORPHAN-RIVET" },
+    { "title": "气动拉铆枪 工业级 4.8mm", "brand": "波斯", "standardCategoryId": "2e6614ca-fd23-4392-b734-5c2b58312b22" },
+    { "title": "电动拉铆枪 插电式 自锁", "brand": null, "standardCategoryId": "933dda54-ec85-4e7c-a652-5a3982b548bd" },
+    { "title": "万能转换接头 定制款", "brand": null, "standardCategoryId": "FIXTURE-ORPHAN-MISC" }
+  ]
+}

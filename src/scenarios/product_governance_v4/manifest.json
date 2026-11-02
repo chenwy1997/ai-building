@@ -1,13 +1,19 @@
 {
   "version": 4,
-  "fixedContext": ["docs/standard.md", "knowledge/field-ownership.json", "knowledge/native-quantity-carrier.json"],
+  "fixedContext": ["docs/standard.md", "docs/attribute-type-contract.md", "docs/procurement-and-source-policy.md", "knowledge/source-priority-policy.json", "knowledge/field-ownership.json", "knowledge/native-quantity-carrier.json", "knowledge/attribute-reference-library/README.md", "knowledge/attribute-reference-library/catalog.json"],
   "stages": {
     "research": "skills/candidate-research/SKILL.md",
     "model": "skills/family-modeling/SKILL.md",
-    "review": "skills/independent-review/SKILL.md"
+    "review": "skills/independent-review/SKILL.md",
+    "extract": "skills/sku-extraction/SKILL.md",
+    "value-review": "skills/sku-value-review/SKILL.md"
   },
-  "dynamicContext": ["scope", "baseline", "candidatePool", "supplementalSources", "familyMatrix", "previousReview"],
-  "tools": ["query category", "query candidates", "query family", "query evidence", "collect-vop", "read-own-source"],
+  "stageContext": {
+    "extract": ["docs/sku-extraction-standard.md", "knowledge/sku-value-policy.json", "docs/scm-category-attribute-value-alignment.md"],
+    "value-review": ["docs/sku-extraction-standard.md", "knowledge/sku-value-policy.json", "docs/sku-extraction-reliability-research.md"]
+  },
+  "dynamicContext": ["scope", "baseline", "candidatePool", "supplementalSources", "referenceMatches", "familyMatrix", "dictionaries", "previousReview", "procurementReview", "enumDecisions", "skuEvidence", "skuFillResults", "categoryRouting", "fillContract", "extractionKnowledge"],
+  "tools": ["query category", "query candidates", "query family", "query evidence", "query references", "query dictionary", "query extraction-knowledge", "source-priority", "refine-procurement", "check-types", "inspect-types", "collect-vop", "read-own-source", "collect-sku-evidence", "prepare-sku-fill", "assemble-sku-fill", "revise-sku-value-policy", "revise-sku-fill"],
   "runtime": "Codex delegation; CLI handles data preparation, inspection, validation, assembly and export",
   "productionWrites": false
 }

@@ -1,0 +1,1422 @@
+{
+  "provenance": {
+    "kind": "selected_fields_from_frozen_contract",
+    "sourcePath": "outputs/product-governance-v4/cleaning-supplies-procurement-20261030/review/attribute-proposals.json",
+    "sourceSha256": "0a74bdd1ad5649d68c84e27e1e3938bff89c6f6c66b149eb8941b556c355fca2",
+    "description": "仅提取五类属性的定义、类型与规则字段，保留完整 typing；此文件不是原始合同，测试 fixture 哈希不等于原合同哈希。",
+    "retainedFields": [
+      "categoryId",
+      "category",
+      "key",
+      "name",
+      "type",
+      "unit",
+      "typing",
+      "enumValues",
+      "scope",
+      "required",
+      "definition",
+      "definitionId",
+      "definitionVersion",
+      "rules",
+      "purpose"
+    ]
+  },
+  "version": 1,
+  "attributeContractVersion": 1,
+  "proposals": [
+    {
+      "categoryId": "c2861c74-b1ad-46e8-990e-bb4f68c7a7f7",
+      "category": "平口式垃圾袋",
+      "key": "tw.c2861c74.8b699d9e3e87",
+      "name": "尺寸",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品本体、部件或容纳空间",
+        "rationale": "多维尺寸、测量部位及单位需组合表达，不拆分。",
+        "text": {
+          "formatHint": "标明对象、维度顺序和单位；不填包装尺寸。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品本体、明确部件或容纳空间的尺寸组合及其测量对象。",
+      "definitionId": "cleaning.dimensions",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "标明对象、维度顺序和单位；不填包装尺寸。"
+      ],
+      "purpose": "比较本体尺寸与安装或使用空间。"
+    },
+    {
+      "categoryId": "c2861c74-b1ad-46e8-990e-bb4f68c7a7f7",
+      "category": "平口式垃圾袋",
+      "key": "tw.c2861c74.9f14a7cade71",
+      "name": "单层厚度",
+      "type": "number",
+      "unit": "mm",
+      "typing": {
+        "version": 1,
+        "object": "袋膜单层",
+        "rationale": "该定义固定计量对象与单位，标称单值可比较；范围或口径不明的来源待核，不强行转成单值。",
+        "number": {
+          "quantityKind": "袋膜单层",
+          "precision": null,
+          "min": null,
+          "max": null,
+          "constraintReferences": []
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "袋膜单层的标称厚度。",
+      "definitionId": "cleaning.single_layer_thickness",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填单层厚度；双面厚度、范围及口径不明的丝数待核。"
+      ],
+      "purpose": "比较袋膜厚度。"
+    },
+    {
+      "categoryId": "c2861c74-b1ad-46e8-990e-bb4f68c7a7f7",
+      "category": "平口式垃圾袋",
+      "key": "tw.c2861c74.3398e25e0618",
+      "name": "材质",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品主体或明确部件",
+        "rationale": "材料开放且可由不同部件和比例组成，使用文本。",
+        "text": {
+          "formatHint": "填写材料和对应部位，复合材料注明组成及比例。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品主体或明确部件的材料及已标示的组成。",
+      "definitionId": "cleaning.material",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填写材料和对应部位，复合材料注明组成及比例。"
+      ],
+      "purpose": "比较材质与使用环境的匹配。"
+    },
+    {
+      "categoryId": "c2861c74-b1ad-46e8-990e-bb4f68c7a7f7",
+      "category": "平口式垃圾袋",
+      "key": "tw.c2861c74.457b25f183d7",
+      "name": "颜色",
+      "type": "option",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品本体或成套商品主要配色",
+        "rationale": "同一件或成套商品可有多种主要颜色，故允许多选。色阶、光泽、各部位与颜色的对应及成套关系须在证据层保留；只有杂色混合而未明确色系才选混色。随机发色未确定或只知非主体局部颜色时留空；备选颜色须按SKU区分。 选项及映射为 model_proposal，待人工审；其他为明确未列值，非未知。",
+        "choice": {
+          "mode": "multiple",
+          "dimension": "商品本体或成套商品主要配色",
+          "rationale": "同一件或成套商品可有多种主要颜色，故允许多选。色阶、光泽、各部位与颜色的对应及成套关系须在证据层保留；只有杂色混合而未明确色系才选混色。随机发色未确定或只知非主体局部颜色时留空；备选颜色须按SKU区分。 选项及映射为 model_proposal，待人工审；其他为明确未列值，非未知。",
+          "boundaryReferences": [
+            {
+              "sourceId": "forms-input",
+              "locator": "forms-input.json#concepts[name=颜色]；原绑定及 evidenceKeys 可追溯旧方案"
+            },
+            {
+              "sourceId": "luxshare-template",
+              "locator": "152b9fc010b97cd2:04-品名属性长表:725；垃圾桶按桶体主色填写"
+            },
+            {
+              "sourceId": "zkh-template",
+              "locator": "bd26f43247ede6f4:1295分类模板:4148；垃圾袋颜色含多色及随机"
+            },
+            {
+              "sourceId": "model_proposal",
+              "locator": "本轮类型、值域及归一边界建议，待人工审核；其他表示已知但未列类型，未知留空"
+            }
+          ],
+          "minSelections": 1,
+          "maxSelections": 18,
+          "mutuallyExclusive": []
+        }
+      },
+      "enumValues": [
+        "黑色",
+        "白色",
+        "灰色",
+        "红色",
+        "橙色",
+        "黄色",
+        "绿色",
+        "青色",
+        "蓝色",
+        "紫色",
+        "粉色",
+        "棕色",
+        "米色",
+        "金色",
+        "银色",
+        "透明",
+        "混色（颜色未细分）",
+        "其他颜色"
+      ],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品本体主要颜色或明确成套配色所属色系；可含无色透明及未细分混色。",
+      "definitionId": "cleaning.color_palette",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "明确主要配色多选；仅局部色、随机色未定留空，细节留原值。"
+      ],
+      "purpose": "比较商品主要外观与分色管理。"
+    },
+    {
+      "categoryId": "c2861c74-b1ad-46e8-990e-bb4f68c7a7f7",
+      "category": "平口式垃圾袋",
+      "key": "tw.c2861c74.538b634ddc9d",
+      "name": "容量",
+      "type": "number",
+      "unit": "L",
+      "typing": {
+        "version": 1,
+        "object": "垃圾袋适配的单个垃圾桶",
+        "rationale": "该定义固定计量对象与单位，标称单值可比较；范围或口径不明的来源待核，不强行转成单值。",
+        "number": {
+          "quantityKind": "垃圾袋适配的单个垃圾桶",
+          "precision": null,
+          "min": null,
+          "max": null,
+          "constraintReferences": []
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "垃圾袋明确适配的垃圾桶标称容积。",
+      "definitionId": "cleaning.bag_fits_bin_volume",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "仅填明确适配的单一桶容积；袋体容量和适配区间须区分。"
+      ],
+      "purpose": "核对垃圾袋与垃圾桶的容量适配。"
+    },
+    {
+      "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "category": "无芯小卷纸",
+      "key": "paper_material",
+      "name": "原料",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "纸品主体纤维原料",
+        "rationale": "纸浆及纤维可混配、比例不固定，使用文本。",
+        "text": {
+          "formatHint": "填写纸品原料和已标明的组成比例。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "纸品主体使用的纤维原料及明确标示的组成。",
+      "definitionId": "cleaning.paper_fiber_material",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填写纸品原料和已标明的组成比例。"
+      ],
+      "purpose": "比较纸品纤维原料。"
+    },
+    {
+      "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "category": "无芯小卷纸",
+      "key": "layers",
+      "name": "层数",
+      "type": "number",
+      "unit": "层",
+      "typing": {
+        "version": 1,
+        "object": "一张纸或纸巾",
+        "rationale": "该定义固定计量对象与单位，标称单值可比较；范围或口径不明的来源待核，不强行转成单值。",
+        "number": {
+          "quantityKind": "一张纸或纸巾",
+          "precision": null,
+          "min": null,
+          "max": null,
+          "constraintReferences": []
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "单张成品纸或纸巾叠合的纸层数量。",
+      "definitionId": "cleaning.paper_ply_count",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填一张成品纸的叠合层数，不填包装数量。"
+      ],
+      "purpose": "比较纸品叠层结构。"
+    },
+    {
+      "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "category": "无芯小卷纸",
+      "key": "paper_size",
+      "name": "尺寸",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品本体、部件或容纳空间",
+        "rationale": "多维尺寸、测量部位及单位需组合表达，不拆分。",
+        "text": {
+          "formatHint": "标明对象、维度顺序和单位；不填包装尺寸。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品本体、明确部件或容纳空间的尺寸组合及其测量对象。",
+      "definitionId": "cleaning.dimensions",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "标明对象、维度顺序和单位；不填包装尺寸。"
+      ],
+      "purpose": "比较本体尺寸与安装或使用空间。"
+    },
+    {
+      "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "category": "无芯小卷纸",
+      "key": "coreless",
+      "name": "是否无芯",
+      "type": "boolean",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "单卷卫生纸",
+        "rationale": "该属性是明确的是否命题；未知留空而非否。"
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "单卷纸是否采用无纸芯结构。",
+      "definitionId": "cleaning.coreless_roll",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "明确无芯填是，有纸芯填否；未知留空。"
+      ],
+      "purpose": "选择纸卷芯结构。"
+    },
+    {
+      "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "category": "无芯小卷纸",
+      "key": "mass",
+      "name": "单卷重量",
+      "type": "number",
+      "unit": "g",
+      "typing": {
+        "version": 1,
+        "object": "单卷纸品",
+        "rationale": "该定义固定计量对象与单位，标称单值可比较；范围或口径不明的来源待核，不强行转成单值。",
+        "number": {
+          "quantityKind": "单卷纸品",
+          "precision": null,
+          "min": null,
+          "max": null,
+          "constraintReferences": []
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "单卷纸品的标称重量。",
+      "definitionId": "cleaning.roll_weight",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填每卷重量；纸芯及净重口径不明时待核。"
+      ],
+      "purpose": "比较每卷纸品重量。"
+    },
+    {
+      "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "category": "无芯小卷纸",
+      "key": "fragrance",
+      "name": "香型",
+      "type": "option",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品香气",
+        "rationale": "同一商品可明示复合香型，故可多选；有香未注明类型和无香各自与具体香型互斥。更具体香名原文保留，泛称与具体同一香味不重复选。 选项及映射为 model_proposal，待人工审；其他为明确未列值，非未知。",
+        "choice": {
+          "mode": "multiple",
+          "dimension": "商品香气",
+          "rationale": "同一商品可明示复合香型，故可多选；有香未注明类型和无香各自与具体香型互斥。更具体香名原文保留，泛称与具体同一香味不重复选。 选项及映射为 model_proposal，待人工审；其他为明确未列值，非未知。",
+          "boundaryReferences": [
+            {
+              "sourceId": "forms-input",
+              "locator": "forms-input.json#concepts[name=香型]；原绑定及 evidenceKeys 可追溯旧方案"
+            },
+            {
+              "sourceId": "zkh-template",
+              "locator": "bd26f43247ede6f4:1295分类模板:3366、3513；清洁用品与洗洁精香型候选"
+            },
+            {
+              "sourceId": "luxshare-template",
+              "locator": "152b9fc010b97cd2:04-品名属性长表:462；香皂香型"
+            },
+            {
+              "sourceId": "model_proposal",
+              "locator": "本轮类型、值域及归一边界建议，待人工审核；其他表示已知但未列类型，未知留空"
+            }
+          ],
+          "minSelections": 1,
+          "maxSelections": 17,
+          "mutuallyExclusive": [
+            [
+              "无香",
+              "有香（香型未注明）"
+            ],
+            [
+              "无香",
+              "清香"
+            ],
+            [
+              "无香",
+              "花香"
+            ],
+            [
+              "无香",
+              "果香"
+            ],
+            [
+              "无香",
+              "草本香"
+            ],
+            [
+              "无香",
+              "海洋香"
+            ],
+            [
+              "无香",
+              "木质香"
+            ],
+            [
+              "无香",
+              "茶香"
+            ],
+            [
+              "无香",
+              "薄荷香"
+            ],
+            [
+              "无香",
+              "柠檬香"
+            ],
+            [
+              "无香",
+              "薰衣草香"
+            ],
+            [
+              "无香",
+              "茉莉香"
+            ],
+            [
+              "无香",
+              "玫瑰香"
+            ],
+            [
+              "无香",
+              "松木香"
+            ],
+            [
+              "无香",
+              "生姜香"
+            ],
+            [
+              "无香",
+              "其他香型"
+            ],
+            [
+              "有香（香型未注明）",
+              "清香"
+            ],
+            [
+              "有香（香型未注明）",
+              "花香"
+            ],
+            [
+              "有香（香型未注明）",
+              "果香"
+            ],
+            [
+              "有香（香型未注明）",
+              "草本香"
+            ],
+            [
+              "有香（香型未注明）",
+              "海洋香"
+            ],
+            [
+              "有香（香型未注明）",
+              "木质香"
+            ],
+            [
+              "有香（香型未注明）",
+              "茶香"
+            ],
+            [
+              "有香（香型未注明）",
+              "薄荷香"
+            ],
+            [
+              "有香（香型未注明）",
+              "柠檬香"
+            ],
+            [
+              "有香（香型未注明）",
+              "薰衣草香"
+            ],
+            [
+              "有香（香型未注明）",
+              "茉莉香"
+            ],
+            [
+              "有香（香型未注明）",
+              "玫瑰香"
+            ],
+            [
+              "有香（香型未注明）",
+              "松木香"
+            ],
+            [
+              "有香（香型未注明）",
+              "生姜香"
+            ],
+            [
+              "有香（香型未注明）",
+              "其他香型"
+            ]
+          ]
+        }
+      },
+      "enumValues": [
+        "无香",
+        "有香（香型未注明）",
+        "清香",
+        "花香",
+        "果香",
+        "草本香",
+        "海洋香",
+        "木质香",
+        "茶香",
+        "薄荷香",
+        "柠檬香",
+        "薰衣草香",
+        "茉莉香",
+        "玫瑰香",
+        "松木香",
+        "生姜香",
+        "其他香型"
+      ],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品明确标示的香气类别或无香状态。",
+      "definitionId": "cleaning.fragrance",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "多种明示香型可并选；香名细节保留原值，未知留空。"
+      ],
+      "purpose": "按香气偏好选择商品。"
+    },
+    {
+      "categoryId": "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+      "category": "无芯小卷纸",
+      "key": "printed",
+      "name": "是否印花",
+      "type": "boolean",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "纸品表面",
+        "rationale": "该属性是明确的是否命题；未知留空而非否。"
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "纸品是否明确标示有印花。",
+      "definitionId": "cleaning.printed_pattern",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "明示印花填是，无印花填否。"
+      ],
+      "purpose": "选择纸品印花外观。"
+    },
+    {
+      "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "category": "洗脸巾",
+      "key": "sheet_material",
+      "name": "材质",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品主体或明确部件",
+        "rationale": "材料开放且可由不同部件和比例组成，使用文本。",
+        "text": {
+          "formatHint": "填写材料和对应部位，复合材料注明组成及比例。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品主体或明确部件的材料及已标示的组成。",
+      "definitionId": "cleaning.material",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填写材料和对应部位，复合材料注明组成及比例。"
+      ],
+      "purpose": "比较材质与使用环境的匹配。"
+    },
+    {
+      "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "category": "洗脸巾",
+      "key": "sheet_size",
+      "name": "尺寸",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品本体、部件或容纳空间",
+        "rationale": "多维尺寸、测量部位及单位需组合表达，不拆分。",
+        "text": {
+          "formatHint": "标明对象、维度顺序和单位；不填包装尺寸。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品本体、明确部件或容纳空间的尺寸组合及其测量对象。",
+      "definitionId": "cleaning.dimensions",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "标明对象、维度顺序和单位；不填包装尺寸。"
+      ],
+      "purpose": "比较本体尺寸与安装或使用空间。"
+    },
+    {
+      "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "category": "洗脸巾",
+      "key": "pack_qty",
+      "name": "每包数量",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "一包或一盒的纸张、片或抽数",
+        "rationale": "同一类目按张、片或抽计数，不应擅自做跨计数词换算。",
+        "text": {
+          "formatHint": "填写每包或每盒数量及计数词，张、片、抽不换算。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "一个最内层使用包装标示的纸张、片或抽取数量。",
+      "definitionId": "cleaning.paper_count_per_package",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填写每包或每盒数量及计数词，张、片、抽不换算。"
+      ],
+      "purpose": "比较单个使用包装中的纸品数量。"
+    },
+    {
+      "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "category": "洗脸巾",
+      "key": "grammage",
+      "name": "克重",
+      "type": "number",
+      "unit": "g/m²",
+      "typing": {
+        "version": 1,
+        "object": "擦拭或纸巾基材",
+        "rationale": "该定义固定计量对象与单位，标称单值可比较；范围或口径不明的来源待核，不强行转成单值。",
+        "number": {
+          "quantityKind": "擦拭或纸巾基材",
+          "precision": null,
+          "min": null,
+          "max": null,
+          "constraintReferences": []
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "擦拭材料或纸巾基材单位面积的标称质量。",
+      "definitionId": "cleaning.basis_weight",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填材料面密度，不把单张或单包重量当克重。"
+      ],
+      "purpose": "比较材料单位面积用料。"
+    },
+    {
+      "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "category": "洗脸巾",
+      "key": "texture",
+      "name": "纹路",
+      "type": "option",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "擦拭巾表面",
+        "rationale": "同一维度的明确类别可分别成立，故多选。 选项及映射为 model_proposal，待人工审；其他为明确未列值，非未知。",
+        "choice": {
+          "mode": "multiple",
+          "dimension": "擦拭巾表面",
+          "rationale": "同一维度的明确类别可分别成立，故多选。 选项及映射为 model_proposal，待人工审；其他为明确未列值，非未知。",
+          "boundaryReferences": [
+            {
+              "sourceId": "forms-input",
+              "locator": "forms-input.json#concepts[name=纹路]；原绑定及 evidenceKeys 可追溯旧方案"
+            },
+            {
+              "sourceId": "model_proposal",
+              "locator": "本轮类型、值域及归一边界建议，待人工审核；其他表示已知但未列类型，未知留空"
+            }
+          ],
+          "minSelections": 1,
+          "maxSelections": 5,
+          "mutuallyExclusive": []
+        }
+      },
+      "enumValues": [
+        "平纹",
+        "珍珠纹",
+        "网纹",
+        "波浪纹",
+        "其他"
+      ],
+      "scope": "SKU",
+      "required": false,
+      "definition": "巾体表面标示的纹理。",
+      "definitionId": "cleaning.wipe_surface_texture",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "按明示纹路选，多种纹路可并选并留部位。"
+      ],
+      "purpose": "比较擦拭巾的表面纹理。"
+    },
+    {
+      "categoryId": "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+      "category": "洗脸巾",
+      "key": "form",
+      "name": "类型",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "纸巾使用形态",
+        "rationale": "来源同时涉及抽取、卷筒和悬挂等不同结构维度，不强行单选。",
+        "text": {
+          "formatHint": "按标示填写取用或悬挂形态。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "纸或巾商品标示的取用或放置形态。",
+      "definitionId": "cleaning.type.paper_use_form",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "按标示填写取用或悬挂形态。"
+      ],
+      "purpose": "比较纸巾的取用与放置方式。"
+    },
+    {
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "category": "盒装抽纸",
+      "key": "paper_material",
+      "name": "原料",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "纸品主体纤维原料",
+        "rationale": "纸浆及纤维可混配、比例不固定，使用文本。",
+        "text": {
+          "formatHint": "填写纸品原料和已标明的组成比例。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "纸品主体使用的纤维原料及明确标示的组成。",
+      "definitionId": "cleaning.paper_fiber_material",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填写纸品原料和已标明的组成比例。"
+      ],
+      "purpose": "比较纸品纤维原料。"
+    },
+    {
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "category": "盒装抽纸",
+      "key": "layers",
+      "name": "层数",
+      "type": "number",
+      "unit": "层",
+      "typing": {
+        "version": 1,
+        "object": "一张纸或纸巾",
+        "rationale": "该定义固定计量对象与单位，标称单值可比较；范围或口径不明的来源待核，不强行转成单值。",
+        "number": {
+          "quantityKind": "一张纸或纸巾",
+          "precision": null,
+          "min": null,
+          "max": null,
+          "constraintReferences": []
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "单张成品纸或纸巾叠合的纸层数量。",
+      "definitionId": "cleaning.paper_ply_count",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填一张成品纸的叠合层数，不填包装数量。"
+      ],
+      "purpose": "比较纸品叠层结构。"
+    },
+    {
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "category": "盒装抽纸",
+      "key": "paper_size",
+      "name": "尺寸",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品本体、部件或容纳空间",
+        "rationale": "多维尺寸、测量部位及单位需组合表达，不拆分。",
+        "text": {
+          "formatHint": "标明对象、维度顺序和单位；不填包装尺寸。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品本体、明确部件或容纳空间的尺寸组合及其测量对象。",
+      "definitionId": "cleaning.dimensions",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "标明对象、维度顺序和单位；不填包装尺寸。"
+      ],
+      "purpose": "比较本体尺寸与安装或使用空间。"
+    },
+    {
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "category": "盒装抽纸",
+      "key": "tissue_qty",
+      "name": "抽数",
+      "type": "number",
+      "unit": "抽",
+      "typing": {
+        "version": 1,
+        "object": "一盒或一包抽取式纸品",
+        "rationale": "该定义固定计量对象与单位，标称单值可比较；范围或口径不明的来源待核，不强行转成单值。",
+        "number": {
+          "quantityKind": "一盒或一包抽取式纸品",
+          "precision": null,
+          "min": null,
+          "max": null,
+          "constraintReferences": []
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "最内层抽取包装中可抽取的次数。",
+      "definitionId": "cleaning.pull_count_per_package",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "按一盒或一包抽数填写，不与张数、层数换算。"
+      ],
+      "purpose": "比较单包可抽取次数。"
+    },
+    {
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "category": "盒装抽纸",
+      "key": "fragrance",
+      "name": "香型",
+      "type": "option",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品香气",
+        "rationale": "同一商品可明示复合香型，故可多选；有香未注明类型和无香各自与具体香型互斥。更具体香名原文保留，泛称与具体同一香味不重复选。 选项及映射为 model_proposal，待人工审；其他为明确未列值，非未知。",
+        "choice": {
+          "mode": "multiple",
+          "dimension": "商品香气",
+          "rationale": "同一商品可明示复合香型，故可多选；有香未注明类型和无香各自与具体香型互斥。更具体香名原文保留，泛称与具体同一香味不重复选。 选项及映射为 model_proposal，待人工审；其他为明确未列值，非未知。",
+          "boundaryReferences": [
+            {
+              "sourceId": "forms-input",
+              "locator": "forms-input.json#concepts[name=香型]；原绑定及 evidenceKeys 可追溯旧方案"
+            },
+            {
+              "sourceId": "zkh-template",
+              "locator": "bd26f43247ede6f4:1295分类模板:3366、3513；清洁用品与洗洁精香型候选"
+            },
+            {
+              "sourceId": "luxshare-template",
+              "locator": "152b9fc010b97cd2:04-品名属性长表:462；香皂香型"
+            },
+            {
+              "sourceId": "model_proposal",
+              "locator": "本轮类型、值域及归一边界建议，待人工审核；其他表示已知但未列类型，未知留空"
+            }
+          ],
+          "minSelections": 1,
+          "maxSelections": 17,
+          "mutuallyExclusive": [
+            [
+              "无香",
+              "有香（香型未注明）"
+            ],
+            [
+              "无香",
+              "清香"
+            ],
+            [
+              "无香",
+              "花香"
+            ],
+            [
+              "无香",
+              "果香"
+            ],
+            [
+              "无香",
+              "草本香"
+            ],
+            [
+              "无香",
+              "海洋香"
+            ],
+            [
+              "无香",
+              "木质香"
+            ],
+            [
+              "无香",
+              "茶香"
+            ],
+            [
+              "无香",
+              "薄荷香"
+            ],
+            [
+              "无香",
+              "柠檬香"
+            ],
+            [
+              "无香",
+              "薰衣草香"
+            ],
+            [
+              "无香",
+              "茉莉香"
+            ],
+            [
+              "无香",
+              "玫瑰香"
+            ],
+            [
+              "无香",
+              "松木香"
+            ],
+            [
+              "无香",
+              "生姜香"
+            ],
+            [
+              "无香",
+              "其他香型"
+            ],
+            [
+              "有香（香型未注明）",
+              "清香"
+            ],
+            [
+              "有香（香型未注明）",
+              "花香"
+            ],
+            [
+              "有香（香型未注明）",
+              "果香"
+            ],
+            [
+              "有香（香型未注明）",
+              "草本香"
+            ],
+            [
+              "有香（香型未注明）",
+              "海洋香"
+            ],
+            [
+              "有香（香型未注明）",
+              "木质香"
+            ],
+            [
+              "有香（香型未注明）",
+              "茶香"
+            ],
+            [
+              "有香（香型未注明）",
+              "薄荷香"
+            ],
+            [
+              "有香（香型未注明）",
+              "柠檬香"
+            ],
+            [
+              "有香（香型未注明）",
+              "薰衣草香"
+            ],
+            [
+              "有香（香型未注明）",
+              "茉莉香"
+            ],
+            [
+              "有香（香型未注明）",
+              "玫瑰香"
+            ],
+            [
+              "有香（香型未注明）",
+              "松木香"
+            ],
+            [
+              "有香（香型未注明）",
+              "生姜香"
+            ],
+            [
+              "有香（香型未注明）",
+              "其他香型"
+            ]
+          ]
+        }
+      },
+      "enumValues": [
+        "无香",
+        "有香（香型未注明）",
+        "清香",
+        "花香",
+        "果香",
+        "草本香",
+        "海洋香",
+        "木质香",
+        "茶香",
+        "薄荷香",
+        "柠檬香",
+        "薰衣草香",
+        "茉莉香",
+        "玫瑰香",
+        "松木香",
+        "生姜香",
+        "其他香型"
+      ],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品明确标示的香气类别或无香状态。",
+      "definitionId": "cleaning.fragrance",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "多种明示香型可并选；香名细节保留原值，未知留空。"
+      ],
+      "purpose": "按香气偏好选择商品。"
+    },
+    {
+      "categoryId": "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+      "category": "盒装抽纸",
+      "key": "printed",
+      "name": "是否印花",
+      "type": "boolean",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "纸品表面",
+        "rationale": "该属性是明确的是否命题；未知留空而非否。"
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "纸品是否明确标示有印花。",
+      "definitionId": "cleaning.printed_pattern",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "明示印花填是，无印花填否。"
+      ],
+      "purpose": "选择纸品印花外观。"
+    },
+    {
+      "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+      "category": "软包抽纸",
+      "key": "paper_material",
+      "name": "原料",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "纸品主体纤维原料",
+        "rationale": "纸浆及纤维可混配、比例不固定，使用文本。",
+        "text": {
+          "formatHint": "填写纸品原料和已标明的组成比例。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "纸品主体使用的纤维原料及明确标示的组成。",
+      "definitionId": "cleaning.paper_fiber_material",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填写纸品原料和已标明的组成比例。"
+      ],
+      "purpose": "比较纸品纤维原料。"
+    },
+    {
+      "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+      "category": "软包抽纸",
+      "key": "layers",
+      "name": "层数",
+      "type": "number",
+      "unit": "层",
+      "typing": {
+        "version": 1,
+        "object": "一张纸或纸巾",
+        "rationale": "该定义固定计量对象与单位，标称单值可比较；范围或口径不明的来源待核，不强行转成单值。",
+        "number": {
+          "quantityKind": "一张纸或纸巾",
+          "precision": null,
+          "min": null,
+          "max": null,
+          "constraintReferences": []
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "单张成品纸或纸巾叠合的纸层数量。",
+      "definitionId": "cleaning.paper_ply_count",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "填一张成品纸的叠合层数，不填包装数量。"
+      ],
+      "purpose": "比较纸品叠层结构。"
+    },
+    {
+      "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+      "category": "软包抽纸",
+      "key": "paper_size",
+      "name": "尺寸",
+      "type": "text",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品本体、部件或容纳空间",
+        "rationale": "多维尺寸、测量部位及单位需组合表达，不拆分。",
+        "text": {
+          "formatHint": "标明对象、维度顺序和单位；不填包装尺寸。",
+          "minLength": null,
+          "maxLength": null
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品本体、明确部件或容纳空间的尺寸组合及其测量对象。",
+      "definitionId": "cleaning.dimensions",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "标明对象、维度顺序和单位；不填包装尺寸。"
+      ],
+      "purpose": "比较本体尺寸与安装或使用空间。"
+    },
+    {
+      "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+      "category": "软包抽纸",
+      "key": "tissue_qty",
+      "name": "抽数",
+      "type": "number",
+      "unit": "抽",
+      "typing": {
+        "version": 1,
+        "object": "一盒或一包抽取式纸品",
+        "rationale": "该定义固定计量对象与单位，标称单值可比较；范围或口径不明的来源待核，不强行转成单值。",
+        "number": {
+          "quantityKind": "一盒或一包抽取式纸品",
+          "precision": null,
+          "min": null,
+          "max": null,
+          "constraintReferences": []
+        }
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "最内层抽取包装中可抽取的次数。",
+      "definitionId": "cleaning.pull_count_per_package",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "按一盒或一包抽数填写，不与张数、层数换算。"
+      ],
+      "purpose": "比较单包可抽取次数。"
+    },
+    {
+      "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+      "category": "软包抽纸",
+      "key": "fragrance",
+      "name": "香型",
+      "type": "option",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "商品香气",
+        "rationale": "同一商品可明示复合香型，故可多选；有香未注明类型和无香各自与具体香型互斥。更具体香名原文保留，泛称与具体同一香味不重复选。 选项及映射为 model_proposal，待人工审；其他为明确未列值，非未知。",
+        "choice": {
+          "mode": "multiple",
+          "dimension": "商品香气",
+          "rationale": "同一商品可明示复合香型，故可多选；有香未注明类型和无香各自与具体香型互斥。更具体香名原文保留，泛称与具体同一香味不重复选。 选项及映射为 model_proposal，待人工审；其他为明确未列值，非未知。",
+          "boundaryReferences": [
+            {
+              "sourceId": "forms-input",
+              "locator": "forms-input.json#concepts[name=香型]；原绑定及 evidenceKeys 可追溯旧方案"
+            },
+            {
+              "sourceId": "zkh-template",
+              "locator": "bd26f43247ede6f4:1295分类模板:3366、3513；清洁用品与洗洁精香型候选"
+            },
+            {
+              "sourceId": "luxshare-template",
+              "locator": "152b9fc010b97cd2:04-品名属性长表:462；香皂香型"
+            },
+            {
+              "sourceId": "model_proposal",
+              "locator": "本轮类型、值域及归一边界建议，待人工审核；其他表示已知但未列类型，未知留空"
+            }
+          ],
+          "minSelections": 1,
+          "maxSelections": 17,
+          "mutuallyExclusive": [
+            [
+              "无香",
+              "有香（香型未注明）"
+            ],
+            [
+              "无香",
+              "清香"
+            ],
+            [
+              "无香",
+              "花香"
+            ],
+            [
+              "无香",
+              "果香"
+            ],
+            [
+              "无香",
+              "草本香"
+            ],
+            [
+              "无香",
+              "海洋香"
+            ],
+            [
+              "无香",
+              "木质香"
+            ],
+            [
+              "无香",
+              "茶香"
+            ],
+            [
+              "无香",
+              "薄荷香"
+            ],
+            [
+              "无香",
+              "柠檬香"
+            ],
+            [
+              "无香",
+              "薰衣草香"
+            ],
+            [
+              "无香",
+              "茉莉香"
+            ],
+            [
+              "无香",
+              "玫瑰香"
+            ],
+            [
+              "无香",
+              "松木香"
+            ],
+            [
+              "无香",
+              "生姜香"
+            ],
+            [
+              "无香",
+              "其他香型"
+            ],
+            [
+              "有香（香型未注明）",
+              "清香"
+            ],
+            [
+              "有香（香型未注明）",
+              "花香"
+            ],
+            [
+              "有香（香型未注明）",
+              "果香"
+            ],
+            [
+              "有香（香型未注明）",
+              "草本香"
+            ],
+            [
+              "有香（香型未注明）",
+              "海洋香"
+            ],
+            [
+              "有香（香型未注明）",
+              "木质香"
+            ],
+            [
+              "有香（香型未注明）",
+              "茶香"
+            ],
+            [
+              "有香（香型未注明）",
+              "薄荷香"
+            ],
+            [
+              "有香（香型未注明）",
+              "柠檬香"
+            ],
+            [
+              "有香（香型未注明）",
+              "薰衣草香"
+            ],
+            [
+              "有香（香型未注明）",
+              "茉莉香"
+            ],
+            [
+              "有香（香型未注明）",
+              "玫瑰香"
+            ],
+            [
+              "有香（香型未注明）",
+              "松木香"
+            ],
+            [
+              "有香（香型未注明）",
+              "生姜香"
+            ],
+            [
+              "有香（香型未注明）",
+              "其他香型"
+            ]
+          ]
+        }
+      },
+      "enumValues": [
+        "无香",
+        "有香（香型未注明）",
+        "清香",
+        "花香",
+        "果香",
+        "草本香",
+        "海洋香",
+        "木质香",
+        "茶香",
+        "薄荷香",
+        "柠檬香",
+        "薰衣草香",
+        "茉莉香",
+        "玫瑰香",
+        "松木香",
+        "生姜香",
+        "其他香型"
+      ],
+      "scope": "SKU",
+      "required": false,
+      "definition": "商品明确标示的香气类别或无香状态。",
+      "definitionId": "cleaning.fragrance",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "多种明示香型可并选；香名细节保留原值，未知留空。"
+      ],
+      "purpose": "按香气偏好选择商品。"
+    },
+    {
+      "categoryId": "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+      "category": "软包抽纸",
+      "key": "printed",
+      "name": "是否印花",
+      "type": "boolean",
+      "unit": null,
+      "typing": {
+        "version": 1,
+        "object": "纸品表面",
+        "rationale": "该属性是明确的是否命题；未知留空而非否。"
+      },
+      "enumValues": [],
+      "scope": "SKU",
+      "required": false,
+      "definition": "纸品是否明确标示有印花。",
+      "definitionId": "cleaning.printed_pattern",
+      "definitionVersion": "2026-10-30",
+      "rules": [
+        "明示印花填是，无印花填否。"
+      ],
+      "purpose": "选择纸品印花外观。"
+    }
+  ],
+  "dictionaries": {
+    "version": 1,
+    "dictionaries": []
+  }
+}

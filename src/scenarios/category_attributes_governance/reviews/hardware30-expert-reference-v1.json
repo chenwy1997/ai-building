@@ -1,0 +1,2050 @@
+{
+  "version": "hardware30-expert-reference-v1",
+  "sourceRun": "run-2026-09-15T05-40-02-348Z-hardware30-v2",
+  "sourceSha256": "af1323af3db7ddf43fb021f572b84c941bfb2651f5597a59d5740b373fa3acc1",
+  "scope": "本固定30类的AI专家审阅参考版；不是DeepSeek独立通过，未改原类目，不自动发布全量模板",
+  "decisions": [
+    {
+      "categoryId": "d938b1cf-15b5-4303-89ed-258bbfb527f1",
+      "name": "充电式电钻",
+      "changes": [
+        {
+          "key": "power_supply_mode",
+          "before": "36bf0fc6097a809882c9aab2d24752f725f31ca5eff7e6d4846ff52440b794be",
+          "remove": true,
+          "reason": "充电式已由类目限定，插电式选项扩大了对象范围"
+        },
+        {
+          "key": "motor_type",
+          "before": "3d7553bca40838b734e75de990e178df90cdad9ad6e239351c92514c7be6ab21",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "chuck_type",
+          "before": "978991394f90783b077ecc4510e5f730977159e08fac787cae8f725fc38cf67e",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "夹头装夹与锁紧结构，多个特征可同时描述；不将重叠结构当互斥选项",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "battery_platform_voltage",
+          "before": "fc61c81b120814ef89ca40323122765fad65ca9afd8c8aca3b5822032841c355",
+          "set": {
+            "name": "电池标称电压",
+            "description": "工具所需电池的标称电压；与满充/最大电压分别标识，不以宣传峰值替代标称值",
+            "format": "标称值V；可切换多电压时分别注明",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "分开电压与平台身份"
+        },
+        {
+          "key": "max_torque",
+          "before": "4aa1e3051703ce97e1c7d76e5dbb3ed1c3205be6f07841f8855752bf336637c2",
+          "set": {
+            "type": "text",
+            "description": "按制造商口径区分软连接、硬连接或最大扭矩；不得把硬连接值直接称为峰值",
+            "format": "工况标签:数值 N·m；多项用分号分隔",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "软连接、硬连接及最大值口径不可混淆"
+        },
+        {
+          "key": "no_load_speed",
+          "before": "546effb6c7d4bc5c2cb7dea7e761bd98b55de4884905304b24857b1fd3df7184",
+          "set": {
+            "requirement": "required",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "转速是钻孔选型核心"
+        },
+        {
+          "key": "drilling_capacity",
+          "before": "9eb5777e36712416f6e22e97ffd09f1605228f77b077e5a44c647153212e08be",
+          "set": {
+            "requirement": "required",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "按材料区分钻孔能力"
+        },
+        {
+          "key": "battery_capacity",
+          "before": "39c69d24b8b0209f80994eb8c1eda9d118b445d09077225fa4bfe8ff38d0d9c1",
+          "set": {
+            "name": "随附电池容量",
+            "requirement": "conditional",
+            "condition": "销售包装包含电池时必填",
+            "description": "实际随附单块电池的标称容量；不列举全部可适配电池容量",
+            "format": "容量Ah；多种电池分别标注数量与容量",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "随附电池与可适配电池容量不是同一对象"
+        },
+        {
+          "key": "supplied_battery_count",
+          "before": "ff3f7f4e8682f0242f971f46d006b6649be2c82b55f8e060c4f290e684815537",
+          "set": {
+            "requirement": "required",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "明确裸机与套装差异"
+        },
+        {
+          "add": [
+            "charger_included",
+            "是否含充电器",
+            "boolean",
+            "required",
+            "",
+            [],
+            "",
+            "销售包装是否含充电器；已知不含为false，未知不得填false",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "14686fd6-0352-4c35-b48e-df86ab2a302a",
+      "name": "弹簧压缩器",
+      "changes": [
+        {
+          "key": "tool_type",
+          "before": "86598f0a0967e41fca130d49145e6c03ea53882815199052d144e966f02096b7",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "spring_type",
+          "before": "2803d1dcbaae72a14071f634f89d269321a7d857448909d85d8147eb068c541d",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "制造商规定可压缩的弹簧类型；不能由商品泛称推断适用所有弹簧",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "working_range",
+          "before": "4848ec7f0306eab38dddc67fc104f1b5d2d7cd275d2e41a214957f21d023e00a",
+          "set": {
+            "name": "适用弹簧外径范围",
+            "description": "夹持机构可适配的弹簧外径区间",
+            "format": "下限~上限 mm",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "弹簧外径与行程需要独立表达"
+        },
+        {
+          "add": [
+            "compression_stroke",
+            "压缩行程",
+            "text",
+            "required",
+            "mm",
+            [],
+            "",
+            "单次允许的压缩位移；与适用弹簧外径分开",
+            "下限~上限或最大行程，注明口径",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "add": [
+            "actuation",
+            "驱动方式",
+            "text",
+            "required",
+            "",
+            [],
+            "",
+            "如螺纹手动、液压或气动；按实际结构填写",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "key": "drive_interface",
+          "before": "f5b9141e985c63ddb2be2860b8cfd147e69aa26718acc26b3d2e77c072d99a0f",
+          "set": {
+            "requirement": "conditional",
+            "condition": "需要外接驱动工具或动力源时必填",
+            "description": "外接驱动工具/动力源的接口形式和尺寸；与弹簧夹持端分开",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "不同驱动形式不都有套筒连接端"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "08477264-e7ab-4817-9c3a-45e602e1e2ed",
+      "name": "O形圈",
+      "changes": [
+        {
+          "key": "hardness",
+          "before": "0e74fb3b69438f13cb701da3fd51976cd4b199275a403ae83b45de555b805b0f",
+          "set": {
+            "unit": "",
+            "description": "注明硬度数值及实际测试标度，如Shore A或IRHD；不同标度不直接当作等值",
+            "format": "数值+标度",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "硬度标度不能混为同一单位"
+        },
+        {
+          "key": "tolerance_class",
+          "before": "4fa44098dfee16722d4a08554deb68db2b1cc672c9e8488ca1409f5cc14fc95a",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "注明尺寸公差等级及所依据标准；不以未核实的精密/普通二分替代标准分级",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "standard",
+          "before": "d39e14f74dfd832539b35a57333ddb3af3e644099aa3dae4fe5c26789b198da4",
+          "set": {
+            "requirement": "optional",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "未声明统一标准的定制件也能存在"
+        },
+        {
+          "key": "application",
+          "before": "198586534159ecc3d0a85872e416451c096888dfadd47eec18a8d7cb24ad70e2",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "按静/动、安装位置、运动形式分别加标签描述适用场景",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "16219224-fdb5-450a-b260-a90bb3ba4ad4",
+      "name": "电动工具电池",
+      "changes": [
+        {
+          "key": "capacity_ah",
+          "before": "4a22685e99c11a525a5822551541f5182a93e0e4ed87e5bc0d075161bb9c8990",
+          "set": {
+            "type": "number",
+            "unit": "Ah",
+            "description": "电池包额定容量，统一换算为Ah；按制造商额定条件",
+            "format": "数值",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "单一额定容量统一单位"
+        },
+        {
+          "key": "battery_chemistry",
+          "before": "9c2e8d471512a6d6035064973f5271af58f055dd4360cea1a820ce6054b85f0f",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "compatible_series",
+          "before": "2adc69c153c9c861ffa8e1c8d517c339e109faeda3a5e6ac28b7d7e66f87b541",
+          "set": {
+            "name": "适配系列",
+            "description": "制造商明确限定兼容的工具或充电器系列",
+            "condition": "制造商按系列限定兼容范围时必填",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "系列与具体机型分开"
+        },
+        {
+          "add": [
+            "compatible_model",
+            "适配具体机型",
+            "text",
+            "conditional",
+            "",
+            [],
+            "制造商按具体型号限定兼容范围时必填",
+            "制造商明确限定的兼容工具或充电器具体型号",
+            "多个型号用分号分隔",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "key": "cell_brand",
+          "before": "e4d1ee21ccdb40e5f156abeae4edeb420e80652a8c3c17c681afa6a041d24ef1",
+          "set": {
+            "description": "电池包内部电芯制造商标示的品牌；仅在可核实电芯来源时填写",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "样本型号中的电池包品牌不能替代电芯品牌"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "5da09f30-dcc6-43f6-b797-165d27f22854",
+      "name": "剥线钳",
+      "changes": [
+        {
+          "key": "stripping_type",
+          "before": "a1d3bf8af578197d0a0a6521e32ceae873f99eea6237e764d7b59737d5aeca55",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "剥线操作原理，如手动定孔或自动自适应；多功能不是与手动/自动互斥的原理",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "cutter_function",
+          "before": "a32e2c5ec3b5adf84b1b3cb5b4e122c303d257eacfdacfb5142a6179199c194d",
+          "set": {
+            "format": "无附加功能只能单独选择；有功能时可多选剪线、压接端子",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "无附加功能与其他选项互斥"
+        },
+        {
+          "key": "blade_material",
+          "before": "9b8df9f6fad98c4b71ede78e7dff0a00af31a18fde67067daa188f7b0b1f54c7",
+          "set": {
+            "name": "刃口材质",
+            "description": "剥线或剪线工作刃口的材质，不以手柄或钳体材质代替",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "钳体与刃口材质分别表达"
+        },
+        {
+          "add": [
+            "body_material",
+            "钳体材质",
+            "text",
+            "optional",
+            "",
+            [],
+            "",
+            "承载钳体的主要材料",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "key": "insulation_voltage",
+          "before": "ca45586857e92771e0445d42b1f890992af6455d93c9c906891bf1f85b764a32",
+          "set": {
+            "name": "绝缘作业电压",
+            "requirement": "conditional",
+            "condition": "产品按绝缘作业工具设计时必填",
+            "description": "制造商声明的允许作业电压，明确AC/DC；不能用试验耐压值代替",
+            "format": "AC或DC:数值V；非绝缘工具不适用",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "试验耐压与允许工作电压不是一回事"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "24bd6c31-8068-4d71-af81-9325beef9f89",
+      "name": "梅花敲击扳手",
+      "changes": [
+        {
+          "key": "opening_size",
+          "before": "ce9fdd1258c25c17a339f3fa1c4ac556cc06b5edf1db21eb0473aa8d05374981",
+          "set": {
+            "format": "单工作端写数值+单位；双工作端按A端/B端分别标注，不用区间暗示连续可调",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "固定扳手规格不能无说明写成可调范围"
+        },
+        {
+          "key": "head_type",
+          "before": "03459ccf742dfcdf3ed6443dd02da8f19275ad5d71020680b6724192713f390f",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "handle_type",
+          "before": "fcb2b3a884a6f59dff06bc38839dde7ab36def54b3488d75ec2bd65c5440d5f9",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "035658a7-9537-4fee-8d35-8bdc6b476fc8",
+      "name": "半圆锉",
+      "changes": [
+        {
+          "key": "cross_section",
+          "before": "66e52b4a5a67b532c12c995553c87e9a768ac16e68c2ced39d9a1a48b19c91a7",
+          "remove": true,
+          "reason": "半圆已由类目限定，不把其他截面加入选项"
+        },
+        {
+          "key": "tooth_type",
+          "before": "d819eab3d7e3e37ab5312c1306b363a8b0711badc542d7f6783bde727ad163dc",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "制造商标注的齿纹粗细等级或锉号，保留所属等级体系",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "add": [
+            "section_dimensions",
+            "锉身截面尺寸",
+            "text",
+            "optional",
+            "mm",
+            [],
+            "",
+            "工作锉身的宽度与厚度，标明测量位置",
+            "宽×厚 mm",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "67a0833d-01e8-44b9-af43-9b11a0b21616",
+      "name": "梅花头插件",
+      "changes": [
+        {
+          "key": "drive_interface",
+          "before": "c2d2399b40755003eda6224f877c4d8539756936319149b0d4b734161920c072",
+          "set": {
+            "description": "插件安装连接部与扭力扳手工具座配合的公称截面尺寸；9×12、14×18等表示配合截面规格，不解释为插入深度",
+            "format": "截面宽×高 mm；其他接口明确结构及单位",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "区分配合截面与插入长度"
+        },
+        {
+          "key": "interface_type",
+          "before": "b73a3722d15bae0edbee14ad415fce8997783394c2cbd24939335d029b92684c",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "插件连接部实际结构，例如矩形插入式；区分插件凸接头与工具座容纳孔",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "add": [
+            "effective_length",
+            "工作中心至安装基准距离",
+            "number",
+            "required",
+            "mm",
+            [],
+            "",
+            "按制造商安装基准标注作用中心距离，用于判断更换插件后的扭矩换算；不是总长",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充扭矩插件与尺寸相关的关键使用口径"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "05925e53-8610-4892-9944-90387e2e2d02",
+      "name": "液压式弯管器",
+      "changes": [
+        {
+          "key": "drive_mode",
+          "before": "b462ab72dc9553ab037f47373826b35e700b837ece7d2ad1d45fc7d1346e79f5",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "驱动液压泵的动力方式，如手动、电动、气动；按实际类型填写",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "bend_radius_spec",
+          "before": "a03e7c258e11b6d3be7011bd24a7abcd3441abe4539551255da85bd9c7ca0912",
+          "set": {
+            "name": "弯曲半径",
+            "description": "模具对应的管中心线弯曲半径，按管径或模具分别标注；D表示管外径时明确说明",
+            "format": "适用管径/模具:中心线半径mm；或注明D基准的倍径",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "模具代号与半径数值不能互相替代"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "41af1618-bd24-4214-8a6c-d844f7fddd2a",
+      "name": "合金锯片",
+      "changes": [
+        {
+          "key": "blade_type",
+          "before": "123ffb24f9034f9a9eb815729239d8b4f529d5fe5f49572cd61b5e26131648a8",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "适用切削方向或加工用途，如纵切、横切；不与齿形混成单选",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "blade_type",
+          "before": "123ffb24f9034f9a9eb815729239d8b4f529d5fe5f49572cd61b5e26131648a8",
+          "set": {
+            "name": "切削用途",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "用途独立命名"
+        },
+        {
+          "add": [
+            "tooth_geometry",
+            "齿形",
+            "text",
+            "required",
+            "",
+            [],
+            "",
+            "锯齿几何形状，如左右交替齿、梯平齿；与切削用途分开",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "key": "thickness",
+          "before": "e233d8633dbacecd78e00d8582423e89c41eedf4c4128772439c39305eb0b650",
+          "set": {
+            "name": "基体厚度",
+            "type": "number",
+            "unit": "mm",
+            "description": "锯片基体的厚度，不含齿部超出基体形成的切缝宽度",
+            "format": "数值",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "基体厚度与锯路宽度分开"
+        },
+        {
+          "add": [
+            "kerf_width",
+            "锯路宽度",
+            "number",
+            "required",
+            "mm",
+            [],
+            "",
+            "刀齿形成的标称切缝宽度，与基体厚度分开",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "key": "max_speed",
+          "before": "f4711c978182ad12bb74fd30b6c287555f9b713e7bffaeb65f972c61ed08f861",
+          "set": {
+            "name": "最高允许转速",
+            "type": "number",
+            "unit": "r/min",
+            "description": "制造商规定的最高允许旋转速度；不得把线速度数值直接填入",
+            "format": "数值",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "转速和线速度分别记录"
+        },
+        {
+          "key": "workpiece_material",
+          "before": "e3cd2a6a2e6d5a41381b5ee57d2f1828801d32753b51deaec3dbe542d2617cf6",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "制造商规定可切割的材料清单；开放条目以分号分隔",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "coating",
+          "before": "cd3a0ca2ea82fb76076a4e52d31e15a8bcb10c3273321badc666d290a5e58033",
+          "set": {
+            "name": "齿部涂层",
+            "description": "刀齿表面涂层或处理；没有涂层时可明确无",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "涂层和齿部材料是独立维度"
+        },
+        {
+          "add": [
+            "tooth_material",
+            "齿部材质",
+            "text",
+            "required",
+            "",
+            [],
+            "",
+            "刀齿的基体材质或硬质合金牌号，不以涂层名称代替",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "973bb90a-e639-46af-9334-93f5b820c437",
+      "name": "六角套筒",
+      "changes": [
+        {
+          "key": "socket_type",
+          "before": "484f52abc71b7b1f3f2f9ae329956c0e640cf5a819c80d7c4dae3f61de7d0cd0",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "轴向结构，如标准、加长、薄壁等；冲击适用性另列",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "impact_rated",
+          "before": "6f68020b05a6495b58133ae2b6ab7aec345cf4b216854069ab7caae8e541a9f9",
+          "set": {
+            "type": "boolean",
+            "options": [],
+            "description": "制造商是否明确声明可用于冲击工具；未知留空，不能从表面颜色推断",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "适用性是布尔，未知不是枚举中的产品类型"
+        },
+        {
+          "key": "opening_type",
+          "before": "03b708ab5e5d16c980a9cfa9c5faffec7455741fc53b14b56b71186aa00ef3fc",
+          "remove": true,
+          "reason": "六角工作端已由原类目限定，十二角不应作为本类选项"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "ad3262f0-070c-4e54-aa45-c4eada8c7d54",
+      "name": "绝缘六角螺丝批",
+      "changes": [
+        {
+          "key": "tip_type",
+          "before": "131fb4c9143c441f7fd2f790361e14377ce097fa0d8f7528c85df3fd285a9beb",
+          "remove": true,
+          "reason": "原类目工作端用于内六角螺钉，避免将套筒工作端混入"
+        },
+        {
+          "key": "tip_size",
+          "before": "023b6f11500bd0097aca7beff3b28f60382a3541d7011b85a38bbdbc9b13d46c",
+          "set": {
+            "description": "与内六角螺钉凹槽配合的工具外六角工作端对边尺寸；与手柄连接端不同",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "明确工具工作端与螺钉孔形"
+        },
+        {
+          "key": "insulation_standard",
+          "before": "4bfb5a44affe5683da98af925a8064503db7beea6d871f29bfab4ffec3a14a6c",
+          "set": {
+            "name": "绝缘执行标准",
+            "description": "制造商声明执行的绝缘工具标准编号及版本；认证标志另填，不把电压数值当标准号",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "标准、认证标志和电压等级分开"
+        },
+        {
+          "add": [
+            "certification_mark",
+            "认证标志",
+            "text",
+            "optional",
+            "",
+            [],
+            "",
+            "制造商可核验的认证标志或证书编号，需有对应资料；不由执行标准推断已获认证",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "666d8869-1afb-46ec-8e7c-e6f8694743f1",
+      "name": "钢索剪",
+      "changes": [
+        {
+          "key": "tool_type",
+          "before": "dc929c7501e34882581bb277d40aee3cb09640de8f963be5b12a3c5800c7f943",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "剪切机构及操作方式，如棘轮、连杆或其他结构，可描述多个共存特征",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "handle_type",
+          "before": "8b1ac55b628b72f5b17922da15f2984e4af5837b00f096851670a4230d4b62d5",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "max_cutting_capacity",
+          "before": "fb71612b89abeab038708af5021222ce7f0ef094a50d3af46f6107bdf51590bf",
+          "set": {
+            "description": "按钢丝绳/钢缆的材料、结构及制造商限定条件分别标明最大可剪直径",
+            "format": "线材与条件:直径mm；多项用分号分隔",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "剪切能力依赖线材条件"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "ec933ca4-a1ad-441a-8dd3-feb91af72d7f",
+      "name": "组套工具箱",
+      "changes": [
+        {
+          "key": "drive_type",
+          "before": "c42d1924beb97ae91437e13f0a32231fb92ac0e23a29c8cd3167fa24418048a6",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "组套包含的驱动方式，可同时包含手动、电动、气动等",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "box_material",
+          "before": "016947d1b5bb1e737b58df77743545ff55ab56e7ab89da871ddeb37bada92bc3",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "box_type",
+          "before": "a7b4db5c611eb7128fe8bd039389504e21ebbac2b672e8c11aad9bd2ee84b430",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "携带结构与开合方式分别描述，可同时手提且翻盖",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "tool_composition",
+          "before": "d5d21600ca9dc5ec9e4d927040579d6b835d56b0530ea75145dd4b7fefd64994",
+          "set": {
+            "description": "列出组套内工具及配件的名称、规格与数量；不计收纳箱和运输包装，数量合计与工具件数采用相同口径",
+            "format": "名称/规格×数量；条目用分号分隔",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "组成与件数采用相同计数口径"
+        },
+        {
+          "key": "tool_count",
+          "before": "ef5fcdcb53be4a35a56b51d48902a409308d7e22ff7229466c0eafa9aa9c9b3d",
+          "set": {
+            "description": "组套内独立工具及配件总件数，不含收纳箱和运输包装",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "明确计数边界"
+        },
+        {
+          "key": "voltage",
+          "before": "5cc52f3834cbb44e09997f7afc75853a2e9acb850f14048ed05c13bc072ab5e9",
+          "set": {
+            "condition": "组套包含需要供电的电动工具时必填",
+            "description": "逐个电动工具标注所需电源制式及电压，与电池平台名称分开",
+            "unit": "",
+            "format": "工具名称:AC/DC 数值V；多项分号分隔",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "条件由实际配置判断，不依赖封闭驱动枚举"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "124cbe1f-6981-4e95-ad72-1cffbf4960c4",
+      "name": "羊角锤",
+      "changes": [
+        {
+          "key": "magnetic_nail_holder",
+          "before": "954ddf64ff9b1c51885bb4bc1bab9c68100b1b9ea68b6a4e18e913e4e5a7f8bd",
+          "set": {
+            "name": "磁性持钉结构",
+            "description": "是否带用于持住钉子、辅助初次敲入定位的磁性结构；与羊角拔钉结构分开",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "磁性持钉辅助起钉前定位，不等同磁性拔钉"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "ff746664-ed27-483c-b0db-f22e5ab2c0ad",
+      "name": "羊毛刷",
+      "changes": [
+        {
+          "key": "bristle_density",
+          "before": "0a8308a0c50b4898d3b6d53c91d81307bb2ec9e46602cd0bef80c631235fdc58",
+          "remove": true,
+          "reason": "长毛/细毛说明长度或粗细，不能定义为密度；不凭错误栏目硬设密度属性"
+        },
+        {
+          "key": "brush_type",
+          "before": "d62585fcf9d2e87c65ffa347677602ab4a1626853f3075dabd23692324f6b826",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "刷头形状与手柄结构分别描述，不把可共存特征当互斥项",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "head_material",
+          "before": "91b83b4870aefacf26aa337a07bc78ae1b998b05e0335ff59060464cbffcb307",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "刷毛材质及是否混毛，混合材料明确组成；不把未知比例当纯羊毛",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "handle_material",
+          "before": "41d3e8272616486406e170ac4eeb1a0033e65280e5a01689f5244d5258fd4b2c",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "size_inch",
+          "before": "c4c8c8916a3f98fb852c0cd8eb2a7fb43d64713daf142374235e1006b02b013b",
+          "set": {
+            "name": "刷头宽度",
+            "description": "刷头标称涂刷宽度，注明数值与公英制单位；不能拿柄长或毛长代替",
+            "format": "数值+mm或英寸；名义规格与实测值分别标明",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "明确规格指向涂刷宽度"
+        },
+        {
+          "key": "handle_length",
+          "before": "1394fa3a46483b5f0e19e8952169f0857f67e713f99cc1adfb4d8e11d31e64ce",
+          "set": {
+            "name": "手柄长度",
+            "type": "number",
+            "unit": "mm",
+            "description": "手柄本身的长度，与整刷总长区分",
+            "format": "数值",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "柄长与总长独立"
+        },
+        {
+          "add": [
+            "overall_length",
+            "整刷总长",
+            "number",
+            "optional",
+            "mm",
+            [],
+            "",
+            "从刷毛尖端至手柄尾端的整体长度",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "5599df6b-c715-4c4b-9fc0-98f3fc495d83",
+      "name": "工业美工刀",
+      "changes": [
+        {
+          "key": "overall_length",
+          "before": "249220f4aa161c29f33597da8929489d831b1c4ab1bb69200d0a2d545f19fa67",
+          "set": {
+            "type": "text",
+            "description": "注明测量状态的整刀总长度；收纳与展开长度分开标注",
+            "format": "收纳/展开:数值mm；多项分号分隔",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "number不能承载伸出状态标签"
+        },
+        {
+          "key": "locking_mechanism",
+          "before": "dfef9465589562c73ddcdf64bfe119aab9e7f4d09e86a302a2de825f24c41489",
+          "set": {
+            "format": "无锁定仅能单独选择；其余可多选",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "无锁定与其他结构互斥"
+        },
+        {
+          "key": "blade_material",
+          "before": "df9e96341992f2328ec679c884065bcb0e60e3bf3d798b8a562d461ff358e70c",
+          "set": {
+            "name": "随附刀片材质",
+            "description": "包装实际随附刀片的材质；未随附刀片时不适用",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "刀片材质属于随附刀片，不是工具所有兼容刀片材质"
+        },
+        {
+          "key": "compatible_blade_brand",
+          "before": "9b909a9d244583486b011bd8d9341278f36ce3f40d69469771a6e921257fcd7a",
+          "set": {
+            "requirement": "conditional",
+            "condition": "制造商按品牌限定可替换刀片范围时必填",
+            "description": "经制造商确认的兼容刀片品牌；不由刀架自身品牌推断",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "通用接口不要求猜测兼容品牌"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "e534f3b3-8f7f-4c3a-b5ce-6b6cc6065056",
+      "name": "水枪",
+      "changes": [
+        {
+          "key": "product_form",
+          "before": "fa96dc37af2700140c226994ac967ccad228d0faf8224ef2974262d040a77a8e",
+          "remove": true,
+          "reason": "仅喷头、枪体部件会扩大类目对象；包装配置已有独立字段"
+        },
+        {
+          "key": "supply_mode",
+          "before": "c6b4c04d7a56d0f213da87d4b1b39d174900707f891c3022832ddd1a7bbf832d",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "外接供水条件与压力来源；普通喷枪不因此宣称自吸，是否需外接泵按制造商说明",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "supply_mode",
+          "before": "c6b4c04d7a56d0f213da87d4b1b39d174900707f891c3022832ddd1a7bbf832d",
+          "set": {
+            "requirement": "optional",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "供水条件辅助选型"
+        },
+        {
+          "key": "handle_grip",
+          "before": "1a130f8e7ff1f5fedbee36109df0015b1edc69332c15ba0b69f71388fde445e9",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "握把包胶、防滑、人体工学等可并存的特征",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "valve_type",
+          "before": "c986f1f7a4e76c19d6f7dc54af881fe1a9e984743f4b06ce693947971181d206",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "止水、锁扣等阀门控制特征，可同时存在",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "f5589b1f-8820-4082-8fbb-9ec813bb91fb",
+      "name": "钢丝钳",
+      "changes": [
+        {
+          "key": "head_type",
+          "before": "6113104bef4ca9577697c2244d9fe90228647aa8e0785b6ec66f47c67f4135d3",
+          "remove": true,
+          "reason": "尖口/圆口等会混入相邻钳类，不用错误通用枚举替代原类目"
+        },
+        {
+          "key": "cutting_edge_type",
+          "before": "c19ad4aba95a2aff5602186786e0396e61a81f6128819e3ca8f598ba4def6ccb",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "工作端剪切刃与夹持齿的配置分别描述，可同时存在",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "handle_type",
+          "before": "6915d6dfd65ac83bfa8e24302369c624b0f44897ef86d9ca5e55a6e51affe3c2",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "insulation_voltage",
+          "before": "51ffc7fc130c7c5103b165643b9a40b12fff1958da06f9d8d94bcbb9b2e06c3d",
+          "set": {
+            "name": "绝缘作业电压",
+            "condition": "产品按绝缘作业工具设计时必填",
+            "description": "制造商声明的允许作业电压及AC/DC制式；试验耐压不能作为作业电压",
+            "format": "AC/DC:数值V",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "适用性不取决于是否公开资料；耐压与工作电压分开"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "22debbee-4a4d-4778-bb32-7d7cab3b2135",
+      "name": "气动钉枪",
+      "changes": [
+        {
+          "key": "gun_type",
+          "before": "0ad34efbb7b6154eefa02c113ba95d93fd6f5a58ff55263e85983826491ba673",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "按可击发钉件体系描述钉枪类型；不纳入拔钉工具",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "driving_mode",
+          "before": "eb05eeecbb5c4db51c81ac8f641066a3a6b381f2e078e562881f61036b0ed51c",
+          "remove": true,
+          "reason": "气动已由类目确定，无需恒定单选"
+        },
+        {
+          "add": [
+            "compatible_nail_spec",
+            "适配钉件规格",
+            "text",
+            "required",
+            "",
+            [],
+            "",
+            "明确钉件系列、线径/截面及适用的冠宽、排钉连接形式；不能仅凭钉长判断兼容",
+            "钉件系列;线径/截面;冠宽（适用时）;连接形式",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "c1cff9f0-e664-466a-b494-d072f9c5d30d",
+      "name": "水平尺（工具）",
+      "changes": [
+        {
+          "key": "measure_type",
+          "before": "103bf54306887159005cf63294441b9e05cf7cb181d41e6027104442c288c77d",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "水平状态的显示方式，如气泡、数显，可同时具备多种显示",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "accuracy_grade",
+          "before": "36e963116dead0506bc83d57f6b8ad9ff118c4a49418d8d0727bff3e8ffd99fd",
+          "set": {
+            "name": "测量允许误差",
+            "description": "注明测量姿态及制造商条件下的允许误差；不是分度值或分辨率",
+            "format": "姿态/条件:±数值mm/m或角度单位",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "测量误差与分度值不能混为一项"
+        },
+        {
+          "add": [
+            "resolution",
+            "分辨率/分度值",
+            "text",
+            "optional",
+            "",
+            [],
+            "",
+            "可分辨的最小显示或刻度增量，与允许误差分开",
+            "数值+单位",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "key": "body_material",
+          "before": "08a74ae499c4fdf3e35a81f574b9bf791a31dc1d01fecd3858a2026565d7899a",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "length",
+          "before": "2647c8ad2ea4e52df1be7dfc36ab5e62753fa16cf77f9dd687d3bc4f781fc6ab",
+          "set": {
+            "description": "尺身沿长度方向的标称全长",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "避免错误的测量面端点定义"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "3c738ac0-b76f-488b-8cd7-89c66344ee99",
+      "name": "冲击型内六角批头",
+      "changes": [
+        {
+          "key": "hex_size",
+          "before": "178275c2f99e44c33cea323ccbb565ce9552354da91cd01f988e8442de1f18ea",
+          "set": {
+            "name": "工作端六角对边尺寸",
+            "description": "用于内六角螺钉的工具外六角工作端对边尺寸；与驱动柄尺寸分开",
+            "format": "数值mm；若附H代号，同时注明对应毫米尺寸",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "工作端外六角配合螺钉内六角，不把H代号当单位"
+        },
+        {
+          "key": "tip_type",
+          "before": "6bafad7af8247f808de8057653b389874d81c7711b63d7f53c37586aa03b555e",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "工作端六角头的结构，如实心或带防拆中孔；按实际适配螺钉填写",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "impact_rated",
+          "before": "f5c04fc18cc1323e5ead9f8076f015dbfa02ec3bbd3614589398af91af3aa3f9",
+          "set": {
+            "name": "冲击适用声明",
+            "requirement": "required",
+            "condition": "",
+            "description": "制造商明确声明适用的冲击驱动方式与限制；不能由普通批头外观推断。没有额定扭矩时不编造数值",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "冲击适用性不能以是否有资料为条件"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "04eff17e-1005-40f9-9030-fde28fcb603a",
+      "name": "弹簧夹",
+      "changes": [
+        {
+          "key": "clamp_size",
+          "before": "a3c1ff34b3c196b8339c63bc9d0c9aea3e2396eeddfac35335fce2d5af7bbb14",
+          "set": {
+            "name": "最大夹持开口",
+            "type": "number",
+            "unit": "mm",
+            "description": "夹口可容纳工件的最大开口距离；不从标称几英寸或整夹总长推导",
+            "format": "数值",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "英寸名义尺寸可能是全长，不能代替最大开口"
+        },
+        {
+          "add": [
+            "overall_length",
+            "夹体总长",
+            "number",
+            "optional",
+            "mm",
+            [],
+            "",
+            "弹簧夹整体长度，与最大开口距离分开",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "31c51379-9e0c-42c1-9380-d7781a1cf0e6",
+      "name": "充电式草坪修剪机",
+      "changes": [
+        {
+          "key": "power_type",
+          "before": "7f363d6f06182225c9bf7e59e5708abcd89776beb2d0ba0a1e44ae89330c49b1",
+          "remove": true,
+          "reason": "充电式类目不应列插电或混合动力"
+        },
+        {
+          "key": "rated_vs_max",
+          "before": "45a18dfc575fb365df471bc63036652e58947352635862109c9379dbec8d7ed7",
+          "remove": true,
+          "reason": "额定/最大口径应落在对应属性定义，不另造一个汇总属性"
+        },
+        {
+          "key": "voltage_platform",
+          "before": "cc0fa6ed68e1dca589af615ad53ef3d2bfe14ad4abaf71e46d7b29ce6f1b30f1",
+          "set": {
+            "name": "电池标称电压",
+            "description": "工具设计使用的电池标称电压，不以最大宣传电压替代",
+            "format": "数值V；可切换平台时分别说明",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "平台身份与电压分别表达"
+        },
+        {
+          "key": "battery_capacity",
+          "before": "944647737a5d85b521d1104175dc92edd708f3d72e6b1a8223a6fdb65bdaf079",
+          "set": {
+            "name": "随附电池容量",
+            "requirement": "conditional",
+            "condition": "销售包装包含电池时必填",
+            "description": "包装内实际随附电池的额定容量，按单块分别注明",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "实际随附与全部适配电池不是同一对象"
+        },
+        {
+          "key": "drive_type",
+          "before": "b1e29d0cfc9c878fa73975cd8995d197c370992734f76c03676ef216e804f2fb",
+          "set": {
+            "name": "操作形态",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "操作形态不是动力原理"
+        },
+        {
+          "key": "working_head_type",
+          "before": "93c9a9ea38213ab4387e60a3f4ea698117bcefa5dff58dbbcaeb8a2d22c402ee",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "制造商允许安装的切割工作头类型；不从通用附件列表推断可装锯片",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "add": [
+            "battery_count",
+            "随附电池数量",
+            "number",
+            "required",
+            "个",
+            [],
+            "",
+            "包装内随附电池数量，裸机为0",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "add": [
+            "charger_included",
+            "是否含充电器",
+            "boolean",
+            "required",
+            "",
+            [],
+            "",
+            "包装是否随附充电器；未知不得填false",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "5f847d18-d739-4107-aaa1-8085d7c29ce6",
+      "name": "液压式轨缝调整器",
+      "changes": [
+        {
+          "key": "max_thrust",
+          "before": "8b6cc058c6c40f5b14cf16999a208e1278625e3e015ee8b302a3f8c500cb8fa8",
+          "set": {
+            "name": "额定推力",
+            "description": "在制造商额定液压工况下允许输出的推力，不以破坏极限替代",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "额定输出不等于未定义极限"
+        },
+        {
+          "key": "power_supply",
+          "before": "6c7b9a3e5e874d4b97a2ffbe61eeaa9ea8ecebcd91d97621a33b068857ba1ee7",
+          "set": {
+            "condition": "采用需要外接电源的电动泵或电控配置时必填",
+            "description": "电动/电控部分所需电源制式与电压；纯手动或内燃机泵不据此强求外接电源",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "机动泵可能是内燃机驱动，不能一律要求供电"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "01c38f83-97b0-47c5-a9d7-72020bc6323c",
+      "name": "热风枪发热芯",
+      "changes": [
+        {
+          "key": "compatible_brand",
+          "before": "6b521c0d301a5068f11892b0501f32982aec31b7c98695652e5702ae0de14239",
+          "set": {
+            "description": "制造商明确确认可替换的整机品牌，不由发热芯自身品牌推断",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "自身品牌字段不能证明兼容整机品牌"
+        },
+        {
+          "key": "compatible_model",
+          "before": "47342ecf65c7f6171bd354a6549a6d88623f444338b49db7fb51d9561322d741",
+          "set": {
+            "description": "制造商明确确认适配的整机具体型号，不能填写泛称或只填系列",
+            "condition": "制造商按具体机型限定兼容范围时必填",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "系列与具体型号分开"
+        },
+        {
+          "add": [
+            "compatible_series",
+            "适配整机系列",
+            "text",
+            "conditional",
+            "",
+            [],
+            "制造商按系列限定兼容范围时必填",
+            "制造商确认兼容的整机系列，与具体机型分开",
+            "多个系列用分号分隔",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "key": "heating_wire_count",
+          "before": "bf361cdf3722bbb55e0069534bbe3bd93e11bdef0389766b680aa85b38532fdd",
+          "set": {
+            "name": "引出线数",
+            "description": "对外电气连接的引出线数量，用于与整机接线对应，不代表内部发热丝数量",
+            "unit": "根",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "引出接线数不等于内部发热丝根数"
+        },
+        {
+          "key": "overall_dimensions",
+          "before": "7a1cebc6a808776d297c5f9e49b5beaafb5d00a7498663f7ef3c03d2b7f70c1b",
+          "set": {
+            "requirement": "required",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "配件安装适配需要实际外形尺寸"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "e39cbe8a-5661-4d5b-acf3-1498554689af",
+      "name": "防爆六角套筒",
+      "changes": [
+        {
+          "key": "material",
+          "before": "b996affb3b9ec17fb314bd4350a505869854b1ec134470be66f9061ef96cd06f",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "明确本体合金种类或牌号；材料名称本身不等于取得防爆认证",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "socket_type",
+          "before": "6e66bbd2e4435c7a81aebbd095ce2ebbe7cd60873c9cbe65305d6a9d2facacf8",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "标准长度、加深、薄壁等结构形式；冲击适用性另行确认",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "point_count",
+          "before": "417b20663bfdd83dfcd8b694d545ed7a2b986b98d6d8216d693bfc9c2d660880",
+          "remove": true,
+          "reason": "六角已由类目限定，不混入十二角"
+        },
+        {
+          "add": [
+            "impact_suitable",
+            "是否适用冲击工具",
+            "boolean",
+            "required",
+            "",
+            [],
+            "",
+            "以制造商声明确认是否适用冲击工具；未知留空，不能由防爆材质或外形推断",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "add": [
+            "application_limits",
+            "适用环境及使用限制",
+            "text",
+            "required",
+            "",
+            [],
+            "",
+            "依据制造商防火花性能说明或试验资料，注明适用环境与限制；不自动等同电气设备Ex等级",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "防火花工具不能仅靠合金名称泛化适用环境"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "2ce6d1d0-c27f-40f3-9fe7-33742df82733",
+      "name": "六角螺柱",
+      "changes": [
+        {
+          "key": "structure_type",
+          "before": "3e86b1823c27054a127d2bdea2d2a5e9c241c0e93ed8736f2de7a4e45dd6c8a2",
+          "set": {
+            "type": "text",
+            "options": [],
+            "description": "逐端注明内螺纹孔或外螺纹柱结构，如内-内、内-外、外-外；通孔与盲孔另注明",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "thread_spec",
+          "before": "e180b18721728958c7ff570c6ffb1601a1ebd564a214464964bfdcf776e55574",
+          "set": {
+            "description": "按A端/B端分别标明螺纹公称规格与螺距/牙数，注明公制或英制标准",
+            "format": "A端:规格;B端:规格；如M4×0.7或1/4-20 UNC",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "多端接口需要一一对应且保留制式"
+        },
+        {
+          "key": "thread_length",
+          "before": "9c6995a0dafa3c0a01b4c5eee588d15db165d8cdac6c976313d506f7690438fd",
+          "set": {
+            "requirement": "required",
+            "condition": "",
+            "description": "A/B端对应标明内螺纹有效深度或外螺纹有效长度；不能把盲孔深度当外部伸出长度",
+            "format": "A端内螺纹深度/外螺纹长度:数值mm;B端:数值mm",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "内孔有效深度与外螺纹伸出长度分开"
+        },
+        {
+          "add": [
+            "across_flats",
+            "柱体六角对边尺寸",
+            "number",
+            "required",
+            "mm",
+            [],
+            "",
+            "六角柱体两平行侧面的对边宽度，用于装配工具与空间匹配",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "key": "material",
+          "before": "90d573f4e452e9987c0980998dfefe5559675aaa26cbcea54ab7e32365116626",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "drive_end",
+          "before": "fedd0f8dca7328c6db93f20cbfd0b58bcd0237fea56e8aff9801a8025af3b066",
+          "remove": true,
+          "reason": "六角柱体与螺丝头驱动形式混淆，对边尺寸已单列"
+        },
+        {
+          "key": "package_qty",
+          "before": "cff9354debb9de94a53d2e9d5675039fd779f9f7762250a0d609172855c7cd61",
+          "set": {
+            "unit": "个",
+            "description": "每个销售包装内的螺柱数量",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "数量与每包口径在定义中说明"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "5505c561-07a3-4744-b323-cf2552603fb6",
+      "name": "地漏",
+      "changes": [
+        {
+          "key": "drain_type",
+          "before": "740587c69d85ba840a430f3c1716b4e3e9dd4c90d928c66a6195f9e4b7c255a4",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "body_material",
+          "before": "b0977ec814165e955e2bd748a77d958e50ae55ee768ee96109b9aa8c75a26806",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "surface_treatment",
+          "before": "37e9c50f262809e80f77649d358779096323270262da1d26eaa31af7f5d32e53",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "core_material",
+          "before": "bc0c242970bb75531075eed59ee9a82785363590a1cb6b52c7d0f305dc205ba9",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "seal_principle",
+          "before": "dd6ab368d515245560616e146cf5f5a3214847de3508a2ba7d25d6748bee1a16",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "installation_type",
+          "before": "ae8edabe9aac20352a1e666d18af54ed42e34fbad01a0a745269d5b06f300202",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "compatible_pipe_material",
+          "before": "04b811c2c5b1ec55df45fae00b2e44964570521c476c538521bfa45990ecacd4",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "application_scene",
+          "before": "ceb2321de33277f61c9f947ecb080c0d17e9671eedfce31615223d0a80797806",
+          "set": {
+            "type": "text",
+            "options": [],
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "这些取值可能重叠或并非完备集合，不作为封闭枚举"
+        },
+        {
+          "key": "core_material",
+          "before": "bc0c242970bb75531075eed59ee9a82785363590a1cb6b52c7d0f305dc205ba9",
+          "set": {
+            "requirement": "conditional",
+            "condition": "产品具有独立防臭/密封内芯时必填",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "并非所有地漏都有可分离防臭芯"
+        },
+        {
+          "key": "odor_proof",
+          "before": "165389f85d7caa839be8950158e399b9d933be211efb4a6454fc68fc82889b5c",
+          "set": {
+            "description": "是否具有隔绝下水管异味的防臭结构；不代表具备防返溢能力",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "防臭与防返溢是不同功能"
+        },
+        {
+          "add": [
+            "backflow_prevention",
+            "防返溢功能",
+            "boolean",
+            "optional",
+            "",
+            [],
+            "",
+            "是否具备阻止下水反向溢出的结构；不从防臭功能推断",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        },
+        {
+          "key": "adjustable_height",
+          "before": "01da25fd3dff487f3ce9889e9a5129bd95f116e38bf98b0b1cde3c8835e03bc9",
+          "set": {
+            "type": "text",
+            "requirement": "conditional",
+            "condition": "产品具有可调安装高度结构时必填",
+            "description": "可调安装高度的最小值与最大值",
+            "format": "最小~最大 mm",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "高度范围不能由单一number表达"
+        },
+        {
+          "add": [
+            "installation_height",
+            "安装占用高度",
+            "number",
+            "required",
+            "mm",
+            [],
+            "",
+            "地面完成面至地漏本体最低安装点的垂直占用高度；与可调范围区分",
+            "",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    },
+    {
+      "categoryId": "10cb0ffc-1354-4336-a450-8efdbe813ee1",
+      "name": "抽屉式工具箱",
+      "changes": [
+        {
+          "key": "wheel_type",
+          "before": "fe8e6a96cf25e186f4d9cc2af257db176fb26b4039782abad919a5efb9727672",
+          "set": {
+            "description": "带轮配置的脚轮材质、定向/万向结构分别描述；无轮不适用",
+            "condition": "工具箱带脚轮时必填",
+            "refs": [
+              "K"
+            ]
+          },
+          "reason": "轮材质与转向结构可以同时存在"
+        },
+        {
+          "add": [
+            "drawer_internal_size",
+            "抽屉有效内尺寸",
+            "text",
+            "optional",
+            "mm",
+            [],
+            "",
+            "可用于放置工具的抽屉内部长宽高；不同抽屉分别标明",
+            "抽屉编号:长×宽×高 mm",
+            [
+              "K"
+            ]
+          ],
+          "reason": "补充独立的选型或配置维度"
+        }
+      ],
+      "note": "按对象、核心选型、单位、条件和开放集合逐项复核；这是试点参考样板，非行业认证。"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://www.bosch-professional.com/gb/en/products/gsr-18v-55-06019H5202",
+      "note": "区分软/硬扭矩、分档转速、电压与夹头能力；不复制样本值为通用枚举"
+    },
+    {
+      "url": "https://stahlwille.com/en_au/products/detail/854424",
+      "note": "区分工作端尺寸、工具座配合截面、长度尺寸"
+    },
+    {
+      "url": "https://www.knipex.com/en-uk/products/insulated-tools/screwdrivers-for-hexagon-socket-screws/screwdrivers-hexagon-socket-screws/981325",
+      "note": "核对用于内六角螺钉的绝缘工具对象"
+    },
+    {
+      "url": "https://www.parker.com/content/dam/Parker-com/Literature/Praedifa/Catalogs/Catalog_O-Ring-Handbook_PTD5705-EN.pdf",
+      "note": "核对O形圈内径、截面、硬度与材料的独立性"
+    },
+    {
+      "url": "https://www.estwing.com/wp-content/uploads/2026/03/Estwing-Catalog.pdf",
+      "note": "核对磁性持钉辅助起钉定位，与羊角拔钉结构区分"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "sourceId": "ai-competition-2",
+      "originalFile": "originals/AI比赛第2期-赛题类目属性.xlsx",
+      "sha256": "7cd76b1bd0b6e2ddf2cc3b4681f09572a821b3a54b91703e8a3583f66fde8752",
+      "bytes": 1543164,
+      "receivedAt": "2026-10-29",
+      "providedBy": "user",
+      "publisherVerified": false,
+      "publishedAt": null,
+      "intakeAction": "byte_identical_copy_no_workbook_edits"
+    },
+    {
+      "sourceId": "zkh-template",
+      "originalFile": "originals/震坤行类目属性案例模板.xlsx",
+      "sha256": "bd26f43247ede6f4ed4783fd2a9f75c4cd636f07fb9d3a5391ed11f9d3ec71a9",
+      "bytes": 2236113,
+      "receivedAt": "2026-10-29",
+      "providedBy": "user",
+      "publisherVerified": false,
+      "publishedAt": null,
+      "intakeAction": "byte_identical_copy_no_workbook_edits"
+    },
+    {
+      "sourceId": "luxshare-template",
+      "originalFile": "originals/立讯物料品类属性治理表-2610.xlsx",
+      "sha256": "152b9fc010b97cd20f9d45959c7be6cbb3bf1fb5f0408d7aa46692b77a3d4fdb",
+      "bytes": 1871250,
+      "receivedAt": "2026-10-29",
+      "providedBy": "user",
+      "attribution": "用户说明：领导提供的立讯类目属性治理成果",
+      "publisherVerified": false,
+      "publishedAt": null,
+      "declaredWorkbookVersion": "V1.0 / 2026-10-29（00-治理说明自述）",
+      "intakeAction": "byte_identical_copy_no_workbook_edits"
+    },
+    {
+      "sourceId": "zkh-l5-specs",
+      "sourceFamilyId": "zkh",
+      "originalFile": "originals/zkh_l5_specs_long.csv",
+      "sha256": "09d5cfc70d6aeb073b5c4016dfe10d25148898af14b31e06f7a30a341970beb8",
+      "bytes": 3227715,
+      "receivedAt": "2026-10-30",
+      "providedBy": "user",
+      "role": "indexed_long_view",
+      "publisherVerified": false,
+      "publishedAt": null,
+      "collectedAt": null,
+      "intakeAction": "byte_identical_copy_no_source_edits"
+    },
+    {
+      "sourceId": "zkh-l5-specs",
+      "sourceFamilyId": "zkh",
+      "originalFile": "originals/zkh_l5_specs_wide.csv",
+      "sha256": "a305e4ba31818c05dbfe512d0d0291dee139327bfbc03201d2903bfff4d15732",
+      "bytes": 15893594,
+      "receivedAt": "2026-10-30",
+      "providedBy": "user",
+      "role": "same_source_wide_view",
+      "publisherVerified": false,
+      "publishedAt": null,
+      "collectedAt": null,
+      "intakeAction": "byte_identical_copy_no_source_edits"
+    }
+  ]
+}

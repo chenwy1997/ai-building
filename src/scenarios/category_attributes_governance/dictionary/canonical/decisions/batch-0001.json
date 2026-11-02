@@ -1,0 +1,1198 @@
+{
+  "schema": "sanheng-canonical-decisions-v1",
+  "batch": 1,
+  "ranks": [
+    1,
+    40
+  ],
+  "author": "architect",
+  "note": "对照 canonical-v1/packages/batch-0001.json 逐名判定。合并依据是描述对象与测量口径是否相同，不依据名称字符串相似度。产品名出现在原说明里（螺钉材质、扳手总长度、灯具额定功率）只是重复类目已表达的信息，不构成新概念。无法判定的记 defer，不硬合并。",
+  "newUnits": [
+    {
+      "id": "cm",
+      "symbol": "cm",
+      "quantity": "length"
+    },
+    {
+      "id": "MPa",
+      "symbol": "MPa",
+      "quantity": "pressure"
+    },
+    {
+      "id": "L",
+      "symbol": "L",
+      "quantity": "volume"
+    },
+    {
+      "id": "mL",
+      "symbol": "mL",
+      "quantity": "volume"
+    },
+    {
+      "id": "month",
+      "symbol": "月",
+      "quantity": "time"
+    },
+    {
+      "id": "day",
+      "symbol": "天",
+      "quantity": "time"
+    }
+  ],
+  "amendUnitIds": [
+    {
+      "propertyId": "sh.geometry.overall_length",
+      "unitIds": [
+        "mm",
+        "cm",
+        "m"
+      ],
+      "reason": "原始候选在 mm/cm/m 三种单位下均有使用，同为长度量纲；单位在挂载时选定，不另立属性。"
+    },
+    {
+      "propertyId": "sh.geometry.overall_width",
+      "unitIds": [
+        "mm",
+        "cm",
+        "m"
+      ],
+      "reason": "同总长。"
+    },
+    {
+      "propertyId": "sh.geometry.overall_height",
+      "unitIds": [
+        "mm",
+        "cm",
+        "m"
+      ],
+      "reason": "同总长。"
+    }
+  ],
+  "newProperties": [
+    {
+      "id": "sh.appearance.color",
+      "name": "外观颜色",
+      "definition": "实际交付商品可见外表面的颜色或制造商色号。",
+      "object": "目标商品外表面",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "包装颜色",
+        "指示灯颜色",
+        "内部部件颜色"
+      ],
+      "qualifications": [
+        "多色或按件随机时按实际交付说明",
+        "色号与色名并存时保留制造商写法"
+      ]
+    },
+    {
+      "id": "sh.surface.treatment",
+      "name": "表面处理工艺",
+      "definition": "施加于目标商品表面的镀层、涂层或表面加工工艺名称。",
+      "object": "目标商品表面",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "本体材质",
+        "表面颜色",
+        "涂层厚度数值"
+      ],
+      "qualifications": [
+        "未做表面处理时按实际填写，不留空冒充未知",
+        "取值保持开放，不预设封闭枚举"
+      ]
+    },
+    {
+      "id": "sh.standard.compliance",
+      "name": "执行标准编号",
+      "definition": "制造商声明目标商品所执行标准的编号及版本。",
+      "object": "目标商品",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "参考文献中提及但未声明执行的标准",
+        "认证证书编号",
+        "检测报告编号"
+      ],
+      "qualifications": [
+        "只记录制造商已声明的标准，不由类目推定",
+        "多个标准并列时全部保留"
+      ]
+    },
+    {
+      "id": "sh.install.method",
+      "name": "安装方式",
+      "definition": "目标商品固定或就位于使用位置所采用的方式。",
+      "object": "目标商品与安装基面的固定关系",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "与管路的连接形式",
+        "电气接线方式",
+        "包装或运输固定方式"
+      ],
+      "qualifications": [
+        "取值保持开放",
+        "免安装或自立式按实际填写"
+      ]
+    },
+    {
+      "id": "sh.pipe.connection_form",
+      "name": "管路连接形式",
+      "definition": "目标商品与管道或管路系统对接的结构形式。",
+      "object": "目标商品的管路接口",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "安装固定方式",
+        "电气或数据接口形式",
+        "螺纹代号本身"
+      ],
+      "qualifications": [
+        "进出口形式不同时分别说明",
+        "螺纹连接的具体螺纹代号另用螺纹代号属性"
+      ]
+    },
+    {
+      "id": "sh.shelflife.unopened",
+      "name": "未开封保质期",
+      "definition": "在制造商规定贮存条件下，未开封商品自生产日期起的保质时长。",
+      "object": "未开封的目标商品",
+      "type": "number",
+      "unitIds": [
+        "month",
+        "day"
+      ],
+      "excludedMeanings": [
+        "开封后使用期限",
+        "剩余有效期",
+        "质保或保修期"
+      ],
+      "qualifications": [
+        "贮存条件由制造商声明，条件不同不可互换",
+        "以时长记录，不记具体到期日期"
+      ]
+    },
+    {
+      "id": "sh.origin.production_place",
+      "name": "生产地",
+      "definition": "目标商品完成生产或最终组装的国家、地区或产地名称。",
+      "object": "目标商品的生产地点",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "品牌注册地",
+        "供应商所在地",
+        "发货仓地址",
+        "原料产地"
+      ],
+      "qualifications": [
+        "原料产地与成品生产地不一致时以成品生产地为准并注明"
+      ]
+    },
+    {
+      "id": "sh.geometry.overall_thickness",
+      "name": "本体厚度",
+      "definition": "目标商品指定部位沿厚度方向的尺寸。",
+      "object": "目标商品指定几何部位",
+      "type": "number",
+      "unitIds": [
+        "mm",
+        "cm"
+      ],
+      "excludedMeanings": [
+        "涂层或镀层厚度",
+        "包装厚度",
+        "多层结构的总层数"
+      ],
+      "qualifications": [
+        "须说明测量部位；多层结构注明是单层还是总厚"
+      ]
+    },
+    {
+      "id": "sh.enclosure.ip_code",
+      "name": "外壳防护等级IP代号",
+      "definition": "按IP代号体系表示的外壳对固体异物和水的防护等级代号。",
+      "object": "目标商品外壳",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "防爆等级",
+        "绝缘等级",
+        "抗冲击IK代号"
+      ],
+      "qualifications": [
+        "保留完整代号；代号是分级标识，不是可运算数值",
+        "附加字母存在时一并保留"
+      ]
+    },
+    {
+      "id": "sh.packaging.unit_quantity",
+      "name": "单包装内数量",
+      "definition": "一个最小销售包装内所含目标商品的件数。",
+      "object": "最小销售包装",
+      "type": "integer",
+      "unitIds": [
+        "count"
+      ],
+      "excludedMeanings": [
+        "起订量",
+        "整箱或整托数量",
+        "包装层级本身"
+      ],
+      "qualifications": [
+        "按件计数；成对或成套销售时须说明一件的构成",
+        "计数单位与商品计量单位不同时以件数为准"
+      ]
+    },
+    {
+      "id": "sh.packaging.form",
+      "name": "包装形式",
+      "definition": "目标商品最小销售包装的容器或包装形态。",
+      "object": "最小销售包装",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "运输外包装形式",
+        "包装内数量",
+        "包装材料牌号"
+      ],
+      "qualifications": [
+        "取值保持开放",
+        "包装形态与净含量分列，不合写"
+      ]
+    },
+    {
+      "id": "sh.content.net_mass",
+      "name": "内容物净质量",
+      "definition": "定量包装商品在单个最小销售包装内所含内容物的质量，不含容器与包装。",
+      "object": "单个最小销售包装的内容物",
+      "type": "number",
+      "unitIds": [
+        "kg",
+        "g"
+      ],
+      "excludedMeanings": [
+        "含容器的商品本体净质量",
+        "运输毛质量",
+        "内容物体积"
+      ],
+      "qualifications": [
+        "只用于定量包装的物料型商品",
+        "同时标示质量与体积时分别记录"
+      ]
+    },
+    {
+      "id": "sh.content.net_volume",
+      "name": "内容物净体积",
+      "definition": "定量包装商品在单个最小销售包装内所含内容物的体积，不含容器与包装。",
+      "object": "单个最小销售包装的内容物",
+      "type": "number",
+      "unitIds": [
+        "L",
+        "mL"
+      ],
+      "excludedMeanings": [
+        "容器标称容积",
+        "内容物质量",
+        "包装外形体积"
+      ],
+      "qualifications": [
+        "只用于定量包装的液体或流体类商品",
+        "容器标称容积大于内容物体积时不可互相替代"
+      ]
+    },
+    {
+      "id": "sh.vessel.nominal_capacity",
+      "name": "标称容积",
+      "definition": "容器、腔体或箱体按制造商标称可容纳的体积。",
+      "object": "目标商品的指定容器或腔体",
+      "type": "number",
+      "unitIds": [
+        "L",
+        "mL"
+      ],
+      "excludedMeanings": [
+        "内容物净体积",
+        "有效工作容积与标称容积不同时的另一口径",
+        "外形体积"
+      ],
+      "qualifications": [
+        "须说明是标称容积还是有效容积；两者不同时分别记录",
+        "多腔体商品注明所指腔体"
+      ]
+    },
+    {
+      "id": "sh.pipe.nominal_diameter_dn",
+      "name": "公称通径DN代号",
+      "definition": "管路元件按DN体系标示的公称通径代号。",
+      "object": "目标商品的管路通道",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "实测内径或外径的毫米数值",
+        "螺纹公称直径",
+        "英制管螺纹尺寸代号"
+      ],
+      "qualifications": [
+        "DN是无量纲公称代号，不等于任何实测尺寸，不得换算为毫米数值",
+        "进出口通径不同时分别记录"
+      ]
+    },
+    {
+      "id": "sh.fastener.shank_nominal_diameter",
+      "name": "杆部公称直径",
+      "definition": "紧固件或销类零件杆部按标准标示的公称直径。",
+      "object": "目标商品的杆部",
+      "type": "number",
+      "unitIds": [
+        "mm"
+      ],
+      "excludedMeanings": [
+        "公称通径DN代号",
+        "螺纹代号",
+        "头部直径",
+        "实测中径"
+      ],
+      "qualifications": [
+        "按标准标注的公称值记录，不填实测值",
+        "螺纹紧固件另用螺纹代号表达制式与螺距"
+      ]
+    },
+    {
+      "id": "sh.fastener.nominal_length",
+      "name": "公称长度",
+      "definition": "紧固件按其头型标准规定的测量基准所标示的公称长度。",
+      "object": "目标商品按标准规定的长度测量段",
+      "type": "number",
+      "unitIds": [
+        "mm"
+      ],
+      "excludedMeanings": [
+        "实测最大外形总长",
+        "螺纹长度",
+        "夹紧长度"
+      ],
+      "qualifications": [
+        "是否含头部由该头型标准决定，与总长可能不等，不可互相替代",
+        "须能指明所依据的标准"
+      ]
+    },
+    {
+      "id": "sh.power.supply_mode",
+      "name": "供电方式",
+      "definition": "目标商品获取工作电能的方式。",
+      "object": "目标商品的供电来源",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "额定输入电压数值",
+        "电池标称电压",
+        "充电接口形式"
+      ],
+      "qualifications": [
+        "取值保持开放",
+        "支持多种供电方式时全部记录",
+        "电压数值另用额定输入电压属性"
+      ]
+    },
+    {
+      "id": "sh.thread.designation",
+      "name": "螺纹代号",
+      "definition": "完整的螺纹标记，含制式、公称规格及必要的螺距或每英寸牙数。",
+      "object": "目标商品的指定螺纹部位",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "杆部公称直径数值",
+        "公称通径DN代号",
+        "螺纹长度"
+      ],
+      "qualifications": [
+        "保留制造商标注的完整代号，不拆成数值",
+        "同一商品多处螺纹时分别注明部位"
+      ]
+    },
+    {
+      "id": "sh.pressure.nominal_rating",
+      "name": "公称压力等级代号",
+      "definition": "管路元件按PN或Class等体系标示的公称压力等级代号。",
+      "object": "目标商品的承压本体",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "额定工作压力数值",
+        "最大工作压力数值",
+        "试验压力"
+      ],
+      "qualifications": [
+        "PN与Class属不同体系，不得互相换算或混填",
+        "等级代号是分级标识，不等于任一温度下的允许工作压力"
+      ]
+    },
+    {
+      "id": "sh.pressure.rated_working",
+      "name": "额定工作压力",
+      "definition": "制造商为目标商品规定的正常连续工作压力。",
+      "object": "目标商品的承压腔或工作介质通道",
+      "type": "number",
+      "unitIds": [
+        "MPa"
+      ],
+      "excludedMeanings": [
+        "最大工作压力",
+        "公称压力等级代号",
+        "耐压试验压力",
+        "爆破压力"
+      ],
+      "qualifications": [
+        "须说明介质与温度条件",
+        "表压与绝压不可混用"
+      ]
+    },
+    {
+      "id": "sh.pressure.max_working",
+      "name": "最大工作压力",
+      "definition": "制造商允许目标商品短时或极限工况下承受的最高工作压力。",
+      "object": "目标商品的承压腔或工作介质通道",
+      "type": "number",
+      "unitIds": [
+        "MPa"
+      ],
+      "excludedMeanings": [
+        "额定工作压力",
+        "耐压试验压力",
+        "爆破压力"
+      ],
+      "qualifications": [
+        "与额定工作压力是两个口径，不可只填其中之一冒充另一个"
+      ]
+    },
+    {
+      "id": "sh.electrical.rated_voltage_designation",
+      "name": "额定电压等级代号",
+      "definition": "电缆电线等按分数形式标示的额定电压等级代号，如相对地与相间电压组合。",
+      "object": "目标商品的绝缘体系",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "设备的额定输入电压数值",
+        "耐压试验电压",
+        "系统标称电压"
+      ],
+      "qualifications": [
+        "保留完整分数写法，不简化为单一数值",
+        "与设备额定输入电压是不同概念"
+      ]
+    },
+    {
+      "id": "sh.apparel.size_designation",
+      "name": "尺码代号",
+      "definition": "服装、鞋靴或穿戴用品按尺码体系标示的规格代号。",
+      "object": "目标穿戴商品",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "实测长度或围度数值",
+        "包装规格",
+        "适用身高体重范围"
+      ],
+      "qualifications": [
+        "保留所用尺码体系的原写法；不同体系代号不可互换",
+        "均码按实际标注记录"
+      ]
+    },
+    {
+      "id": "sh.display.method",
+      "name": "显示方式",
+      "definition": "目标商品向使用者呈现读数或状态所采用的显示技术形式。",
+      "object": "目标商品的显示部件",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "显示屏尺寸",
+        "分辨率",
+        "被显示的测量量"
+      ],
+      "qualifications": [
+        "取值保持开放",
+        "无显示部件时按实际填写，不留空冒充未知"
+      ]
+    },
+    {
+      "id": "sh.material.wetted",
+      "name": "过流件材质",
+      "definition": "与工作介质直接接触的壳体或过流部件的材料名称或牌号。",
+      "object": "与介质接触的过流部件",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "非接触外壳材质",
+        "密封件材质",
+        "表面涂层"
+      ],
+      "qualifications": [
+        "须指明所述部件；多部件材质不同时分别记录",
+        "耐介质性由材料与介质共同决定，不由材质名单独证明"
+      ]
+    },
+    {
+      "id": "sh.material.fabric",
+      "name": "面料材质",
+      "definition": "服装、织物或软质制品主要面层的纤维或材料成分。",
+      "object": "目标商品的主要面层",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "里料或衬料成分",
+        "涂层材料",
+        "本体材质用于刚性件的情形"
+      ],
+      "qualifications": [
+        "成分比例已知时一并保留",
+        "面料与里料不同时分别记录"
+      ]
+    },
+    {
+      "id": "sh.accessory.part_type",
+      "name": "配件部件类型",
+      "definition": "该配件在其所属成套件或主机中对应的部件类型。",
+      "object": "目标配件在成套件中的部件身份",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "适配主机的类型或型号",
+        "末级类目名称本身",
+        "配件材质",
+        "配件在整机上的安装位置"
+      ],
+      "qualifications": [
+        "仅用于兜底型配件类目，主机或整机不使用本属性",
+        "取值为部件名称；枚举随所属成套件不同，按类目维护，字典层不设封闭取值",
+        "依据848条历史候选实测：取值与末级类目名无重合，具备独立区分作用"
+      ]
+    },
+    {
+      "id": "sh.service.acceptance_requirement",
+      "name": "验收要求",
+      "definition": "服务类交付的记录、核对方式及完成确认依据。",
+      "object": "服务交付过程",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "实物商品的质量检验标准",
+        "执行标准编号",
+        "质保期"
+      ],
+      "qualifications": [
+        "仅适用于服务类末级类目，不用于实物商品",
+        "按合同或约定填写"
+      ]
+    },
+    {
+      "id": "sh.pharma.strength",
+      "name": "药品规格",
+      "definition": "药品或制剂按药典与说明书标示的规格，表达单位制剂中活性成分的含量或装量。",
+      "object": "单位制剂（每片、每丸、每支、每袋）中的活性成分含量或装量",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "单包装内的件数",
+        "包装形式",
+        "净含量",
+        "剂型",
+        "批准文号"
+      ],
+      "qualifications": [
+        "按药典或说明书原文完整记录，如 0.5g、每丸重9g、10g:0.1g；不得改写格式或只留数字",
+        "用文本而非数值是实测结论：10g:0.1g 这类写法同时给出制剂总量与主药含量，复方制剂还需列全多个活性成分，都无法压成一个数值",
+        "「0.5g*24片」是规格与装量的合写，必须拆开：0.5g 填本属性，24 填单包装内数量"
+      ]
+    },
+    {
+      "id": "sh.tool.across_flats",
+      "name": "对边或开口尺寸",
+      "definition": "扳手的钳口宽度，或套筒内六角、内方的对边距离。",
+      "object": "工具与紧固件配合的对边平面之间的距离",
+      "type": "number",
+      "unitIds": [
+        "mm"
+      ],
+      "excludedMeanings": [
+        "驱动方孔尺寸",
+        "工具全长",
+        "紧固件螺纹公称直径",
+        "套筒外径"
+      ],
+      "qualifications": [
+        "这是与紧固件六角面配合的公称配合尺寸，同一数值的扳手开口与螺母对边相互匹配",
+        "英制工具按其公称英寸值另行标注，不得折算成毫米填入",
+        "与驱动方孔尺寸是套筒两端的两个不同尺寸，不可混填"
+      ]
+    },
+    {
+      "id": "sh.paper.sheet_size_designation",
+      "name": "纸张幅面代号",
+      "definition": "纸质商品按标准系列或传统开本标示的幅面代号。",
+      "object": "纸质商品的幅面规格",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "以毫米表达的实测长宽",
+        "纸张定量或克重",
+        "装订厚度",
+        "页数"
+      ],
+      "qualifications": [
+        "保留代号原写法，如 A4、A5、B5、16开、8开；代号不是可运算数值",
+        "A/B 系列与传统开本是两套体系，同一代号在两套体系下尺寸不同，不可互换",
+        "需要精确尺寸时另填外形长宽，不以代号代替"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "name": "品牌",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.own.brand"
+        }
+      ],
+      "note": "125个变体全部是同一概念的不同措辞。已有定义明确排除供应商与经销商名称，直接复用。"
+    },
+    {
+      "name": "型号",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.own.model"
+        }
+      ],
+      "note": "127个变体均指制造商用于识别商品的型号或货号。原说明中的“规格代号”“货号”“订货号”是同一识别符的不同叫法。"
+    },
+    {
+      "name": "材质",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.material.body",
+          "when": "刚性件、结构件、工具、五金件的主体材料，包含原说明中带产品名的写法（螺钉材质、螺母主体材质、柜体主要材质、刀具材质等）"
+        },
+        {
+          "propertyId": "sh.material.wetted",
+          "when": "泵体、阀体、管件等与工作介质直接接触的过流部件材料"
+        },
+        {
+          "propertyId": "sh.material.fabric",
+          "when": "服装、手套、织物类商品的面层材料"
+        }
+      ],
+      "note": "4180个变体里绝大多数只是把类目名写进了说明，测量对象都是“指定主体部件”，因此collapse为本体材质。真正需要分开的只有介质接触件和面料两类：前者决定耐介质性，后者的测量对象是面层而非刚性本体。"
+    },
+    {
+      "name": "颜色",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.appearance.color"
+        }
+      ],
+      "note": "胶体颜色、涂料外观颜色等仍是商品外观颜色；柜体外观颜色同理。"
+    },
+    {
+      "name": "表面处理",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.surface.treatment"
+        }
+      ],
+      "note": "463个变体中大量“如镀铬、发黑、喷砂等”属于把示例值写进说明，不构成不同概念。"
+    },
+    {
+      "name": "长度",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.geometry.overall_length",
+          "when": "外形长度、总长度、产品长度、软管长度、板材长度等按实测外形定义的长度"
+        },
+        {
+          "propertyId": "sh.fastener.nominal_length",
+          "when": "紧固件按头型标准标示的公称长度（螺钉公称长度、螺栓长度）"
+        }
+      ],
+      "note": "1539个变体中带产品名的“扳手总长度/批头总长度/套筒总长度”都是总长。必须拆出紧固件公称长度：是否含头由头型标准决定，与实测总长可能不等，混用会直接导致选型错误。"
+    },
+    {
+      "name": "执行标准",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.standard.compliance"
+        }
+      ],
+      "note": "变体差异只在措辞与示例标准号。"
+    },
+    {
+      "name": "安装方式",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.install.method"
+        }
+      ],
+      "note": "845个变体中“开关安装方式/灯具安装方式/器件安装方式”是同一概念。原说明里出现的“法兰、底脚”属于安装固定方式，与管路连接形式的区别已写入排除含义。"
+    },
+    {
+      "name": "宽度",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.geometry.overall_width"
+        }
+      ],
+      "note": "轴承宽度、胶带宽度、托盘短边尺寸均为按尺寸图定义方向的整体宽度。“轴承宽度或厚度”一条口径不清，按宽度收，挂载时须在定义中指明测量方向。"
+    },
+    {
+      "name": "连接方式",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.pipe.connection_form",
+          "when": "与管道、管路或流体设备对接（泵、阀及管路、气动液压类目下的绝大多数）"
+        }
+      ],
+      "defer": [
+        {
+          "scope": "电气类、办公设备、安防消防下表示电气接线或数据接口的用法",
+          "reason": "同一名称在这些类目下指电气接线方式或数据接口形式，与管路连接形式测量对象不同；证据里的说明过于笼统，无法判断应归入接线方式还是接口类型，留待对应行业包处理。"
+        }
+      ],
+      "note": "762个末级里501个在泵阀管路，管路含义占主导。剩余部分不并入，避免把电气接口塞进管路属性。"
+    },
+    {
+      "name": "保质期",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.shelflife.unopened"
+        }
+      ],
+      "note": "主流变体均限定“未开封”。出现的text类型（如“24个月”）是历史脏数据，标准定义取数值加时间单位。"
+    },
+    {
+      "name": "产地",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.origin.production_place"
+        }
+      ],
+      "note": "“原料或生产产地”一类混合了原料产地，已在排除含义与限定中处理。"
+    },
+    {
+      "name": "尺寸",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.geometry.overall_length",
+          "when": "复合写法中的长"
+        },
+        {
+          "propertyId": "sh.geometry.overall_width",
+          "when": "复合写法中的宽"
+        },
+        {
+          "propertyId": "sh.geometry.overall_height",
+          "when": "复合写法中的高"
+        }
+      ],
+      "note": "“尺寸”不是一个属性，而是长宽高三个数值合写进一个文本框（长×宽×高、长宽尺寸、床垫长宽尺寸）。标准字典不保留这种复合文本属性；合写导致无法比较和筛选，是模板难以填写的直接原因之一。仅表示尺码或号数的用法（3号/5号/单人）不属于几何尺寸，见尺码代号。"
+    },
+    {
+      "name": "额定电压",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.electrical.rated_input_voltage",
+          "when": "设备、工具、电机、开关、连接器的额定工作电压数值"
+        },
+        {
+          "propertyId": "sh.electrical.rated_voltage_designation",
+          "when": "电缆电线以分数形式标示的额定电压等级，如0.6/1kV"
+        }
+      ],
+      "note": "两者不是单位差异：等级代号是绝缘体系的分级标识，强行取单一数值会丢失相对地与相间两个电压。“触点额定电压”“线圈或控制侧额定电压”是同一概念的不同部位，挂载时在理由中说明部位。"
+    },
+    {
+      "name": "厚度",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.geometry.overall_thickness"
+        }
+      ],
+      "note": "板材厚度、垫圈厚度、胶带厚度、单层厚度均为指定部位的厚度方向尺寸。值样本中的“加厚/薄款”是服装档位描述，不是厚度数值，属于该类目的档位属性，不并入。"
+    },
+    {
+      "name": "功率",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.electrical.rated_input_power",
+          "when": "额定功率、设备额定功率、额定输入功率等电气输入侧功率"
+        },
+        {
+          "propertyId": "sh.mechanical.rated_output_power",
+          "when": "电机轴端输出功率（电机功率、配套电机功率、驱动功率在铭牌上通常指输出功率）"
+        }
+      ],
+      "note": "输入与输出功率数值不同且不可互相推导，这是历史模板中反复出现的实质错误。“设备总功率”指整机输入侧合计，归输入功率。"
+    },
+    {
+      "name": "防护等级",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.enclosure.ip_code"
+        }
+      ],
+      "note": "全部指IP代号。定义中明确代号不是可运算数值，避免被当作数值比较。"
+    },
+    {
+      "name": "高度",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.geometry.overall_height"
+        }
+      ],
+      "note": "螺母总高、托盘总高度、箱体外部高度均为整体高度。"
+    },
+    {
+      "name": "包装数量",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.packaging.unit_quantity"
+        }
+      ],
+      "note": "367个变体只是把商品名和计量单位写进了说明（单包装内铆钉数量、每包/盒数量）。单位列出现的个/件/双/把/支属于计量单位问题，标准定义统一按件计数，成对商品在限定中要求说明一件的构成。"
+    },
+    {
+      "name": "规格",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.pharma.strength",
+          "when": "医药类的药品规格与单剂量含量（药品规格如0.5g*24片、10g:0.1g，每片含量、每丸重9克、每支容量）"
+        },
+        {
+          "propertyId": "sh.packaging.unit_quantity",
+          "when": "每盒或每瓶所含件数（每盒支数、瓶装粒数、每盒袋数、每盒装多少袋/丸/支）"
+        },
+        {
+          "propertyId": "sh.content.net_mass",
+          "when": "以克数或千克数表达的净含量（净含量或包装规格如500g/盒、每袋克数、每瓶克数）"
+        },
+        {
+          "propertyId": "sh.content.net_volume",
+          "when": "以容量表达的净含量（每支毫升数、每瓶容量）"
+        },
+        {
+          "propertyId": "sh.thread.designation",
+          "when": "五金类以螺纹代号表达的规格（垫圈规格M12、M16，规格描述M6）"
+        },
+        {
+          "propertyId": "sh.tool.across_flats",
+          "when": "扳手开口尺寸与套筒对边尺寸（如8mm、10mm）"
+        },
+        {
+          "propertyId": "sh.paper.sheet_size_designation",
+          "when": "办公纸品的幅面或开本代号（A4、A5、B5、16开、8开）"
+        },
+        {
+          "propertyId": "sh.own.model",
+          "when": "「规格型号」写法中可识别为制造商型号标识的部分"
+        }
+      ],
+      "defer": [
+        {
+          "scope": "「配件/耗材/备件/附件的规格尺寸或参数」这类纯占位写法，实测102条占9%（如「备件主要规格尺寸或参数」「耗材规格尺寸或接口参数」）",
+          "reason": "这不是一个概念而是一个占位符，含义等于「本配件重要的那些参数」，任何定义都只会把占位固化下来。裁定为不给属性：这些类目应改填该配件本身的具体属性（口径、接口形式、功率、尺寸等），由挂载阶段按类目补齐。"
+        },
+        {
+          "scope": "实验室类的「包装规格或浓度规格」中的浓度部分（实测14条）",
+          "reason": "浓度的量纲随表达方式而变（mol/L、质量分数%、ppm 属不同物理量），与「测量范围」是同一处结构缺口，随 q-区间值类型 一并处理。"
+        },
+        {
+          "scope": "中药材的「统货/选货/等级」与贵细中药材的「支数/头数」，以及中药饮片的「片厚/大小」",
+          "reason": "这是中药材特有的商品等级与个头分级体系（头数指每500g的支数，是分级计量而非尺寸），与工业品的规格不同源。实测候选不足10条，不足以确定完整口径，等其自身名称进入批次或按医药行业包单独立项。"
+        },
+        {
+          "scope": "「公称规格或适用尺寸」「规格描述」这类未指明具体量的笼统写法（五金24条、实验室28条为最多）",
+          "reason": "这些写法本身没有指定被测量的量，无法判定归属；它们是占位名在各类目的具体化缺失，应在挂载阶段按类目改填对应的具体属性，不为笼统写法保留位置。"
+        }
+      ],
+      "note": "实测裁定：按一级类目分组读1090条候选后，结论不是原先假设的「四种含义各拆一条」，而是「规格」在各类目下是一个占位名，指本类目最主要的那个规格参数。因此它的正确归宿以映射到已有属性为主（装量、净质量、净体积、螺纹代号、型号），实测只暴露出三个已有属性无法承接的真概念：药品规格、对边或开口尺寸、纸张幅面代号。医药352条的写法直接给出了拆法证据：0.5g*24片 是单剂量与件数合写，10g:0.1g 与复方制剂证明单剂量必须用文本。"
+    },
+    {
+      "name": "净含量",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.content.net_mass",
+          "when": "以质量标示的定量包装内容物（kg、g）"
+        },
+        {
+          "propertyId": "sh.content.net_volume",
+          "when": "以体积标示的定量包装内容物（L、mL）"
+        }
+      ],
+      "note": "质量与体积是不同量纲，契约要求每个属性只有一个量纲，因此必须拆两条。与商品本体净质量的区别在测量对象：内容物不含容器，本体净质量含容器。变体中出现的“单件净重”混用了两者，按其所在类目判断。"
+    },
+    {
+      "name": "包装规格",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.packaging.form",
+          "when": "复合写法中的包装形态（桶装、瓶装、罐装）"
+        },
+        {
+          "propertyId": "sh.content.net_mass",
+          "when": "复合写法中以质量标示的净含量"
+        },
+        {
+          "propertyId": "sh.content.net_volume",
+          "when": "复合写法中以体积标示的净含量"
+        },
+        {
+          "propertyId": "sh.packaging.unit_quantity",
+          "when": "复合写法中的每包件数（如每盒支数）"
+        }
+      ],
+      "note": "“18kg/桶”“200L 桶装”“每盒装多少袋/丸/支及单剂量”都是把包装形态、净含量、件数合写。与“尺寸”同类问题：合写属性无法比较筛选，必须拆开。"
+    },
+    {
+      "name": "公称直径",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.pipe.nominal_diameter_dn",
+          "when": "管路元件的DN公称通径代号（值样本DN15、DN100等）"
+        },
+        {
+          "propertyId": "sh.fastener.shank_nominal_diameter",
+          "when": "紧固件与销类的杆部公称直径实测毫米值（铆钉杆部公称直径、销体公称直径）"
+        }
+      ],
+      "note": "同名下两类完全不同的东西：DN是无量纲分级代号，不等于任何实测尺寸；铆钉杆径是毫米数值。混用会让管路选型与紧固件选型互相污染。"
+    },
+    {
+      "name": "供电方式",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.power.supply_mode"
+        }
+      ],
+      "note": "值样本中混入了220V、DC24V等电压数值，属于填写口径错误而非另一个概念；标准定义在排除含义中把电压数值分离到额定输入电压。"
+    },
+    {
+      "name": "电压",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.electrical.rated_input_voltage"
+        }
+      ],
+      "note": "231个候选的说明直接就是“额定电压”，与#14同概念，合并到同一ID。这是跨名称合并：两个不同属性名指向同一标准属性。“电池电压”少量出现，应由挂载时改选电池标称电压。"
+    },
+    {
+      "name": "螺纹规格",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.thread.designation"
+        }
+      ],
+      "note": "286个变体都在表达完整螺纹标记，差异只在示例。定义要求保留完整代号而不拆成数值，避免与杆部公称直径混淆。"
+    },
+    {
+      "name": "外形尺寸",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.geometry.overall_length",
+          "when": "长×宽×高中的长"
+        },
+        {
+          "propertyId": "sh.geometry.overall_width",
+          "when": "长×宽×高中的宽"
+        },
+        {
+          "propertyId": "sh.geometry.overall_height",
+          "when": "长×宽×高中的高"
+        }
+      ],
+      "note": "与“尺寸”同一处理。注意变体中出现“宽×高×深”，维度顺序不一致进一步说明合写不可比。"
+    },
+    {
+      "name": "容量",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.vessel.nominal_capacity",
+          "when": "容器、腔体、箱体的标称容积（垃圾桶容量、水箱容量、内胆容量、集尘容器容量）"
+        },
+        {
+          "propertyId": "sh.content.net_volume",
+          "when": "定量包装内容物体积（产品净含量、标称容量用于填充物时）"
+        }
+      ],
+      "note": "容器能装多少与实际装了多少是两件事，采购选型都要用到。值样本中的“12支装/3支装”是包装件数，应走单包装内数量。"
+    },
+    {
+      "name": "适用场景",
+      "action": "defer",
+      "reason": "644个变体大多描述客户现场条件或推荐用途，而不是商品自身的固有属性；同一商品在不同场景下取值会变，不具备唯一确定的测量对象。是否作为可筛选属性保留属于业务决策，应由品类专家在验收阶段裁定，不由本轮自行统一定义。"
+    },
+    {
+      "name": "额定功率",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.electrical.rated_input_power",
+          "when": "额定输入功率、设备额定功率、灯具额定功率、工具额定输入功率"
+        },
+        {
+          "propertyId": "sh.mechanical.rated_output_power",
+          "when": "电机额定输出功率、额定输出功率"
+        }
+      ],
+      "note": "与#16“功率”合并到同一组标准属性，属跨名称合并。证据里已有一条明确写“铭牌额定输入功率，不能混用峰值或输出功率”，说明这个混淆在历史交付中被识别过但未统一。"
+    },
+    {
+      "name": "公称压力",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.pressure.nominal_rating",
+          "when": "PN或Class等级代号（值样本PN0.6、Class150）"
+        },
+        {
+          "propertyId": "sh.pressure.rated_working",
+          "when": "以MPa标示的额定工作压力数值（管件额定工作压力）"
+        }
+      ],
+      "note": "PN等级不等于任一温度下的允许工作压力，两者混填会造成承压误判。PN与Class是不同体系，定义中已禁止互换换算。"
+    },
+    {
+      "name": "配件类型",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.accessory.part_type"
+        }
+      ],
+      "note": "初判怀疑它与末级类目名重复、应由类目表达，实测推翻：848条候选中取值与末级类目名完全重合的为0条，完全不重合的202条，且824条的类目路径本身已含配件/备件/耗材字样。说明这些末级是兜底类目，本属性是桶内唯一的区分维度（垃圾桶配件→桶盖/内桶/脚踏板/轮子）。保留。629条为纯文本无枚举，因此标准定义不设封闭取值，枚举按所属成套件在类目内维护。"
+    },
+    {
+      "name": "净重",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.own.net_mass"
+        }
+      ],
+      "note": "45个变体高度一致，已有定义即“商品本体净质量，不含运输包装”。“包装净重”一条口径相反，属个别错误，不改标准定义。"
+    },
+    {
+      "name": "尺码",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.apparel.size_designation"
+        }
+      ],
+      "note": "服装、手套、鞋靴尺码同为尺码体系代号。变体中“鞋靴尺码，如 42、260mm”混入了实测脚长，定义已在排除含义中分离。"
+    },
+    {
+      "name": "显示方式",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.display.method"
+        }
+      ],
+      "note": "测量结果显示方式、温度显示方式、读数显示方式的差异在“显示什么”，而显示技术形式是同一概念；被显示的量已在排除含义中分离。"
+    },
+    {
+      "name": "包装形式",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.packaging.form"
+        }
+      ],
+      "note": "94个变体一致。与包装规格的复合写法拆分结果指向同一ID。"
+    },
+    {
+      "name": "工作压力",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.pressure.rated_working",
+          "when": "额定工作压力、气动工具正常工作气压"
+        },
+        {
+          "propertyId": "sh.pressure.max_working",
+          "when": "最大工作压力"
+        }
+      ],
+      "note": "额定与最大是两个口径，历史模板经常只填一个并当作另一个使用。出现的“工作压力范围”应由挂载时同时选用两条属性表达，而不是塞进一个文本。"
+    },
+    {
+      "name": "外径",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.geometry.body_outer_diameter"
+        }
+      ],
+      "note": "管材外径、软管外径、轴承外径、垫圈外圆直径均为指定圆形截面的外直径。已有定义要求说明测量部位。"
+    },
+    {
+      "name": "验收要求",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.service.acceptance_requirement"
+        }
+      ],
+      "note": "只有2个变体，且集中在服务类交付。保留为服务类专用属性，定义中限定不用于实物商品。"
+    },
+    {
+      "name": "重量",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.own.net_mass"
+        }
+      ],
+      "note": "与#33“净重”跨名称合并。变体中“商品净重或毛重”口径不清，属个别错误；毛重若确需保留应另立属性，本批证据不足以支持新增。"
+    }
+  ],
+  "amendments": [
+    {
+      "trigger": "实测裁定 q-规格",
+      "what": "「规格」原判定为待审。按一级类目实测1090条候选后改为拆分：新增药品规格、对边或开口尺寸、纸张幅面代号三条，其余按类目分派到已有属性；纯占位的「配件规格尺寸或参数」写法（实测102条占9%）明确不给属性。",
+      "why": "实测推翻了原先「规格下有四种含义」的假设。真实情况是它在各一级类目下是一个占位名，指「本类目最主要的那个规格参数」：医药相关352条(32%)、五金工具169条(16%)、实验室137条(13%)、生活福利118条(11%)、办公用品78条(7%)。其中医药的写法证明了必须怎么拆——0.5g*24片 与 10g:0.1g 是单剂量与件数写在一起，而 10g:0.1g（软膏总量比主药含量）和复方制剂多活性成分证明单剂量装不进一个数值，因此药品规格按药典原文用文本，件数归已有的单包装内数量。",
+      "legitimacy": "字典尚未定稿、未经专家验收，决定文件按批次顺序重放即生效。本次修正的依据是可复现的实测，不是新的主观判断；q-规格 的裁定结论同步记入待裁定清单。"
+    }
+  ]
+}

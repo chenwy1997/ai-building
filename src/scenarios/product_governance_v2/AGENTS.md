@@ -1,4 +1,4 @@
-# 商品治理V2工作约定
+    # 商品治理V2工作约定
 
 - 进行Codex审核、裁定或交付核对前，读取 `reviewers/codex/审核大纲.md`，按任务范围选择审核流程。
 - Codex审核上下文位于 `reviewers/codex/`，不放入 `standards/`，不交给DeepSeek自动加载；双方引用同一冻结业务标准。

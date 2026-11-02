@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "date": "2026-10-30",
+  "source": "用户对商品试填的反馈：明确标称值及时提取，规范值简洁，原文完整保留",
+  "rulesByDefinitionId": {
+    "cleaning.roll_weight": {
+      "shortRule": "填原文标称的单卷重量；g/卷、g×卷数可直接取单卷值，不额外要求净重或含芯说明。不得仅由整包总重除算。",
+      "valuePolicy": {"declaredPerItem": true}
+    },
+    "cleaning.material": {
+      "shortRule": "填材料名；100%棉、纯棉或全棉写棉。混材保留全部材料和必要部位，比例及原文留证据，不把棉柔当棉。",
+      "valuePolicy": {"materialNameOnly": true}
+    },
+    "cleaning.paper_fiber_material": {
+      "shortRule": "填明确的纤维原料，混配保留组成；不重复100%等单一成分比例，比例原文留证据。",
+      "valuePolicy": {"materialNameOnly": true}
+    },
+    "cleaning.dimensions": {
+      "shortRule": "填本体或明确部件的尺寸组合；每个数值带原有物理单位，维度之间用*，例如155mm*120mm；不换算或猜测未标单位，不填包装尺寸。对象已明确时省略重复的/节、/张、/片，不额外要求单片或展开措辞。",
+      "valuePolicy": {"compactDimensions": true}
+    },
+    "cleaning.paper_count_per_package": {
+      "shortRule": "填每包或每盒的数字和计数词，如90抽；不重复/包或/盒，张、片、抽不换算。",
+      "valuePolicy": {"quantityScopes": ["包", "盒"]}
+    }
+  }
+}

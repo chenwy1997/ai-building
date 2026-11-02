@@ -1,0 +1,156 @@
+{
+  "version": "known-semantic-defects-v1",
+  "source": "run-2026-09-15T06-38-02-595Z-cache-ab/conversation",
+  "purpose": "历史真实缺陷回放，非泛化准确率。期望答案仅用于本地比对，不发送给模型。",
+  "cases": [
+    {
+      "id": "brand-does-not-prove-model",
+      "kind": "claims",
+      "category": [
+        "标准类目",
+        "五金工具",
+        "紧固密封件",
+        "密封件",
+        "O形圈"
+      ],
+      "data": {
+        "claims": [
+          {
+            "key": "brand",
+            "name": "品牌",
+            "meaning": "O形圈制造商或自有品牌名称；明确无品牌时填“无品牌”，不得用供应商/经销商冒充",
+            "ref": "J71203b3dbe6b.0",
+            "quote": "靳拓",
+            "sourceTitle": "靳拓 O型圈NBR70线径3.5mm丁晴橡胶O形密封圈  内径27.4*3.5（100个）",
+            "sourceField": "品牌",
+            "sourceValue": "靳拓"
+          },
+          {
+            "key": "model",
+            "name": "型号",
+            "meaning": "制造商为O形圈实际分配的型号或料号",
+            "ref": "Ja1e14ec3b268.0",
+            "quote": "恩福",
+            "sourceTitle": "恩福NOK O型圈密封圈 33.7X3.5 丁腈橡胶NBR CO00033-B1A 10个1包",
+            "sourceField": "品牌",
+            "sourceValue": "恩福"
+          }
+        ]
+      },
+      "expected": {
+        "supported": [
+          {
+            "key": "brand",
+            "ref": "J71203b3dbe6b.0"
+          }
+        ],
+        "rejected": [
+          {
+            "key": "model",
+            "ref": "Ja1e14ec3b268.0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "name-and-definition-describe-different-counts",
+      "kind": "audit",
+      "category": [
+        "标准类目",
+        "五金工具",
+        "动力工具零件",
+        "动力工具零件",
+        "热风枪发热芯"
+      ],
+      "data": {
+        "needs": {
+          "needs": [
+            {
+              "id": "wiring",
+              "dimension": "引出接线数量",
+              "object": "对外接线",
+              "scope": "intrinsic",
+              "meaning": "接到整机电路的引出导线数量",
+              "purpose": "匹配接线接口"
+            }
+          ],
+          "applicationContext": [],
+          "gaps": []
+        },
+        "attributes": [
+          [
+            "heating_wire_count",
+            "发热丝线数",
+            "number",
+            "required",
+            "线",
+            [],
+            "",
+            "发热芯引出接线数量，用于匹配原装接线与温控回路",
+            "",
+            [
+              "J0b06e7058b3c.2",
+              "J0b06e7058b3c.1"
+            ]
+          ]
+        ],
+        "sources": []
+      },
+      "expected": {
+        "issueKeys": [
+          "heating_wire_count"
+        ]
+      }
+    },
+    {
+      "id": "insulation-strength-is-not-resistance",
+      "kind": "audit",
+      "category": [
+        "标准类目",
+        "五金工具",
+        "动力工具零件",
+        "动力工具零件",
+        "热风枪发热芯"
+      ],
+      "data": {
+        "needs": {
+          "needs": [
+            {
+              "id": "insulation",
+              "dimension": "绝缘性能",
+              "object": "发热芯绝缘结构",
+              "scope": "declared_capability",
+              "meaning": "绝缘耐温等级与电气绝缘指标，注明各自测量对象和单位",
+              "purpose": "判断绝缘选型是否匹配"
+            }
+          ],
+          "applicationContext": [],
+          "gaps": []
+        },
+        "attributes": [
+          [
+            "insulation_grade",
+            "绝缘耐温等级与绝缘强度",
+            "text",
+            "required",
+            "",
+            [],
+            "",
+            "绝缘材料的耐温等级及电气绝缘强度",
+            "格式：耐温等级+绝缘强度，如H级/≥100MΩ",
+            [
+              "K"
+            ]
+          ]
+        ],
+        "sources": []
+      },
+      "expected": {
+        "issueKeys": [
+          "insulation_grade"
+        ]
+      }
+    }
+  ],
+  "additionalSource": "run-2026-09-15T07-05-46-825Z-semantic-v3"
+}

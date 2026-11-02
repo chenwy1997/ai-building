@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {parseLayoutArgs,loadReviewLayout,applyReviewLayout,validateSheetTargets} from './review-workbook-layout.mjs';
+import {attributeTypeLabel,attributeValueSummary,validateAttribute,validateDictionaries,validateSharedDefinitions,resolveDictionary} from '../attribute-contract.mjs';
 
 const args=process.argv.slice(2), flags={}, layoutArgs=[];
 for(let i=0;i<args.length;i++){
@@ -18,6 +19,14 @@ const out=path.resolve(flags.out),root=path.dirname(fileURLToPath(import.meta.ur
 const read=async file=>JSON.parse(await fs.readFile(file,'utf8'));
 const plan=await read(path.join(out,'attribute-proposals.json')),sources=await read(path.join(out,'review-sources.json'));
 const policy=await read(path.join(root,'../knowledge/field-ownership.json'));
+const dictionaries=plan.dictionaries??{version:1,dictionaries:[]};
+const typeErrors=[...validateDictionaries(dictionaries),...validateSharedDefinitions(plan.proposals)];
+assert.equal(typeErrors.length,0,'Invalid type/dictionary input: '+JSON.stringify(typeErrors));
+for(const p of plan.proposals){
+  if(p.typing)typeErrors.push(...validateAttribute(p,dictionaries).map(e=>({...e,category:p.category,attribute:p.name})));
+  else if(plan.attributeContractVersion===1&&!plan.legacyVerification?.typeUnreviewedAttributeIds?.includes(p.categoryId+':'+(p.key||p.name)))typeErrors.push({attribute:p.name,message:'新方案缺类型配置，不能按旧稿导出'});
+}
+assert.equal(typeErrors.length,0,'Invalid type/value configuration: '+JSON.stringify(typeErrors));
 assert.equal(plan.programChecks.length,0,'Resolve structural errors first');
 assert(plan.independentReview,'Independent review must be attached to final manifest');
 assert.equal(plan.fieldOwnershipPolicyHash,crypto.createHash('sha256').update(JSON.stringify(policy)).digest('hex'),'Field policy changed after assembly; assemble again');
@@ -49,19 +58,41 @@ function table(name,title,notes,headers,rows,widths,editable=[]){
   reviewTable.showFilterButton=true;
   manifest.push({name,headers,rows,widths,editable});return sheet;
 }
-const type={text:'文本',number:'数值',boolean:'是否',option:'选项'};
 const previous=plan.baselineDiff.filter(x=>x.status==='preserved').length;
+const modified=plan.baselineDiff.filter(x=>x.status==='modified').length;
 const mainRows=[];
 for(const c of plan.categories){
   const ps=plan.proposals.filter(p=>p.categoryId===c.categoryId);
   if(!ps.length)mainRows.push(['暂无可用方案',c.category,'','','','待补证','','',c.sampleGap??'',c.scopeNote??'','','',0,'',c.path,'',c.categoryId,'']);
-  for(const p of ps)mainRows.push([p.name,c.category,type[p.type]+(p.unit?' / '+p.unit:''),p.example??p.rawExample??'',p.shortRule??'',p.v4Disposition,'','',p.definition,text(p.rules),p.purpose,p.required?'必填':'选填',p.sourceSpuCount??0,text(p.sourceNames),c.path,p.author??(p.authority==='terra_proposal'?'GPT-6.1 Terra / max':'沿用认可稿'),c.categoryId,text(p.sourceReferences??[]) + (p.exampleQualification?'\n示例范围：'+p.exampleQualification:'') + (p.basis?'\n依据：'+p.basis:'')]);
+  for(const p of ps)mainRows.push([p.name,c.category,attributeTypeLabel(p)+(p.unit?' / '+p.unit:''),p.example??p.rawExample??'',p.shortRule??'',p.v4Disposition,'','',p.definition,text(p.rules),p.purpose,p.required?'必填':'选填',p.sourceSpuCount??0,text(p.sourceNames),c.path,p.author??(p.authority==='terra_proposal'?'GPT-6.1 Terra / max':'沿用认可稿'),c.categoryId,text(p.sourceReferences??[]) + (p.exampleQualification?'\n示例范围：'+p.exampleQualification:'') + (p.basis?'\n依据：'+p.basis:'')]);
 }
 table('属性方案','清洁用品：v4 类目属性方案',[
-  `${plan.categories.length}个末级，${plan.proposals.length}项；${previous}项保留原认可内容，${plan.proposals.length-previous}项本轮新增待审。`,
-  '可筛选“版本状态”只看新增；黄色列填意见。示例不等于已核实的SKU值，旧认可不等于线上配置已验证。',
+  `${plan.categories.length}个末级，${plan.proposals.length}项；${previous}项沿用，${modified}项修改，${plan.proposals.length-previous-modified}项新增。`,
+  '可筛选“版本状态”看新增/修改；黄色列填意见。来源示例与规范填写示例分开，类型配置详见辅助表。',
   plan.policyRevision?.summary ?? '所有治理属性按SKU；短名及口径一起审。表单为动态目录配置，86条历史字段映射见“字段职责”。',
 ],['属性','末级类目','类型/单位','来源示例','填写要点','版本状态','审阅结论','审阅意见','完整定义','详细填写规则','业务用途','填写要求','本类观察款','原字段/候选名','完整类目路径','作者','类目ID','补充依据与适用范围'],mainRows,[106,132,96,150,220,110,90,160,430,500,330,80,90,210,420,190,290,700],[6,7]);
+const typed=plan.proposals.filter(p=>p.typing);
+const exampleText=p=>(p.valueExamples??[]).map(e=>{
+  let value=e.value;
+  if(p.type==='dictionary'&&value!==null){const {dictionary}=resolveDictionary(p.typing.dictionary,dictionaries);value=(Array.isArray(value)?value:[value]).map(id=>dictionary.values.find(v=>v.id===id)?.label??id).join('、');}
+  else if(p.type==='boolean'&&value!==null)value=value?'是':'否';
+  return `${value===null?'未知（留空）':inline(value)}（${e.origin==='constructed'?'构造示例':'来源规范化'}）`;
+}).join('；');
+if(typed.length)table('类型与取值','属性类型与允许值',[
+  '按业务对象、选项边界和来源审类型；程序通过不等于选项已穷尽或行业含义已核实。',
+  '字典引用固定版本与允许值子集。构造示例仅说明格式，不作为商品证据。',
+  '旧稿未补类型配置的属性仍在主表保留，不能将其计作新类型合同通过。',
+],['属性','末级类目','类型/单位','允许值/格式','规范填写示例','类型选择依据','单多选/约束依据','共享定义与版本','字典引用','类目ID','示例原值与来源'],typed.map(p=>[p.name,p.category,attributeTypeLabel(p)+(p.unit?' / '+p.unit:''),attributeValueSummary(p,dictionaries),exampleText(p),p.typing.rationale,text(p.typing.choice??p.typing.number??p.typing.text??'是/否，未知留空'),p.definitionId+'@'+p.definitionVersion,text(p.typing.dictionary??''),p.categoryId,text(p.valueExamples)]),[106,132,110,330,240,420,600,240,600,290,650]);
+if(dictionaries.dictionaries.length)table('取值字典','本轮引用的取值字典',[
+  '候选字典仍待人工确认。released 状态须有实际批准记录，程序不代替批准。',
+  '已废弃的值保留历史；类目只允许选其显式子集，不自动采用整个字典。',
+  '新增值经审校发布新版本，来源资料只作为参考。',
+],['字典','版本/状态','标准值','别名','值状态','维护责任','定义','来源','字典ID','值ID','新值处理','批准记录'],dictionaries.dictionaries.flatMap(d=>d.values.map(v=>[d.name,d.version+' / '+({candidate:'候选待审',released:'已发布',retired:'已退役'})[d.status],v.label,inline(v.aliases),v.status==='active'?'可引用':'已废弃',d.owner,d.definition,text(d.sourceReferences),d.id,v.id,d.newValuePolicy,text(d.approval??'尚未批准')])),[130,140,160,220,90,160,480,650,260,220,230,500]);
+if(modified)table('本轮修改','已认可属性的修改提案',[
+  '旧版认可保留在原定义上，本次修改仍待复核。未列为修改的属性沿用。',
+  '逐项核类型、定义及填写范围变化，不能只看名称一致。',
+  '当前是离线方案，不执行生产配置或商品填值。',
+],['属性','末级类目','旧类型','新类型','审阅结论','修改原因','原定义与配置','本次定义与配置','类目ID'],plan.proposals.filter(p=>p.v4Disposition==='本轮修改待审').map(p=>[p.name,p.category,attributeTypeLabel(p.previousDefinition),attributeTypeLabel(p),'',p.revisionReason,text(p.previousDefinition),text({definition:p.definition,typing:p.typing,enumValues:p.enumValues}),p.categoryId]),[106,132,110,110,100,300,700,700,290],[4]);
 const catName=id=>plan.categories.find(c=>c.categoryId===id)?.category??id;
 const familyRows=plan.families.flatMap(f=>f.concepts.flatMap(c=>c.assessments.map(a=>[f.name,c.name,catName(a.categoryId),({applicable:'适用',conditional:'局部适用',not_applicable:'不适用',unresolved:'待核'})[a.applicability],inline(a.proposalNames),a.reason,'',c.definition,a.categoryId])));
 for(const c of plan.standaloneCategories??[])familyRows.push(['独立对象','',catName(c.categoryId??c.id??c),'单独判断','',c.reason??c.note??'参照原认可方案，不强制同族','','',c.categoryId??c.id??c]);
@@ -105,9 +136,9 @@ table('补充来源','本轮补充研究：来源与支持范围',[
   '这里提供完整原记录，供审校和业务追溯。',
 ],['来源组','来源标识','标题/对象','来源类型','链接/定位','完整来源记录'],supplemental.records.map(r=>[r.group,r.id??r.sourceId??'',r.title??r.category??r.topic??'',r.sourceKind??r.kind??'',r.url??r.path??'',text(r)]),[145,170,260,120,600,1100]);
 const reviewFindings=[...(plan.independentReview.findings??[]),...(plan.independentReview.amendments??[]).flatMap(a=>a.findings??[])];
-const reviewRows=[...reviewFindings.map(q=>['Astra审校',q.category??text(q.categories),q.attribute??q.title??'',q.finding??q.issue??q.message??text(q),q.status??q.disposition??'',text(q)]),...plan.warnings.map(q=>['上线前职责核实',q.category,q.attribute,q.message,'未核',q.kind]),...plan.openQuestions.map(q=>['作者待核',q.category??'',q.attribute??'',q.issue??text(q),q.status??'待审',text(q)])];
+const reviewRows=[...reviewFindings.map(q=>['独立审校记录',q.category??text(q.categories),q.attribute??q.title??'',q.finding??q.issue??q.message??text(q),q.status??q.disposition??'',text(q)]),...plan.warnings.map(q=>[q.kind==='legacy_type_unreviewed'?'旧类型待复核':'上线前职责核实',q.category,q.attribute,q.message,'未核',q.kind]),...plan.openQuestions.map(q=>['作者待核',q.category??'',q.attribute??'',q.issue??text(q),q.status??'待审',text(q)])];
 table('审校与待核','v4：独立审校及后续核实',[
-  'Astra独立审校范围及结果见右侧完整记录；程序检查通过不代表行业准确率或线上配置可用。',
+  '独立审校范围及结果见右侧完整记录；程序检查通过不代表行业准确率或线上配置可用。',
   '新增属性仍待你的取舍。目录有效字段、数量载体、局部适用对象和商品值须分别核实。',
   '当前仅类目方案；DeepSeek调用0，生产写入0。',
 ],['记录来源','末级类目','属性/问题','发现或待核事项','处理状态','完整记录'],reviewRows,[135,150,170,700,140,1200]);

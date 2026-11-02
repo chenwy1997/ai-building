@@ -1,0 +1,1051 @@
+{
+  "schema": "sanheng-canonical-decisions-v1",
+  "batch": 3,
+  "ranks": [
+    81,
+    120
+  ],
+  "author": "architect",
+  "note": "本批出现两件第1、2批没有的情况。(一)后批证据推翻前批判定：「适用性别」暴露出第2批「适用人群」把性别与年龄段打包了，已回改 batch-0002.json 为拆分并撤回 sh.applicability.target_user，修正依据记在该文件的 amendedBy 字段。(二)同一物理概念的单位数量不决定拆不拆：「流量」四个单位属同一物理量，一条属性即可；「粘度」两个单位是动力粘度与运动粘度两个量，必须拆。此外「温度范围」与「使用温度范围」这两个近似名称被判到不同去处，前者含设备控温能力，后者是耐温限值，方向相反。",
+  "newUnits": [
+    {
+      "id": "L_per_min",
+      "symbol": "L/min",
+      "quantity": "volume-flow"
+    },
+    {
+      "id": "L_per_h",
+      "symbol": "L/h",
+      "quantity": "volume-flow"
+    },
+    {
+      "id": "L_per_s",
+      "symbol": "L/s",
+      "quantity": "volume-flow"
+    },
+    {
+      "id": "m3_per_h",
+      "symbol": "m³/h",
+      "quantity": "volume-flow"
+    },
+    {
+      "id": "g_per_cm3",
+      "symbol": "g/cm³",
+      "quantity": "density"
+    },
+    {
+      "id": "kg_per_m3",
+      "symbol": "kg/m³",
+      "quantity": "density"
+    },
+    {
+      "id": "mPa_s",
+      "symbol": "mPa·s",
+      "quantity": "dynamic-viscosity"
+    },
+    {
+      "id": "mm2_per_s",
+      "symbol": "mm²/s",
+      "quantity": "kinematic-viscosity"
+    },
+    {
+      "id": "r_per_min",
+      "symbol": "r/min",
+      "quantity": "rotational-speed"
+    },
+    {
+      "id": "K",
+      "symbol": "K",
+      "quantity": "temperature"
+    }
+  ],
+  "newProperties": [
+    {
+      "id": "sh.material.metal_hardness",
+      "name": "金属硬度",
+      "definition": "金属材料或其表面按指定硬度标尺测得的硬度，以标尺代号加数值或范围表示。",
+      "object": "目标商品的金属本体或经热处理的表面",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "邵氏硬度",
+        "铅笔硬度",
+        "「硬」「中」这类主观描述",
+        "材料牌号"
+      ],
+      "qualifications": [
+        "必须带标尺代号：HRC、HB、HV 等标尺的数值不可互相比较，去掉代号只留数字即失去含义",
+        "以文本保留原写法（如 HRC58-62）：硬度常以范围给出，且热处理件的表面与芯部硬度不同，须说明测量部位",
+        "不同标尺之间的换算表只是近似，不得据此改写原始值"
+      ]
+    },
+    {
+      "id": "sh.pharma.dosage_form",
+      "name": "剂型",
+      "definition": "药品或类似制剂经加工形成的给药形态。",
+      "object": "制剂的给药形态",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "包装形式",
+        "外观物理形态",
+        "规格或含量",
+        "给药途径本身"
+      ],
+      "qualifications": [
+        "按国家药典或说明书标示的剂型名称记录，不自行归类",
+        "剂型决定给药途径与贮存要求，不可用外观形态代替"
+      ]
+    },
+    {
+      "id": "sh.thread.pitch",
+      "name": "螺距",
+      "definition": "螺纹相邻两牙对应点之间的轴向距离。",
+      "object": "目标商品的螺纹牙型",
+      "type": "number",
+      "unitIds": [
+        "mm"
+      ],
+      "excludedMeanings": [
+        "每英寸牙数",
+        "螺纹公称直径",
+        "导程",
+        "螺纹长度"
+      ],
+      "qualifications": [
+        "粗牙螺纹的螺距由标准唯一确定，可不重复填写；细牙必须填",
+        "英制螺纹以每英寸牙数标示，与本属性量纲不同，须换算后填写或改用螺纹代号表达",
+        "多线螺纹的导程等于螺距乘线数，不可混填"
+      ]
+    },
+    {
+      "id": "sh.thread.system",
+      "name": "螺纹制式",
+      "definition": "螺纹所属的标准体系。",
+      "object": "目标商品的螺纹标准体系",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "螺纹代号本身",
+        "螺距数值",
+        "牙型角",
+        "全螺纹或半螺纹"
+      ],
+      "qualifications": [
+        "取值为体系名称或其代号，如公制M、管螺纹G、锥管螺纹NPT、英制BSP",
+        "制式不同则不可互相配合；同一通径的G与NPT不可互换",
+        "与螺纹代号成对使用：制式说明体系，代号给出具体规格"
+      ]
+    },
+    {
+      "id": "sh.signal.output_type",
+      "name": "输出信号形式",
+      "definition": "目标商品对外输出测量或状态结果所采用的信号形式。",
+      "object": "目标商品的信号输出端",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "数据通信接口形式",
+        "通信协议",
+        "供电电压",
+        "显示方式"
+      ],
+      "qualifications": [
+        "可多值，多种输出全部记录",
+        "模拟量须给出完整量程写法，如4-20mA、0-10V；开关量注明是继电器还是集电极开路",
+        "取值保持开放"
+      ]
+    },
+    {
+      "id": "sh.tool.drive_size",
+      "name": "驱动方孔尺寸",
+      "definition": "套筒或类似工具与扳杆、风批等驱动件配合的方孔公称尺寸。",
+      "object": "目标商品的驱动方孔",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "套筒对边尺寸",
+        "工具柄部形式",
+        "螺纹代号",
+        "整体长度"
+      ],
+      "qualifications": [
+        "以英寸分数或毫米的公称写法保留，如1/2\"、3/4\"、10mm；这是配合代号而非实测尺寸",
+        "扭力扳手的矩形接头（如14×18mm）属另一种配合形式，须按原写法记录不可折算成方孔"
+      ]
+    },
+    {
+      "id": "sh.lubricant.base_oil_type",
+      "name": "基础油类型",
+      "definition": "润滑剂所用基础油的类别。",
+      "object": "润滑剂的基础油组分",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "添加剂类型",
+        "粘度等级",
+        "性能等级",
+        "稠化剂类型"
+      ],
+      "qualifications": [
+        "取值为基础油类别，如矿物油、合成油（PAO、酯类、硅油）、半合成",
+        "基础油类别决定与密封件及塑料的相容性，不可省略"
+      ]
+    },
+    {
+      "id": "sh.chemical.flash_point",
+      "name": "闪点",
+      "definition": "在规定试验条件下，试样蒸气与空气混合物接触火源发生闪火的最低温度。",
+      "object": "试样在规定试验方法下的闪火温度",
+      "type": "number",
+      "unitIds": [
+        "degC"
+      ],
+      "excludedMeanings": [
+        "燃点",
+        "自燃温度",
+        "沸点",
+        "工作温度上限"
+      ],
+      "qualifications": [
+        "必须注明测定方法：开口闪点与闭口闪点对同一试样结果不同，通常闭口低于开口，去掉方法即不可比",
+        "闪点是危险品分类与运输条件的判据，不得以估值填写"
+      ]
+    },
+    {
+      "id": "sh.applicability.season",
+      "name": "适用季节",
+      "definition": "制造商按商品规格标示的适用季节。",
+      "object": "目标商品按规格设计适用的季节",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "使用场景",
+        "适用地区气候",
+        "贮存条件",
+        "上市季节"
+      ],
+      "qualifications": [
+        "按制造商标注记录，不自行判定",
+        "与保暖性等具体性能属性并存，季节标示不能代替具体性能"
+      ]
+    },
+    {
+      "id": "sh.regulatory.approval_number",
+      "name": "批准文号",
+      "definition": "药品等实施批准文号管理的商品由监管部门核发的批准文号。",
+      "object": "商品的行政许可编号",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "医疗器械注册证号",
+        "生产许可证号",
+        "执行标准编号",
+        "商品条码"
+      ],
+      "qualifications": [
+        "按证照原文完整记录，含字母与年份段，不做省略或格式改写",
+        "批准文号与持证主体及规格绑定，不同规格可能不同号，不可跨规格套用"
+      ]
+    },
+    {
+      "id": "sh.regulatory.registration_number",
+      "name": "注册证号",
+      "definition": "医疗器械等实施注册管理的商品由监管部门核发的注册证编号。",
+      "object": "商品的注册许可编号",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "药品批准文号",
+        "备案号",
+        "生产许可证号",
+        "执行标准编号"
+      ],
+      "qualifications": [
+        "按证照原文完整记录，不做省略或格式改写",
+        "注册证号与管理类别及适用范围绑定，不可跨型号套用"
+      ]
+    },
+    {
+      "id": "sh.closure.method",
+      "name": "闭合方式",
+      "definition": "服装、鞋帽、箱包等通过何种结构实现开合与固定。",
+      "object": "目标商品的闭合结构",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "连接方式",
+        "安装方式",
+        "包装方式",
+        "装饰件形式"
+      ],
+      "qualifications": [
+        "可多值，多种闭合结构全部记录",
+        "取值保持开放"
+      ]
+    },
+    {
+      "id": "sh.fluid.volumetric_flow",
+      "name": "额定流量",
+      "definition": "制造商在规定工况下声明的体积流量。",
+      "object": "通过目标商品的介质体积流量",
+      "type": "number",
+      "unitIds": [
+        "L_per_min",
+        "L_per_h",
+        "L_per_s",
+        "m3_per_h"
+      ],
+      "excludedMeanings": [
+        "质量流量",
+        "最大或瞬时流量",
+        "流通能力系数Kv",
+        "流速"
+      ],
+      "qualifications": [
+        "必须说明对应工况：流量随压差、扬程与介质粘度变化，脱离工况的流量不可比",
+        "额定流量与最大流量不是同一点，不可互相替代"
+      ]
+    },
+    {
+      "id": "sh.cooling.method",
+      "name": "冷却方式",
+      "definition": "目标商品排出运行热量所采用的方式。",
+      "object": "目标商品的散热途径",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "制冷量",
+        "工作温度范围",
+        "防护等级",
+        "冷却介质本身的牌号"
+      ],
+      "qualifications": [
+        "取值保持开放，如自然冷却、风冷、水冷、油冷",
+        "水冷与油冷须另行说明对冷却介质的要求；冷却方式直接决定负载持续率"
+      ]
+    },
+    {
+      "id": "sh.rotation.no_load_speed",
+      "name": "空载转速",
+      "definition": "目标商品在不带负载条件下的输出转速。",
+      "object": "目标商品输出轴在空载下的转速",
+      "type": "number",
+      "unitIds": [
+        "r_per_min"
+      ],
+      "excludedMeanings": [
+        "额定负载转速",
+        "冲击频率或打击次数",
+        "摆动或往复频率",
+        "电机同步转速"
+      ],
+      "qualifications": [
+        "空载转速高于负载转速，两者不可互换；调速产品记录范围时须说明是最高档还是全范围",
+        "冲击类工具的冲击频率是另一个量，不得填入本属性"
+      ]
+    },
+    {
+      "id": "sh.tool.shank_type",
+      "name": "柄部类型",
+      "definition": "刀具、钻头、批头等装入机具一端的柄部接口形式。",
+      "object": "目标商品装入机具的柄部",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "握持手柄的结构形式",
+        "驱动方孔尺寸",
+        "柄部直径数值",
+        "刀具切削部形状"
+      ],
+      "qualifications": [
+        "取值为接口形式代号或名称，如SDS-plus、SDS-max、六角柄、圆柄、锥柄",
+        "柄部是装夹端，与操作者握持的手柄不是同一部位，两者不可混填",
+        "柄部形式决定能否装入某台机具，属配合性属性"
+      ]
+    },
+    {
+      "id": "sh.hazardous.ex_marking",
+      "name": "防爆标志",
+      "definition": "按防爆标准体系标示在铭牌上的完整防爆合格标志。",
+      "object": "目标商品的防爆合格认证标示",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "防护等级IP代号",
+        "执行标准编号",
+        "认证机构名称",
+        "适用区域分区本身"
+      ],
+      "qualifications": [
+        "以铭牌原文完整记录，如Exd IIB T4：其中防爆型式、气体组别、温度组别三段各有独立含义，缺一段即无法判断能否用于某危险场所",
+        "不得只填「防爆」或只填型式段；标志与认证证书绑定"
+      ]
+    },
+    {
+      "id": "sh.material.density",
+      "name": "密度",
+      "definition": "材料或产品在规定温度下单位体积的质量。",
+      "object": "目标商品的材料或产品本体",
+      "type": "number",
+      "unitIds": [
+        "g_per_cm3",
+        "kg_per_m3"
+      ],
+      "excludedMeanings": [
+        "「高密度」「低密度」这类等级或牌号称谓",
+        "堆积密度或松装密度",
+        "相对密度（无量纲）",
+        "净质量"
+      ],
+      "qualifications": [
+        "须注明测定温度：液体产品的密度随温度变化，行业惯例多为20℃",
+        "体积密度与真密度对多孔材料差别很大，须说明所指",
+        "「高密度聚乙烯」中的高密度是牌号称谓不是取值，不得填入本属性"
+      ]
+    },
+    {
+      "id": "sh.origin.import_status",
+      "name": "国产或进口",
+      "definition": "商品按产地归属划分为国产或进口。",
+      "object": "商品产地的国别归属",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "具体产地名称",
+        "品牌所属国别",
+        "报关口岸",
+        "经销商所在地"
+      ],
+      "qualifications": [
+        "取值仅为国产或进口两类；它是产地的粗粒度归类，与产地属性必须一致，不得互相矛盾",
+        "品牌国别不等于产地：外资品牌国内生产的应记为国产",
+        "医药与器械采购常只能取到本属性，因此与产地并存而非替代"
+      ]
+    },
+    {
+      "id": "sh.service.cycle",
+      "name": "服务周期",
+      "definition": "服务的计费或交付周期与频次。",
+      "object": "服务的周期与频次",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "履约时间",
+        "质保期限",
+        "单次作业耗时",
+        "合同总金额"
+      ],
+      "qualifications": [
+        "仅适用于服务类末级类目",
+        "取值如按次、按月、按季度、按年；周期与频次须能区分开",
+        "与履约时间是两回事：周期是多久做一次，履约时间是触发后多久做完"
+      ]
+    },
+    {
+      "id": "sh.chemical.physical_form",
+      "name": "物理形态",
+      "definition": "化学品或制剂在常温常压下的物理状态与外形。",
+      "object": "目标商品在常温常压下的物理状态",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "颜色",
+        "包装形式",
+        "药品剂型",
+        "晶体结构"
+      ],
+      "qualifications": [
+        "取值如固体、液体、气体、粉末、颗粒、膏状、气雾；晶体或片状等外形另作说明",
+        "物理形态影响贮存、运输与危险品分类，不可与颜色合写在一个字段"
+      ]
+    },
+    {
+      "id": "sh.fluid.dynamic_viscosity",
+      "name": "动力粘度",
+      "definition": "流体在规定温度下的动力粘度。",
+      "object": "目标商品流体本体的内摩擦阻力",
+      "type": "number",
+      "unitIds": [
+        "mPa_s"
+      ],
+      "excludedMeanings": [
+        "运动粘度",
+        "粘度等级牌号",
+        "「高粘」「低粘」这类主观描述",
+        "稠度"
+      ],
+      "qualifications": [
+        "必须注明测定温度：粘度随温度剧烈变化，脱离温度的粘度值无意义",
+        "动力粘度与运动粘度是两个物理量，相差一个密度因子，不可换算后混填",
+        "非牛顿流体须注明剪切速率或测定方法"
+      ]
+    },
+    {
+      "id": "sh.fluid.kinematic_viscosity",
+      "name": "运动粘度",
+      "definition": "流体在规定温度下的运动粘度。",
+      "object": "目标商品流体本体的运动粘度",
+      "type": "number",
+      "unitIds": [
+        "mm2_per_s"
+      ],
+      "excludedMeanings": [
+        "动力粘度",
+        "粘度等级牌号如ISO VG46",
+        "「高粘」「低粘」这类主观描述"
+      ],
+      "qualifications": [
+        "必须注明测定温度：润滑油行业惯例为40℃与100℃两点，两者不可混用",
+        "与动力粘度是两个物理量，不可换算后混填",
+        "ISO VG 等粘度等级是牌号不是取值，须另用性能或牌号属性表达"
+      ]
+    },
+    {
+      "id": "sh.lighting.colour_temperature",
+      "name": "色温",
+      "definition": "光源所发白光的相关色温。",
+      "object": "目标商品光源所发光的色温",
+      "type": "number",
+      "unitIds": [
+        "K"
+      ],
+      "excludedMeanings": [
+        "显色指数",
+        "光通量",
+        "「暖白」「正白」这类称谓本身",
+        "工作温度"
+      ],
+      "qualifications": [
+        "以开尔文记录；「暖白」「冷白」是区间称谓，须换成具体数值或标称值",
+        "可调色温产品记录范围时须说明为可调，不得只填单值"
+      ]
+    },
+    {
+      "id": "sh.structure.foldable",
+      "name": "是否可折叠",
+      "definition": "目标商品是否具备为收纳或运输而折叠的结构。",
+      "object": "目标商品的结构形式",
+      "type": "boolean",
+      "unitIds": [],
+      "excludedMeanings": [
+        "是否可拆卸",
+        "是否可伸缩",
+        "是否可堆叠",
+        "折叠后的尺寸"
+      ],
+      "qualifications": [
+        "未知不得写false",
+        "可折叠时应另行记录折叠后尺寸，否则该属性对选型无帮助"
+      ]
+    },
+    {
+      "id": "sh.material.seal",
+      "name": "密封件材质",
+      "definition": "构成目标商品密封元件的材料名称或牌号。",
+      "object": "目标商品的密封元件",
+      "type": "text",
+      "unitIds": [],
+      "excludedMeanings": [
+        "过流件材质",
+        "本体材质",
+        "密封形式或结构",
+        "润滑脂牌号"
+      ],
+      "qualifications": [
+        "与本体及过流件材质并存，分别记录",
+        "密封件材质决定介质相容性与温度上限，通常是整机耐介质与耐温的短板，不可由本体材质推断"
+      ]
+    },
+    {
+      "id": "sh.thermal.control_range",
+      "name": "控温范围",
+      "type": "range",
+      "unitIds": [
+        "degC"
+      ],
+      "definition": "目标商品可主动设定并维持的温度闭区间。",
+      "object": "目标商品的控温能力区间",
+      "excludedMeanings": [
+        "允许工作的环境温度范围",
+        "贮存温度范围",
+        "实际显示温度",
+        "控温精度"
+      ],
+      "qualifications": [
+        "这是设备的控温能力，与「工作温度」是两回事：后者是不损坏的环境限值（约束，越宽越宽容），前者是可达到的设定值（能力，越宽越强）",
+        "区间值：上下限是一个值的两端，不得只填一侧",
+        "控温精度另用测量精度表达，不并入本属性"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "name": "适用性别",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.applicability.gender"
+        }
+      ],
+      "note": "取值纯为男/女/中性，正是它让第2批「适用人群」的打包暴露出来，因此第2批已回改为性别与年龄段两条。本条与年龄段成对使用。"
+    },
+    {
+      "name": "硬度",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.material.shore_a",
+          "when": "橡胶与弹性体的邵氏硬度数值（橡胶邵氏硬度、硫化后邵氏硬度、固化后硬度）"
+        },
+        {
+          "propertyId": "sh.material.metal_hardness",
+          "when": "金属材料或热处理表面的硬度，以标尺代号加数值或范围表示（HRC、HB、HV）"
+        }
+      ],
+      "note": "218个变体里至少混了四种互不可比的东西。邵氏硬度已有属性可直接归入；金属硬度必须带标尺代号且常以范围给出，因此用文本而非数值。这与「精度等级」是同一处理：标尺代号一去掉，数字就不再有含义。",
+      "defer": [
+        {
+          "scope": "铅笔硬度写法（值样本2B、HB、2H、4B、6B）",
+          "reason": "铅笔硬度是石墨芯的软硬分级，与材料力学硬度不是同一概念，也不与任何硬度标尺可比。它是文具类的独立属性，本批没有对应的高频属性名，等其自身名称进入批次时再定义。"
+        },
+        {
+          "scope": "「硬」「中」「半硬壳」这类主观描述",
+          "reason": "无测量方法与标尺，不构成可比取值；应由填写方改填具体标尺数值，不为其保留位置。"
+        }
+      ]
+    },
+    {
+      "name": "温度范围",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.thermal.control_range",
+          "when": "设备可主动设定并维持的温度区间（可调温度范围、可控温度区间）"
+        },
+        {
+          "propertyId": "sh.thermal.working_temperature",
+          "when": "不损坏或可正常工作的环境或介质温度区间（适用温度范围、工作温度范围）"
+        }
+      ],
+      "note": "这是本批最有价值的一处辨析：「可控温度范围」是设备的控温能力（恒温箱能设到5~95℃，越宽越强），「适用温度范围」是不损坏的环境限值（约束），两者方向相反。历史模板把它们写在同一个字段里，实验室54与办公设备25主要是前者，泵阀18主要是后者。两者都用 range 区间值类型，各一条属性。"
+    },
+    {
+      "name": "总长度",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.geometry.overall_length"
+        }
+      ],
+      "note": "跨批次的跨名称合并（第三个归入总长的名字，前两个是第1批「长度」与第2批「全长」）。127个变体全是把工具名写进说明，五金工具124占绝对主导。"
+    },
+    {
+      "name": "剂型",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.pharma.dosage_form"
+        }
+      ],
+      "note": "医药相关105占主导。与「物理形态」分开：剂型是按药典标示的给药形态（片剂、胶囊、注射液），物理形态是常温常压下的物态，化学品用后者。"
+    },
+    {
+      "name": "螺距",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.thread.pitch"
+        }
+      ],
+      "note": "63个变体高度一致，五金工具132。证据中多条写明「粗牙可留空」——粗牙螺距由标准唯一确定，这个惯例写进了限定条件。与螺纹制式、螺纹代号构成一族。"
+    },
+    {
+      "name": "电池容量",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.battery.rated_capacity"
+        }
+      ],
+      "note": "跨批次的跨名称合并：与第1批「额定容量」同为电池额定容量。"
+    },
+    {
+      "name": "螺纹类型",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.thread.system"
+        }
+      ],
+      "note": "84个变体中占绝大多数的说明是「螺纹制式」「螺纹标准体系」，值样本M/G/NPT/BSP/BSPT也是体系代号，因此本属性是制式而非第1批的螺纹代号。同一通径的G与NPT不可互换，这是配合性判据。",
+      "defer": [
+        {
+          "scope": "值样本中的「三角牙螺纹」等牙型写法",
+          "reason": "牙型角与牙形是螺纹的另一个维度，由制式基本决定，单独作为取值会与制式冲突；证据量不足以确定其独立口径。"
+        },
+        {
+          "scope": "值样本中的「全螺纹」「不等长双头」等螺纹覆盖形式",
+          "reason": "这是螺纹在杆部的覆盖长度形式，描述对象是杆部而非螺纹体系，属另一条属性，等其自身名称进入批次时再定义。"
+        }
+      ]
+    },
+    {
+      "name": "输出信号",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.signal.output_type"
+        }
+      ],
+      "note": "仪器仪表91占主导。模拟量输出（4-20mA、0-10V、脉冲、继电器）是本属性的核心。",
+      "defer": [
+        {
+          "scope": "值样本中的CAN、EtherCAT、CANopen、BiSS、Modbus等总线与协议写法",
+          "reason": "这些是数据通信的接口与协议，不是测量结果的信号形式；接口部分应改填接口类型，协议部分目前字典没有对应属性（见「通讯接口」同一条留待处理）。"
+        }
+      ]
+    },
+    {
+      "name": "使用温度范围",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.thermal.working_temperature"
+        }
+      ],
+      "note": "与「温度范围」不同，本名称的说明高度一致地指向耐温限值（长期使用温度区间、推荐工作温度范围），实验室及化学用品101占绝对主导，多为密封件与胶粘剂的耐温区间，因此整体归入工作温度这一条区间属性，不涉及控温能力。"
+    },
+    {
+      "name": "服务商",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.service.provider"
+        }
+      ],
+      "note": "跨批次的跨名称合并：与第2批「服务提供方」同概念。办公设备92占主导。"
+    },
+    {
+      "name": "驱动方孔尺寸",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.tool.drive_size"
+        }
+      ],
+      "note": "五金工具131几乎独占，83个变体一致指套筒与扳杆配合的方孔。值样本混有英寸分数与毫米两种写法，本质是配合代号不是实测尺寸，因此用文本。"
+    },
+    {
+      "name": "基础油类型",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.lubricant.base_oil_type"
+        }
+      ],
+      "note": "实验室及化学用品128占主导。基础油类别决定与密封件及塑料的相容性，是润滑剂选型的第一个判据。"
+    },
+    {
+      "name": "适配型号",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.compatible.model"
+        }
+      ],
+      "note": "跨批次的跨名称合并：与第1批「适用型号」同为适配主机型号。与适配品牌成对使用。"
+    },
+    {
+      "name": "闪点",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.chemical.flash_point"
+        }
+      ],
+      "note": "实验室及化学用品127几乎独占。证据里多条自己写明「需注明测定方法」——开口与闭口闪点对同一试样结果不同，这个限定写进了定义。闪点是危险品分类判据，不得估填。"
+    },
+    {
+      "name": "适用季节",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.applicability.season"
+        }
+      ],
+      "note": "运动相关78与个人防护34。保留的理由与「风格」一致而与「适用场景」不同：羽绒服是冬季款这件事由商品规格决定，不随客户现场变化。"
+    },
+    {
+      "name": "批准文号",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.regulatory.approval_number"
+        }
+      ],
+      "note": "医药相关110占主导。与注册证号分开：批准文号是药品的许可instrument，注册证号是医疗器械的，两者法定含义与编号规则都不同。"
+    },
+    {
+      "name": "闭合方式",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.closure.method"
+        }
+      ],
+      "note": "运动相关62与个人防护38，指鞋服箱包的开合结构。与「连接方式」分开：后者是零件间的机械连接。"
+    },
+    {
+      "name": "流量",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.fluid.volumetric_flow"
+        }
+      ],
+      "note": "泵阀管路56与气动液压27。四种单位L/min、m³/h、L/s、L/h都是体积流量同一个物理量，因此一条属性挂四个单位即可，不需拆分——这与「粘度」正相反。"
+    },
+    {
+      "name": "冷却方式",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.cooling.method"
+        }
+      ],
+      "note": "焊接39与电气17。冷却方式直接决定负载持续率，是焊机选型的关键项。"
+    },
+    {
+      "name": "空载转速",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.rotation.no_load_speed"
+        }
+      ],
+      "note": "五金工具118几乎独占，38个变体一致。定义中把冲击频率隔离出去：冲击类工具的每分钟打击次数是另一个量，历史模板常填错位置。"
+    },
+    {
+      "name": "柄部类型",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.tool.shank_type"
+        }
+      ],
+      "note": "金属加工69与五金工具48。与第2批「手柄类型」必须分开：柄部是装入机具的装夹端（SDS-plus、六角柄），手柄是操作者握持的部位，描述对象不同。已声明互为口径以防混选。"
+    },
+    {
+      "name": "通讯接口",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.interface.type"
+        }
+      ],
+      "note": "跨批次合并到第2批的接口类型。实测取值以物理接口为主：RS485(74)、USB(66)、RS232(63)、以太网(45)、GPIB(23)。",
+      "defer": [
+        {
+          "scope": "取值中的Modbus(7)、TCP/IP(12)等协议名",
+          "reason": "通信协议与接口形式是两个维度，同一RS485可跑多种协议。字典目前没有通信协议属性，本批也没有对应的高频属性名可据以建立，等其自身名称进入批次时再定义。"
+        }
+      ]
+    },
+    {
+      "name": "防爆等级",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.hazardous.ex_marking"
+        }
+      ],
+      "note": "五金工具39、仪器仪表32、照明14。处理方式同IP代号：Exd IIB T4 是一个整体标志，型式、气体组别、温度组别三段各有独立含义，缺一段就无法判断能否用于某危险场所，因此整体保留不拆。"
+    },
+    {
+      "name": "密度",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.material.density"
+        }
+      ],
+      "note": "g/cm³与kg/m³是同一物理量的两个单位，一条属性挂两个即可。定义把三件事隔离出去：主观的高低密度称谓、多孔材料的堆积密度、以及「高密度聚乙烯」里作为牌号一部分的高密度。多条证据自带「20℃下」，测温要求写进了限定。"
+    },
+    {
+      "name": "国产/进口",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.origin.import_status"
+        }
+      ],
+      "note": "值样本只有国产与进口两个。没有并入产地：产地的取值空间是地名，把「国产」填进产地会污染值空间。两者并存并要求一致，医药与器械采购常只能取到粗粒度的本属性。"
+    },
+    {
+      "name": "应用场景",
+      "action": "defer",
+      "reason": "与已裁定的「适用场景」是同一概念的另一个名字，取值为停车场、写字楼、农业灌溉、农村照明这类场景。待裁定清单 q-适用场景 已由业务负责人裁定不进入标准字典，本条按同一结论处理，不再新开问题。另需说明：实验室及化学用品52里的「适用样品类型」用法不属于场景，而是仪器可处理的对象，应改填「适用介质」，这一点写入映射备注供填写方参照。"
+    },
+    {
+      "name": "附件类型",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.accessory.part_type"
+        }
+      ],
+      "note": "跨批次的跨名称合并，由实测定案：230条候选的末级类目名100%含「附件/配件/耗材」（控制开关附件、变压器附件、编码器附件），与「配件类型」的96%同属一个角色——商品本身是兜底桶里的某个部件。原先怀疑它指随机附件清单，实测推翻。220个变体几乎全是n=1的逐类目写法，正是兜底桶的特征。"
+    },
+    {
+      "name": "服务周期",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.service.cycle"
+        }
+      ],
+      "note": "值样本按次、按月、按季度、按年。与第2批「履约时间」分开：周期是多久做一次，履约时间是触发后多久做完，两者都缺一不可。"
+    },
+    {
+      "name": "外观",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.chemical.physical_form",
+          "when": "物态与外形描述（固体、液体、气雾剂、粉末、片状、柱状、球状）"
+        },
+        {
+          "propertyId": "sh.appearance.color",
+          "when": "颜色描述部分（无色晶体、白色晶体中的颜色）"
+        }
+      ],
+      "note": "实验室及化学用品109几乎独占。说明里反复出现「颜色、状态等外观描述」，即一个字段同时装了物态与颜色；「白色晶体」这个取值本身就是颜色加外形的合写。物态影响贮存运输与危险品分类，颜色属外观，必须分开。颜色部分归入第1批已有属性。"
+    },
+    {
+      "name": "粘度",
+      "action": "split",
+      "targets": [
+        {
+          "propertyId": "sh.fluid.dynamic_viscosity",
+          "when": "以mPa·s给出的动力粘度（胶体粘度、施工粘度、熔融粘度）"
+        },
+        {
+          "propertyId": "sh.fluid.kinematic_viscosity",
+          "when": "以mm²/s给出的运动粘度（产品运动粘度）"
+        }
+      ],
+      "note": "必须拆：mPa·s与mm²/s不是同一物理量的两个单位，两者相差一个密度因子，是动力粘度与运动粘度两个量。这与「流量」正相反——那里四个单位属同一物理量，一条属性即可。两条都要求注明测定温度，润滑油行业的40℃与100℃两点不可混用。",
+      "defer": [
+        {
+          "scope": "值样本中的「高粘」「中粘」「低粘」",
+          "reason": "无测定温度与方法，不构成可比取值；应由填写方改填具体数值。"
+        }
+      ]
+    },
+    {
+      "name": "色温",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.lighting.colour_temperature"
+        }
+      ],
+      "note": "照明106几乎独占，仅21个变体，是本批最干净的一条。定义要求把「暖白」「冷白」这类区间称谓换成标称数值，并要求可调色温产品说明为范围。"
+    },
+    {
+      "name": "注册证号",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.regulatory.registration_number"
+        }
+      ],
+      "note": "医药相关101，仅14个变体。与批准文号分立而非合并：两者是不同法规下的不同许可instrument，编号规则与绑定对象都不同，合并会让合规校验失效。已声明互为口径，一个商品通常只有其中一种。"
+    },
+    {
+      "name": "动力类型",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.actuation.method"
+        }
+      ],
+      "note": "跨批次的跨名称合并到第2批的驱动方式。证据里的说明直接写着「设备驱动方式」「驱动方式」，取值人力、手动、插电、充电式、内燃、太阳能正是驱动执行机构的动力形式。值样本混入的「卧式」「手持」属形态描述，填写口径错误。"
+    },
+    {
+      "name": "包装方式",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.packaging.form"
+        }
+      ],
+      "note": "合并到已有的包装形式属性。仅24个变体，生活福利51与五金工具30。"
+    },
+    {
+      "name": "性能等级",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.fastener.property_class"
+        }
+      ],
+      "note": "跨批次的跨名称合并到第2批从「强度等级」拆出的紧固件性能等级。105个变体里有83个共用同一句说明「按适用标准记录性能等级；非金属件或无等级产品可留空，不混用螺栓与螺母等级」，说明修订版模板已统一过口径，值样本4.8/8.8/10.9/A2-70/A4-80与之吻合。",
+      "defer": [
+        {
+          "scope": "值样本中的API GL-5、AGMA等润滑油性能等级（约4个变体）",
+          "reason": "润滑剂性能等级是另一套体系，描述对象是油品而非紧固件。本批「基础油类型」「粘度」已开始形成润滑剂属性族，但性能等级在本批的证据只有个位数变体，不足以确定口径，等其自身名称进入批次时再定义。"
+        }
+      ]
+    },
+    {
+      "name": "总长",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.geometry.overall_length"
+        }
+      ],
+      "note": "跨批次的跨名称合并，归入总长的第四个名字。金属加工85与五金工具18。与「总长度」同批出现且指向同一条，说明历史模板内部就没统一过写法。"
+    },
+    {
+      "name": "是否可折叠",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.structure.foldable"
+        }
+      ],
+      "note": "运动相关37与搬运存储25。定义要求可折叠时另记折叠后尺寸，否则单一个布尔值对选型没有帮助。"
+    },
+    {
+      "name": "密封材质",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.material.seal"
+        }
+      ],
+      "note": "泵阀管路69与气动液压24。第三条按部位区分的材质属性（前两条是本体与过流件）。密封件通常是整机耐介质与耐温的短板，不能由本体材质推断，因此必须独立。"
+    },
+    {
+      "name": "操控方式",
+      "action": "map",
+      "targets": [
+        {
+          "propertyId": "sh.control.method"
+        }
+      ],
+      "note": "跨批次的跨名称合并：与第2批「控制方式」同概念。办公设备65占主导。"
+    }
+  ],
+  "amendments": [
+    {
+      "trigger": "实测裁定 q-区间值类型",
+      "what": "控温范围上下限两条属性合并为「控温范围」一条区间属性；「使用温度范围」与「温度范围」的目标随之改为区间属性。",
+      "why": "ETIM 把区间定为独立值类型 R（闭区间 [a..b]，两个数值共用一个单位），eCl@ss 用同一条数值属性的 min/max level 表达，两个标准都不把区间拆成两条属性；ETIM 分类导则第777行还明确要求「优先使用数值、布尔、区间类型，不要新建字母数字型」，即标准反对退回文本。原来拆成上下限两条的做法有一个结构缺陷：类目只挂下限不挂上限在契约上完全合法，配对关系只能在结构检查里报警告，而区间作为一个值可以从根上排除这种半挂。",
+      "legitimacy": "与第2批同一次裁定连带修正，属同一处结构缺口的统一处理；字典尚未定稿，决定文件按批次顺序重放即生效。"
+    }
+  ]
+}

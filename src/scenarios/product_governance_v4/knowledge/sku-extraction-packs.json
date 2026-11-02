@@ -1,0 +1,216 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-30",
+  "scope": "离线建议。真实目录ID为知识包适用配置，不是某批SKU硬编码；新目录接入时核对映射。",
+  "policy": "原文明确优先。品类知识允许补合理省略并标推断，必须同SKU线索、适用对象、规则、理由与假设。不能用经验覆盖明确相反信息。",
+  "packs": [
+    {
+      "id": "paper-roll",
+      "version": "2026-10-30.1",
+      "name": "卫生卷纸",
+      "categoryIds": [
+        "3360395b-3790-41f3-8e8c-6c682c53e8da",
+        "8db9ebc8-9bd2-4d72-b183-819a8451c8ff",
+        "e30ca09a-3e86-4223-b618-d6581ad1489e",
+        "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+        "15216d47-17c6-4b18-9391-83097f6f7447"
+      ],
+      "rules": [
+        {
+          "id": "roll-item-mass",
+          "definitionIds": [
+            "cleaning.roll_weight"
+          ],
+          "description": "已确定所售为卫生卷纸，标题/所选规格的克数与粒/卷数并列（180克10粒、75克10粒、900克4卷装），可按卷纸商品惯例理解为单卷标称重量。粒在此语境可指卷。结合型号、包装表达和合理量级判断，不仅靠不合理小就反推；整包/总重/毛重明示优先，不从总重除算；有相反单卷数值则核冲突。"
+        },
+        {
+          "id": "roll-dimension-unit",
+          "definitionIds": [
+            "cleaning.dimensions"
+          ],
+          "description": "卷高/幅宽等测量部位明确，约百量级的裸数字可按纸卷规格毫米惯例判断并标推断；不能把101卷高误当101卷，不能用典型尺寸替换数字，也不从尺寸推出纸芯或类别。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://www.jd.com/brand/159017f7d66c89088cb3e.html",
+          "note": "同平台商品中180克10卷及75克10粒对应180g/卷、75g/卷的表达；这是行业表达参考，不证明每件SKU。"
+        }
+      ]
+    },
+    {
+      "id": "waste-bag",
+      "version": "2026-10-30.1",
+      "name": "垃圾袋与错挂的配套袋",
+      "categoryIds": [
+        "642d23b1-6a0b-4f34-97f5-adb37d01478a",
+        "ef26b5d4-8316-4f43-81e4-fb6d0616a2ef",
+        "c2861c74-b1ad-46e8-990e-bb4f68c7a7f7",
+        "725ad4e8-ad27-4a4e-96c7-0f262e8cbdbe",
+        "64693bfb-ab6a-44a6-923e-2c21d1f0b296",
+        "ead15250-2393-4e5d-a3f6-f9f825bd90c6",
+        "718afd01-74a0-4168-bba1-31fa24ed5dea"
+      ],
+      "rules": [
+        {
+          "id": "bag-dimension-unit",
+          "definitionIds": [
+            "cleaning.dimensions"
+          ],
+          "description": "实际所售对象明确是日用、宠物、保洁或物业用普通垃圾袋时，70×90、80×90等袋幅长宽可依品类尺寸惯例补cm；先排除已标mm、厚度、只数、桶尺寸、包装尺寸及多款未选。所售是桶配套袋也可用于当前类的共享尺寸字段，不把桶容量/材质复制给袋。明确mm的450×500×0.007mm可提取前两维450×500mm，第三维膜厚不能吞入长宽。"
+        },
+        {
+          "id": "bag-generic-material",
+          "definitionIds": [
+            "cleaning.material"
+          ],
+          "description": "明确日用、宠物、保洁或物业用途的普通薄膜垃圾袋，且无纸袋、布袋、编织袋或复合特殊材料线索时，可按品类给泛称塑料并标推断；不能升级成PE、HDPE、LDPE、可降解或特定配方。分类仍有疑点不阻断此共享材料字段。"
+        },
+        {
+          "id": "film-thickness-si",
+          "definitionIds": [
+            "cleaning.single_layer_thickness"
+          ],
+          "description": "薄膜行业丝为0.01mm的商用单位解释，仅在原文明确单面/单层时可将X丝转为X×0.01mm并标品类判断。双面、总厚、范围、不同规格不能按单层值填；该惯例不是对任何行业的通用单位定义。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://zcms.esgcc.com.cn/upload/file/2026/03/31/1774945032699021013.pdf",
+          "note": "采购清单含70×90cm平口垃圾袋、单面与双面丝规格，支持袋尺寸和膜厚对象分开。"
+        },
+        {
+          "url": "https://bid.wens.com.cn/u/cms/www/202407/%E9%99%84%E4%BB%B61%EF%BC%9A%E6%8B%9B%E6%A0%87%E4%BA%A7%E5%93%81%E6%98%8E%E7%BB%86%EF%BC%88%E5%BD%A9%E6%9D%A1%E5%B8%83%E3%80%81%E6%94%B6%E7%BA%B3%E7%AE%B1%E3%80%81%E5%86%B2%E6%B4%97%E6%9C%BA%E7%AD%89%E4%BA%A7%E5%93%81%EF%BC%89.pdf",
+          "note": "采购方平口垃圾袋资料列cm尺寸及聚乙烯/聚丙烯等塑料材料；只能支持泛材质判断，不能指定本SKU树脂。"
+        }
+      ]
+    },
+    {
+      "id": "waste-bin",
+      "version": "2026-10-30.1",
+      "name": "垃圾桶颜色与对象",
+      "categoryIds": [
+        "7974e8ea-c029-43c6-ab62-24363f913e43",
+        "fc1998b7-8ea3-4c65-a2a0-2ffc337f1a51",
+        "2ed98cb8-660a-4aae-ae62-dccace6b107f",
+        "a020d4d7-8cbb-41bb-bc64-965694e004d4",
+        "6f7f1bf4-7519-4f98-a5f3-f626e09e75ea",
+        "9043edfb-bd84-426a-b52f-8f5998b81bfb",
+        "d1f164e8-375f-44b9-9add-66e4db518c56",
+        "9731a35a-5ee1-4f28-8f8f-597e96730a6f",
+        "2d954613-324d-464d-891b-4a1c60493943",
+        "718afd01-74a0-4168-bba1-31fa24ed5dea",
+        "35609bb3-8c23-4044-80ef-84e3a8101e43",
+        "dc4b9084-aee9-4127-ab8d-7444789017a3"
+      ],
+      "rules": [
+        {
+          "id": "stainless-natural-color",
+          "definitionIds": [
+            "cleaning.color_palette"
+          ],
+          "description": "同SKU标题或参数已明示不锈钢，所选颜色为本色且无喷涂颜色冲突，可规范为不锈钢色；本色纸、本色木、透明塑料不可如此映射。不仅因是桶就推断不锈钢或塑料。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://zcms.esgcc.com.cn/upload/file/2026/03/31/1774945032699021013.pdf",
+          "note": "实际采购条目使用垃圾桶不锈钢色；新增枚举是本地建议，非已修改线上。"
+        }
+      ]
+    },
+    {
+      "id": "paper-sheet",
+      "version": "2026-10-30.1",
+      "name": "抽纸与擦拭巾",
+      "categoryIds": [
+        "640b5b8b-9d6e-4784-a8e2-53c291f0b7f7",
+        "ce3a9f67-613c-4707-bf3a-95193edb8a2d",
+        "7a1ea510-8777-46ba-bfa0-955b472a0d61",
+        "3360395b-3790-41f3-8e8c-6c682c53e8da",
+        "8db9ebc8-9bd2-4d72-b183-819a8451c8ff",
+        "e30ca09a-3e86-4223-b618-d6581ad1489e",
+        "67adeef9-8c1f-47e2-ad72-462ad35a5a75",
+        "15216d47-17c6-4b18-9391-83097f6f7447"
+      ],
+      "rules": [
+        {
+          "id": "sheet-dimension-unit",
+          "definitionIds": [
+            "cleaning.dimensions"
+          ],
+          "description": "纸巾/洗脸巾本体尺寸表达中的175×175、140×175等百量级数字可按毫米常用规格推断；20×20等也可能是厘米，须按本件品类、部位、相邻明示规格及合理量级判断。不得机械给所有裸数字同一单位。"
+        },
+        {
+          "id": "sheet-pack-count",
+          "definitionIds": [
+            "cleaning.pull_count_per_package",
+            "cleaning.paper_count_per_package"
+          ],
+          "description": "实际所选包装明确的X抽×Y包、X抽/Y包，或挂抽中一提即一个独立悬挂纸包且没有一提多包证据，可按单包X抽标品类判断；若提是外包装含多包则不成立。不能由张数和层数换算抽数；标题笼统但所选规格已明确单包/每提层级时，按所选规格并保留标题问题。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://zcms.esgcc.com.cn/upload/file/2026/03/31/1774945032699021013.pdf",
+          "note": "采购商品常列每包抽数与单张mm尺寸；只作单位和包装语境参考。"
+        }
+      ]
+    },
+    {
+      "id": "cleaning-tool",
+      "version": "2026-10-30.1",
+      "name": "粘尘滚筒",
+      "categoryIds": [
+        "53ba7acd-51d7-401f-87af-52c4ce82cd1c",
+        "30ac0158-92f9-47ee-82df-1e921291e750"
+      ],
+      "rules": [
+        {
+          "id": "roller-form",
+          "definitionIds": [
+            "cleaning.material"
+          ],
+          "description": "同SKU图片与文字确认手持粘尘滚筒时，可从可见注塑结构提出手柄/外壳为塑料的泛材质推断，纸卷材料与塑料部件分开，不从颜色猜具体树脂；图片SKU关联或材质外观不清则仅保留其他已知字段。"
+        },
+        {
+          "id": "roller-size",
+          "definitionIds": [
+            "cleaning.dimensions"
+          ],
+          "description": "同SKU图展示滚筒且16cm规格语境能定位纸筒，可推断其宽度，注明测量部位假设；只有数字或无法定位部位则保留16cm不扩写。"
+        }
+      ],
+      "references": [
+        {
+          "source": "user-image-20261030",
+          "note": "用户补充16cm粉色带柄粘毛器实物；视觉只支持可见部位，不将60撕作为卫生纸数量。"
+        }
+      ]
+    }
+  ],
+  "enumExtensions": [
+    {
+      "definitionId": "cleaning.color_palette",
+      "categoryIds": [
+        "7974e8ea-c029-43c6-ab62-24363f913e43",
+        "fc1998b7-8ea3-4c65-a2a0-2ffc337f1a51",
+        "2ed98cb8-660a-4aae-ae62-dccace6b107f",
+        "a020d4d7-8cbb-41bb-bc64-965694e004d4",
+        "6f7f1bf4-7519-4f98-a5f3-f626e09e75ea",
+        "9043edfb-bd84-426a-b52f-8f5998b81bfb",
+        "d1f164e8-375f-44b9-9add-66e4db518c56",
+        "9731a35a-5ee1-4f28-8f8f-597e96730a6f",
+        "2d954613-324d-464d-891b-4a1c60493943",
+        "718afd01-74a0-4168-bba1-31fa24ed5dea",
+        "35609bb3-8c23-4044-80ef-84e3a8101e43",
+        "dc4b9084-aee9-4127-ab8d-7444789017a3"
+      ],
+      "values": [
+        "不锈钢色"
+      ],
+      "reason": "用户明确要求恢复不锈钢本色；原文不锈钢+本色做带对象的颜色规范，不全局把本色当银色。",
+      "adoption": "pending_human"
+    }
+  ]
+}

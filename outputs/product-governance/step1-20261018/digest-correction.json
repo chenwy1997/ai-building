@@ -1,9 +1,0 @@
-{
-  "reason": "旧规范化对内存中的undefined字段计入null，但保存JSON时字段省略；仅修复摘要元数据，规则结果及模型输入未改动。",
-  "oldResultsHash": "4b80271d8af6c5bde05277bdc995b1708ae8ed93d0326ffcfd55d0b98d0f5dd2",
-  "newResultsHash": "175ef7fc645b204a1f5b4103a9f3130d3d6df2bdd4667ada01ae66d6bcb57e3e",
-  "oldHashReproduced": true,
-  "originalPreserved": "evaluation-r2.json",
-  "correctedMetadata": "evaluation-r2-canonical.json",
-  "at": "2026-10-18T15:47:27.329Z"
-}

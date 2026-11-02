@@ -1,0 +1,15 @@
+{
+  "schema": "sanheng-property-mapping-reference-v1",
+  "status": "project-authored; independent expert verification and blind model evaluation pending",
+  "purpose": "概念区分参考，不能作为本轮AI准确率结果；expected不应送入被测模型",
+  "cases": [
+    {"id":"own-vs-compatible-brand","input":"配件自身品牌甲；制造商明确适配乙品牌的乙-100机型。描述适配品牌。","expected":["sh.compatible.brand"],"reject":["sh.own.brand"]},
+    {"id":"brand-cannot-prove-model","input":"只有品牌甲，未提供商品型号。是否能够得到制造商型号的具体值？","expectedAction":"unknown; do not infer","note":"模板可包含型号字段，但商品值不能由品牌推断。"},
+    {"id":"input-vs-output-power","input":"电动工具铭牌额定电气输入功率800W；此处描述输入功率。","expected":["sh.electrical.rated_input_power"],"reject":["sh.mechanical.rated_output_power"]},
+    {"id":"insulation-resistance","input":"给定直流测试电压和测量部位，报告绝缘电阻≥100MΩ。识别所测属性。","expected":["sh.electrical.insulation_resistance"],"reject":["sh.material.dielectric_strength","sh.electrical.withstand_test_voltage"]},
+    {"id":"hardness-scale","input":"橡胶试样测试报告明确为IRHD硬度；不得改变原测试方法。","expected":["sh.material.irhd"],"reject":["sh.material.shore_a"]},
+    {"id":"lead-count","input":"描述发热元件连接至外部的独立引出导线根数，并非内部电阻丝数量。","expected":["sh.heater.external_lead_count"],"rejectAction":"rename as 发热丝线数"},
+    {"id":"materials-role","input":"发热芯由镍铬发热丝和陶瓷绝缘支撑构成，需要分别描述这两个材料。","expected":["sh.material.heating_element","sh.material.insulating_support"],"rejectAction":"merge both into undifferentiated 材质"},
+    {"id":"battery-not-included","input":"工具以裸机形式交付，不含电池；页面只展示兼容电池的容量。","expected":["sh.configuration.battery_included"],"rejectAction":"fill included battery capacity from a compatible optional battery"}
+  ]
+}

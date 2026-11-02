@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "basis": "业务研究顺序；不是平台事实正确率或统一权威分数",
+  "sourceFamilies": {
+    "zkh": {
+      "sources": [
+        "zkh-template",
+        "zkh-l5-specs"
+      ],
+      "focus": "工业MRO、工业清洁、设备与耗材",
+      "duplicatePolicy": "模板、长表、宽表不算独立来源"
+    },
+    "jd-vop": {
+      "sources": [
+        "jd-vop"
+      ],
+      "focus": "生活消费、办公及通用商品；工业品也可补充"
+    },
+    "luxshare": {
+      "sources": [
+        "luxshare-template"
+      ],
+      "focus": "企业物料、电子制造、金属与材料；需核其采购对象是否匹配"
+    },
+    "ai-competition": {
+      "sources": [
+        "ai-competition-2"
+      ],
+      "focus": "跨类目属性模板；用于补漏，不默认高于厂家或适用标准"
+    },
+    "manufacturer": {
+      "sources": [],
+      "focus": "具体型号的定义、适用条件、规格和技术声明"
+    },
+    "own-products": {
+      "sources": [
+        "sanheng-products"
+      ],
+      "focus": "本地经营对象与供应链实际字段；历史挂类可能错误"
+    },
+    "web-commerce": {
+      "sources": [
+        "web-reference"
+      ],
+      "focus": "其他电商和采购网站；保留卖方、商品和页内定位"
+    },
+    "model-knowledge": {
+      "sources": [
+        "model-prior"
+      ],
+      "focus": "发现采购问题和补充候选；不能伪装实测或标准证据"
+    }
+  },
+  "profiles": {
+    "industrial_mro": {
+      "order": [
+        "zkh",
+        "manufacturer",
+        "luxshare",
+        "jd-vop",
+        "ai-competition",
+        "own-products",
+        "web-commerce",
+        "model-knowledge"
+      ],
+      "reason": "先找专业工业规格与采购差异，再用其他来源补漏"
+    },
+    "consumer_daily": {
+      "order": [
+        "jd-vop",
+        "manufacturer",
+        "zkh",
+        "own-products",
+        "web-commerce",
+        "ai-competition",
+        "luxshare",
+        "model-knowledge"
+      ],
+      "reason": "先找消费者常用名称和规格，再核工业/商用适用差异"
+    },
+    "industrial_materials": {
+      "order": [
+        "zkh",
+        "luxshare",
+        "manufacturer",
+        "jd-vop",
+        "ai-competition",
+        "own-products",
+        "web-commerce",
+        "model-knowledge"
+      ],
+      "reason": "企业材料模板可帮助发现材质、等级、加工和兼容维度"
+    },
+    "mixed": {
+      "order": [
+        "zkh",
+        "jd-vop",
+        "manufacturer",
+        "own-products",
+        "luxshare",
+        "ai-competition",
+        "web-commerce",
+        "model-knowledge"
+      ],
+      "reason": "先分实际商品对象与采购场景，分别检索并保留冲突"
+    }
+  },
+  "selection": "逐类声明 profile 与理由；不能按整个一级大类或来源频次机械裁决。适用正式标准须另核版本、现行状态和对象。",
+  "numericEnums": "归一单位、去重、核对象；共享词库+有依据的类目子集，新值保留原文并走新版本待审。平台筛选列表不是行业全集。"
+}

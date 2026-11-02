@@ -24,8 +24,23 @@ out/
 coverage/
 *.egg-info/
 
+# Generated results and local workspaces
+outputs/
+workspace/
+workspace-suggest/
+scratch-*/
+*.inspect.ndjson
+/audit-ops.json
+/audit-ops.md
+/属性模板-修订版.xlsx
+/属性模板-修订行.xlsx
+/比赛结果-1000商品-修订版.xlsx
+/改动类目清单.csv
+
 # Logs and caches
 *.log
+*.log.*
+logs/
 .cache/
 .turbo/
 .pytest_cache/

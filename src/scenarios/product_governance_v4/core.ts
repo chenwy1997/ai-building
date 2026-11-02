@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { normalizeRestorationName, restorationEligibility, optionalRestorationAllowed } from './restoration';
+import { validateAttribute, validateDictionaries, validateSharedDefinitions, stableJson } from './attribute-contract.mjs';
 
 export const readJson = async (file: string) => JSON.parse(await fs.readFile(file, 'utf8'));
 export const hash = (value: string | Uint8Array) => createHash('sha256').update(value).digest('hex');
@@ -11,7 +12,12 @@ export const writeJson = async (file: string, value: unknown) => {
   await fs.writeFile(file, JSON.stringify(value, null, 2) + '\n');
 };
 const semanticFields = ['name', 'type', 'unit', 'required', 'scope', 'definition', 'rules', 'shortRule', 'purpose', 'valueDomain', 'enumValues'];
-export const semanticHash = (p: any) => hash(JSON.stringify(semanticFields.map(k => [k, p[k] ?? null])));
+export const semanticHash = (p: any) => {
+  const fields = semanticFields.map(k => [k, p[k] ?? null]);
+  // Old definitions retain their historical digest; typed additions are substantive changes.
+  for (const k of ['definitionId', 'definitionVersion', 'typing', 'valueExamples']) if (p[k] !== undefined) fields.push([k, JSON.parse(stableJson(p[k]))]);
+  return hash(JSON.stringify(fields));
+};
 export const identity = (p: any) => p.categoryId + ':' + (p.key || p.name);
 export function compareBaseline(before: any[], after: any[]) {
   const current = new Map(after.map(p => [identity(p), p]));
@@ -135,9 +141,35 @@ export function checkRestorations(baseline: any, proposals: any[], decisions: an
   return { errors, decisions: reviewed, restored, pending, eligible, excluded };
 }
 
-export function validateDraft(draft: any, pool: any, expectedIds: string[], policy: any) {
+export function checkAttributeTypes(proposals: any[], dictionaries: any = { version: 1, dictionaries: [] }, baseline: any[] = [], inspectLegacy = false) {
+  const errors: any[] = [...validateDictionaries(dictionaries)], warnings: any[] = [];
+  if (!Array.isArray(proposals) || !Array.isArray(baseline)) errors.push({ kind: 'attribute_type', path: 'proposals', message: '方案和基线必须含 proposals 数组' });
+  if (errors.length) return { errors, warnings, checked: 0, legacy: 0 };
+  const before = new Map(baseline.filter(p => p && typeof p === 'object' && !Array.isArray(p)).map(p => [identity(p), p]));
+  let checked = 0, legacy = 0;
+  for (const [i, p] of proposals.entries()) {
+    if (!p || typeof p !== 'object' || Array.isArray(p)) {
+      errors.push({ kind: 'attribute_type', path: `proposals[${i}]`, message: '属性必须是对象' }); continue;
+    }
+    const old = before.get(identity(p));
+    if (!p.typing && (inspectLegacy || old && semanticHash(old) === semanticHash(p))) {
+      legacy++;
+      warnings.push({ kind: 'legacy_type_unreviewed', category: p.category, attribute: p.name, path: `proposals[${i}]`, message: '沿用历史定义；尚未按新类型合同复核，不算新合同验收通过' });
+      continue;
+    }
+    checked++;
+    errors.push(...validateAttribute(p, dictionaries).map(e => ({ ...e, category: p.category, attribute: p.name, path: `proposals[${i}].${e.path}` })));
+  }
+  errors.push(...validateSharedDefinitions(proposals));
+  return { errors, warnings, checked, legacy };
+}
+
+export function validateDraft(draft: any, pool: any, expectedIds: string[], policy: any, context: { dictionaries?: any; baseline?: any[] } = {}) {
   const errors: any[] = [], warnings: any[] = [];
   const add = (kind: string, category: string, attribute: string, message: string) => errors.push({ kind, category, attribute, message });
+  const typing = checkAttributeTypes(draft.proposals, context.dictionaries, context.baseline);
+  errors.push(...typing.errors); warnings.push(...typing.warnings);
+  if (typing.checked && draft.attributeContractVersion !== 1) add('attribute_contract_version', '', '', '新稿需要 attributeContractVersion=1；不能用旧格式跳过类型检查');
   const ids = draft.categories.map((c: any) => c.categoryId);
   if (new Set(ids).size !== ids.length || JSON.stringify([...ids].sort()) !== JSON.stringify([...expectedIds].sort())) add('scope', '', '', '类目范围重复、遗漏或越界');
   if (draft.productionWrites || draft.deepseekRequests) add('execution_scope', '', '', '此运行仅授权Codex离线方案');
@@ -164,7 +196,7 @@ export function validateDraft(draft: any, pool: any, expectedIds: string[], poli
     }
     if (new Set(ps.map((p: any) => p.name)).size !== ps.length || new Set(ps.map((p: any) => p.key)).size !== ps.length) add('duplicate_attribute', c.category, '', '名称或key重复');
     for (const p of ps) {
-      if (p.scope !== 'SKU' || typeof p.required !== 'boolean' || !['text', 'number', 'boolean', 'option'].includes(p.type) || !p.definition || !p.purpose || !p.rules?.length) add('contract', c.category, p.name, '缺定义/用途/规则或类型、SKU维度、必填合同错误');
+      if (p.scope !== 'SKU' || typeof p.required !== 'boolean' || !['text', 'number', 'boolean', 'option', 'dictionary'].includes(p.type) || !p.definition || !p.purpose || !p.rules?.length) add('contract', c.category, p.name, '缺定义/用途/规则或类型、SKU维度、必填合同错误');
       if (p.humanDecision) add('human_authority', c.category, p.name, '新作者稿不得预填人工结论');
       if (ownership(p.name, policy) === 'explicit_business_exclusion') add('explicit_exclusion', c.category, p.name, '违反明确业务职责政策');
       if (!ds.some((d: any) => ['keep', 'merge'].includes(d.decision) && d.candidateName === p.name)) add('missing_decision', c.category, p.name, '属性没有保留或归并取舍');
@@ -194,6 +226,11 @@ export function validateFamilies(matrix: any, proposals: any[], categoryIds: str
         if (!['applicable', 'conditional', 'not_applicable', 'unresolved'].includes(a.applicability) || !a.reason) errors.push({ kind: 'family_reason', family: family.name, concept: concept.name, categoryId: a.categoryId });
         for (const name of a.proposalNames ?? []) if (!proposals.some(p => p.categoryId === a.categoryId && p.name === name)) errors.push({ kind: 'family_reference', family: family.name, concept: concept.name, categoryId: a.categoryId, name });
       }
+      const bindings = concept.assessments.flatMap((a: any) => (a.proposalNames ?? []).map((name: string) => ({ assessment: a, p: proposals.find(p => p.categoryId === a.categoryId && p.name === name) }))).filter((x: any) => x.p);
+      if (bindings.some((x: any) => x.p.typing)) {
+        const signatures = new Set(bindings.map((x: any) => JSON.stringify([x.p.type, x.p.unit ?? null, x.p.typing?.choice?.mode ?? null])));
+        if (signatures.size > 1 && bindings.some((x: any) => !x.assessment.definitionDifferenceReason)) errors.push({ kind: 'family_type_conflict', family: family.name, concept: concept.name, message: '同族概念的类型、单位或单多选不一致，须逐成员提供 definitionDifferenceReason 并独立审校' });
+      }
     }
   }
   const standalone = matrix.standaloneCategories ?? matrix.independentCategories ?? matrix.standalone ?? [];
@@ -222,6 +259,7 @@ export async function loadSelection(manifestFile: string) {
     files.push({ path: file, sha256: actual }); return readJson(file);
   };
   const scope = await load(config.scope), baseline = await load(config.baseline), baselineSources = await load(config.baselineSources);
+  const dictionaries = config.dictionaries ? await load(config.dictionaries) : baseline.dictionaries ?? { version: 1, dictionaries: [] };
   const groups = [];
   for (const g of config.groups) groups.push({ ...g, draft: await load(g.draft), pool: await load(g.pool), matrix: await load(g.matrix) });
   const preservedMatrix = config.preservedMatrix ? await load(config.preservedMatrix) : { families: [] };
@@ -230,11 +268,11 @@ export async function loadSelection(manifestFile: string) {
     const amendment = await load(ref);
     review = { ...(review ?? {}), amendments: [...(review?.amendments ?? []), amendment] };
   }
-  return { config, scope, baseline, baselineSources, groups, preservedMatrix, files, review };
+  return { config, scope, baseline, baselineSources, groups, preservedMatrix, files, review, dictionaries };
 }
 
 export async function assemble(manifestFile: string, out: string, policy: any) {
-  const { config, scope, baseline, baselineSources, groups, preservedMatrix, files, review } = await loadSelection(manifestFile);
+  const { config, scope, baseline, baselineSources, groups, preservedMatrix, files, review, dictionaries } = await loadSelection(manifestFile);
   const preserve = new Set<string>(config.preserveCategoryIds);
   const categories = baseline.categories.filter((c: any) => preserve.has(c.categoryId));
   const proposals = baseline.proposals.filter((p: any) => preserve.has(p.categoryId));
@@ -248,7 +286,7 @@ export async function assemble(manifestFile: string, out: string, policy: any) {
     for (const key of d.evidenceKeys ?? []) if (!source?.evidence.some((e: any) => e.id === key)) errors.push({ kind: 'legacy_evidence_reference', category: d.category, attribute: d.sourceName, key });
   }
   for (const g of groups) {
-    const checks = validateDraft(g.draft, g.pool, g.categoryIds, policy);
+    const checks = validateDraft(g.draft, g.pool, g.categoryIds, policy, { dictionaries, baseline: baseline.proposals });
     errors.push(...checks.errors); warnings.push(...checks.warnings);
     errors.push(...validateFamilies(g.matrix, g.draft.proposals, g.categoryIds));
     categories.push(...g.draft.categories); proposals.push(...g.draft.proposals); candidateDecisions.push(...g.draft.candidateDecisions); sources.push(...g.pool.categories);
@@ -259,28 +297,53 @@ export async function assemble(manifestFile: string, out: string, policy: any) {
   const expected = scope.categories.map((c: any) => c.id), actual = categories.map((c: any) => c.categoryId);
   if (JSON.stringify([...expected].sort()) !== JSON.stringify([...actual].sort())) errors.push({ kind: 'assembly_scope', message: '整合范围不等于选定范围' });
   const baselineDiff = compareBaseline(baseline.proposals.filter((p: any) => expected.includes(p.categoryId)), proposals);
-  for (const d of baselineDiff) if (d.status !== 'preserved') errors.push({ kind: 'baseline_changed', ...d });
+  const requests = new Map<string, any>();
+  for (const request of config.proposedBaselineChanges ?? []) {
+    const id = identity(request);
+    if (requests.has(id) || !request.reason || !request.beforeHash) errors.push({ kind: 'baseline_revision_request', ...request, message: '修改提案需唯一属性标识、旧定义哈希与原因' });
+    requests.set(id, request);
+  }
+  for (const d of baselineDiff) if (d.status !== 'preserved') {
+    const request = requests.get(identity(d));
+    if (d.status !== 'modified' || request?.beforeHash !== d.beforeHash) errors.push({ kind: 'baseline_changed', ...d });
+  }
+  for (const id of requests.keys()) if (!baselineDiff.some(d => identity(d) === id && d.status === 'modified')) errors.push({ kind: 'baseline_revision_request', message: '修改清单不存在对应实质变更：' + id });
   const restoration = checkRestorations(baseline, proposals, candidateDecisions, policy);
   errors.push(...restoration.errors);
   const before = new Map(baseline.proposals.map((p: any) => [identity(p), p]));
   const order = new Map(scope.categories.map((c: any, i: number) => [c.id, i]));
   const sort = (a: any, b: any) => Number(order.get(a.categoryId)) - Number(order.get(b.categoryId));
-  const merged = proposals.map((p: any) => ({ ...p, v4Disposition: before.has(identity(p)) ? '既有已认可' : '本轮新增待审', baselineSemanticHash: before.has(identity(p)) ? semanticHash(before.get(identity(p))) : null }));
+  const merged = proposals.map((p: any) => {
+    const old = before.get(identity(p));
+    const changed = old && semanticHash(old) !== semanticHash(p);
+    return { ...p, v4Disposition: changed ? '本轮修改待审' : old ? '既有已认可' : '本轮新增待审',
+      baselineSemanticHash: old ? semanticHash(old) : null,
+      ...(changed ? { revisionReason: requests.get(identity(p))?.reason, previousDefinition: old } : {}) };
+  });
+  const typeChecks = checkAttributeTypes(merged, dictionaries, baseline.proposals);
+  errors.push(...typeChecks.errors);
+  for (const warning of typeChecks.warnings) if (!warnings.some(w => w.kind === warning.kind && w.category === warning.category && w.attribute === warning.attribute)) warnings.push(warning);
+  // Cross-group sharing is checked after joining, not just inside an author's group.
+  errors.push(...validateFamilies({ families, standaloneCategories }, merged, expected));
   const cats = categories.map((c: any) => ({ ...c, path: scope.categories.find((s: any) => s.id === c.categoryId).path,
     attributes: merged.filter((p: any) => p.categoryId === c.categoryId).length,
     attributeNames: merged.filter((p: any) => p.categoryId === c.categoryId).map((p: any) => p.name) })).sort(sort);
-  const plan = { version: 4, categories: cats, proposals: merged.sort(sort), candidateDecisions: restoration.decisions.sort(sort),
+  const plan = { version: 4, attributeContractVersion: 1, dictionaries, typeChecks,
+    categories: cats, proposals: merged.sort(sort), candidateDecisions: restoration.decisions.sort(sort),
     families, standaloneCategories, openQuestions, baselineDiff, lineage: files,
     humanRecognition: config.humanRecognition, independentReview: review, policyRevision: config.policyRevision ?? null, programChecks: errors, warnings,
     restorationReview: { policy: policy.restorationPolicy, restoredDecisions: restoration.restored, pendingUserDecisions: restoration.pending,
       eligiblePendingDefinition: restoration.eligible, retainedExclusions: restoration.excluded },
     fieldOwnershipPolicyHash: hash(JSON.stringify(policy)),
     legacyVerification: { categoryIds: [...preserve], attributeContent: 'hash_compared_to_accepted_baseline',
+      typeUnreviewedAttributeIds: merged.filter((p: any) => !p.typing && before.has(identity(p)) && semanticHash(before.get(identity(p))) === semanticHash(p)).map(identity),
       evidenceCounts: 'historical_summary_with_example_references; not recomputed from example keys',
       reopenedCarrierExclusions: candidateDecisions.filter((d: any) => d.migrationDisposition === 'unverified_carrier_reopened').length },
     deepseekRequests: 0, productionWrites: 0, providerUsage: 'Codex agent token/cache counters not available' };
   await writeJson(path.join(out, 'assembly-checks.json'), { errors, warnings, categories: cats.length, proposals: merged.length,
-    preserved: baselineDiff.filter(d => d.status === 'preserved').length, added: merged.filter((p: any) => !before.has(identity(p))).length, families: families.length });
+    preserved: baselineDiff.filter(d => d.status === 'preserved').length, modifiedPendingHuman: baselineDiff.filter(d => d.status === 'modified').length,
+    typeChecked: typeChecks.checked, typeUnreviewed: typeChecks.legacy,
+    added: merged.filter((p: any) => !before.has(identity(p))).length, families: families.length });
   if (errors.length) throw Error(`${errors.length} checks failed; see assembly-checks.json`);
   await writeJson(path.join(out, 'attribute-proposals.json'), plan);
   await writeJson(path.join(out, 'review-sources.json'), { categories: sources, ownSourceRecords: baselineSources.ownSourceRecords ?? [] });
